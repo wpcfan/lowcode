@@ -1,25 +1,22 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
+import 'package:admin/repositories/github_repository.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
 class SearchFieldController extends ChangeNotifier {
   final List<String> _matched = [];
+  final GithubRepository _githubRepository = GithubRepository();
 
   List<String> get matched => _matched;
 
   Future<void> query(String text) async {
-    final client = http.Client();
-    final response = await client.get(Uri.parse(
-        'https://api.github.com/search/repositories?q=$text&sort=stars&order=desc'));
-    if (response.statusCode == HttpStatus.ok) {
-      final data = jsonDecode(response.body);
+    if (text.isEmpty) {
       _matched.clear();
-      for (var item in data['items']) {
-        _matched.add(item['full_name']);
-      }
+    } else {
+      final results = await _githubRepository.search(text);
+
+      _matched.clear();
+      _matched.addAll(results.items.map((item) => item.fullName));
     }
     notifyListeners();
   }

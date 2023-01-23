@@ -33,7 +33,7 @@ class GithubRepository {
     final response = await client.get(Uri.parse('$baseUrl$term'));
     final results = json.decode(response.body);
 
-    return SearchResult.fromJson(results['items']);
+    return SearchResult.fromJson(results['items'] ?? []);
   }
 }
 

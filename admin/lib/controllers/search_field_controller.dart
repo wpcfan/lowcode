@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -9,12 +10,12 @@ class SearchFieldController extends ChangeNotifier {
 
   List<String> get matched => _matched;
 
-  Future query(String text) async {
-    var client = http.Client();
-    var response = await client.get(Uri.parse(
+  Future<void> query(String text) async {
+    final client = http.Client();
+    final response = await client.get(Uri.parse(
         'https://api.github.com/search/repositories?q=$text&sort=stars&order=desc'));
     if (response.statusCode == HttpStatus.ok) {
-      var data = jsonDecode(response.body);
+      final data = jsonDecode(response.body);
       _matched.clear();
       for (var item in data['items']) {
         _matched.add(item['full_name']);

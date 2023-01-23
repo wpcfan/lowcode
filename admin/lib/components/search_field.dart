@@ -14,12 +14,7 @@ class SearchField extends StatelessWidget {
       create: (context) => SearchFieldController(),
       child: Consumer<SearchFieldController>(
         builder: (context, controller, child) {
-          return PopupMenuButton(
-            child: TextField(
-              onChanged: (value) {
-                Provider.of<SearchFieldController>(context, listen: false)
-                    .query(value);
-              },
+          return InputDecorator(
               decoration: InputDecoration(
                 hintText: "Search",
                 fillColor: secondaryColor,
@@ -38,20 +33,28 @@ class SearchField extends StatelessWidget {
                       color: primaryColor,
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
-                    child: const Icon(Icons.search),
+                    child: const Icon(
+                      Icons.search,
+                    ),
                   ),
                 ),
               ),
-            ),
-            itemBuilder: (context) {
-              final matched = controller.matched;
-              return matched
-                  .map((e) => PopupMenuItem(
-                        child: Text(e),
-                      ))
-                  .toList();
-            },
-          );
+              child: Autocomplete(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  if (textEditingValue.text == '') {
+                    return const Iterable<String>.empty();
+                  }
+                  await Provider.of<SearchFieldController>(context,
+                          listen: false)
+                      .query(textEditingValue.text);
+                  return controller.matched.where((String option) {
+                    return option.contains(textEditingValue.text.toLowerCase());
+                  });
+                },
+                onSelected: (String selection) {
+                  print('You just selected $selection');
+                },
+              ));
         },
       ),
     );

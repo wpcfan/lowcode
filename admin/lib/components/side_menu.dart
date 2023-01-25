@@ -40,9 +40,11 @@ class SideMenu extends StatelessWidget {
             },
           ),
           DrawerListTile(
-            title: "Documents",
-            icon: Icons.document_scanner,
-            press: () {},
+            title: "DragDrop",
+            icon: Icons.drag_indicator,
+            press: () {
+              context.go('/dragdrop');
+            },
           ),
           DrawerListTile(
             title: "Store",

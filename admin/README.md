@@ -1123,7 +1123,7 @@ DragTarget(
   // builder 是构建方法，它的第一个参数是 BuildContext
   // 第二个参数是 List<T>，它是 Draggable 的 data
   // 第三个参数是 List<dynamic>，它是 Draggable 的 onDraggableCanceled 方法的第一个参数
-  builder: (context, List<String> candidateData, rejectedData) {
+  builder: (context, candidateData, rejectedData) {
     return Container(
       width: 100,
       height: 100,
@@ -1147,4 +1147,76 @@ DragTarget(
     print('onLeave');
   },
 )
+```
+
+### 拖放调整顺序
+
+在 flutter 中实现对一个列表的元素进行拖放调整顺序，我们可以通过 `Draggable` 和 `DragTarget` 来实现。这个例子里面每个元素都同时是一个 `Draggable` 和 `DragTarget` ，当拖动一个元素时，它会在列表中寻找一个 `DragTarget` ，当找到一个 `DragTarget` 时，它会将自己的数据和 `DragTarget` 的数据进行交换。
+
+```dart
+class DragDropListPage extends StatefulWidget {
+  const DragDropListPage({super.key});
+
+  @override
+  State<DragDropListPage> createState() => _DragDropListPageState();
+}
+
+class _DragDropListPageState extends State<DragDropListPage> {
+  final List<int> _items = List<int>.generate(20, (int index) => index);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        final String item = "${_items[index]}";
+        return DragTarget(
+          builder: (context, candidateData, rejectedData) {
+            return Draggable(
+              data: item,
+              feedback: SizedBox(
+                width: 200,
+                height: 50,
+                child: ListTile(
+                  tileColor: Colors.blue,
+                  title: Text('Item $item'),
+                ),
+              ),
+              child: ListTile(
+                key: Key(item),
+                title: Text('Item $item'),
+              ),
+            );
+          },
+          onWillAccept: (data) {
+            return true;
+          },
+          onAccept: (String data) {
+            final int dragIndex = _items.indexOf(int.parse(data));
+            final int dropIndex = _items.indexOf(int.parse(item));
+
+            setState(() {
+              // swap 是一个我们自己实现的扩展方法，用于交换列表中两个元素的位置
+              _items.swap(dragIndex, dropIndex);
+            });
+          },
+        );
+      },
+      itemCount: _items.length,
+    );
+  }
+}
+```
+
+注意上面代码中的 `swap` 方法并不是内建的方法，我们使用了一个 `extension` 去扩展了 `List` 类型，这个 `extension` 的作用是交换列表中两个元素的位置。
+
+```dart
+extension ListExtension<T> on List<T> {
+  void swap(int index1, int index2) {
+    RangeError.checkValidIndex(index1, this, 'index1');
+    RangeError.checkValidIndex(index2, this, 'index2');
+    final T temp = this[index1];
+    this[index1] = this[index2];
+    this[index2] = temp;
+  }
+}
 ```

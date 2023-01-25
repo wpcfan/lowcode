@@ -5,6 +5,7 @@ import 'package:admin/constants.dart';
 import 'package:admin/controllers/menu_controller.dart';
 import 'package:admin/pages/canvas_page.dart';
 import 'package:admin/pages/dashboard_page.dart';
+import 'package:admin/pages/drag_drop_list_page.dart';
 import 'package:admin/repositories/github_repository.dart';
 import 'package:admin/responsive.dart';
 import 'package:flutter/material.dart';
@@ -65,8 +66,13 @@ final _router = GoRouter(
               ),
             ),
             GoRoute(
-                path: 'draggable',
-                builder: (context, state) => const CanvasPage()),
+              path: 'draggable',
+              builder: (context, state) => const CanvasPage(),
+            ),
+            GoRoute(
+              path: 'dragdrop',
+              builder: (context, state) => const DragDropListPage(),
+            ),
           ],
           pageBuilder: (context, state) {
             return CustomTransitionPage(

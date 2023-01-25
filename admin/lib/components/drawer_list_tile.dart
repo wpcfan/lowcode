@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+class DragData {
+  String id;
+  String name;
+  DragData({required this.id, required this.name});
+}
+
 class DrawerListTile extends StatelessWidget {
   const DrawerListTile({
     Key? key,
@@ -15,16 +21,33 @@ class DrawerListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      onTap: press,
-      horizontalTitleGap: 0.0,
-      leading: Icon(
-        icon,
-        color: Colors.white54,
+    return Draggable(
+      data: DragData(id: '1', name: title),
+      feedback: Material(
+        color: Colors.transparent,
+        child: Container(
+          height: 80,
+          width: 200,
+          color: Colors.red,
+          child: Center(
+            child: Text(
+              title,
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        ),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(color: Colors.white54),
+      child: ListTile(
+        onTap: press,
+        horizontalTitleGap: 0.0,
+        leading: Icon(
+          icon,
+          color: Colors.white54,
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(color: Colors.white54),
+        ),
       ),
     );
   }

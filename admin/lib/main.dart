@@ -3,6 +3,7 @@ import 'package:admin/components/search_field_with_bloc.dart';
 import 'package:admin/components/side_menu.dart';
 import 'package:admin/constants.dart';
 import 'package:admin/controllers/menu_controller.dart';
+import 'package:admin/pages/canvas_page.dart';
 import 'package:admin/pages/dashboard_page.dart';
 import 'package:admin/repositories/github_repository.dart';
 import 'package:admin/responsive.dart';
@@ -63,6 +64,9 @@ final _router = GoRouter(
                 api: GithubRepository(),
               ),
             ),
+            GoRoute(
+                path: 'draggable',
+                builder: (context, state) => const CanvasPage()),
           ],
           pageBuilder: (context, state) {
             return CustomTransitionPage(

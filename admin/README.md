@@ -1060,3 +1060,91 @@ class MyApp extends StatelessWidget {
   }
 }
 ```
+
+## Flutter 中的拖放支持
+
+Flutter 中的拖放支持是通过 `Draggable` 和 `DragTarget` 来实现的，`Draggable` 是一个可拖动的组件，`DragTarget` 是一个可接受拖动的组件。
+
+### Draggable
+
+`Draggable` 是一个可拖动的组件，它的参数是 `Widget Function(BuildContext, DragTargetDetails)` ，它的第一个参数是 `BuildContext` ，第二个参数是 `DragTargetDetails` ，它是一个 `DragTarget` 的子组件，它的 `onAccept` 方法会在 `DragTarget` 接受拖动后调用。
+
+```dart
+Draggable(
+  // 这里的 child 就是我们要拖动的组件
+  child: Container(
+    width: 100,
+    height: 100,
+    color: Colors.red,
+  ),
+  // feedback 是拖动时显示的组件
+  feedback: Container(
+    width: 100,
+    height: 100,
+    color: Colors.blue,
+  ),
+  // childWhenDragging 是拖动结束后显示的组件
+  childWhenDragging: Container(
+    width: 100,
+    height: 100,
+    color: Colors.green,
+  ),
+  // data 是拖动时传递的数据
+  data: 'data',
+  // onDragStarted 是拖动开始时调用的方法
+  onDragStarted: () {
+    print('onDragStarted');
+  },
+  // onDraggableCanceled 是拖动取消时调用的方法
+  onDraggableCanceled: (velocity, offset) {
+    print('onDraggableCanceled');
+  },
+  // onDragCompleted 是拖动完成时调用的方法
+  onDragCompleted: () {
+    print('onDragCompleted');
+  },
+  // onDragEnd 是拖动结束时调用的方法
+  onDragEnd: (details) {
+    print('onDragEnd');
+  },
+  // onDraggableCanceled 是拖动取消时调用的方法
+  onDraggableCanceled: (velocity, offset) {
+    print('onDraggableCanceled');
+  },
+)
+```
+
+### DragTarget
+
+`DragTarget` 是一个可接受拖动的组件，它的参数是 `Widget Function(BuildContext, List<T>, List<dynamic>)` ，它的第一个参数是 `BuildContext` ，第二个参数是 `List<T>` ，第三个参数是 `List<dynamic>` ，它的第二个参数是 `Draggable` 的 `data` ，第三个参数是 `Draggable` 的 `onDraggableCanceled` 方法的第一个参数。
+
+```dart
+DragTarget(
+  // builder 是构建方法，它的第一个参数是 BuildContext
+  // 第二个参数是 List<T>，它是 Draggable 的 data
+  // 第三个参数是 List<dynamic>，它是 Draggable 的 onDraggableCanceled 方法的第一个参数
+  builder: (context, List<String> candidateData, rejectedData) {
+    return Container(
+      width: 100,
+      height: 100,
+      color: Colors.red,
+    );
+  },
+  // onWillAccept 是当 Draggable 进入 DragTarget 时调用的方法
+  // 它的参数是 Draggable 的 data
+  onWillAccept: (data) {
+    print('onWillAccept');
+    return true;
+  },
+  // onAccept 是当 Draggable 进入 DragTarget 并且 onWillAccept 返回 true 时调用的方法
+  // 它的参数是 Draggable 的 data
+  onAccept: (data) {
+    print('onAccept');
+  },
+  // onLeave 是当 Draggable 离开 DragTarget 时调用的方法
+  // 它的参数是 Draggable 的 data
+  onLeave: (data) {
+    print('onLeave');
+  },
+)
+```

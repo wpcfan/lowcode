@@ -1,4 +1,3 @@
-import 'package:admin/components/header.dart';
 import 'package:admin/constants.dart';
 import 'package:admin/responsive.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ class DashboardPage extends StatelessWidget {
         padding: const EdgeInsets.all(defaultPadding),
         child: Column(
           children: [
-            const Header(),
             const SizedBox(height: defaultPadding),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,

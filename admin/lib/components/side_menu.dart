@@ -1,4 +1,6 @@
+import 'package:admin/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'drawer_list_tile.dart';
 
@@ -10,6 +12,7 @@ class SideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: bgColor,
       child: ListView(
         children: [
           DrawerHeader(
@@ -18,12 +21,16 @@ class SideMenu extends StatelessWidget {
           DrawerListTile(
             title: "Dashboard",
             icon: Icons.dashboard,
-            press: () {},
+            press: () {
+              context.go('/');
+            },
           ),
           DrawerListTile(
             title: "Transaction",
             icon: Icons.track_changes,
-            press: () {},
+            press: () {
+              context.go('/search');
+            },
           ),
           DrawerListTile(
             title: "Task",

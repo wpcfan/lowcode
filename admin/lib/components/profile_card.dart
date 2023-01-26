@@ -9,39 +9,44 @@ class ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenuButton(
-      offset: const Offset(-10, 42),
-      child: Container(
-        margin: const EdgeInsets.only(left: defaultPadding),
-        padding: const EdgeInsets.symmetric(
-          horizontal: defaultPadding,
-          vertical: defaultPadding / 2,
-        ),
-        decoration: BoxDecoration(
-          color: secondaryColor,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          border: Border.all(color: Colors.white10),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.account_circle, color: Colors.white),
-            if (!Responsive.isMobile(context))
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
-                child: Text("First Last"),
-              ),
-            const Icon(Icons.keyboard_arrow_down),
-          ],
-        ),
+    return Theme(
+      data: Theme.of(context).copyWith(
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
       ),
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          child: Text("Profile"),
+      child: PopupMenuButton(
+        offset: const Offset(-10, 42),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: defaultPadding,
+            vertical: defaultPadding / 2,
+          ),
+          decoration: BoxDecoration(
+            color: secondaryColor,
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            border: Border.all(color: Colors.white10),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.account_circle, color: Colors.white),
+              if (!Responsive.isMobile(context))
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: defaultPadding / 2),
+                  child: Text("First Last"),
+                ),
+              const Icon(Icons.keyboard_arrow_down),
+            ],
+          ),
         ),
-        const PopupMenuItem(
-          child: Text("Log Out"),
-        ),
-      ],
+        itemBuilder: (context) => [
+          const PopupMenuItem(
+            child: Text("Profile"),
+          ),
+          const PopupMenuItem(
+            child: Text("Log Out"),
+          ),
+        ],
+      ),
     );
   }
 }

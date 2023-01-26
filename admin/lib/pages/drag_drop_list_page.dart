@@ -8,9 +8,13 @@ class DragDropListPage extends StatefulWidget {
   State<DragDropListPage> createState() => _DragDropListPageState();
 }
 
-class _DragDropListPageState extends State<DragDropListPage> {
+class _DragDropListPageState extends State<DragDropListPage>
+    with TickerProviderStateMixin {
   final List<int> _items = List<int>.generate(20, (int index) => index);
   int sortType = -1;
+  double scale = 1.0;
+  int moveOverIndex = -1;
+
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -20,19 +24,38 @@ class _DragDropListPageState extends State<DragDropListPage> {
           builder: (context, candidateData, rejectedData) {
             return Draggable(
               data: item,
-              feedback: SizedBox(
-                width: 200,
-                height: 50,
-                child: ListTile(
-                  tileColor: Colors.blue,
-                  title: Text('Item $item'),
+              feedback: Opacity(
+                opacity: 0.5,
+                child: SizedBox(
+                  width: 200,
+                  height: 50,
+                  child: ListTile(
+                    tileColor: Colors.blue,
+                    title: Text('Item $item'),
+                  ),
                 ),
               ),
               child: ListTile(
                 key: Key(item),
-                title: Text('Item $item'),
+                tileColor:
+                    moveOverIndex == index ? Colors.red[100] : Colors.amber,
+                title: Text(
+                  'Item $item',
+                  textScaleFactor: moveOverIndex == index ? scale : 1.0,
+                ),
               ),
             );
+          },
+          onMove: (details) {
+            setState(() {
+              scale = 1.1;
+              moveOverIndex = index;
+            });
+          },
+          onLeave: (data) {
+            setState(() {
+              scale = 1.0;
+            });
           },
           onWillAccept: (data) {
             if (data is String) {

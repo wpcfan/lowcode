@@ -24,26 +24,8 @@ class _DragDropListPageState extends State<DragDropListPage>
           builder: (context, candidateData, rejectedData) {
             return Draggable(
               data: item,
-              feedback: Opacity(
-                opacity: 0.5,
-                child: SizedBox(
-                  width: 200,
-                  height: 50,
-                  child: ListTile(
-                    tileColor: Colors.blue,
-                    title: Text('Item $item'),
-                  ),
-                ),
-              ),
-              child: ListTile(
-                key: Key(item),
-                tileColor:
-                    moveOverIndex == index ? Colors.red[100] : Colors.amber,
-                title: Text(
-                  'Item $item',
-                  textScaleFactor: moveOverIndex == index ? scale : 1.0,
-                ),
-              ),
+              feedback: DragListTileWidget(item: item),
+              child: ListTileWidget(item: item, isDragOver: moveOverIndex == index, scale: scale),
             );
           },
           onMove: (details) {
@@ -101,6 +83,56 @@ class _DragDropListPageState extends State<DragDropListPage>
         );
       },
       itemCount: _items.length,
+    );
+  }
+}
+
+class ListTileWidget extends StatelessWidget {
+  const ListTileWidget({
+    super.key,
+    required this.item,
+    required this.isDragOver,
+    required this.scale,
+  });
+
+  final String item;
+  final bool isDragOver;
+  final double scale;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      key: Key(item),
+      tileColor:
+      isDragOver ? Colors.red[100] : Colors.amber,
+      title: Text(
+        'Item $item',
+        textScaleFactor: isDragOver ? scale : 1.0,
+      ),
+    );
+  }
+}
+
+class DragListTileWidget extends StatelessWidget {
+  const DragListTileWidget({
+    super.key,
+    required this.item,
+  });
+
+  final String item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: 0.5,
+      child: SizedBox(
+        width: 200,
+        height: 50,
+        child: ListTile(
+          tileColor: Colors.blue,
+          title: Text('Item $item'),
+        ),
+      ),
     );
   }
 }

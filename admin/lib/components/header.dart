@@ -1,4 +1,5 @@
-import 'package:admin/controllers/menu_controller.dart';
+import 'package:admin/constants.dart';
+import 'package:admin/controllers/side_menu_controller.dart';
 import 'package:admin/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -18,16 +19,17 @@ class Header extends StatelessWidget {
         if (!Responsive.isDesktop(context))
           IconButton(
             icon: const Icon(Icons.menu),
-            onPressed: context.read<MenuController>().controlMenu,
+            onPressed: context.read<SideMenuController>().controlMenu,
           ),
         if (!Responsive.isMobile(context)) ...[
           Text(
             "Dashboard",
-            style: Theme.of(context).textTheme.headline6,
+            style: Theme.of(context).textTheme.titleLarge,
           ),
           Spacer(flex: Responsive.isDesktop(context) ? 2 : 1)
         ],
         const Expanded(child: SearchField()),
+        const SizedBox(width: defaultPadding),
         const ProfileCard()
       ],
     );

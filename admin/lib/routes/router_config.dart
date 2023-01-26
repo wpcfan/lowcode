@@ -12,6 +12,7 @@ import 'routes.dart';
 final routerConfig = GoRouter(
   initialLocation: '/',
   routes: [
+    // 嵌套的路由使用 ShellRoute
     ShellRoute(
       // 通过 MultiProvider 来管理多个 Provider
       builder: (context, state, child) => MultiProvider(

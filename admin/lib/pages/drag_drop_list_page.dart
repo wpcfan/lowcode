@@ -10,7 +10,7 @@ class DragDropListPage extends StatefulWidget {
 
 class _DragDropListPageState extends State<DragDropListPage> {
   final List<int> _items = List<int>.generate(20, (int index) => index);
-
+  int sortType = -1;
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -35,14 +35,44 @@ class _DragDropListPageState extends State<DragDropListPage> {
             );
           },
           onWillAccept: (data) {
-            return true;
+            if (data is String) {
+              final int dragIndex = _items.indexOf(int.parse(data));
+              final int dropIndex = _items.indexOf(int.parse(item));
+              return dragIndex != dropIndex;
+            }
+            return false;
           },
-          onAccept: (String data) {
+          onAccept: (String data) async {
             final int dragIndex = _items.indexOf(int.parse(data));
             final int dropIndex = _items.indexOf(int.parse(item));
 
+            final result = await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                      title: Text('Item $item'),
+                      content: const Text('Please choose the sort type below.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 0),
+                          child: const Text('Swap'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, 1),
+                          child: const Text('Move'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, -1),
+                          child: const Text('Cancel'),
+                        ),
+                      ],
+                    ));
             setState(() {
-              _items.swap(dragIndex, dropIndex);
+              sortType = result;
+              if (sortType == 0) {
+                _items.swap(dragIndex, dropIndex);
+              } else if (sortType == 1) {
+                _items.move(dragIndex, dropIndex);
+              }
             });
           },
         );

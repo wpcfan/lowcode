@@ -1061,6 +1061,75 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+#### 页面的过渡动画
+
+`GoRouter` 使用 `pageBuilder` 参数来定义页面的过渡动画，它的参数是 `Page Function(BuildContext, GoRouteState)` ，它的第一个参数是 `BuildContext` ，第二个参数是 `GoRouteState`。对于自定义动画我们一般返回一个 `CustomTransitionPage`
+
+```dart
+final _router = GoRouter(
+  pageBuilder: (context, state) {
+    return CustomTransitionPage(
+      key: state.pageKey,
+      child: const DashboardPage(),
+      transitionsBuilder:
+          (context, animation, secondaryAnimation, child) {
+        return FadeTransition(
+          opacity: CurveTween(curve: Curves.easeInOutCirc)
+              .animate(animation),
+          child: child,
+        );
+      },
+    );
+  },
+)
+```
+
+但目前 `go_router` 没有全局的 `pageBuilder` ，所以我们需要在每个路由中都定义 `pageBuilder` ，这样有点麻烦，我们的策略是构建一个自定义的动画类，尽量减少重复代码。
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+class CustomSlideTransition extends CustomTransitionPage<void> {
+  CustomSlideTransition({super.key, required super.child})
+      : super(
+          transitionDuration: const Duration(milliseconds: 250),
+          transitionsBuilder: (_, animation, __, child) {
+            return SlideTransition(
+              position: animation.drive(
+                Tween(
+                  begin: const Offset(1.5, 0),
+                  end: Offset.zero,
+                ).chain(
+                  CurveTween(curve: Curves.ease),
+                ),
+              ),
+              child: child,
+            );
+          },
+        );
+}
+```
+
+然后在每个路由中使用这个自定义的动画类
+
+```dart
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (_) => const DashboardPage(),
+      pageBuilder: (context, state) {
+        return CustomSlideTransition(
+          key: state.pageKey,
+          child: const DashboardPage(),
+        );
+      },
+    ),
+  ],
+)
+```
+
 ## Flutter 中的拖放支持
 
 Flutter 中的拖放支持是通过 `Draggable` 和 `DragTarget` 来实现的，`Draggable` 是一个可拖动的组件，`DragTarget` 是一个可接受拖动的组件。
@@ -1149,9 +1218,9 @@ DragTarget(
 )
 ```
 
-### 拖放调整顺序
+### 拖放对调元素位置
 
-在 flutter 中实现对一个列表的元素进行拖放调整顺序，我们可以通过 `Draggable` 和 `DragTarget` 来实现。这个例子里面每个元素都同时是一个 `Draggable` 和 `DragTarget` ，当拖动一个元素时，它会在列表中寻找一个 `DragTarget` ，当找到一个 `DragTarget` 时，它会将自己的数据和 `DragTarget` 的数据进行交换。
+在 flutter 中实现对一个列表的元素进行拖放对调元素位置，我们可以通过 `Draggable` 和 `DragTarget` 来实现。这个例子里面每个元素都同时是一个 `Draggable` 和 `DragTarget` ，当拖动一个元素时，它会在列表中寻找一个 `DragTarget` ，当找到一个 `DragTarget` 时，它会将自己的数据和 `DragTarget` 的数据进行交换。
 
 ```dart
 class DragDropListPage extends StatefulWidget {
@@ -1217,6 +1286,78 @@ extension ListExtension<T> on List<T> {
     final T temp = this[index1];
     this[index1] = this[index2];
     this[index2] = temp;
+  }
+}
+```
+
+### 拖放排序
+
+在 flutter 中实现拖放排序，我们可以通过 `Draggable` 和 `DragTarget` 来实现。这个例子里面每个元素都同时是一个 `Draggable` 和 `DragTarget` ，当拖动一个元素时，它会在列表中寻找一个 `DragTarget` ，当找到一个 `DragTarget` 时，它会把自己插入到 `DragTarget` 的位置。
+
+```dart
+class DragDropListPage extends StatefulWidget {
+  const DragDropListPage({super.key});
+
+  @override
+  State<DragDropListPage> createState() => _DragDropListPageState();
+}
+
+class _DragDropListPageState extends State<DragDropListPage> {
+  final List<int> _items = List<int>.generate(20, (int index) => index);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        final String item = "${_items[index]}";
+        return DragTarget(
+          builder: (context, candidateData, rejectedData) {
+            return Draggable(
+              data: item,
+              feedback: SizedBox(
+                width: 200,
+                height: 50,
+                child: ListTile(
+                  tileColor: Colors.blue,
+                  title: Text('Item $item'),
+                ),
+              ),
+              child: ListTile(
+                key: Key(item),
+                title: Text('Item $item'),
+              ),
+            );
+          },
+          onWillAccept: (data) {
+            return true;
+          },
+          onAccept: (String data) {
+            final int dragIndex = _items.indexOf(int.parse(data));
+            final int dropIndex = _items.indexOf(int.parse(item));
+
+            setState(() {
+              // move 是一个我们自己实现的扩展方法，用于移动列表中的元素
+              _items.move(dragIndex, dropIndex);
+            });
+          },
+        );
+      },
+      itemCount: _items.length,
+    );
+  }
+}
+```
+
+和交换顺序的差别仅在于 `swap` 方法被替换成了 `move` 方法，`move` 方法的作用是移动列表中的元素到拖放的元素之前。
+
+```dart
+extension ListExtension<T> on List<T> {
+  move(int oldIndex, int newIndex) {
+    RangeError.checkValidIndex(oldIndex, this, 'oldIndex');
+    RangeError.checkValidIndex(newIndex, this, 'newIndex');
+    if (oldIndex == newIndex) return;
+    final T item = removeAt(oldIndex);
+    insert(newIndex < oldIndex ? newIndex : newIndex - 1, item);
   }
 }
 ```

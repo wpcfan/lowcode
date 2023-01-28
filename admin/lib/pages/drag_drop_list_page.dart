@@ -20,12 +20,17 @@ class _DragDropListPageState extends State<DragDropListPage>
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
         final String item = "${_items[index]}";
+        final listWidth = MediaQuery.of(context).size.width;
         return DragTarget(
           builder: (context, candidateData, rejectedData) {
             return Draggable(
               data: item,
-              feedback: DragListTileWidget(item: item),
-              child: ListTileWidget(item: item, isDragOver: moveOverIndex == index, scale: scale),
+              feedback: DragListTileWidget(
+                item: item,
+                width: listWidth,
+              ),
+              child: ListTileWidget(
+                  item: item, isDragOver: moveOverIndex == index, scale: scale),
             );
           },
           onMove: (details) {
@@ -101,15 +106,20 @@ class ListTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      key: Key(item),
-      tileColor:
-      isDragOver ? Colors.red[100] : Colors.amber,
-      title: Text(
-        'Item $item',
-        textScaleFactor: isDragOver ? scale : 1.0,
-      ),
-    );
+    return SizedBox(
+        height: 50,
+        child: Card(
+          key: Key(item),
+          color: isDragOver
+              ? Colors.accents[int.parse(item) % Colors.accents.length]
+              : Colors.primaries[int.parse(item) % Colors.primaries.length],
+          child: Center(
+            child: Text(
+              'Item $item',
+              textScaleFactor: isDragOver ? scale : 1.0,
+            ),
+          ),
+        ));
   }
 }
 
@@ -117,20 +127,22 @@ class DragListTileWidget extends StatelessWidget {
   const DragListTileWidget({
     super.key,
     required this.item,
+    required this.width,
   });
 
   final String item;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
     return Opacity(
       opacity: 0.5,
       child: SizedBox(
-        width: 200,
+        width: width,
         height: 50,
-        child: ListTile(
-          tileColor: Colors.blue,
-          title: Text('Item $item'),
+        child: Card(
+          color: Colors.black,
+          child: Center(child: Text('Item $item')),
         ),
       ),
     );

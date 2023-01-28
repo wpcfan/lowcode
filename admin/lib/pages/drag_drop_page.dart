@@ -1,8 +1,9 @@
+
 import 'package:admin/components/drawer_list_tile.dart';
 import 'package:flutter/material.dart';
 
-class CanvasPage extends StatelessWidget {
-  const CanvasPage({super.key});
+class DragDropPage extends StatelessWidget {
+  const DragDropPage({super.key});
 
   @override
   Widget build(BuildContext context) {

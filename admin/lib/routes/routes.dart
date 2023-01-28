@@ -1,7 +1,7 @@
 import 'package:admin/components/search_field_with_bloc.dart';
-import 'package:admin/pages/canvas_page.dart';
 import 'package:admin/pages/dashboard_page.dart';
 import 'package:admin/pages/drag_drop_list_page.dart';
+import 'package:admin/pages/drag_drop_page.dart';
 import 'package:admin/repositories/github_repository.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,9 +25,9 @@ final routes = <RouteBase>[
       ),
       GoRoute(
         path: 'draggable',
-        builder: (context, state) => const CanvasPage(),
+        builder: (context, state) => const DragDropPage(),
         pageBuilder: (context, state) => CustomSlideTransition(
-            key: state.pageKey, child: const CanvasPage()),
+            key: state.pageKey, child: const DragDropPage()),
       ),
       GoRoute(
         path: 'dragdrop',

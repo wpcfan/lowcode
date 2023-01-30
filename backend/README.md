@@ -378,6 +378,179 @@ public final class Rectangle extends Shape {
 }
 ```
 
+## SpringBoot 的测试
+
+SpringBoot 对于各种类型的测试的支持都非常好，它支持单元测试、集成测试、Web 测试、数据库测试等。
+
+### 单元测试
+
+进行单元测试时，我们需要使用 @SpringBootTest 注解来启动 SpringBoot 应用，然后使用 @Autowired 注解来注入需要测试的 Bean，最后使用 @Test 注解来声明测试方法。
+
+```java
+@SpringBootTest
+class DemoApplicationTests {
+
+    @Autowired
+    private UserService userService;
+
+    @Test
+    void contextLoads() {
+        System.out.println(userService.findAll());
+    }
+
+}
+```
+
+#### Mock
+
+在进行单元测试时，我们可能会经常遇到 Mock 的情况，Mock 是一种模拟对象，它可以用来模拟一个对象的行为，我们可以通过 Mockito 来进行 Mock。
+比如我们有一个 UserService 类，它依赖于一个 UserRepository 类，我们可以通过 Mockito 来模拟 UserRepository 类的行为，然后将模拟的 UserRepository 类注入到 UserService 类中，这样我们就可以对 UserService 类进行单元测试了。
+
+```java
+@SpringBootTest
+class DemoApplicationTests {
+
+    @Autowired
+    private UserService userService;
+
+    @Test
+    void contextLoads() {
+        var userRepository = Mockito.mock(UserRepository.class);
+        Mockito.when(userRepository.findAll()).thenReturn(List.of(new User()));
+        userService.setUserRepository(userRepository);
+        System.out.println(userService.findAll());
+    }
+
+}
+```
+
+上面代码中，我们通过 Mockito 来模拟 UserRepository 类的 findAll 方法，然后将模拟的 UserRepository 类注入到 UserService 类中，这样我们就可以对 UserService 类进行单元测试了。
+
+很多初次接触 Mock 概念的同学可能会有疑问，为什么要使用 Mock 呢？我们可以通过下面的代码来对比一下使用 Mock 和不使用 Mock 的区别。
+
+```java
+@SpringBootTest
+class DemoApplicationTests {
+
+    @Autowired
+    private UserService userService;
+
+    @Test
+    void contextLoads() {
+        System.out.println(userService.findAll());
+    }
+
+}
+```
+
+上面代码中，我们没有使用 Mock，而是直接调用了 UserService 类的 findAll 方法，这样的话，我们就需要在测试环境中配置好数据库，然后在测试之前先往数据库中插入一些数据，这样才能保证测试的正确性，这样的话，我们的测试就和生产环境耦合在了一起，我们的测试就不是一个单元测试了，而是一个集成测试。
+这种集成测试要求你的所有依赖都要正常运行起来，比如数据库，比如 Redis，比如 RabbitMQ 等等，这样的话，你的测试就会变得非常复杂。
+
+#### MockMvc
+
+在进行 Web 层的单元测试时，我们可以使用 MockMvc 来进行测试，MockMvc 是 Spring 提供的一个模拟 MVC 请求的工具类，它可以模拟发送 HTTP 请求，然后对返回的结果进行断言。
+
+```java
+@SpringBootTest
+class DemoApplicationTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void contextLoads() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/user"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name"), Matchers.is("张三"));
+    }
+}
+```
+
+上面代码中，我们使用 MockMvc 来模拟发送了一个 GET 请求，然后对返回的结果进行了断言，断言的结果是返回的状态码是 200，然后断言返回的结果是一个 JSON 数组，数组的长度是 2。
+
+注意 `$` 符号，它表示的是根节点，也就是整个 JSON 对象，`$.length()` 表示的是 JSON 数组的长度。如果 JSON 数组中的元素是一个对象，我们也可以使用 `$.name` 来获取对象中的 name 属性。
+如果你的代码编译出错，提示找不到 `Matchers.is` 方法，那么你需要在 `build.gradle` 文件中添加如下依赖：
+
+```gradle
+testImplementation 'org.hamcrest:hamcrest-library'
+```
+
+### 集成测试
+
+集成测试是指将多个模块组合在一起进行测试，它的目的是为了验证各个模块之间的交互是否符合预期，以及验证整个系统是否符合需求。
+
+#### Spring Boot 的集成测试
+
+Spring Boot 提供了一个测试工具类 `SpringBootTest`，它可以帮助我们快速地进行集成测试，我们只需要在测试类上添加 `@SpringBootTest` 注解，然后在测试方法上添加 `@Test` 注解，就可以进行集成测试了。
+
+集成测试中我们可能需要一些外部的资源，比如数据库，比如 Redis，比如 RabbitMQ 等等，有的情况下我们还需要指定测试用例的生命周期。比如，我们需要在测试用例执行之前，先启动一个容器，然后在测试用例执行之后，再关闭这个容器，这时候我们就可以使用 `@TestInstance` 注解来指定测试用例的生命周期，比如：
+
+SpringBoot 提供了 `testcontainers` 的依赖，我们可以使用 `testcontainers` 来启动一个容器，比如：
+
+```java
+@DataJpaTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class DemoApplicationTests {
+    private static final MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.0.22")
+            .withDatabaseName("test")
+            .withUsername("root")
+            .withPassword("root");
+
+    @BeforeAll
+    static void beforeAll() {
+        mySQLContainer.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        mySQLContainer.stop();
+    }
+}
+```
+
+这种测试容器的方式，可以让我们的测试用例更加独立，不会受到其他测试用例的影响。
+
+添加 `testcontainers` 依赖：
+
+```gradle
+dependencies {
+    // ...
+    testImplementation 'org.testcontainers:testcontainers'
+}
+```
+
+不只是数据库，我们还可以使用 `testcontainers` 来启动一个 Redis 容器，比如：
+
+```java
+@DataJpaTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class DemoApplicationTests {
+    private static final GenericContainer<?> redisContainer = new GenericContainer<>("redis:6.0.9")
+            .withExposedPorts(6379);
+
+    @BeforeAll
+    static void beforeAll() {
+        redisContainer.start();
+    }
+
+    @AfterAll
+    static void afterAll() {
+        redisContainer.stop();
+    }
+}
+```
+
+`testcontainers` 具体的文档可以参考：[https://www.testcontainers.org/](https://www.testcontainers.org/)
+
+和每个测试添加 `@TestInstance(TestInstance.Lifecycle.PER_CLASS)` 注解不同，我们可以通过在 `tests/resources` 目录下创建一个 `junit-platform.properties` 来全局设置测试用例的生命周期，比如：
+
+```properties
+junit.jupiter.testinstance.lifecycle.default = per_class
+```
+
+除了 `PER_CLASS`, 还有 `PER_METHOD` 也就是按方法的生命周期，具体的可以参考：[https://junit.org/junit5/docs/current/user-guide/#writing-tests-test-instance-lifecycle](https://junit.org/junit5/docs/current/user-guide/#writing-tests-test-instance-lifecycle)
+
 ## Spring Data JPA
 
 ### Spring Data JPA 的使用
@@ -407,9 +580,9 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL5InnoDBDialect
 ```
 
-#### Spring Data JPA 的实体类
+### Spring Data JPA 的实体类
 
-Spring Data JPA 的实体类如下：
+实体类是一个简单的 POJO，它需要使用 JPA 的注解来标注它的属性，比如：
 
 ```java
 @Entity
@@ -417,38 +590,457 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     private Integer age;
-    private String email;
+
+    // getter and setter
 }
 ```
 
-#### Spring Data JPA 的接口
-
-Spring Data JPA 的接口如下：
+上面代码中，我们使用了 `@Entity` 注解来标注这是一个实体类，使用 `@Id` 注解来标注这是一个主键，使用 `@GeneratedValue` 注解来标注这是一个自增的主键。
+此外，我们还可以使用 `@Table` 注解来标注这个实体类对应的表名，比如：
 
 ```java
+@Entity
+@Table(name = "t_user")
+public class User {
+    // ...
+}
+```
+
+默认字段名和属性名一致，如果不一致，可以使用 `@Column` 注解来标注，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_name")
+    private String name;
+
+    private Integer age;
+
+    // getter and setter
+}
+```
+
+在 `@Column` 注解中，我们还可以设置 `nullable`、`unique`、`length` 等属性，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_name", nullable = false, unique = true, length = 20)
+    private String name;
+
+    private Integer age;
+
+    // getter and setter
+}
+```
+
+此外，我们还可以使用 `@Temporal` 注解来标注日期类型的属性，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_name", nullable = false, unique = true, length = 20)
+    private String name;
+
+    private Integer age;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createTime;
+
+    // getter and setter
+}
+```
+
+当然在 Spring Data JPA 中，我们即使不使用 `@Temporal` 注解，也可以使用 `java.time` 包中的日期类型，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_name", nullable = false, unique = true, length = 20)
+    private String name;
+
+    private Integer age;
+
+    private LocalDateTime createTime;
+
+    // getter and setter
+}
+```
+
+框架会自动将 `java.time` 包中的日期类型转换为数据库中的日期类型。
+
+对于二进制或者大文本类型的属性，我们可以使用 `@Lob` 注解来标注，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_name", nullable = false, unique = true, length = 20)
+    private String name;
+
+    private Integer age;
+
+    @Lob
+    private byte[] avatar;
+
+    // getter and setter
+}
+```
+
+#### 实体类和数据库表的映射关系
+
+在 Spring Data JPA 中，实体类和数据库表的映射关系如下：
+
+| 实体类属性类型    | 数据库字段类型  |
+|------------|----------|
+| String     | VARCHAR  |
+| Integer    | INT      |
+| Long       | BIGINT   |
+| Float      | FLOAT    |
+| Double     | DOUBLE   |
+| BigDecimal | DECIMAL  |
+| Boolean    | BIT      |
+| Date       | DATETIME |
+| byte[]     | BLOB     |
+
+#### 表关联的映射
+
+在 Spring Data JPA 中，我们可以使用 `@ManyToOne`、`@OneToOne`、`@OneToMany`、`@ManyToMany` 注解来标注实体类之间的关联关系，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "user_name", nullable = false, unique = true, length = 20)
+    private String name;
+
+    private Integer age;
+
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
+
+    // getter and setter
+}
+
+@Entity
+public class Role {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "role_name", nullable = false, unique = true, length = 20)
+    private String name;
+
+    // getter and setter
+}
+```
+
+在上面的代码中，我们使用 `@ManyToOne` 注解来标注 `User` 实体类和 `Role` 实体类之间的多对一关联关系，使用 `@JoinColumn` 注解来标注外键列。
+
+如果一个用户有多个角色，我们可以使用 `@ManyToMany` 注解来标注实体类之间的关联关系，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String username;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    // getters and setters
+}
+
+@Entity
+public class Role {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
+
+    // getters and setters
+}
+
 public interface UserRepository extends JpaRepository<User, Long> {
 }
+
+public interface RoleRepository extends JpaRepository<Role, Long> {
+}
+
+@Service
+public class UserRoleService {
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Transactional
+    public void assignRoleToUser(Long userId, Long roleId) {
+        User user = userRepository.findById(userId).orElse(null);
+        Role role = roleRepository.findById(roleId).orElse(null);
+        if (user != null && role != null) {
+            user.getRoles().add(role);
+            role.getUsers().add(user);
+            userRepository.save(user);
+        }
+    }
+}
 ```
 
-#### Spring Data JPA 的测试
+在上面的代码中，我们使用 `@ManyToMany` 注解来标注 `User` 实体类和 `Role` 实体类之间的多对多关联关系，使用 `@JoinTable` 注解来标注中间表的信息。
+实际创建表的时候，Spring Data JPA 会自动创建中间表，中间表的名称为 `user_role`，中间表的外键列分别为 `user_id` 和 `role_id`。
+在 `Role` 实体类中，我们使用 `@ManyToMany` 注解的 `mappedBy` 属性来标注 `User` 实体类中的 `roles` 属性。
+在保存的时候，请注意，我们必须要保存外键关系所在的实体类，否则外键关系不会被保存，这里就是 `User` 实体类。
 
-Spring Data JPA 的测试如下：
+在 Spring Data JPA 中，处理多对多的表关联的最佳实践如下：
+
+1. 定义实体：定义多对多关系的两个实体，并在实体中使用 @ManyToMany 注解描述关系。
+2. 定义中间表：如果需要存储关系的其他信息，可以定义中间表，并使用 @JoinTable 注解描述。
+3. 使用 JPA 接口：使用 JPA 接口对数据进行操作，例如增加、更新、删除、查询等。
+4. 使用事务：因为处理多对多关系需要同时对多个表进行操作，因此需要使用事务。
+5. 使用 DTO 进行数据传输：如果需要从数据库中检索多个实体，可以使用 DTO 进行数据传输，以避免 N+1 查询问题。
+
+通过以上步骤，可以轻松地处理多对多的表关联，并在不影响代码质量的前提下提高开发效率。
+
+这里再说一下如何使用 DTO 避免 N+1 问题
+
+### 表的自动创建
+
+Spring Data JPA 会在应用启动的时候自动创建表，但是在创建表之前，我们需要先创建数据库，比如：
+
+```sql
+CREATE DATABASE spring_data_jpa;
+```
+
+然后在 `application.properties` 文件中配置数据库连接信息，比如：
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/spring_data_jpa?useUnicode=true&characterEncoding=utf-8&useSSL=false
+spring.datasource.username=root
+spring.datasource.password=123456
+spring.datasource.driver-class-name=com.mysql.jdbc.Driver
+```
+
+我们还可以指定表的自动创建策略，比如：
+
+```properties
+spring.jpa.hibernate.ddl-auto=create
+```
+
+Spring Data JPA 支持的表的自动创建策略如下：
+
+| 策略          | 说明                                                                                                             |
+|-------------|----------------------------------------------------------------------------------------------------------------|
+| create      | 每次加载 Hibernate 时都会删除上一次的生成的表，然后根据你的 model 类再重新来生成新表，即使两次没有任何改变，也要删除表后重新创建。                                     |
+| create-drop | 每次加载 Hibernate 时根据 model 类生成表，但是 sessionFactory 一关闭,表就自动删除。                                                    |
+| update      | 最常用的属性，第一次加载 Hibernate 时根据 model 类会自动建立起表的结构（前提是先建立好数据库），以后加载 Hibernate 时根据 model 类自动更新表结构，即使表结构改变了，但表中的行仍然存在。 |
+| validate    | 每次加载 Hibernate 时，验证创建数据库表结构，只会和数据库中的表进行比较，不会创建新表，但是会插入新值。                                                      |
+| none        | 什么都不做。                                                                                                         |
+
+一般情况下在开发阶段，我们会使用这种自动的方式来创建表，但是在生产环境中，我们会使用数据库的脚本来创建表，这样可以保证表的创建和数据的初始化是分开的。
+
+当然还有一些更专门的数据管理框架，比如 Flyway、Liquibase 等，它们可以帮助我们管理数据库的变更，比如创建表、修改表、删除表等。
+
+### Spring Data JPA 的接口
+
+传统的 Spring 应用我们会创建一个 DAO 层，它的作用是封装对数据库的访问，比如：
 
 ```java
-@SpringBootTest
-class SampleJPATests {
+public interface PersonRepository {
+    Person save(Person person);
+    void delete(Person person);
+    Person findOne(Long id);
+    List<Person> findAll();
+}
+```
+
+Spring Data JPA 中的 Repository 也是一个接口，它的作用也是封装对数据库的访问，但是它不需要我们自己去实现，Spring Data JPA 会为我们自动实现这个接口。
+
+```java
+public interface PersonRepository extends CrudRepository<Person, Long> {
+}
+```
+
+Spring Data JPA 提供了多种不同类型的 Repository，它们提供了不同的操作和功能。
+
+以下是几种常用的 Repository 的区别：
+
+- CrudRepository：提供了对数据存储的基本 CRUD 操作，例如：save，findOne，findAll，delete 等。
+
+- PagingAndSortingRepository：扩展了 CrudRepository，提供了分页和排序的功能。
+
+- JpaRepository：扩展了 PagingAndSortingRepository，并提供了额外的 JPA 操作，例如批量操作和查询方法。
+
+- JpaSpecificationExecutor：提供了使用 JPA Criteria API 进行动态查询的功能。
+
+这些 Repository 各有不同的用途，具体使用哪个取决于项目需要以及个人的开发习惯。通常情况下，CrudRepository 和 JpaRepository 都是足够用的。
+
+不管选择哪种 Repository，Spring Data JPA 都提供了一种简化数据访问的方法，极大的减少了数据访问代码的量，提高了开发效率。
+
+### Spring Data JPA 的查询
+
+#### 命名形式查询
+
+Spring Data JPA 中的命名形式查询是一种在不编写实际查询的情况下通过方法名称定义查询的方式。命名形式查询遵循一组预定义的规则，以定义查询语句。
+
+命名形式查询规则如下：
+
+1. 查询以“find…By”开头。
+2. 在“By”之后指定要查询的字段。
+3. 可以指定一个或多个字段。
+4. 可以使用“And”和“Or”来连接多个字段。
+5. 可以使用通配符，例如“%value%”，表示查询任何包含给定值的字符串。
+6. 可以使用关键字，例如“IgnoreCase”，表示查询时忽略大小写。
+
+例如，如果想要查询姓名为某字符串的用户，可以使用以下方法：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    User findByName(String name);
+}
+```
+
+如果想要查询姓名为某字符串并且年龄为某数字的用户，可以使用以下方法：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    User findByNameAndAge(String name, Integer age);
+}
+```
+
+命名形式查询是一种非常灵活的方法，可以快速简便地定义查询。通过命名形式查询，可以避免编写大量的查询代码，提高开发效率。
+
+如果涉及到表关联时，比如用户和地址是一对多的关系，那么可以使用以下方法查询某个城市的所有用户：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    User findByAddressCity(String city);
+}
+```
+
+上面的命名中，Address 是 Address 实体类的名称，City 是 Address 实体类中的一个属性。为避免歧义，可以使用以下方法：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    User findByAddress_City(String city);
+}
+```
+
+其中 `_` 用来分隔实体类和属性。
+
+值得指出的是，对于多对多的关系，Spring Data JPA 依然可以通过命名形式查询来实现。例如，如果用户和角色是多对多的关系，那么可以使用以下方法查询某个角色的所有用户：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    User findByRoles_Name(String name);
+}
+```
+
+注意，这里的 `Roles` 是 `User` 实体类中的一个属性，是用户的角色集合，`Name` 是 `Role` 实体类中的一个属性。
+
+### Spring Data JPA 的测试
+
+进行数据库测试的时候，Spring Data JPA 提供了一个 @DataJpaTest 注解，它可以帮助我们自动配置 Spring Data JPA 所需要的组件，比如 EntityManager、DataSource、JdbcTemplate 等。
+我们进行 Repository 测试的时候往往需要配合使用 `TestEntityManager`，它可以帮助我们进行数据库的增删改查操作。
+
+```java
+@DataJpaTest
+class DemoApplicationTests {
+
+    @Autowired
+    private TestEntityManager entityManager;
+
     @Autowired
     private UserRepository userRepository;
 
     @Test
-    void test() {
+    void contextLoads() {
         User user = new User();
         user.setName("张三");
         user.setAge(18);
         user.setEmail("zhangsan@local.dev");
-        userRepository.save(user);
+        entityManager.persist(user);
+        entityManager.flush();
+        
+        List<User> users = userRepository.findAll();
+        Assertions.assertEquals(1, users.size());
+        Assertions.assertEquals("张三", users.get(0).getName());
     }
 }
 ```
+
+为什么要使用 `TestEntityManager` 而不是直接使用 `UserRepository` 来进行数据库的增删改查操作呢？因为 `TestEntityManager` 可以帮助我们在进行数据库操作的时候，可以将数据保存到内存中，而不是真正的保存到数据库中，这样可以提高我们的测试效率。而且 `TestEntityManager` 还可以帮助我们进行数据库的回滚操作，也就是说，当我们的测试用例执行完毕之后，`TestEntityManager` 会帮助我们将内存中的数据清空，这样可以保证我们的测试用例之间的数据隔离。
+
+在数据库测试中，我们经常会遇到需要预先插入一些数据到数据库中的情况，这时候我们可以使用 `@Sql` 注解来指定需要执行的 SQL 脚本，比如：
+
+```java
+@DataJpaTest
+@Sql("classpath:/init.sql")
+class DemoApplicationTests {
+    // ...
+}
+```
+
+在上面的代码中，我们使用了 `@Sql` 注解来指定需要执行的 SQL 脚本，这个 SQL 脚本的路径是 `resources/init.sql`，这个 SQL 脚本的内容如下：
+
+```sql
+INSERT INTO user (name, age, email) VALUES ('张三', 18, 'zhangsan@local.dev');
+INSERT INTO user (name, age, email) VALUES ('李四', 20, 'lisi@local.dev');
+```
+
+这样，当我们的测试用例执行的时候，就会先执行这个 SQL 脚本，然后再执行我们的测试用例。
+
+但是很快我们遇到另一个问题，如果下个测试不需要这些数据了，我们就需要再写一个 SQL 脚本来清空这些数据，这样就会导致我们的测试用例之间的耦合性变得很高，这时候我们就可以使用 `@Sql` 注解的 `executionPhase` 属性来指定 SQL 脚本的执行阶段，比如：
+
+```java
+@DataJpaTest
+@SqlGroup({
+        @Sql(value = "classpath:/init.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+        @Sql(value = "classpath:/clear.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+})
+class DemoApplicationTests {
+    // ...
+}
+```
+
+在上面的代码中，我们使用了 `@Sql` 注解的 `executionPhase` 属性来指定 SQL 脚本的执行阶段，这样我们就可以在测试用例执行之前，先执行 `init.sql`，然后在测试用例执行之后，再执行 `clear.sql`。

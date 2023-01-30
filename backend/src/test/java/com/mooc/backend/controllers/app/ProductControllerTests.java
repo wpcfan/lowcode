@@ -8,6 +8,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.HashSet;
@@ -20,16 +21,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@TestPropertySource(locations="classpath:application-test.properties")
 @WebMvcTest
 public class ProductControllerTests {
-    private final MockMvc mockMvc;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     @MockBean
     private ProductService productService;
-
-    public ProductControllerTests(@Autowired MockMvc mockMvc) {
-        this.mockMvc = mockMvc;
-    }
 
     @Test
     public void testFindAllByCategory() throws Exception {

@@ -5,20 +5,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.context.TestPropertySource;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@TestPropertySource(locations="classpath:application-test.properties")
 @DataJpaTest
 public class CategoryRepositoryTests {
 
-    private final CategoryRepository categoryRepository;
-    private final TestEntityManager testEntityManager;
-    CategoryRepositoryTests(@Autowired CategoryRepository categoryRepository, @Autowired TestEntityManager testEntityManager) {
-        this.categoryRepository = categoryRepository;
-        this.testEntityManager = testEntityManager;
-    }
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private TestEntityManager testEntityManager;
 
     @Test
     public void testFindAll() {

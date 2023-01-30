@@ -7,11 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//@TestPropertySource(locations="classpath:application-test.properties")
-@ActiveProfiles("test")
+@TestPropertySource(locations="classpath:application-test.properties")
+//@ActiveProfiles("test")
 @DataJpaTest
 public class ProductRepositoryTests {
 
@@ -32,10 +33,10 @@ public class ProductRepositoryTests {
 
         var products = productRepository.findAll();
 
-        assertThat("There should be 1 product", products.size() == 1);
-        assertThat("The product name should be 'Test Product'", products.get(0).getName().equals("Test Product"));
-        assertThat("The product description should be 'Test Description'", products.get(0).getDescription().equals("Test Description"));
-        assertThat("The product price should be 10000", products.get(0).getPrice() == 10000);
+        assertEquals(1, products.size());
+        assertEquals("Test Product", products.get(0).getName());
+        assertEquals("Test Description", products.get(0).getDescription());
+        assertEquals(10000, products.get(0).getPrice());
 
         var product2 = new Product();
         product2.setName("Test Product 2");
@@ -46,18 +47,19 @@ public class ProductRepositoryTests {
 
         products = productRepository.findAll();
 
-        assertThat("There should be 2 products", products.size() == 2);
-        assertThat("The product name should be 'Test Product'", products.get(0).getName().equals("Test Product"));
-        assertThat("The product description should be 'Test Description'", products.get(0).getDescription().equals("Test Description"));
-        assertThat("The product price should be 10000", products.get(0).getPrice() == 10000);
-        assertThat("The product2 name should be 'Test Product 2'", products.get(1).getName().equals("Test Product 2"));
-        assertThat("The product2 description should be 'Test Description 2'", products.get(1).getDescription().equals("Test Description 2"));
-        assertThat("The product2 price should be 10100", products.get(1).getPrice() == 10100);
+        assertEquals(2, products.size());
+        assertEquals("Test Product", products.get(0).getName());
+        assertEquals("Test Description", products.get(0).getDescription());
+        assertEquals(10000, products.get(0).getPrice());
+        assertEquals("Test Product 2", products.get(1).getName());
+        assertEquals("Test Description 2", products.get(1).getDescription());
+        assertEquals(10100, products.get(1).getPrice());
     }
 
     @Test
-    public void findByCategories_Id() {
+    public void testFindByCategories_Id() {
         var category = new Category();
+        category.setCode("cat_one");
         category.setName("Test Category");
         testEntityManager.persist(category);
 
@@ -71,10 +73,57 @@ public class ProductRepositoryTests {
 
         var products = productRepository.findByCategoriesId(category.getId());
 
-        assertThat("There should be 1 product", products.size() == 1);
-        assertThat("The product name should be 'Test Product'", products.get(0).getName().equals("Test Product"));
-        assertThat("The product description should be 'Test Description'", products.get(0).getDescription().equals("Test Description"));
-        assertThat("The product price should be 10000", products.get(0).getPrice() == 10000);
+        assertEquals(1, products.size());
+        assertEquals("Test Product", products.get(0).getName());
+        assertEquals("Test Description", products.get(0).getDescription());
+        assertEquals(10000, products.get(0).getPrice());
+    }
 
+    @Test
+    public void testFindProductDTOsByCategoriesId() throws Exception {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Test Category");
+        testEntityManager.persist(category);
+
+        var product = new Product();
+        product.setName("Test Product");
+        product.setDescription("Test Description");
+        product.setPrice(10000);
+        product.getCategories().add(category);
+        testEntityManager.persist(product);
+
+        var product2 = new Product();
+        product2.setName("Test Product 2");
+        product2.setDescription("Test Description 2");
+        product2.setPrice(10100);
+        product2.getCategories().add(category);
+        testEntityManager.persist(product2);
+        testEntityManager.flush();
+
+        var products = productRepository.findProductDTOsByCategoriesId(category.getId());
+
+        assertEquals(2, products.size());
+        assertEquals("Test Product", products.get(0).name());
+        assertEquals("Test Description", products.get(0).description());
+        assertEquals(10000, products.get(0).price());
+        assertEquals("Test Product 2", products.get(1).name());
+        assertEquals("Test Description 2", products.get(1).description());
+        assertEquals(10100, products.get(1).price());
+
+        var category2 = new Category();
+        category2.setCode("cat_two");
+        category2.setName("Test Category 2");
+        testEntityManager.persist(category2);
+        product.getCategories().add(category2);
+        testEntityManager.persist(product);
+        testEntityManager.flush();
+
+        products = productRepository.findProductDTOsByCategoriesId(category2.getId());
+
+        assertEquals(1, products.size());
+        assertEquals("Test Product", products.get(0).name());
+        assertEquals("Test Description", products.get(0).description());
+        assertEquals(10000, products.get(0).price());
     }
 }

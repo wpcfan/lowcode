@@ -35,7 +35,7 @@ public class ProductControllerTests {
 
     @Test
     public void testFindAllByCategory() throws Exception {
-        var category = new CategoryDTO(1L, "Category 1");
+        var category = new CategoryDTO("cat_one","Category 1");
 
         var product1 = new ProductDTO(1L, "Product 1", "Description 1", 100000, Set.of(category), new HashSet<>());
         var product2 = new ProductDTO(2L, "Product 2", "Description 2", 200000, Set.of(category), new HashSet<>());
@@ -51,14 +51,14 @@ public class ProductControllerTests {
                 .andExpect(jsonPath("$[0].description", is("Description 1")))
                 .andExpect(jsonPath("$[0].price", is(100000)))
                 .andExpect(jsonPath("$[0].categories", hasSize(1)))
-                .andExpect(jsonPath("$[0].categories[0].id", is(1)))
+                .andExpect(jsonPath("$[0].categories[0].code", is("cat_one")))
                 .andExpect(jsonPath("$[0].categories[0].name", is("Category 1")))
                 .andExpect(jsonPath("$[1].id", is(2)))
                 .andExpect(jsonPath("$[1].name", is("Product 2")))
                 .andExpect(jsonPath("$[1].description", is("Description 2")))
                 .andExpect(jsonPath("$[1].price", is(200000)))
                 .andExpect(jsonPath("$[1].categories", hasSize(1)))
-                .andExpect(jsonPath("$[1].categories[0].id", is(1)))
+                .andExpect(jsonPath("$[1].categories[0].code", is("cat_one")))
                 .andExpect(jsonPath("$[1].categories[0].name", is("Category 1"))
         );
     }

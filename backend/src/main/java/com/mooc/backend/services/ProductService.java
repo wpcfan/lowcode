@@ -27,7 +27,7 @@ public class ProductService {
                         p.getDescription(),
                         p.getPrice(),
                         p.getCategories().stream()
-                                .map(c -> new CategoryDTO(c.getId(), c.getName()))
+                                .map(c -> new CategoryDTO(c.getCode(), c.getName()))
                                 .collect(Collectors.toSet()),
                         p.getImages().stream()
                                 .map(ProductImage::getImageUrl)

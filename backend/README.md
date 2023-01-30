@@ -864,7 +864,28 @@ public class UserRoleService {
 
 通过以上步骤，可以轻松地处理多对多的表关联，并在不影响代码质量的前提下提高开发效率。
 
-这里再说一下如何使用 DTO 避免 N+1 问题
+这里再说一下如何使用 DTO 避免 `N+1` 问题，在存在多对多关系的情况下，一般默认的查询策略是 `LAZY`，也就是说，当我们查询 `User` 实体类的时候，`Role` 实体类不会被查询，只有当我们访问 `User` 实体类的 `roles` 属性的时候，`Role` 实体类才会被查询。
+如果我们查询 `User` 实体类的时候，需要同时查询 `Role` 实体类，那么就会产生 `N+1` 问题，这里的 `N` 就是 `User` 实体类的数量，`1` 就是 `Role` 实体类的数量。
+用 SQL 语句来表示的话，就是查询 `User` 实体类的时候，会执行 `N` 条 `SQL` 语句，每条 `SQL` 语句都会查询 `Role` 实体类，这样就会产生 `N+1` 问题。
+
+为了避免 `N+1` 问题，我们可以使用 DTO 来进行数据传输，比如：
+
+```java
+public class UserDTO {
+    private Long id;
+    private String username;
+    private String password;
+    private List<Role> roles;
+    // 省略 getter 和 setter 方法
+}
+```
+
+然后在 `UserRepository` 接口中定义一个方法，用于查询 `User` 实体类的同时查询 `Role` 实体类，比如：
+
+```java
+@Query("select new com.example.demo.dto.UserDTO(u.id, u.username, u.password, u.roles) from User u left join u.roles r")
+List<UserDTO> findAllUserDTO();
+```
 
 ### 表的自动创建
 

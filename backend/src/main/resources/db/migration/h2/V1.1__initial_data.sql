@@ -1,27 +1,27 @@
-insert into mooc_categories (`id`, `name`)
-values (1, 'Business & Management');
-insert into mooc_categories (`id`, `name`)
-values (2, 'Computer Science');
-insert into mooc_categories (`id`, `name`)
-values (3, 'Data Science');
-insert into mooc_categories (`id`, `name`)
-values (4, 'Design');
-insert into mooc_categories (`id`, `name`)
-values (5, 'Health');
-insert into mooc_categories (`id`, `name`)
-values (6, 'Language');
-insert into mooc_categories (`id`, `name`)
-values (7, 'Math & Logic');
-insert into mooc_categories (`id`, `name`)
-values (8, 'Personal Development');
-insert into mooc_categories (`id`, `name`)
-values (9, 'Physical Science & Engineering');
-insert into mooc_categories (`id`, `name`)
-values (10, 'Social Sciences');
-insert into mooc_categories (`id`, `name`)
-values (11, 'Test Prep');
-insert into mooc_categories (`id`, `name`)
-values (12, 'None');
+insert into mooc_categories (`id`, `code`, `name`)
+values (1, 'cat_b_m', 'Business & Management');
+insert into mooc_categories (`id`, `code`, `name`)
+values (2, 'cat_c_s', 'Computer Science');
+insert into mooc_categories (`id`, `code`, `name`)
+values (3, 'cat_d_s', 'Data Science');
+insert into mooc_categories (`id`, `code`, `name`)
+values (4, 'cat_d', 'Design');
+insert into mooc_categories (`id`, `code`, `name`)
+values (5, 'cat_h', 'Health');
+insert into mooc_categories (`id`, `code`, `name`)
+values (6, 'cat_l', 'Language');
+insert into mooc_categories (`id`, `code`, `name`)
+values (7, 'cat_m_l', 'Math & Logic');
+insert into mooc_categories (`id`, `code`, `name`)
+values (8, 'cat_p_d', 'Personal Development');
+insert into mooc_categories (`id`, `code`, `name`)
+values (9, 'cat_p_s_e', 'Physical Science & Engineering');
+insert into mooc_categories (`id`, `code`, `name`)
+values (10, 'cat_s_s', 'Social Sciences');
+insert into mooc_categories (`id`, `code`, `name`)
+values (11, 'cat_t_p', 'Test Prep');
+insert into mooc_categories (`id`, `code`, `name`)
+values (12, 'cat_n', 'None');
 insert into mooc_products (`id`, `name`, `description`, `price`)
 values (1, 'Business & Management 1', 'Learn how to use data to make better decisions', 10);
 insert into mooc_products (`id`, `name`, `description`, `price`)

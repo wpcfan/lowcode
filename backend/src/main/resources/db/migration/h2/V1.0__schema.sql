@@ -1,9 +1,13 @@
 CREATE TABLE mooc_categories
 (
     id   BIGINT AUTO_INCREMENT NOT NULL,
+    code VARCHAR(255)          NOT NULL,
     name VARCHAR(255)          NOT NULL,
     CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
 );
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
 
 CREATE TABLE mooc_product_categories
 (

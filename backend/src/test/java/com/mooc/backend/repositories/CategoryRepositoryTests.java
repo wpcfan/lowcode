@@ -15,9 +15,8 @@ import org.testcontainers.containers.MySQLContainer;
 
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//@TestPropertySource(locations="classpath:application-test.properties")
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
         "spring.jpa.hibernate.ddl-auto=none",
@@ -60,24 +59,29 @@ public class CategoryRepositoryTests {
     @Test
     public void testFindAll() {
         var category = new Category();
+        category.setCode("cat_one");
         category.setName("Test Category");
         testEntityManager.persist(category);
         testEntityManager.flush();
 
         List<Category> categories = categoryRepository.findAll();
 
-        assertThat("There should be 1 category", categories.size() == 1);
-        assertThat("The category name should be 'Test Category'", categories.get(0).getName().equals("Test Category"));
+        assertEquals(1, categories.size());
+        assertEquals("cat_one", categories.get(0).getCode());
+        assertEquals("Test Category", categories.get(0).getName());
 
         var category2 = new Category();
+        category2.setCode("cat_two");
         category2.setName("Test Category 2");
         testEntityManager.persist(category2);
         testEntityManager.flush();
 
         categories = categoryRepository.findAll();
 
-        assertThat("There should be 2 categories", categories.size() == 2);
-        assertThat("The category name should be 'Test Category'", categories.get(0).getName().equals("Test Category"));
-        assertThat("The category name should be 'Test Category 2'", categories.get(1).getName().equals("Test Category 2"));
+        assertEquals(2, categories.size());
+        assertEquals("cat_one", categories.get(0).getCode());
+        assertEquals("Test Category", categories.get(0).getName());
+        assertEquals("cat_two", categories.get(1).getCode());
+        assertEquals("Test Category 2", categories.get(1).getName());
     }
 }

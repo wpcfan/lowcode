@@ -1,16 +1,16 @@
-insert into mooc_categories (`id`, `name`)
-values (1, 'Business & Management'),
-       (2, 'Computer Science'),
-       (3, 'Data Science'),
-       (4, 'Design'),
-       (5, 'Health'),
-       (6, 'Language'),
-       (7, 'Math & Logic'),
-       (8, 'Personal Development'),
-       (9, 'Physical Science & Engineering'),
-       (10, 'Social Sciences'),
-       (11, 'Test Prep'),
-       (12, 'None');
+insert into mooc_categories (`id`, `code`, `name`)
+values (1, 'cat_b_m', 'Business & Management'),
+       (2, 'cat_c_s', 'Computer Science'),
+       (3, 'cat_d_s', 'Data Science'),
+       (4, 'cat_d', 'Design'),
+       (5, 'cat_h', 'Health'),
+       (6, 'cat_l', 'Language'),
+       (7, 'cat_m_l', 'Math & Logic'),
+       (8, 'cat_p_d', 'Personal Development'),
+       (9, 'cat_p_s_e', 'Physical Science & Engineering'),
+       (10, 'cat_s_s', 'Social Sciences'),
+       (11, 'cat_t_p', 'Test Prep'),
+       (12, 'cat_n', 'None');
 insert into mooc_products (`id`, `name`, `description`, `price`)
 values (1, 'Business & Management 1', 'Learn how to use data to make better decisions', 10),
        (2, 'Computer Science 2', 'Learn how to use data to make better decisions', 20),

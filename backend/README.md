@@ -511,14 +511,16 @@ class DemoApplicationTests {
 
 这种测试容器的方式，可以让我们的测试用例更加独立，不会受到其他测试用例的影响。
 
-添加 `testcontainers` 依赖：
+添加 `testcontainers` 依赖，比如希望集成测试时有 MySQL ：
 
 ```gradle
 dependencies {
     // ...
-    testImplementation 'org.testcontainers:testcontainers'
+    testImplementation 'org.testcontainers:mysql:1.17.6'
 }
 ```
+
+注意，这个版本号不一定要和文档一致，最新版本号参考：[https://mvnrepository.com/artifact/org.testcontainers/mysql](https://mvnrepository.com/artifact/org.testcontainers/mysql)
 
 不只是数据库，我们还可以使用 `testcontainers` 来启动一个 Redis 容器，比如：
 
@@ -550,6 +552,26 @@ junit.jupiter.testinstance.lifecycle.default = per_class
 ```
 
 除了 `PER_CLASS`, 还有 `PER_METHOD` 也就是按方法的生命周期，具体的可以参考：[https://junit.org/junit5/docs/current/user-guide/#writing-tests-test-instance-lifecycle](https://junit.org/junit5/docs/current/user-guide/#writing-tests-test-instance-lifecycle)
+
+### 测试的配置文件
+
+在测试中，我们可能需要使用不同的配置文件，比如，我们在开发环境中使用的是 `application-dev.yml`，但是在测试环境中，我们可能需要使用 `application-test.yml`，这时候我们可以通过 `@ActiveProfiles` 注解来指定测试用例使用的配置文件，比如：
+
+```java
+@DataJpaTest
+@ActiveProfiles("test")
+class DemoApplicationTests {
+}
+```
+
+也可以使用 `@TestPropertySource` 注解来指定测试用例使用的配置文件，比如：
+
+```java
+@DataJpaTest
+@TestPropertySource("classpath:application-test.yml")
+class DemoApplicationTests {
+}
+```
 
 ## Spring Data JPA
 
@@ -880,6 +902,21 @@ Spring Data JPA 支持的表的自动创建策略如下：
 一般情况下在开发阶段，我们会使用这种自动的方式来创建表，但是在生产环境中，我们会使用数据库的脚本来创建表，这样可以保证表的创建和数据的初始化是分开的。
 
 当然还有一些更专门的数据管理框架，比如 Flyway、Liquibase 等，它们可以帮助我们管理数据库的变更，比如创建表、修改表、删除表等。
+
+#### 导出数据库脚本
+
+我们可以使用 `spring.jpa.hibernate.ddl-auto=none` 来禁用自动创建表，然后使用 `spring.jpa.generate-ddl=true` 来导出数据库脚本，比如：
+
+```properties
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.generate-ddl=true
+```
+
+这样就会在控制台输出数据库的脚本，比如：
+
+```sql
+create table person (id bigint not null auto_increment, age integer not null, name varchar(255), primary key (id)) engine=InnoDB
+```
 
 ### Spring Data JPA 的接口
 

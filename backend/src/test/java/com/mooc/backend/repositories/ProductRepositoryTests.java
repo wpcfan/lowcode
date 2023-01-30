@@ -6,11 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@TestPropertySource(locations="classpath:application-test.properties")
+//@TestPropertySource(locations="classpath:application-test.properties")
+@ActiveProfiles("test")
 @DataJpaTest
 public class ProductRepositoryTests {
 
@@ -68,7 +69,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(product);
         testEntityManager.flush();
 
-        var products = productRepository.findByCategories_Id(category.getId());
+        var products = productRepository.findByCategoriesId(category.getId());
 
         assertThat("There should be 1 product", products.size() == 1);
         assertThat("The product name should be 'Test Product'", products.get(0).getName().equals("Test Product"));

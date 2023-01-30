@@ -5,6 +5,7 @@ import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,8 +18,9 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ProductDTO> findAllByCategory(Long id) {
-        return productRepository.findByCategories_Id(id).stream()
+        return productRepository.findByCategoriesId(id).stream()
                 .map(p -> new ProductDTO(
                         p.getId(),
                         p.getName(),

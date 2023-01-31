@@ -887,6 +887,68 @@ public class UserDTO {
 List<UserDTO> findAllUserDTO();
 ```
 
+解决 N+1 问题还可以使用 `@EntityGraph` 注解
+
+```java
+@EntityGraph(value = "User.roles", type = EntityGraph.EntityGraphType.FETCH)
+List<User> findAll();
+```
+
+`@EntityGraph` 注解的 `value` 属性指定了需要查询的实体类，`type` 属性指定了查询的类型，这里使用 `FETCH` 类型，表示立即加载。
+这个注解是 `JPA` 的注解，而不是 `Spring Data JPA` 的注解，因此在使用的时候需要注意。
+
+有时我们还会遇到自关联的情况，比如商品的类目可以有父类目，也可以有子类目：
+
+```java
+@Entity
+public class Category {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+    @OneToMany(mappedBy = "parent")
+    private List<Category> children;
+    // 省略 getter 和 setter 方法
+}
+```
+
+这里的 `parent` 属性表示父类目，`children` 属性表示子类目，这里的 `parent` 和 `children` 属性都是自关联的关系。
+对于自关联的实体，存储的时候要十分小心，因为自关联的实体会形成一个环，如果不小心就会形成死循环，导致内存溢出。
+处理自关联实体存储的最佳实践是：
+
+- 在保存自关联的实体类时，需要先保存最顶层的实体类，然后再保存其他的实体类，因为在关系中通常需要使用到已经存在的实体类的 id。
+- 如果是在 Java 代码中使用 JPA 完成操作，可以在设置好实体类间关系后，使用 EntityManager 或者 Repository 的 save 方法进行保存。
+- 如果是在数据库中通过 SQL 语句进行保存，则需要先插入顶层实体类，再插入其他实体类，并在插入其他实体类时通过设置外键的方式与顶层实体类进行关联。
+
+总之，关键在于先保存顶层实体类，再保存其他实体类，并在保存过程中正确设置实体类间的关系。
+
+在进行 API 接口设计的时候，同样需要注意一对多，多对多等关系，关联的实体会形成一个环，在 JSON 输出的时候要避免这种情况。
+
+一种方式是在实体类中使用 `@JsonIgnore` 注解，忽略自关联的属性，比如：
+
+```java
+@Entity
+public class Category {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String name;
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    @JsonIgnore
+    private Category parent;
+    @OneToMany(mappedBy = "parent")
+    @JsonIgnore
+    private List<Category> children;
+    // 省略 getter 和 setter 方法
+}
+```
+
+另一种方式是使用 DTO，将实体类转换为 DTO，然后再将 DTO 转换为 JSON，这样就可以避免关联的属性形成环的问题。
+
 ### 表的自动创建
 
 Spring Data JPA 会在应用启动的时候自动创建表，但是在创建表之前，我们需要先创建数据库，比如：

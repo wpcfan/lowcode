@@ -1036,6 +1036,155 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
 注意，这里的 `Roles` 是 `User` 实体类中的一个属性，是用户的角色集合，`Name` 是 `Role` 实体类中的一个属性。
 
+#### @Query 注解查询
+
+除了使用命名形式查询，Spring Data JPA 还提供了另一种查询方式，即使用 `@Query` 注解来定义查询。`@Query` 注解可以定义在 Repository 接口的方法上，也可以定义在实体类的方法上。
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    @Query("select u from User u where u.name = ?1")
+    User findUser(String name);
+}
+```
+
+上面的代码中，`@Query` 注解中的 `value` 属性表示查询语句，`?1` 表示第一个参数，`?2` 表示第二个参数，以此类推。
+
+需要注意的是注解中并不是真正的 SQL 语句，而是 JPA 查询语句，因此 `@Query` 注解中的查询语句并不是真正的 SQL 语句，而是 JPA 查询语句。例如，上面的查询语句可以翻译成如下的 SQL 语句：
+
+```sql
+select * from user where name = ?
+```
+
+JQL 语句和 SQL 语句的区别在于，JQL 语句中的表名和列名都是实体类的名称和属性，而不是数据库表的名称和列名。
+
+#### Specification 查询
+
+Spring Data JPA Specification 是一种基于类的查询方式，它的特点和优势如下：
+
+1. 灵活性：可以根据查询条件动态构建 Specification，而不需要写多余的 DAO 层代码。
+2. 可读性：使用 Specification 的查询条件是定义在单独的类中的，这样比直接写在 DAO 中的 JPQL 或 SQL 语句更加可读性。
+3. 可维护性：使用 Specification 的查询条件是定义在单独的类中的，这样对于每一种查询条件可以单独维护，而不需要在 DAO 层对多余的代码进行维护。
+4. 复用性：Specification 可以复用，即一个 Specification 可以在多个地方使用，这样可以提高代码的复用率。
+5. 可测试性：Specification 可以独立测试，不需要依赖数据库。
+
+总的来说，使用 Specification 可以提高代码的可读性、可维护性、复用性和可测试性，从而提高开发效率。
+
+以下是一个使用 Spring Data JPA 的 Specification 的代码示例
+
+1.首先，我们需要定义 UserSpecification 类，用来封装查询条件：
+
+```java
+import org.springframework.data.jpa.domain.Specification;
+
+public class UserSpecification {
+
+    public static Specification<User> findByName(String name) {
+        return (root, query, builder) -> builder.equal(root.get("name"), name);
+    }
+
+    public static Specification<User> findByRole(Role role) {
+        return (root, query, builder) -> builder.equal(root.get("roles"), role);
+    }
+
+    public static Specification<User> findByNameAndRole(String name, Role role) {
+        return Specification.where(findByName(name)).and(findByRole(role));
+    }
+}
+```
+
+上面代码中，root, query, builder 是一组参数，分别代表了在 Specification 查询中的三个重要对象。
+
+1. root: 表示查询的根对象，通常是实体类。
+2. query: 表示查询对象，可以用于定义查询的结果集、排序、分页等。
+3. builder: 表示条件构造器，用于构建查询条件。
+
+这三个参数一起构成了 Specification 查询的基本结构，其中 root 和 builder 用于定义查询的条件，query 用于定义查询的结果。
+
+在 `findByNameAndRole` 方法中，我们使用了 `Specification.where` 方法来构建查询条件，这个方法的作用是将两个查询条件进行组合，这里我们使用了 `and` 方法，也可以使用 `or` 方法。
+
+2.然后，在 UserRepository 中使用 Specification 进行查询：
+
+```java
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+}
+```
+
+3.最后，在业务代码中使用 Specification 进行查询：
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<User> findByName(String name) {
+        return userRepository.findAll(UserSpecification.findByName(name));
+    }
+
+    public List<User> findByRole(Role role) {
+        return userRepository.findAll(UserSpecification.findByRole(role));
+    }
+}
+```
+
+如果你更习惯传统的 Java 编码方式，也可以实现 Specification 接口，然后在业务代码中直接使用：
+
+```java
+class UserSpecification implements Specification<User> {
+
+    private String name;
+
+    private Role role;
+
+    public UserSpecification(String name, Role role) {
+        this.name = name;
+        this.role = role;
+    }
+
+    @Override
+    public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+        return builder.and(builder.equal(root.get("name"), name), builder.equal(root.get("roles"), role));
+    }
+}
+```
+
+或者通过匿名内部类的方式：
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<User> findByName(String name) {
+        return userRepository.findAll(new Specification<User>() {
+            @Override
+            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+                return builder.equal(root.get("name"), name);
+            }
+        });
+    }
+
+    public List<User> findByRole(Role role) {
+        return userRepository.findAll(new Specification<User>() {
+            @Override
+            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
+                return builder.equal(root.get("roles"), role);
+            }
+        });
+    }
+}
+```
+
 ### Spring Data JPA 的测试
 
 进行数据库测试的时候，Spring Data JPA 提供了一个 @DataJpaTest 注解，它可以帮助我们自动配置 Spring Data JPA 所需要的组件，比如 EntityManager、DataSource、JdbcTemplate 等。

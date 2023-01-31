@@ -1,6 +1,7 @@
 package com.mooc.backend.repositories;
 
 import com.mooc.backend.entities.Category;
+import com.mooc.backend.specifications.CategorySpecification;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -191,5 +192,33 @@ public class CategoryRepositoryTests {
         assertEquals(4, categories.size());
         assertEquals("cat_one", categories.get(0).getCode());
         assertEquals(2, categories.get(0).getChildren().size());
+    }
+
+    @Test
+    public void testFindAllWithSpecification() throws Exception {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Computer Basics");
+        testEntityManager.persist(category);
+
+        var category2 = new Category();
+        category2.setCode("cat_two");
+        category2.setName("Data Mining");
+        testEntityManager.persist(category2);
+
+        var category3 = new Category();
+        category3.setCode("cat_three");
+        category3.setName("Computer Science");
+        testEntityManager.persist(category3);
+
+        var category4 = new Category();
+        category4.setCode("cat_four");
+        category4.setName("Data Science");
+        testEntityManager.persist(category4);
+        testEntityManager.flush();
+
+        CategorySpecification specification = new CategorySpecification("Computer");
+        var matched = categoryRepository.findAll(specification);
+        assertEquals(2, matched.size());
     }
 }

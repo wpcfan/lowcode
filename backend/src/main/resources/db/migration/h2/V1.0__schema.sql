@@ -1,13 +1,17 @@
 CREATE TABLE mooc_categories
 (
-    id   BIGINT AUTO_INCREMENT NOT NULL,
-    code VARCHAR(255)          NOT NULL,
-    name VARCHAR(255)          NOT NULL,
+    id        BIGINT AUTO_INCREMENT NOT NULL,
+    code      VARCHAR(255)          NOT NULL,
+    name      VARCHAR(255)          NOT NULL,
+    parent_id BIGINT,
     CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
 );
 
 ALTER TABLE mooc_categories
     ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT FK_MOOC_CATEGORIES_ON_PARENT FOREIGN KEY (parent_id) REFERENCES mooc_categories (id);
 
 CREATE TABLE mooc_product_categories
 (

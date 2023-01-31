@@ -16,6 +16,7 @@ import org.testcontainers.containers.MySQLContainer;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @TestPropertySource(properties = {
@@ -83,5 +84,112 @@ public class CategoryRepositoryTests {
         assertEquals("Test Category", categories.get(0).getName());
         assertEquals("cat_two", categories.get(1).getCode());
         assertEquals("Test Category 2", categories.get(1).getName());
+    }
+
+    @Test
+    public void testFindByCode() throws Exception {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Test Category");
+        testEntityManager.persist(category);
+
+        var category2 = new Category();
+        category2.setCode("cat_two");
+        category2.setName("Test Category 2");
+        testEntityManager.persist(category2);
+
+        var category3 = new Category();
+        category3.setCode("cat_three");
+        category3.setName("Test Category 3");
+        testEntityManager.persist(category3);
+
+        var category4 = new Category();
+        category4.setCode("cat_four");
+        category4.setName("Test Category 4");
+        testEntityManager.persist(category4);
+        testEntityManager.flush();
+
+        var categoryFromDb = categoryRepository.findByCode("cat_one");
+        assertTrue(categoryFromDb.isPresent());
+        assertEquals("cat_one", categoryFromDb.get().getCode());
+        assertEquals("Test Category", categoryFromDb.get().getName());
+
+        var notFound = categoryRepository.findByCode("none");
+        assertTrue(notFound.isEmpty());
+    }
+
+    @Test
+    public void testFindRoots() throws Exception {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Test Category");
+        testEntityManager.persist(category);
+
+        var category2 = new Category();
+        category2.setCode("cat_two");
+        category2.setName("Test Category 2");
+        category2.setParent(category);
+        testEntityManager.persist(category2);
+        category.getChildren().add(category2);
+
+        var category3 = new Category();
+        category3.setCode("cat_three");
+        category3.setName("Test Category 3");
+        category3.setParent(category);
+        testEntityManager.persist(category3);
+        category.getChildren().add(category3);
+
+        var category4 = new Category();
+        category4.setCode("cat_four");
+        category4.setName("Test Category 4");
+        category4.setParent(category3);
+        testEntityManager.persist(category4);
+        category3.getChildren().add(category4);
+
+        testEntityManager.persist(category3);
+        testEntityManager.flush();
+
+        var categoryFromDb = categoryRepository.findRoots();
+        assertEquals(1, categoryFromDb.size());
+        assertEquals("cat_one", categoryFromDb.get(0).getCode());
+        assertEquals("Test Category", categoryFromDb.get(0).getName());
+        assertEquals(2, categoryFromDb.get(0).getChildren().size());
+    }
+
+    @Test
+    public void testFindAllWithChildren() throws Exception {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Test Category");
+        testEntityManager.persist(category);
+
+        var category2 = new Category();
+        category2.setCode("cat_two");
+        category2.setName("Test Category 2");
+        category2.setParent(category);
+        testEntityManager.persist(category2);
+        category.getChildren().add(category2);
+
+        var category3 = new Category();
+        category3.setCode("cat_three");
+        category3.setName("Test Category 3");
+        category3.setParent(category);
+        testEntityManager.persist(category3);
+        category.getChildren().add(category3);
+
+        var category4 = new Category();
+        category4.setCode("cat_four");
+        category4.setName("Test Category 4");
+        category4.setParent(category3);
+        testEntityManager.persist(category4);
+        category3.getChildren().add(category4);
+
+        testEntityManager.persist(category);
+        testEntityManager.flush();
+
+        var categories = categoryRepository.findAllWithChildren();
+        assertEquals(4, categories.size());
+        assertEquals("cat_one", categories.get(0).getCode());
+        assertEquals(2, categories.get(0).getChildren().size());
     }
 }

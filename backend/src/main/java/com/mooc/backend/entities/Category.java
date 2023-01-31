@@ -1,5 +1,6 @@
 package com.mooc.backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -18,6 +19,13 @@ public class Category {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent")
+    private Set<Category> children = new HashSet<>();
 
     @ManyToMany(mappedBy = "categories")
     private Set<Product> products = new HashSet<>();
@@ -44,6 +52,23 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Category getParent() {
+        return parent;
+    }
+
+    public void setParent(Category parent) {
+        this.parent = parent;
+    }
+
+    @JsonIgnore
+    public Set<Category> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Set<Category> children) {
+        this.children = children;
     }
 
     public Set<Product> getProducts() {
@@ -81,6 +106,6 @@ public class Category {
 
     @Override
     public String toString() {
-        return "Category [id=" + id + ", name=" + name + "]";
+        return "Category [id=" + id + ", code=" + code + ", name=" + name + "]";
     }
 }

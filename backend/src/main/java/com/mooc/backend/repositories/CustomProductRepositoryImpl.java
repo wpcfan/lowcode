@@ -1,11 +1,12 @@
 package com.mooc.backend.repositories;
 
+import com.mooc.backend.dtos.CategoryDTO;
 import com.mooc.backend.dtos.ProductDTO;
-import com.mooc.backend.dtos.ProductDTOResultTransformer;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.hibernate.query.Query;
 
-import java.util.List;
+import java.util.*;
 
 public class CustomProductRepositoryImpl implements CustomProductRepository{
 
@@ -43,8 +44,22 @@ public class CustomProductRepositoryImpl implements CustomProductRepository{
                             c.id = :id
                         """)
                 .setParameter("id", id)
-                .unwrap(org.hibernate.query.Query.class)
-                .setResultTransformer(new ProductDTOResultTransformer())
+                .unwrap(Query.class)
+                .setTupleTransformer(((tuple, aliases) -> {
+                    Map<String, Integer> aliasToIndexMap = Arrays.stream(aliases)
+                            .collect(HashMap::new, (map, alias) -> map.put(alias.toLowerCase(Locale.ROOT), map.size()), Map::putAll);
+                    return new ProductDTO(
+                            (Long) tuple[aliasToIndexMap.get("id")],
+                            (String) tuple[aliasToIndexMap.get("name")],
+                            (String) tuple[aliasToIndexMap.get("description")],
+                            (Integer) tuple[aliasToIndexMap.get("price")],
+                            new HashSet<>(Collections.singletonList(new CategoryDTO(
+                                    (String) tuple[aliasToIndexMap.get("c_code")],
+                                    (String) tuple[aliasToIndexMap.get("c_name")]
+                            ))),
+                            new HashSet<>(Collections.singletonList((String) tuple[aliasToIndexMap.get("pi_image_url")]))
+                    );
+                }))
                 .getResultList();
     }
 }

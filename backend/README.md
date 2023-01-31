@@ -1026,11 +1026,8 @@ Spring Data JPA 提供了多种不同类型的 Repository，它们提供了不�
 以下是几种常用的 Repository 的区别：
 
 - CrudRepository：提供了对数据存储的基本 CRUD 操作，例如：save，findOne，findAll，delete 等。
-
 - PagingAndSortingRepository：扩展了 CrudRepository，提供了分页和排序的功能。
-
 - JpaRepository：扩展了 PagingAndSortingRepository，并提供了额外的 JPA 操作，例如批量操作和查询方法。
-
 - JpaSpecificationExecutor：提供了使用 JPA Criteria API 进行动态查询的功能。
 
 这些 Repository 各有不同的用途，具体使用哪个取决于项目需要以及个人的开发习惯。通常情况下，CrudRepository 和 JpaRepository 都是足够用的。
@@ -1247,6 +1244,39 @@ public class UserService {
 }
 ```
 
+#### 自定义 Repository
+
+基础的增删改查通过 Spring Data JPA 提供的 `JpaRepository` 已经可以满足我们的需求。但有时我们还是需要定义一些自定义的操作，比如某些批处理的更新操作，这时我们就需要自定义 Repository。
+
+和我们的直觉不同，我们不是直接在 UserRepository 中定义自定义的方法，而是需要定义一个接口，然后让 UserRepository 继承这个接口。
+
+```java
+public interface CustomUserRepository {
+    void updateNameById(Long id, String name);
+}
+
+public class CustomUserRepositoryImpl implements CustomUserRepository {
+
+    @Autowired
+    private EntityManager entityManager;
+
+    @Override
+    public void updateNameById(Long id, String name) {
+        entityManager.createQuery("update User u set u.name = ?1 where u.id = ?2")
+                .setParameter(1, name)
+                .setParameter(2, id)
+                .executeUpdate();
+    }
+}
+
+public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User>, CustomUserRepository {
+
+    List<User> findByName(String name);
+
+    List<User> findByRole(Role role);
+}
+```
+
 ### Spring Data JPA 的测试
 
 进行数据库测试的时候，Spring Data JPA 提供了一个 @DataJpaTest 注解，它可以帮助我们自动配置 Spring Data JPA 所需要的组件，比如 EntityManager、DataSource、JdbcTemplate 等。
@@ -1313,3 +1343,78 @@ class DemoApplicationTests {
 ```
 
 在上面的代码中，我们使用了 `@Sql` 注解的 `executionPhase` 属性来指定 SQL 脚本的执行阶段，这样我们就可以在测试用例执行之前，先执行 `init.sql`，然后在测试用例执行之后，再执行 `clear.sql`。
+
+## Flyway 管理数据库版本
+
+Flyway 是一个数据库版本管理工具，它可以帮助我们管理数据库的版本，比如我们可以使用 Flyway 来管理数据库的初始化脚本，也可以使用 Flyway 来管理数据库的变更脚本。
+
+SpringBoot 对 Flyway 提供了开箱即用的支持，我们只需要在 `build.gradle` 文件中添加 `flyway` 依赖即可：
+
+```groovy
+dependencies {
+    // ...
+    implementation 'org.flywaydb:flyway-core'
+}
+```
+
+然后在 `application.properties` 文件中添加 Flyway 的配置：
+
+```properties
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+spring.flyway.baseline-on-migrate=true
+```
+
+在上面的配置中，我们使用了 `spring.flyway.enabled` 属性来启用 Flyway，然后使用了 `spring.flyway.locations` 属性来指定 Flyway 的脚本路径，这个路径是 `resources/db/migration`，然后使用了 `spring.flyway.baseline-on-migrate` 属性来指定 Flyway 在启动的时候是否需要执行初始化脚本，这个属性的默认值是 `false`，也就是说默认情况下，Flyway 不会执行初始化脚本，如果我们需要执行初始化脚本，那么我们就需要将这个属性设置为 `true`。
+
+在 `resources/db/migration` 目录下，我们可以创建一个初始化脚本，比如 `V1.0__create_schema.sql`，这个脚本的内容如下：
+
+```sql
+CREATE TABLE user (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    age INT NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+);
+```
+
+然后我们启动应用，Flyway 会自动执行这个初始化脚本，然后我们就可以在数据库中看到 `user` 表了。
+
+如果我们此时增加一个字段，比如 `address`，那么我们就可以创建一个变更脚本，比如 `V1.1__add_address_column.sql`，这个脚本的内容如下：
+
+```sql
+ALTER TABLE user ADD COLUMN address VARCHAR(255) NOT NULL;
+```
+
+然后我们再次启动应用，Flyway 会自动执行这个变更脚本，然后我们就可以在数据库中看到 `user` 表中多了一个 `address` 字段了。
+
+大家可以看到和代码版本管理类似的概念，我们不是修改原来的脚本，而是创建一个新的脚本，这样就可以保证每次执行脚本的时候，都是执行的最新的脚本。
+
+在使用数据库版本管理工具比如 Flyway 或 Liquibase 的时候，一定注意，不要直接修改数据库，否则可能会导致数据库版本管理工具无法正常工作。
+
+所有对数据库的修改，不管是增删字段，还是添加删除修改初始化数据，都通过数据库版本管理工具来完成。
+
+那么为什么要使用数据库版本管理呢？它带来的好处有哪些？
+
+- 简化数据库迁移：可以简化数据库迁移过程，并且有助于避免数据库迁移过程中的错误。
+- 更好的可重复性：可以使数据库迁移过程更加可重复，从而减少数据库迁移过程中的人为失误。
+- 支持多种数据库类型：这些工具支持多种数据库类型，包括关系型数据库（如 MySQL，PostgreSQL 和 Oracle）和 NoSQL 数据库（如 MongoDB）。
+- 支持自动回滚：如果在进行数据库迁移过程中发生错误，这些工具可以自动回滚数据库到先前的版本。
+- 提高开发效率：可以提高开发效率，减少数据库迁移过程中的繁琐任务。
+- 提供版本控制：这些工具提供了版本控制功能，可以方便的管理数据库的不同版本，从而保证数据库的安全和稳定。
+
+通过在不同 Profile 的 `properties` 文件中定义不同的 `spring.flyway.locations`，我们可以很方便的在不同环境中使用不同的数据库。
+比如，我们可以在 `application-dev.properties` 中定义如下内容：
+
+```properties
+spring.flyway.locations=classpath:db/migration/h2
+```
+
+然后在 `application-prod.properties` 中定义如下内容：
+
+```properties
+spring.flyway.locations=classpath:db/migration/mysql
+```
+
+这样，我们就可以在开发环境中使用 H2 数据库，而在生产环境中使用 MySQL 数据库了。

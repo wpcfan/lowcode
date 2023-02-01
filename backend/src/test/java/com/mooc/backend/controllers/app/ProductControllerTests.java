@@ -2,6 +2,7 @@ package com.mooc.backend.controllers.app;
 
 import com.mooc.backend.dtos.CategoryProjectionDTO;
 import com.mooc.backend.dtos.ProductDTO;
+import com.mooc.backend.rest.app.ProductController;
 import com.mooc.backend.services.ProductService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -11,7 +12,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
-@WebMvcTest
+@WebMvcTest(controllers = ProductController.class)
 public class ProductControllerTests {
 
     @Autowired
@@ -35,14 +35,26 @@ public class ProductControllerTests {
     public void testFindAllByCategory() throws Exception {
         var category = CategoryProjectionDTO.builder()
                 .id(1L)
-                .code("code")
-                .name("name")
+                .code("cat_one")
+                .name("Category 1")
                 .build();
 
-        var product1 = new ProductDTO(1L, "Product 1", "Description 1", 100000, Set.of(category), new HashSet<>());
-        var product2 = new ProductDTO(2L, "Product 2", "Description 2", 200000, Set.of(category), new HashSet<>());
+        var product1 = ProductDTO.builder()
+                .id(1L)
+                .name("Product 1")
+                .description("Description 1")
+                .price(100000)
+                .categories(Set.of(category))
+                .build();
+        var product2 = ProductDTO.builder()
+                .id(2L)
+                .name("Product 2")
+                .description("Description 2")
+                .price(200000)
+                .categories(Set.of(category))
+                .build();
 
-        Mockito.when(productService.findAllByCategory(1L))
+        Mockito.when(productService.findPageableByCategory(1L))
                 .thenReturn(List.of(product1, product2));
 
         mockMvc.perform(get("/api/v1/app/products/by-category/1").accept("application/json"))

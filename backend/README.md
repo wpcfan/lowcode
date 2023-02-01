@@ -1277,6 +1277,264 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 }
 ```
 
+### Spring Data JPA 的分页支持
+
+Spring Data JPA 提供了一个 Pageable 接口，它可以帮助我们进行分页查询。我们可以通过 PageRequest.of() 方法来创建一个 Pageable 对象，它有两个参数，第一个参数是页码，第二个参数是每页的大小。
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public Page<User> findByName(String name, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findByName(name, pageable);
+    }
+}
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Page<User> findByName(String name, Pageable pageable);
+
+    List<User> findByRole(Role role);
+}
+```
+
+请注意，上面我们使用的是 `Page<User> findByName(String name, Pageable pageable)` 方法，它返回的是一个 Page 对象，而不是 List 对象。Page 对象是 Spring Data JPA 提供的一个接口，它继承了 Iterable 接口，所以我们可以使用 for-each 循环来遍历它。
+
+```java
+Page<User> page = userService.findByName("张三", 0, 10);
+for (User user : page) {
+    System.out.println(user);
+}
+```
+
+Page 对象还提供了一些有用的方法，比如获取总页数、总记录数、当前页的记录数等。
+
+```java
+Page<User> page = userService.findByName("张三", 0, 10);
+System.out.println("总页数：" + page.getTotalPages());
+System.out.println("总记录数：" + page.getTotalElements());
+System.out.println("当前页的记录数：" + page.getNumberOfElements());
+```
+
+### Spring Data JPA 的排序支持
+
+Spring Data JPA 提供了一个 Sort 接口，它可以帮助我们进行排序查询。我们可以通过 Sort.by() 方法来创建一个 Sort 对象，它有两个参数，第一个参数是排序的字段，第二个参数是排序的方向。
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List<User> findByName(String name) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        return userRepository.findByName(name, sort);
+    }
+}
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    List<User> findByName(String name, Sort sort);
+
+    List<User> findByRole(Role role);
+}
+```
+
+当然 Pageable 接口也是继承了 Sort 接口，所以我们也可以通过 PageRequest.of() 方法来创建一个 Pageable 对象，它有三个参数，第一个参数是页码，第二个参数是每页的大小，第三个参数是排序的字段和排序的方向。
+
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public Page<User> findByName(String name, int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return userRepository.findByName(name, pageable);
+    }
+}
+
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Page<User> findByName(String name, Pageable pageable);
+
+    List<User> findByRole(Role role);
+}
+```
+
+而且非常方便的是，我们在 Rest API 设计的时候，也可以在 URL 中传递排序的字段和排序的方向，这样就可以让前端开发人员自由的选择排序的字段和排序的方向。
+
+```java
+@GetMapping("/users")
+public Page<User> findByName(@RequestParam String name,
+                             @RequestParam int page,
+                             @RequestParam int size,
+                             @RequestParam String sort,
+                             @RequestParam String direction) {
+    Sort sort = Sort.by(Sort.Direction.fromString(direction), sort);
+    Pageable pageable = PageRequest.of(page, size, sort);
+    return userService.findByName(name, pageable);
+}
+```
+
+甚至更简单一些，我们都不用定义这些参数，Spring Data JPA 会自动帮我们解析这些参数。
+
+```java
+@GetMapping("/users")
+public Page<User> findByName(@RequestParam String name, Pageable pageable) {
+    return userService.findByName(name, pageable);
+}
+```
+
+如果采用这种方式，那么我们就可以在 URL 中传递这些参数了。
+
+```http
+GET /users?name=张三&page=0&size=10&sort=id,DESC
+```
+
+但是排序是可以多个字段的，比如我们可以根据 id 和 name 来进行排序，那么我们就可以在 URL 中传递多个 sort 和 direction 参数。
+
+```http
+GET /users?name=张三&page=0&size=10&sort=id,DESC&sort=name,ASC
+```
+
+如果我们想规定一些默认值，比如页面大小默认为 10，排序字段默认为 id，排序方向默认为 DESC，那么我们就可以在 Pageable 的实现类中定义这些默认值。
+
+```java
+public class PageableImpl implements Pageable {
+
+    private int page = 0;
+
+    private int size = 10;
+
+    private Sort sort = Sort.by(Sort.Direction.DESC, "id");
+
+    public PageableImpl(int page, int size, Sort sort) {
+        this.page = page;
+        this.size = size;
+        this.sort = sort;
+    }
+
+    public PageableImpl(int page, int size) {
+        this.page = page;
+        this.size = size;
+    }
+
+    public PageableImpl() {
+    }
+
+    @Override
+    public int getPageNumber() {
+        return page;
+    }
+
+    @Override
+    public int getPageSize() {
+        return size;
+    }
+
+    @Override
+    public long getOffset() {
+        return page * size;
+    }
+
+    @Override
+    public Sort getSort() {
+        return sort;
+    }
+
+    @Override
+    public Pageable next() {
+        return new PageableImpl(page + 1, size, sort);
+    }
+
+    @Override
+    public Pageable previousOrFirst() {
+        return hasPrevious() ? new PageableImpl(page - 1, size, sort) : this;
+    }
+
+    @Override
+    public Pageable first() {
+        return new PageableImpl(0, size, sort);
+    }
+
+    @Override
+    public boolean hasPrevious() {
+        return page > 0;
+    }
+}
+```
+
+如果不想自己实现一个 `Pageable` ，我们也可以通过一个配置来完成这些默认设置。
+
+```java
+@Configuration
+public class WebMvcConfig implements WebMvcConfigurer {
+
+    private static final int DEFAULT_PAGE_SIZE = 20;
+
+    private static final int DEFAULT_PAGE_NUMBER = 0;
+
+    private static final String DEFAULT_SORT_FIELD = "id";
+
+    private static final Sort.Direction DEFAULT_SORT_DIRECTION = Sort.Direction.DESC;
+
+    @Bean
+    public PageableHandlerMethodArgumentResolver pageableResolver() {
+        PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
+        resolver.setFallbackPageable(PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Sort.by(DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD)));
+        return resolver;
+    }
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.add(pageableResolver());
+    }
+}
+```
+
+此时，我们就可以在 URL 中不传递任何参数了，或者不传递 size 或 sort 参数，Spring Data JPA 会自动帮我们使用默认值。
+
+```http
+GET /users
+GET /users?page=0
+GET /users?page=0&size=10
+GET /users?page=0&size=10&sort=id,DESC
+```
+
+这些请求都会成功，Spring Data JPA 会自动帮我们使用默认值。
+
 ### Spring Data JPA 的测试
 
 进行数据库测试的时候，Spring Data JPA 提供了一个 @DataJpaTest 注解，它可以帮助我们自动配置 Spring Data JPA 所需要的组件，比如 EntityManager、DataSource、JdbcTemplate 等。

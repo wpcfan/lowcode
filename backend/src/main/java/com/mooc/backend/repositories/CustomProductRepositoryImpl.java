@@ -23,7 +23,6 @@ public class CustomProductRepositoryImpl implements CustomProductRepository{
                             p.name AS name,
                             p.description as description,
                             p.price AS price,
-                            p.parentId as productId,
                             c.id AS c_id,
                             c.code AS c_code,
                             c.name AS c_name,
@@ -50,21 +49,18 @@ public class CustomProductRepositoryImpl implements CustomProductRepository{
                 .setTupleTransformer(((tuple, aliases) -> {
                     Map<String, Integer> aliasToIndexMap = Arrays.stream(aliases)
                             .collect(HashMap::new, (map, alias) -> map.put(alias.toLowerCase(Locale.ROOT), map.size()), Map::putAll);
-                    return new ProductDTO(
-                            (Long) tuple[aliasToIndexMap.get("id")],
-                            (String) tuple[aliasToIndexMap.get("name")],
-                            (String) tuple[aliasToIndexMap.get("description")],
-                            (Integer) tuple[aliasToIndexMap.get("price")],
-                            new HashSet<>(Collections.singletonList(
-                                    CategoryProjectionDTO.builder()
-                                            .id((Long) tuple[aliasToIndexMap.get("c_id")])
-                                            .code((String) tuple[aliasToIndexMap.get("c_code")])
-                                            .name((String) tuple[aliasToIndexMap.get("c_name")])
-                                            .parentId((Long) tuple[aliasToIndexMap.get("productId")])
-                                            .build()
-                                    )),
-                            new HashSet<>(Collections.singletonList((String) tuple[aliasToIndexMap.get("pi_image_url")]))
-                    );
+                    return ProductDTO.builder()
+                            .id((Long) tuple[aliasToIndexMap.get("id")])
+                            .name((String) tuple[aliasToIndexMap.get("name")])
+                            .description((String) tuple[aliasToIndexMap.get("description")])
+                            .price((Integer) tuple[aliasToIndexMap.get("price")])
+                            .categories(Set.of(CategoryProjectionDTO.builder()
+                                    .id((Long) tuple[aliasToIndexMap.get("c_id")])
+                                    .code((String) tuple[aliasToIndexMap.get("c_code")])
+                                    .name((String) tuple[aliasToIndexMap.get("c_name")])
+                                    .build()))
+                            .images(aliasToIndexMap.containsKey("pi_image_url") && tuple.length > aliasToIndexMap.get("pi_image_url") + 1 ? Set.of((String) tuple[aliasToIndexMap.get("pi_image_url")]) : new HashSet<>())
+                            .build();
                 }))
                 .getResultList();
     }

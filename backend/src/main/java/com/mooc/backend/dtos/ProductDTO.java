@@ -1,6 +1,36 @@
 package com.mooc.backend.dtos;
 
-import java.util.Set;
 
-public record ProductDTO(Long id, String name, String description, Integer price, Set<CategoryProjectionDTO> categories, Set<String> images) {
+import com.mooc.backend.projections.ProductImageInfo;
+import com.mooc.backend.projections.ProductInfo;
+import lombok.Builder;
+import lombok.Value;
+
+import java.util.Set;
+import java.util.stream.Collectors;
+
+@Value
+@Builder
+public class ProductDTO {
+    private Long id;
+    private String name;
+    private String description;
+    private Integer price;
+    private Set<CategoryProjectionDTO> categories;
+    private Set<String> images;
+
+    public static ProductDTO from(ProductInfo product) {
+        return ProductDTO.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .categories(product.getCategories().stream()
+                        .map(CategoryProjectionDTO::from)
+                        .collect(Collectors.toSet()))
+                .images(product.getImages().stream()
+                        .map(ProductImageInfo::getImageUrl)
+                        .collect(Collectors.toSet()))
+                .build();
+    }
 }

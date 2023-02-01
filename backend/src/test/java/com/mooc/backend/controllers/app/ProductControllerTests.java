@@ -60,7 +60,7 @@ public class ProductControllerTests {
         Mockito.when(productService.findPageableByCategory(1L))
                 .thenReturn(List.of(product1, product2));
 
-        mockMvc.perform(get("/api/v1/app/products/by-category/1").accept("application/json"))
+        mockMvc.perform(get("/api/v1/app/products/by-category/{id}", 1).accept("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(1)))
@@ -112,7 +112,7 @@ public class ProductControllerTests {
         Mockito.when(productService.findPageableByExample(Mockito.any(Example.class), Mockito.any(Pageable.class)))
                 .thenReturn(result);
 
-        mockMvc.perform(get("/api/v1/app/products/by-example?keyword=" + keyword).accept("application/json"))
+        mockMvc.perform(get("/api/v1/app/products/by-example?keyword={keyword}", keyword).accept("application/json"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.page", is(pageNumber)))
                 .andExpect(jsonPath("$.size", is(pageSize)))

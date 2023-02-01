@@ -1,7 +1,7 @@
 package com.mooc.backend.services;
 
 import com.mooc.backend.dtos.CategoryProjectionDTO;
-import com.mooc.backend.dtos.CategoryPlainDTO;
+import com.mooc.backend.dtos.CategoryRecord;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.projections.CategoryInfo;
 import com.mooc.backend.repositories.CategoryRepository;
@@ -33,8 +33,8 @@ public class CategoryService {
      * 直接使用 DTO
      * @return 带子类目的列表
      */
-    public List<CategoryPlainDTO> findAllDTOs() {
-        return categoryRepository.findAllCategoryDTOs();
+    public List<CategoryRecord> findAllDTOs() {
+        return categoryRepository.findAllCategoryPlainDTOs();
     }
 
     public List<Category> findByNameLike(String name) {

@@ -1,7 +1,7 @@
 package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.dtos.CategoryProjectionDTO;
-import com.mooc.backend.dtos.CategoryPlainDTO;
+import com.mooc.backend.dtos.CategoryRecord;
 import com.mooc.backend.services.CategoryService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +25,7 @@ public class CategoryAdminController {
 
 
     @GetMapping("/dto")
-    public List<CategoryPlainDTO> findAllDTOs() {
+    public List<CategoryRecord> findAllDTOs() {
         return categoryService.findAllDTOs();
     }
 }

@@ -7,7 +7,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "mooc_products")
-public class Product {
+public class Product extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)

@@ -1,6 +1,6 @@
 package com.mooc.backend.controllers.app;
 
-import com.mooc.backend.dtos.CategoryDTO;
+import com.mooc.backend.dtos.CategoryProjectionDTO;
 import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.services.ProductService;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,11 @@ public class ProductControllerTests {
 
     @Test
     public void testFindAllByCategory() throws Exception {
-        var category = new CategoryDTO("cat_one","Category 1");
+        var category = CategoryProjectionDTO.builder()
+                .id(1L)
+                .code("code")
+                .name("name")
+                .build();
 
         var product1 = new ProductDTO(1L, "Product 1", "Description 1", 100000, Set.of(category), new HashSet<>());
         var product2 = new ProductDTO(2L, "Product 2", "Description 2", 200000, Set.of(category), new HashSet<>());

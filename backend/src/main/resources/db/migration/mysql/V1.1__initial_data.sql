@@ -1,16 +1,20 @@
-insert into mooc_categories (`id`, `code`, `name`)
-values (1, 'cat_b_m', 'Business & Management'),
-       (2, 'cat_c_s', 'Computer Science'),
-       (3, 'cat_d_s', 'Data Science'),
-       (4, 'cat_d', 'Design'),
-       (5, 'cat_h', 'Health'),
-       (6, 'cat_l', 'Language'),
-       (7, 'cat_m_l', 'Math & Logic'),
-       (8, 'cat_p_d', 'Personal Development'),
-       (9, 'cat_p_s_e', 'Physical Science & Engineering'),
-       (10, 'cat_s_s', 'Social Sciences'),
-       (11, 'cat_t_p', 'Test Prep'),
-       (12, 'cat_n', 'None');
+insert into mooc_categories (`id`, `code`, `name`, `productId`)
+values (1, 'cat_b_m', 'Business & Management', null),
+       (2, 'cat_c_s', 'Computer Science', null),
+       (3, 'cat_d_s', 'Data Science', null),
+       (4, 'cat_d', 'Design', null),
+       (5, 'cat_h', 'Health', null),
+       (6, 'cat_l', 'Language', null),
+       (7, 'cat_m_l', 'Math & Logic', null),
+       (8, 'cat_p_d', 'Personal Development', null),
+       (9, 'cat_p_s_e', 'Physical Science & Engineering', null),
+       (10, 'cat_s_s', 'Social Sciences', null),
+       (11, 'cat_t_p', 'Test Prep', null),
+       (12, 'cat_n', 'None', null),
+       (13, 'cat_java', 'Java', 2),
+       (14, 'cat_py', 'Python', 2),
+       (15, 'cat_dart', 'Dart', 2),
+       (16, 'cat_java_spring', 'Spring', 13);
 insert into mooc_products (`id`, `name`, `description`, `price`)
 values (1, 'Business & Management 1', 'Learn how to use data to make better decisions', 10),
        (2, 'Computer Science 2', 'Learn how to use data to make better decisions', 20),

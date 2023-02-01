@@ -22,6 +22,14 @@ insert into mooc_categories (`id`, `code`, `name`)
 values (11, 'cat_t_p', 'Test Prep');
 insert into mooc_categories (`id`, `code`, `name`)
 values (12, 'cat_n', 'None');
+insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
+values (13, 'cat_java', 'Java', 2);
+insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
+values (14, 'cat_py', 'Python', 2);
+insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
+values (15, 'cat_dart', 'Dart', 2);
+insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
+values (16, 'cat_java_spring', 'Spring', 13);
 insert into mooc_products (`id`, `name`, `description`, `price`)
 values (1, 'Business & Management 1', 'Learn how to use data to make better decisions', 10);
 insert into mooc_products (`id`, `name`, `description`, `price`)

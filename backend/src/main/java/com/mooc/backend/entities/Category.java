@@ -21,7 +21,9 @@ public class Category {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "parent_id")
+    // @JoinColumn 这个注解是用来指定外键的
+    // 如果不指定，会默认使用外键名为：实体名_主键名
+//    @JoinColumn(name = "parent_id")
     private Category parent;
 
     @OneToMany(mappedBy = "parent")

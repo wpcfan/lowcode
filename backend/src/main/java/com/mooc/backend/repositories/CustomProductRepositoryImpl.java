@@ -1,6 +1,6 @@
 package com.mooc.backend.repositories;
 
-import com.mooc.backend.dtos.CategoryDTO;
+import com.mooc.backend.dtos.CategoryProjectionDTO;
 import com.mooc.backend.dtos.ProductDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -23,6 +23,8 @@ public class CustomProductRepositoryImpl implements CustomProductRepository{
                             p.name AS name,
                             p.description as description,
                             p.price AS price,
+                            p.parentId as productId,
+                            c.id AS c_id,
                             c.code AS c_code,
                             c.name AS c_name,
                             pi.image_url AS pi_image_url
@@ -53,10 +55,14 @@ public class CustomProductRepositoryImpl implements CustomProductRepository{
                             (String) tuple[aliasToIndexMap.get("name")],
                             (String) tuple[aliasToIndexMap.get("description")],
                             (Integer) tuple[aliasToIndexMap.get("price")],
-                            new HashSet<>(Collections.singletonList(new CategoryDTO(
-                                    (String) tuple[aliasToIndexMap.get("c_code")],
-                                    (String) tuple[aliasToIndexMap.get("c_name")]
-                            ))),
+                            new HashSet<>(Collections.singletonList(
+                                    CategoryProjectionDTO.builder()
+                                            .id((Long) tuple[aliasToIndexMap.get("c_id")])
+                                            .code((String) tuple[aliasToIndexMap.get("c_code")])
+                                            .name((String) tuple[aliasToIndexMap.get("c_name")])
+                                            .parentId((Long) tuple[aliasToIndexMap.get("productId")])
+                                            .build()
+                                    )),
                             new HashSet<>(Collections.singletonList((String) tuple[aliasToIndexMap.get("pi_image_url")]))
                     );
                 }))

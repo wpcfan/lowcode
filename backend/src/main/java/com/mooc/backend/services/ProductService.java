@@ -1,6 +1,6 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.CategoryDTO;
+import com.mooc.backend.dtos.CategoryProjectionDTO;
 import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.repositories.ProductRepository;
@@ -27,7 +27,22 @@ public class ProductService {
                         p.getDescription(),
                         p.getPrice(),
                         p.getCategories().stream()
-                                .map(c -> new CategoryDTO(c.getCode(), c.getName()))
+                                .map(c -> CategoryProjectionDTO
+                                        .builder()
+                                        .id(c.getId())
+                                        .name(c.getName())
+                                        .code(c.getCode())
+                                        .parentId(c.getParent().getId())
+                                        .children(c.getChildren().stream()
+                                                .map(cc -> CategoryProjectionDTO
+                                                        .builder()
+                                                        .id(cc.getId())
+                                                        .name(cc.getName())
+                                                        .code(cc.getCode())
+                                                        .parentId(cc.getParent().getId())
+                                                        .build())
+                                                .collect(Collectors.toSet()))
+                                        .build())
                                 .collect(Collectors.toSet()),
                         p.getImages().stream()
                                 .map(ProductImage::getImageUrl)

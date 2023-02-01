@@ -2,8 +2,10 @@ package com.mooc.backend.services;
 
 import com.mooc.backend.dtos.CategoryProjectionDTO;
 import com.mooc.backend.dtos.ProductDTO;
+import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.repositories.ProductRepository;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,5 +47,9 @@ public class ProductService {
 
     public Page<ProductDTO> findPageableByCategoriesId(Long id, Pageable pageable) {
         return productRepository.findPageableByCategoriesId(id, pageable).map(ProductDTO::from);
+    }
+
+    public Page<ProductDTO> findPageableByExample(Example<Product> product, Pageable pageable) {
+        return productRepository.findAll(product, pageable).map(ProductDTO::from);
     }
 }

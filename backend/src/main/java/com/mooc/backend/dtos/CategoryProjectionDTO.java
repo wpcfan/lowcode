@@ -1,8 +1,8 @@
 package com.mooc.backend.dtos;
 
+import com.mooc.backend.entities.Category;
 import com.mooc.backend.projections.CategoryInfo;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Value;
 
 import java.util.HashSet;
@@ -20,6 +20,18 @@ public class CategoryProjectionDTO {
     private Set<CategoryProjectionDTO> children = new HashSet<>();
 
     public static CategoryProjectionDTO from(CategoryInfo category) {
+        return CategoryProjectionDTO.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .code(category.getCode())
+                .parentId(category.getParent() != null ? category.getParent().getId() : null)
+                .children(category.getChildren().stream()
+                        .map(CategoryProjectionDTO::from)
+                        .collect(HashSet::new, Set::add, Set::addAll))
+                .build();
+    }
+
+    public static CategoryProjectionDTO from(Category category) {
         return CategoryProjectionDTO.builder()
                 .id(category.getId())
                 .name(category.getName())

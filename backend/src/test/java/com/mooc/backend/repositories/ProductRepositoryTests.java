@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -198,5 +200,44 @@ public class ProductRepositoryTests {
         assertEquals("Test Product 2", products.get(1).getName());
         assertEquals("Test Description 2", products.get(1).getDescription());
         assertEquals(10100, products.get(1).getPrice());
+    }
+
+    @Test
+    public void testQueryByExample() throws Exception {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Test Category");
+        testEntityManager.persist(category);
+
+        var product = new Product();
+        product.setName("Test Product");
+        product.setDescription("Test Description");
+        product.setPrice(10000);
+        product.getCategories().add(category);
+        testEntityManager.persist(product);
+
+        var product2 = new Product();
+        product2.setName("Test Product 2");
+        product2.setDescription("Test Description 2");
+        product2.setPrice(10100);
+        product2.getCategories().add(category);
+        testEntityManager.persist(product2);
+
+        Product productQuery = new Product();
+        productQuery.setName("Test");
+        Category categoryQuery = new Category();
+        categoryQuery.setName("Test");
+        productQuery.getCategories().add(categoryQuery);
+
+        ExampleMatcher matcher = ExampleMatcher.matching()
+                .withIgnoreCase("name")
+                .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.startsWith())
+                .withMatcher("categories.name", ExampleMatcher.GenericPropertyMatchers.contains());
+
+        Example<Product> example = Example.of(productQuery, matcher);
+
+        var products = productRepository.findAll(example);
+
+        assertEquals(2, products.size());
     }
 }

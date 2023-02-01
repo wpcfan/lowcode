@@ -1026,9 +1026,12 @@ Spring Data JPA 提供了多种不同类型的 Repository，它们提供了不�
 以下是几种常用的 Repository 的区别：
 
 - CrudRepository：提供了对数据存储的基本 CRUD 操作，例如：save，findOne，findAll，delete 等。
-- PagingAndSortingRepository：扩展了 CrudRepository，提供了分页和排序的功能。
-- JpaRepository：扩展了 PagingAndSortingRepository，并提供了额外的 JPA 操作，例如批量操作和查询方法。
+- PagingAndSortingRepository：提供了分页和排序的功能。
 - JpaSpecificationExecutor：提供了使用 JPA Criteria API 进行动态查询的功能。
+- ListCrudRepository：提供了对数据存储的基本 CRUD 操作，但是返回的是 List，而不是 Iterable。
+- ListPagingAndSortingRepository：提供了分页和排序的功能，但是返回的是 List，而不是 Iterable。
+- QueryByExampleExecutor：提供了使用 Example 进行查询的功能。
+- JpaRepository：提供了对数据存储的基本 CRUD 操作，以及分页和排序的功能，它是 ListCrudRepository, ListPagingAndSortingRepository 和 QueryByExampleExecutor 的组合。
 
 这些 Repository 各有不同的用途，具体使用哪个取决于项目需要以及个人的开发习惯。通常情况下，CrudRepository 和 JpaRepository 都是足够用的。
 
@@ -1115,6 +1118,73 @@ select * from user where name = ?
 ```
 
 JQL 语句和 SQL 语句的区别在于，JQL 语句中的表名和列名都是实体类的名称和属性，而不是数据库表的名称和列名。
+
+#### Example 查询
+
+Spring Data JPA 提供了 Example 查询，它的特点和优势如下：
+
+1. 灵活性：可以根据查询条件动态构建 Example，而不需要写多余的 DAO 层代码。
+2. 可读性：使用 Example 的查询条件是定义在单独的类中的，这样比直接写在 DAO 中的 JPQL 或 SQL 语句更加可读性。
+3. 可维护性：使用 Example 的查询条件是定义在单独的类中的，这样比直接写在 DAO 中的 JPQL 或 SQL 语句更加可维护性。
+4. 可扩展性：可以根据需要扩展 Example 的查询条件，而不需要修改 DAO 层代码。
+5. 可复用性：可以将 Example 的查询条件抽取出来，作为一个公共的查询条件类，这样可以在多个 DAO 中复用。
+6. 可测试性：可以使用单元测试来测试 Example 的查询条件，而不需要启动 Spring 容器。
+7. 性能：Example 查询的性能比直接写在 DAO 中的 JPQL 或 SQL 语句要好。
+8. 语法：Example 查询的语法比直接写在 DAO 中的 JPQL 或 SQL 语句要简单。
+9. 代码量：Example 查询的代码量比直接写在 DAO 中的 JPQL 或 SQL 语句要少。
+
+我们从一个例子来看看 Example 查询的用法。首先，定义一个查询条件类：
+
+```java
+public class UserExample {
+    private String name;
+    private Integer age;
+    // 省略 getter 和 setter 方法
+}
+```
+
+然后，定义一个查询方法：
+
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+    List<User> findAll(Example<User> example);
+}
+```
+
+最后，调用查询方法：
+
+```java
+UserExample userExample = new UserExample();
+userExample.setName("张三");
+userExample.setAge(20);
+Example<User> example = Example.of(userExample);
+List<User> users = userRepository.findAll(example);
+```
+
+再来看一个表关联的例子，其中 User 类和 Role 类是多对多的关系，我们需要查询出所有角色名为 `admin` 的用户：
+
+```java
+public class UserExample {
+    private String name;
+    private Integer age;
+    private List<Role> roles;
+    // 省略 getter 和 setter 方法
+}
+```
+
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+    List<User> findAll(Example<User> example);
+}
+```
+
+```java
+UserExample userExample = new UserExample();
+userExample.setRoles(Arrays.asList(new Role("admin")));
+Example<User> example = Example.of(userExample);
+List<User> users = userRepository.findAll(example);
+```
+
 
 #### Specification 查询
 
@@ -1534,6 +1604,15 @@ GET /users?page=0&size=10&sort=id,DESC
 ```
 
 这些请求都会成功，Spring Data JPA 会自动帮我们使用默认值。
+
+如果不想全局设置，那么可以采用 Spring Data JPA 3.x 提供的 `@PageableDefault` 注解来设置默认值。
+
+```java
+@GetMapping("/users")
+public Page<User> getUsers(@PageableDefault(size = 10, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable) {
+    return userRepository.findAll(pageable);
+}
+```
 
 ### Spring Data JPA 的测试
 

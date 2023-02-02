@@ -44,6 +44,7 @@ public class ProductController {
         var result = productService.findPageableByExample(example, pageable);
         return new PageRecord<>(pageable.getPageNumber(), pageable.getPageSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
     }
+
     @GetMapping("/by-category/{id}")
     public List<ProductDTO> findAllByCategory(@PathVariable Long id) {
         return productService.findPageableByCategory(id);

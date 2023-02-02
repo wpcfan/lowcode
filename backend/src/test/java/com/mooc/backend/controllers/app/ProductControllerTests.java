@@ -1,10 +1,7 @@
 package com.mooc.backend.controllers.app;
 
 import com.mooc.backend.dtos.CategoryProjectionDTO;
-import com.mooc.backend.dtos.PageRecord;
 import com.mooc.backend.dtos.ProductDTO;
-import com.mooc.backend.entities.Category;
-import com.mooc.backend.entities.Product;
 import com.mooc.backend.rest.app.ProductController;
 import com.mooc.backend.services.ProductService;
 import org.junit.jupiter.api.Test;
@@ -12,14 +9,17 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

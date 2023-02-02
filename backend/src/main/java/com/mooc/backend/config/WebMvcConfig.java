@@ -23,6 +23,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     private static final Sort.Direction DEFAULT_SORT_DIRECTION = Sort.Direction.DESC;
 
+    /**
+     * 全局配置分页参数
+     * @return PageableHandlerMethodArgumentResolver
+     */
     @Bean
     public PageableHandlerMethodArgumentResolver pageableResolver() {
         PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();

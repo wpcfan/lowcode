@@ -1121,17 +1121,7 @@ JQL 语句和 SQL 语句的区别在于，JQL 语句中的表名和列名都是�
 
 #### Example 查询
 
-Spring Data JPA 提供了 Example 查询，它的特点和优势如下：
-
-1. 灵活性：可以根据查询条件动态构建 Example，而不需要写多余的 DAO 层代码。
-2. 可读性：使用 Example 的查询条件是定义在单独的类中的，这样比直接写在 DAO 中的 JPQL 或 SQL 语句更加可读性。
-3. 可维护性：使用 Example 的查询条件是定义在单独的类中的，这样比直接写在 DAO 中的 JPQL 或 SQL 语句更加可维护性。
-4. 可扩展性：可以根据需要扩展 Example 的查询条件，而不需要修改 DAO 层代码。
-5. 可复用性：可以将 Example 的查询条件抽取出来，作为一个公共的查询条件类，这样可以在多个 DAO 中复用。
-6. 可测试性：可以使用单元测试来测试 Example 的查询条件，而不需要启动 Spring 容器。
-7. 性能：Example 查询的性能比直接写在 DAO 中的 JPQL 或 SQL 语句要好。
-8. 语法：Example 查询的语法比直接写在 DAO 中的 JPQL 或 SQL 语句要简单。
-9. 代码量：Example 查询的代码量比直接写在 DAO 中的 JPQL 或 SQL 语句要少。
+Spring Data JPA 提供了 Example 查询，它的作用是根据实体类的属性来查询。优点是非常简单，缺点也是非常明显，就是只能根据实体类的属性来查询，而不能根据其他条件来查询。
 
 我们从一个例子来看看 Example 查询的用法。首先，定义一个查询条件类：
 
@@ -1185,6 +1175,17 @@ Example<User> example = Example.of(userExample);
 List<User> users = userRepository.findAll(example);
 ```
 
+如果不想完全匹配，而是模糊匹配，可以使用 `ExampleMatcher`：
+
+```java
+ExampleMatcher matcher = ExampleMatcher.matching()
+        .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.contains())
+        .withMatcher("age", ExampleMatcher.GenericPropertyMatchers.exact());
+
+Example<User> example = Example.of(userExample, matcher);
+```
+
+但请注意，目前 Example 查询不支持嵌套的查询条件，比如
 
 #### Specification 查询
 
@@ -1755,3 +1756,247 @@ spring.flyway.locations=classpath:db/migration/mysql
 ```
 
 这样，我们就可以在开发环境中使用 H2 数据库，而在生产环境中使用 MySQL 数据库了。
+
+## SpringBoot Validation
+
+SpringBoot 提供了一套强大的数据校验框架，可以方便的对数据进行校验。它基于 JSR-303 标准，支持 Bean Validation 和 Hibernate Validator。
+
+### Bean Validation
+
+Bean Validation 是 JavaEE 6 中的一个规范，它定义了一套数据校验的标准，可以用来校验方法的入参，也可以用来校验 POJO 类中的字段。
+
+Bean Validation 提供了一套注解，用来标记需要校验的字段，比如 `@NotNull`，`@Size`，`@Email` 等等。
+
+在 SpringBoot 中，启用 Bean Validation 非常简单，只需要在 `build.gradle` 中添加如下依赖：
+
+```groovy
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+}
+```
+
+然后在需要校验的 POJO 类中，使用 Bean Validation 提供的注解标记需要校验的字段即可。
+
+```java
+public class User {
+    @NotNull
+    @Size(min = 2, max = 20)
+    private String name;
+
+    @NotNull
+    @Min(18)
+    @Max(60)
+    private Integer age;
+
+    @NotNull
+    @Email
+    private String email;
+}
+```
+
+如果你使用 POJO 作为 Rest Controller 的入参，那么你还需要在入参前面添加 `@Valid` 注解，这样才能触发校验。
+
+```java
+@RestController
+public class UserController {
+    @PostMapping("/users")
+    public User createUser(@Valid @RequestBody User user) {
+        return user;
+    }
+}
+```
+
+如果校验失败，SpringBoot 会抛出 `MethodArgumentNotValidException` 异常，你可以通过捕获该异常来处理校验失败的情况。
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        List<String> errors = e.getBindingResult().getFieldErrors().stream()
+                .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
+                .collect(Collectors.toList());
+        ErrorResponse errorResponse = new ErrorResponse("Invalid Request", errors);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+}
+```
+
+## Lombok
+
+Lombok 是一个 Java 开源库，它可以帮助我们简化 Java 代码。
+
+在 SpringBoot 中，我们可以使用 Lombok 来简化 POJO 类的定义。
+
+在 `build.gradle` 中添加 Lombok 依赖：
+
+```groovy
+dependencies {
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
+```
+
+然后在 IDEA 中安装 Lombok 插件，重启 IDEA 即可。
+
+### @Data
+
+`@Data` 注解可以为我们生成 getter/setter，toString，equals，hashCode 等方法。
+
+```java
+@Data
+public class User {
+    @NotNull
+    @Size(min = 2, max = 20)
+    private String name;
+
+    @NotNull
+    @Min(18)
+    @Max(60)
+    private Integer age;
+
+    @NotNull
+    @Email
+    private String email;
+}
+```
+
+而且 `@Data` 还会为我们生成一个无参构造函数，如果我们需要一个有参构造函数，可以使用 `@AllArgsConstructor` 注解。
+
+```java
+@Data
+@AllArgsConstructor
+public class User {
+    @NotNull
+    @Size(min = 2, max = 20)
+    private String name;
+
+    @NotNull
+    @Min(18)
+    @Max(60)
+    private Integer age;
+
+    @NotNull
+    @Email
+    private String email;
+}
+```
+
+对于我们的实体类来说，因为很多实体类继承了 `Aduditable`，对于 Lombok 生成的 `hashCode` 和 `equals` 方法来说，需要显性指定是否考虑父类，所以我们需要使用 `@EqualsAndHashCode(callSuper = false)` 注解来解决这个问题。
+
+```java
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class User extends Auditable {
+    @NotNull
+    @Size(min = 2, max = 20)
+    private String name;
+
+    @NotNull
+    @Min(18)
+    @Max(60)
+    private Integer age;
+
+    @NotNull
+    @Email
+    private String email;
+}
+```
+
+### @Builder
+
+`@Builder` 注解可以为我们生成一个 Builder 类，我们可以使用 Builder 类来构造一个对象。
+
+```java
+@Data
+@Builder
+public class User {
+    @NotNull
+    @Size(min = 2, max = 20)
+    private String name;
+
+    @NotNull
+    @Min(18)
+    @Max(60)
+    private Integer age;
+
+    @NotNull
+    @Email
+    private String email;
+}
+```
+
+使用 Builder 类来构造对象非常方便：
+
+```java
+User user = User.builder()
+        .name("张三")
+        .age(20)
+        .email("zhangsan@local.dev")
+        .build();
+```
+
+### @RequiredArgsConstructor
+
+`@RequiredArgsConstructor` 注解可以为我们生成一个包含所有 `final` 和 `@NonNull` 字段的构造函数。在 SpringBoot 中，由于我们采用了构造注入依赖的方式，这个注解就非常有用了。
+
+```java
+@Service
+@RequiredArgsConstructor
+public class ProductService {
+    private final ProductRepository productRepository;
+    // 省略
+}
+```
+
+这样的话，我们就省略了构造函数的创建，对于在类中引入新的依赖来说，我们就不需要再调整构造函数了。
+
+### @Value
+
+`@Value` 注解可以为我们生成一个包含所有 `final` 和 `@NonNull` 字段的构造函数，并且为我们生成 getter 方法。
+
+```java
+@Value
+public class User {
+    @NotNull
+    @Size(min = 2, max = 20)
+    private String name;
+
+    @NotNull
+    @Min(18)
+    @Max(60)
+    private Integer age;
+
+    @NotNull
+    @Email
+    private String email;
+}
+```
+
+### val
+
+对于 Java 来说， `var` 是一个可变的变量，而 Lombok 提供的 `val` 是一个不可变的变量。在 SpringBoot 中，我们可以使用 `val` 来简化代码。
+
+```java
+public class UserService {
+    private final UserRepository userRepository;
+
+    public User getUserById(Long id) {
+        val user = userRepository.findById(id);
+        return user.orElse(null);
+    }
+}
+```
+
+### 日志
+
+Lombok 提供了一系列的注解为我们生成一个 `log` 对象，我们可以使用 `log` 对象来打印日志。
+
+```java
+@Slf4j
+public class UserService {
+    public void getUserById(Long id) {
+        log.info("Get user by id: {}", id);
+    }
+}
+```

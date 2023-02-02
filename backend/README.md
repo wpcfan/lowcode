@@ -2000,3 +2000,52 @@ public class UserService {
     }
 }
 ```
+
+### 在实体类中使用需要注意的问题
+
+在 IDEA 中，你会发现如果在实体类上使用 `@Data` 注解或者 `@EqualsAndHashCode` 注解，IDEA 会提示你在实体类中这样写会影响性能。
+IDEA 推荐我们使用 `@Getter` 和 `@Setter` 来替代 `@Data` 注解，使用自动生成 `equals` 和 `hashCode` 来替代 `@EqualsAndHashCode` 注解。
+
+```java
+@Getter
+@Setter
+@ToString
+@RequiredArgsConstructor
+@Entity
+public class User extends Auditable {
+    @NotNull
+    @Size(min = 2, max = 20)
+    private String name;
+
+    @NotNull
+    @Min(18)
+    @Max(60)
+    private Integer age;
+
+    @NotNull
+    @Email
+    private String email;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        User other = (User) obj;
+        if (id == null) {
+            if (other.id != null)
+                return false;
+        } else if (!id.equals(other.id))
+            return false;
+        return true;
+    }
+    
+    @Override
+    public int hashCode() {
+        return 0;
+    }
+}
+```

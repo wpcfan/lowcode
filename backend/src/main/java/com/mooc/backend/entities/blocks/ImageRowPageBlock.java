@@ -20,6 +20,7 @@ public class ImageRowPageBlock implements PageBlock {
     @Builder.Default
     private BlockType type = BlockType.ImageRow;
     private Integer sort;
+    private Double aspectRatio;
     private List<ImageData> data;
 
 }

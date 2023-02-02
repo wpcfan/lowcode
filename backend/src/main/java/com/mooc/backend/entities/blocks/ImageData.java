@@ -11,6 +11,4 @@ public class ImageData {
     private Link link;
     private Integer sort;
     private String title;
-    private Integer width;
-    private Integer height;
 }

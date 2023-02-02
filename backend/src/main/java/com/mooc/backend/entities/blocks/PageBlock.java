@@ -6,6 +6,7 @@ import com.mooc.backend.json.PageBlockDeserializer;
 
 @JsonDeserialize(using = PageBlockDeserializer.class)
 public interface PageBlock {
+    Double getAspectRatio();
 
     String getId();
 

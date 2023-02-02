@@ -60,5 +60,6 @@ CREATE TABLE mooc_pages
     platform   VARCHAR(255)          NOT NULL,
     page_type  VARCHAR(255)          NOT NULL,
     content    JSON                  NOT NULL,
+    config     JSON                  NOT NULL,
     CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
 );

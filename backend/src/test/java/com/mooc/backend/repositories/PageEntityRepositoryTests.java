@@ -1,5 +1,6 @@
 package com.mooc.backend.repositories;
 
+import com.mooc.backend.entities.PageConfig;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.entities.blocks.ImageData;
 import com.mooc.backend.entities.blocks.ImageRowPageBlock;
@@ -90,6 +91,17 @@ public class PageEntityRepositoryTests {
                 pinnedHeader,
                 imageRow
         ));
+
+        var config = PageConfig.builder()
+                        .baselineScreenWidth(375)
+                        .baselineScreenHeight(667)
+                        .horizontalPadding(16)
+                        .horizontalSpacing(12)
+                        .verticalSpacing(8)
+                        .build();
+
+        page.setConfig(config);
+
         testEntityManager.persist(page);
         testEntityManager.flush();
 
@@ -97,6 +109,10 @@ public class PageEntityRepositoryTests {
 
         assertEquals(1, pages.size());
         assertEquals(2, pages.get(0).getContent().size());
-
+        assertEquals("Test Pinned Header", pages.get(0).getContent().get(0).getTitle());
+        assertEquals("Test Image Row", pages.get(0).getContent().get(1).getTitle());
+        assertEquals(2, ((PinnedHeaderPageBlock) pages.get(0).getContent().get(0)).getData().size());
+        assertEquals(3, ((ImageRowPageBlock) pages.get(0).getContent().get(1)).getData().size());
+        assertEquals(config.getBaselineScreenWidth(), pages.get(0).getConfig().getBaselineScreenWidth());
     }
 }

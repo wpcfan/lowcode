@@ -37,4 +37,8 @@ public class PageEntity extends Auditable {
     @Type(JsonType.class)
     @Column(name = "content", nullable = false, columnDefinition = "json")
     private List<PageBlock> content;
+
+    @Type(JsonType.class)
+    @Column(name = "config", nullable = false, columnDefinition = "json")
+    private PageConfig config;
 }

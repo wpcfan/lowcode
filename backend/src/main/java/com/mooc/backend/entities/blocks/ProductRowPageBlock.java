@@ -2,7 +2,6 @@ package com.mooc.backend.entities.blocks;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.enumerations.BlockType;
-import com.mooc.backend.enumerations.PageType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,5 +20,6 @@ public class ProductRowPageBlock implements PageBlock {
     @Builder.Default
     private BlockType type = BlockType.ProductRow;
     private Integer sort;
+    private Double aspectRatio;
     private List<ProductData> data;
 }

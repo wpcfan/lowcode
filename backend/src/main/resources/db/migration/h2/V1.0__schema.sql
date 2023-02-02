@@ -51,3 +51,14 @@ CREATE TABLE mooc_product_images
 
 ALTER TABLE mooc_product_images
     ADD CONSTRAINT FK_MOOC_PRODUCT_IMAGES_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_pages
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at datetime              NULL,
+    updated_at datetime              NULL,
+    platform   VARCHAR(255)          NOT NULL,
+    page_type  VARCHAR(255)          NOT NULL,
+    content    JSON                  NOT NULL,
+    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
+);

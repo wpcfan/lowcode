@@ -5,7 +5,7 @@ import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.repositories.ProductRepository;
-lombimport lombok.RequiredArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

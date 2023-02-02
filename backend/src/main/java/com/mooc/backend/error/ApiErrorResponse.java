@@ -14,11 +14,22 @@ public class ApiErrorResponse {
     private final String path;
     private final String timestamp;
 
+    private String details;
+
     public ApiErrorResponse(HttpStatus status, String message, String path) {
         this.status = status;
         this.error = status.getReasonPhrase();
         this.message = message;
         this.path = path;
         this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+
+    public ApiErrorResponse(HttpStatus status, String message, String path, String details) {
+        this.status = status;
+        this.error = status.getReasonPhrase();
+        this.message = message;
+        this.path = path;
+        this.timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        this.details = details;
     }
 }

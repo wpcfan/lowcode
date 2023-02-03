@@ -18,7 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "mooc_page_blocks")
-public class PageBlockEntity extends Auditable {
+public class PageBlockEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -36,6 +36,7 @@ public class PageBlockEntity extends Auditable {
 
     @Type(JsonType.class)
     @Column(name = "config", nullable = false, columnDefinition = "json")
+    @ToString.Exclude
     private BlockConfig config;
 
     @ManyToOne

@@ -472,7 +472,7 @@ class DemoApplicationTests {
 注意 `$` 符号，它表示的是根节点，也就是整个 JSON 对象，`$.length()` 表示的是 JSON 数组的长度。如果 JSON 数组中的元素是一个对象，我们也可以使用 `$.name` 来获取对象中的 name 属性。
 如果你的代码编译出错，提示找不到 `Matchers.is` 方法，那么你需要在 `build.gradle` 文件中添加如下依赖：
 
-```gradle
+```groovy
 testImplementation 'org.hamcrest:hamcrest-library'
 ```
 
@@ -513,7 +513,7 @@ class DemoApplicationTests {
 
 添加 `testcontainers` 依赖，比如希望集成测试时有 MySQL ：
 
-```gradle
+```groovy
 dependencies {
     // ...
     testImplementation 'org.testcontainers:mysql:1.17.6'
@@ -583,7 +583,7 @@ Spring Data JPA 是 Spring Data 的一个子项目，它是一个基于 JPA 的�
 
 Spring Data JPA 的依赖如下：
 
-```gradle
+```groovy
 implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 ```
 
@@ -854,6 +854,192 @@ public class UserRoleService {
 在 `Role` 实体类中，我们使用 `@ManyToMany` 注解的 `mappedBy` 属性来标注 `User` 实体类中的 `roles` 属性。
 在保存的时候，请注意，我们必须要保存外键关系所在的实体类，否则外键关系不会被保存，这里就是 `User` 实体类。
 
+另外需要注意的是在实体类中对于 `users` 和 `roles` 我们采用的是 Set 集合，这是因为在多对多关系中，我们不希望出现重复的数据，所以我们使用 Set 集合来存储数据。
+而且不能忽略的是 Set 生成的 SQL 语句比 List 生成的 SQL 更高效。
+
+比如我们有如下的实体类：
+
+```java
+@Entity(name = "Post")
+@Table(name = "post")
+public class Post {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String title;
+
+    public Post() {}
+
+    public Post(String title) {
+        this.title = title;
+    }
+
+    @ManyToMany(cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
+    @JoinTable(name = "post_tag",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags = new ArrayList<>();
+
+    public void addTag(Tag tag) {
+        tags.add(tag);
+        tag.getPosts().add(this);
+    }
+
+    public void removeTag(Tag tag) {
+        tags.remove(tag);
+        tag.getPosts().remove(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Post)) return false;
+        return id != null && id.equals(((Post) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+}
+
+@Entity(name = "Tag")
+@Table(name = "tag")
+public class Tag {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    @NaturalId
+    private String name;
+
+    @ManyToMany(mappedBy = "tags")
+    private List<Post> posts = new ArrayList<>();
+
+    public Tag() {}
+
+    public Tag(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tag tag = (Tag) o;
+        return Objects.equals(name, tag.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+}
+```
+
+在上面的代码中，我们使用 `@ManyToMany` 注解来标注 `Post` 实体类和 `Tag` 实体类之间的多对多关联关系，使用 `@JoinTable` 注解来标注中间表的信息。
+然后我们添加以下数据
+
+```java
+Post post1 = new Post("JPA with Hibernate");
+Post post2 = new Post("Native Hibernate");
+
+Tag tag1 = new Tag("Java");
+Tag tag2 = new Tag("Hibernate");
+
+post1.addTag(tag1);
+post1.addTag(tag2);
+
+post2.addTag(tag1);
+
+entityManager.persist(post1);
+entityManager.persist(post2);
+```
+
+然后删除 `post1` 和 `tag1` 的关联关系
+
+```java
+Tag tag1 = new Tag("Java");
+Post post1 = entityManager.find(Post.class, post1.getId());
+post1.removeTag(tag1);
+```
+
+这会产生如下 SQL 语句
+
+```sql
+SELECT p.id AS id1_0_0_,
+       t.id AS id1_2_1_,
+       p.title AS title2_0_0_,
+       t.name AS name2_2_1_,
+       pt.post_id AS post_id1_1_0__,
+       pt.tag_id AS tag_id2_1_0__
+FROM   post p
+INNER JOIN post_tag pt
+ON     p.id = pt.post_id
+INNER JOIN tag t
+ON     pt.tag_id = t.id
+WHERE  p.id = 1
+
+DELETE FROM post_tag
+WHERE       post_id = 1
+
+INSERT INTO post_tag (post_id, tag_id)
+VALUES      (1, 2)
+```
+
+可以看到，它先删除了所有 `post_id` 为 1 的记录，然后再插入一条新的记录。这个从数据库角度并不是一个好的设计。
+
+如果我们改成 Set 呢，首先吧 `Post` 实体类中的 `tags` 属性改成 Set
+
+```java
+@ManyToMany(cascade = {
+CascadeType.PERSIST,
+CascadeType.MERGE
+})
+@JoinTable(name = "post_tag",
+joinColumns = @JoinColumn(name = "post_id"),
+inverseJoinColumns = @JoinColumn(name = "tag_id")
+)
+private Set<Tag> tags = new HashSet<>();
+```
+
+然后把 `Tag` 实体类中的 `posts` 属性改成 Set
+
+```java
+@ManyToMany(mappedBy = "tags")
+private Set<Post> posts = new HashSet<>();
+```
+
+这时候再删除 `post1` 和 `tag1` 的关联关系，会产生如下 SQL 语句
+
+```sql
+SELECT p.id AS id1_0_0_,
+       t.id AS id1_2_1_,
+       p.title AS title2_0_0_,
+       t.name AS name2_2_1_,
+       pt.post_id AS post_id1_1_0__,
+       pt.tag_id AS tag_id2_1_0__
+FROM   post p
+INNER JOIN
+       post_tag pt
+ON     p.id = pt.post_id
+INNER JOIN tag t
+ON     pt.tag_id = t.id
+WHERE  p.id = 1
+
+DELETE FROM post_tag
+WHERE  post_id = 1 AND tag_id = 1
+```
+
+可以看到，它只删除了一条记录，这样就避免了不必要的数据插入。
+
 在 Spring Data JPA 中，处理多对多的表关联的最佳实践如下：
 
 1. 定义实体：定义多对多关系的两个实体，并在实体中使用 @ManyToMany 注解描述关系。
@@ -875,7 +1061,7 @@ public class UserDTO {
     private Long id;
     private String username;
     private String password;
-    private List<Role> roles;
+    private Set<Role> roles;
     // 省略 getter 和 setter 方法
 }
 ```
@@ -910,7 +1096,7 @@ public class Category {
     @JoinColumn(name = "parent_id")
     private Category parent;
     @OneToMany(mappedBy = "parent")
-    private List<Category> children;
+    private Set<Category> children;
     // 省略 getter 和 setter 方法
 }
 ```
@@ -942,7 +1128,7 @@ public class Category {
     private Category parent;
     @OneToMany(mappedBy = "parent")
     @JsonIgnore
-    private List<Category> children;
+    private Set<Category> children;
     // 省略 getter 和 setter 方法
 }
 ```
@@ -1703,7 +1889,8 @@ spring.flyway.locations=classpath:db/migration
 spring.flyway.baseline-on-migrate=true
 ```
 
-在上面的配置中，我们使用了 `spring.flyway.enabled` 属性来启用 Flyway，然后使用了 `spring.flyway.locations` 属性来指定 Flyway 的脚本路径，这个路径是 `resources/db/migration`，然后使用了 `spring.flyway.baseline-on-migrate` 属性来指定 Flyway 在启动的时候是否需要执行初始化脚本，这个属性的默认值是 `false`，也就是说默认情况下，Flyway 不会执行初始化脚本，如果我们需要执行初始化脚本，那么我们就需要将这个属性设置为 `true`。
+在上面的配置中，我们使用了 `spring.flyway.enabled` 属性来启用 Flyway，然后使用了 `spring.flyway.locations` 属性来指定 Flyway 的脚本路径，这个路径是 `resources/db/migration`。
+`spring.flyway.baseline-on-migrate` 属性来指定在对一个非空数据库执行迁移时，是否应该执行基线。这个属性对于初次部署到生产数据库时非常有用，因为生产库往往都是需要特殊权限预先建立的，而且往往是非空的，这时候我们就可以使用这个属性来指定 Flyway 在对一个非空数据库执行迁移时，是否应该执行基线。
 
 在 `resources/db/migration` 目录下，我们可以创建一个初始化脚本，比如 `V1.0__create_schema.sql`，这个脚本的内容如下：
 

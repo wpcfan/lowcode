@@ -121,6 +121,8 @@ public class CategoryRepositoryTests {
 
     @Test
     public void testFindRoots() throws Exception {
+        // 如果不指定级联方式的情况下，我们需要手动处理，要非常小心保存顺序
+        // 原则是先保存
         var category = new Category();
         category.setCode("cat_one");
         category.setName("Test Category");

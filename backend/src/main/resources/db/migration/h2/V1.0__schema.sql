@@ -59,7 +59,32 @@ CREATE TABLE mooc_pages
     updated_at datetime              NULL,
     platform   VARCHAR(255)          NOT NULL,
     page_type  VARCHAR(255)          NOT NULL,
-    content    JSON                  NOT NULL,
     config     JSON                  NOT NULL,
     CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
 );
+
+CREATE TABLE mooc_page_blocks
+(
+    id      BIGINT AUTO_INCREMENT NOT NULL,
+    title   VARCHAR(255)          NOT NULL,
+    type    VARCHAR(255)          NOT NULL,
+    sort    INT                   NOT NULL,
+    config  JSON                  NOT NULL,
+    page_id BIGINT                NOT NULL,
+    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_page_blocks
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
+
+CREATE TABLE mooc_page_block_data
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL,
+    sort          INT                   NOT NULL,
+    content       JSON                  NOT NULL,
+    page_block_id BIGINT                NOT NULL,
+    CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_page_block_data
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCK_DATA_ON_PAGE_BLOCK FOREIGN KEY (page_block_id) REFERENCES mooc_page_blocks (id);

@@ -1,8 +1,11 @@
 package com.mooc.backend.error;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +22,23 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     private final MessageSource messageSource;
+
+    @Value("${hostname}")
+    private String hostname;
+
+    @ExceptionHandler(CustomException.class)
+    public ProblemDetail handleRecordNotFoundException(CustomException ex, WebRequest request) {
+
+        ProblemDetail body = ProblemDetail
+                .forStatusAndDetail(HttpStatusCode.valueOf(500),ex.getLocalizedMessage());
+        body.setType(URI.create(hostname + "/errors/" + ex.getCode()));
+        body.setTitle(ex.getMessage());
+        body.setProperty("hostname", hostname);
+        body.setProperty("code", ex.getCode());
+        body.setProperty("details", ex.getDetails());
+
+        return body;
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, WebRequest request) {

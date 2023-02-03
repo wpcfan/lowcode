@@ -1,10 +1,7 @@
 package com.mooc.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,6 +40,26 @@ public class Product extends Auditable {
     @ToString.Exclude
     private Set<ProductImage> images = new HashSet<>();
 
+    public void addCategory(Category category) {
+        categories.add(category);
+        category.getProducts().add(this);
+    }
+
+    public void removeCategory(Category category) {
+        categories.remove(category);
+        category.getProducts().remove(this);
+    }
+
+    public void addImage(ProductImage image) {
+        images.add(image);
+        image.setProduct(this);
+    }
+
+    public void removeImage(ProductImage image) {
+        images.remove(image);
+        image.setProduct(null);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -67,4 +84,52 @@ public class Product extends Auditable {
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
+
+    public static ProductBuilder builder() {
+        return new ProductBuilder();
+    }
+
+    public static class ProductBuilder {
+        private String name;
+        private String description;
+        private Integer price;
+        private Set<Category> categories = new HashSet<>();
+        private Set<ProductImage> images = new HashSet<>();
+
+        public ProductBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public ProductBuilder description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public ProductBuilder price(Integer price) {
+            this.price = price;
+            return this;
+        }
+
+        public ProductBuilder categories(Set<Category> categories) {
+            this.categories = categories;
+            return this;
+        }
+
+        public ProductBuilder images(Set<ProductImage> images) {
+            this.images = images;
+            return this;
+        }
+
+        public Product build() {
+            Product product = new Product();
+            product.setName(name);
+            product.setDescription(description);
+            product.setPrice(price);
+            product.setCategories(categories);
+            product.setImages(images);
+            return product;
+        }
+    }
+
 }

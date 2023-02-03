@@ -136,11 +136,11 @@ public class PageEntityRepositoryTests {
 
         var productBlockData1 = ProductData.builder()
                 .sort(1)
-                .product(ProductDTO.from(product))
+                .product(ProductDTO.fromEntity(product))
                 .build();
         var productBlockData2 = ProductData.builder()
                 .sort(2)
-                .product(ProductDTO.from(product))
+                .product(ProductDTO.fromEntity(product))
                 .build();
         var productData1 = PageBlockDataEntity.builder()
                 .sort(1)

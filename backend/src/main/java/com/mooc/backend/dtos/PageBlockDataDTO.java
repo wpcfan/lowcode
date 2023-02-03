@@ -1,5 +1,6 @@
 package com.mooc.backend.dtos;
 
+import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.projections.PageBlockDataEntityInfo;
 import lombok.Builder;
@@ -13,11 +14,26 @@ public class PageBlockDataDTO {
     private Integer sort;
     private BlockData content;
 
-    public static PageBlockDataDTO from(PageBlockDataEntityInfo pageBlockData) {
+    public static PageBlockDataDTO fromProjection(PageBlockDataEntityInfo data) {
         return PageBlockDataDTO.builder()
-                .id(pageBlockData.getId())
-                .sort(pageBlockData.getSort())
-                .content(pageBlockData.getContent())
+                .id(data.getId())
+                .sort(data.getSort())
+                .content(data.getContent())
+                .build();
+    }
+
+    public static PageBlockDataDTO fromEntity(PageBlockDataEntity data) {
+        return PageBlockDataDTO.builder()
+                .id(data.getId())
+                .sort(data.getSort())
+                .content(data.getContent())
+                .build();
+    }
+
+    public PageBlockDataEntity toEntity() {
+        return PageBlockDataEntity.builder()
+                .sort(getSort())
+                .content(getContent())
                 .build();
     }
 }

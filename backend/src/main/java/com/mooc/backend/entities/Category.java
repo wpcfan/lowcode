@@ -1,10 +1,7 @@
 package com.mooc.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,10 +31,17 @@ public class Category extends Auditable {
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
+    @ToString.Exclude
     private Set<Category> children = new HashSet<>();
 
     @ManyToMany(mappedBy = "categories")
+    @ToString.Exclude
     private Set<Product> products = new HashSet<>();
+
+    public void addChild(Category child) {
+        children.add(child);
+        child.setParent(this);
+    }
 
     @Override
     public int hashCode() {
@@ -64,4 +68,57 @@ public class Category extends Auditable {
         return true;
     }
 
+    public static CategoryBuilder builder() {
+        return new CategoryBuilder();
+    }
+
+    public static class CategoryBuilder {
+        private Long id;
+        private String code;
+        private String name;
+        private Category parent;
+        private Set<Category> children = new HashSet<>();
+        private Set<Product> products = new HashSet<>();
+
+        public CategoryBuilder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public CategoryBuilder code(String code) {
+            this.code = code;
+            return this;
+        }
+
+        public CategoryBuilder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public CategoryBuilder parent(Category parent) {
+            this.parent = parent;
+            return this;
+        }
+
+        public CategoryBuilder children(Set<Category> children) {
+            this.children = children;
+            return this;
+        }
+
+        public CategoryBuilder products(Set<Product> products) {
+            this.products = products;
+            return this;
+        }
+
+        public Category build() {
+            Category category = new Category();
+            category.setId(id);
+            category.setCode(code);
+            category.setName(name);
+            category.setParent(parent);
+            category.setChildren(children);
+            category.setProducts(products);
+            return category;
+        }
+    }
 }

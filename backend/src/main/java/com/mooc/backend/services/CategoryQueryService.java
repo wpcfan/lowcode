@@ -1,6 +1,5 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.CategoryProjectionDTO;
 import com.mooc.backend.dtos.CategoryRecord;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.projections.CategoryInfo;
@@ -11,10 +10,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class CategoryService {
+public class CategoryQueryService {
     private final CategoryRepository categoryRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryQueryService(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
 
@@ -22,11 +21,8 @@ public class CategoryService {
      * 使用投影
      * @return 带子类目的列表
      */
-    public List<CategoryProjectionDTO> findAll() {
-        return categoryRepository.findAll(CategoryInfo.class)
-                .stream()
-                .map(CategoryProjectionDTO::from)
-                .toList();
+    public List<CategoryInfo> findAll() {
+        return categoryRepository.findAll(CategoryInfo.class);
     }
 
     /**

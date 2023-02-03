@@ -1,5 +1,6 @@
 package com.mooc.backend.dtos;
 
+import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.blocks.BlockConfig;
 import com.mooc.backend.enumerations.BlockType;
 import com.mooc.backend.projections.PageBlockEntityInfo;
@@ -19,17 +20,42 @@ public class PageBlockDTO {
     private BlockConfig config;
     private Set<PageBlockDataDTO> data;
 
-    public static PageBlockDTO from(PageBlockEntityInfo pageBlock) {
+    public static PageBlockDTO fromProjection(PageBlockEntityInfo block) {
         return PageBlockDTO.builder()
-                .id(pageBlock.getId())
-                .title(pageBlock.getTitle())
-                .type(pageBlock.getType())
-                .sort(pageBlock.getSort())
-                .config(pageBlock.getConfig())
-                .data(pageBlock.getData().stream()
-                        .map(PageBlockDataDTO::from)
+                .id(block.getId())
+                .title(block.getTitle())
+                .type(block.getType())
+                .sort(block.getSort())
+                .config(block.getConfig())
+                .data(block.getData().stream()
+                        .map(PageBlockDataDTO::fromProjection)
                         .collect(HashSet::new, Set::add, Set::addAll)
                 )
                 .build();
+    }
+
+    public static PageBlockDTO fromEntity(PageBlockEntity block) {
+        return PageBlockDTO.builder()
+                .id(block.getId())
+                .title(block.getTitle())
+                .type(block.getType())
+                .sort(block.getSort())
+                .config(block.getConfig())
+                .data(block.getData().stream()
+                        .map(PageBlockDataDTO::fromEntity)
+                        .collect(HashSet::new, Set::add, Set::addAll)
+                )
+                .build();
+    }
+
+    public PageBlockEntity toEntity() {
+        var pageBlockEntity = PageBlockEntity.builder()
+                .title(getTitle())
+                .type(getType())
+                .sort(getSort())
+                .config(getConfig())
+                .build();
+        getData().forEach(data -> pageBlockEntity.addData(data.toEntity()));
+        return pageBlockEntity;
     }
 }

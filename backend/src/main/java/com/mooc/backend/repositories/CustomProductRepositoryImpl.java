@@ -1,6 +1,6 @@
 package com.mooc.backend.repositories;
 
-import com.mooc.backend.dtos.CategoryProjectionDTO;
+import com.mooc.backend.dtos.CategoryDTO;
 import com.mooc.backend.dtos.ProductDTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -54,7 +54,7 @@ public class CustomProductRepositoryImpl implements CustomProductRepository{
                             .name((String) tuple[aliasToIndexMap.get("name")])
                             .description((String) tuple[aliasToIndexMap.get("description")])
                             .price((Integer) tuple[aliasToIndexMap.get("price")])
-                            .categories(Set.of(CategoryProjectionDTO.builder()
+                            .categories(Set.of(CategoryDTO.builder()
                                     .id((Long) tuple[aliasToIndexMap.get("c_id")])
                                     .code((String) tuple[aliasToIndexMap.get("c_code")])
                                     .name((String) tuple[aliasToIndexMap.get("c_name")])

@@ -1,9 +1,11 @@
 package com.mooc.backend.controllers.app;
 
-import com.mooc.backend.dtos.CategoryProjectionDTO;
+import com.mooc.backend.dtos.CategoryDTO;
 import com.mooc.backend.dtos.ProductDTO;
+import com.mooc.backend.entities.Category;
+import com.mooc.backend.entities.Product;
 import com.mooc.backend.rest.app.ProductController;
-import com.mooc.backend.services.ProductService;
+import com.mooc.backend.services.ProductQueryService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,32 +34,30 @@ public class ProductControllerTests {
     private MockMvc mockMvc;
 
     @MockBean
-    private ProductService productService;
+    private ProductQueryService productQueryService;
 
     @Test
     public void testFindAllByCategory() throws Exception {
-        var category = CategoryProjectionDTO.builder()
-                .id(1L)
-                .code("cat_one")
-                .name("Category 1")
-                .build();
+        var category = new Category();
+        category.setId(1L);
+        category.setCode("cat_one");
+        category.setName("Category 1");
 
-        var product1 = ProductDTO.builder()
-                .id(1L)
-                .name("Product 1")
-                .description("Description 1")
-                .price(100000)
-                .categories(Set.of(category))
-                .build();
-        var product2 = ProductDTO.builder()
-                .id(2L)
-                .name("Product 2")
-                .description("Description 2")
-                .price(200000)
-                .categories(Set.of(category))
-                .build();
+        var product1 = new Product();
+        product1.setId(1L);
+        product1.setName("Product 1");
+        product1.setDescription("Description 1");
+        product1.setPrice(100000);
+        product1.setCategories(Set.of(category));
 
-        Mockito.when(productService.findPageableByCategory(1L))
+        var product2 = new Product();
+        product2.setId(2L);
+        product2.setName("Product 2");
+        product2.setDescription("Description 2");
+        product2.setPrice(200000);
+        product2.setCategories(Set.of(category));
+
+        Mockito.when(productQueryService.findPageableByCategory(1L))
                 .thenReturn(List.of(product1, product2));
 
         mockMvc.perform(get("/api/v1/app/products/by-category/{id}", 1).accept("application/json"))
@@ -82,26 +82,24 @@ public class ProductControllerTests {
 
     @Test
     public void testFindPageableByExample() throws Exception {
-        var category = CategoryProjectionDTO.builder()
-                .id(1L)
-                .code("cat_one")
-                .name("Category 1")
-                .build();
+        var category = new Category();
+        category.setId(1L);
+        category.setCode("cat_one");
+        category.setName("Category 1");
 
-        var product1 = ProductDTO.builder()
-                .id(1L)
-                .name("Product 1")
-                .description("Description 1")
-                .price(100000)
-                .categories(Set.of(category))
-                .build();
-        var product2 = ProductDTO.builder()
-                .id(2L)
-                .name("Product 2")
-                .description("Description 2")
-                .price(200000)
-                .categories(Set.of(category))
-                .build();
+        var product1 = new Product();
+        product1.setId(1L);
+        product1.setName("Product 1");
+        product1.setDescription("Description 1");
+        product1.setPrice(100000);
+        product1.setCategories(Set.of(category));
+
+        var product2 = new Product();
+        product2.setId(2L);
+        product2.setName("Product 2");
+        product2.setDescription("Description 2");
+        product2.setPrice(200000);
+        product2.setCategories(Set.of(category));
 
         var pageSize = 20;
         var pageNumber = 0;
@@ -109,7 +107,7 @@ public class ProductControllerTests {
 
         var keyword = "test";
         var result = new PageImpl<>(List.of(product1, product2), pageRequest, 2);
-        Mockito.when(productService.findPageableByExample(Mockito.any(Example.class), Mockito.any(Pageable.class)))
+        Mockito.when(productQueryService.findPageableByExample(Mockito.any(Example.class), Mockito.any(Pageable.class)))
                 .thenReturn(result);
 
         mockMvc.perform(get("/api/v1/app/products/by-example?keyword={keyword}", keyword).accept("application/json"))

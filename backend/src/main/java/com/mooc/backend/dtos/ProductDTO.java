@@ -18,17 +18,17 @@ public class ProductDTO {
     private String name;
     private String description;
     private Integer price;
-    private Set<CategoryProjectionDTO> categories;
+    private Set<CategoryDTO> categories;
     private Set<String> images;
 
-    public static ProductDTO from(ProductInfo product) {
+    public static ProductDTO fromProjection(ProductInfo product) {
         return ProductDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .categories(product.getCategories().stream()
-                        .map(CategoryProjectionDTO::from)
+                        .map(CategoryDTO::fromProjection)
                         .collect(Collectors.toSet()))
                 .images(product.getImages().stream()
                         .map(ProductImageInfo::getImageUrl)
@@ -36,18 +36,33 @@ public class ProductDTO {
                 .build();
     }
 
-    public static ProductDTO from(Product product) {
+    public static ProductDTO fromEntity(Product product) {
         return ProductDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .categories(product.getCategories().stream()
-                        .map(CategoryProjectionDTO::from)
+                        .map(CategoryDTO::fromEntity)
                         .collect(Collectors.toSet()))
                 .images(product.getImages().stream()
                         .map(ProductImage::getImageUrl)
                         .collect(Collectors.toSet()))
                 .build();
+    }
+
+    public Product toEntity() {
+        var product = Product.builder()
+                .name(getName())
+                .description(getDescription())
+                .price(getPrice())
+                .build();
+        getImages().forEach(image -> {
+            var productImage = new ProductImage();
+            productImage.setImageUrl(image);
+            product.addImage(productImage);
+        });
+        getCategories().forEach(category -> product.addCategory(category.toEntity()));
+        return product;
     }
 }

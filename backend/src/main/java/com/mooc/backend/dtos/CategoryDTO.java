@@ -10,36 +10,45 @@ import java.util.Set;
 
 @Value
 @Builder
-public class CategoryProjectionDTO {
+public class CategoryDTO {
 
     private Long id;
     private String name;
     private String code;
     private Long parentId;
     @Builder.Default
-    private Set<CategoryProjectionDTO> children = new HashSet<>();
+    private Set<CategoryDTO> children = new HashSet<>();
 
-    public static CategoryProjectionDTO from(CategoryInfo category) {
-        return CategoryProjectionDTO.builder()
+    public static CategoryDTO fromProjection(CategoryInfo category) {
+        return CategoryDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
                 .code(category.getCode())
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .children(category.getChildren().stream()
-                        .map(CategoryProjectionDTO::from)
+                        .map(CategoryDTO::fromProjection)
                         .collect(HashSet::new, Set::add, Set::addAll))
                 .build();
     }
 
-    public static CategoryProjectionDTO from(Category category) {
-        return CategoryProjectionDTO.builder()
+    public static CategoryDTO fromEntity(Category category) {
+        return CategoryDTO.builder()
                 .id(category.getId())
                 .name(category.getName())
                 .code(category.getCode())
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .children(category.getChildren().stream()
-                        .map(CategoryProjectionDTO::from)
+                        .map(CategoryDTO::fromEntity)
                         .collect(HashSet::new, Set::add, Set::addAll))
                 .build();
+    }
+
+    public Category toEntity() {
+        var category = Category.builder()
+                .name(getName())
+                .code(getCode())
+                .build();
+        getChildren().forEach(child -> category.addChild(child.toEntity()));
+        return category;
     }
 }

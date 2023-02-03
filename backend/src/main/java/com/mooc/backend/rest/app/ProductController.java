@@ -4,7 +4,7 @@ import com.mooc.backend.dtos.PageRecord;
 import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.Product;
-import com.mooc.backend.services.ProductService;
+import com.mooc.backend.services.ProductQueryService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -18,10 +18,10 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/api/v1/app/products")
 public class ProductController {
-    private final ProductService productService;
+    private final ProductQueryService productService;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductController(ProductQueryService productQueryService) {
+        this.productService = productQueryService;
     }
 
     @GetMapping("/by-example")
@@ -41,20 +41,23 @@ public class ProductController {
                 .withMatcher("description", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains())
                 .withMatcher("categories.name", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains());
         Example<Product> example = Example.of(productQuery, matcher);
-        var result = productService.findPageableByExample(example, pageable);
+        var result = productService.findPageableByExample(example, pageable).map(ProductDTO::fromEntity);
         return new PageRecord<>(pageable.getPageNumber(), pageable.getPageSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
     }
 
     @GetMapping("/by-category/{id}")
     public List<ProductDTO> findAllByCategory(@PathVariable Long id) {
-        return productService.findPageableByCategory(id);
+        return productService.findPageableByCategory(id)
+                .stream()
+                .map(ProductDTO::fromEntity)
+                .toList();
     }
 
     @GetMapping("/by-category/{id}/page")
     public PageRecord<ProductDTO> findPageableByCategoriesId(
             @PathVariable Long id,
             @PageableDefault(page = 0, size = 20, sort = "id", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable) {
-        var result = productService.findPageableByCategoriesId(id, pageable);
+        var result = productService.findPageableByCategoriesId(id, pageable).map(ProductDTO::fromProjection);
         return new PageRecord<>(result.getNumber(), result.getSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
     }
 }

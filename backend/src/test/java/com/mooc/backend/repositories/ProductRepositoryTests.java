@@ -2,6 +2,7 @@ package com.mooc.backend.repositories;
 
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.Product;
+import com.mooc.backend.entities.ProductImage;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestPropertySource(locations="classpath:application-test.properties")
 //@ActiveProfiles("test")
@@ -204,16 +206,18 @@ public class ProductRepositoryTests {
 
     @Test
     public void testQueryByExample() throws Exception {
+
         var category = new Category();
         category.setCode("cat_one");
         category.setName("Test Category");
+        // 在没有指定 CascadeType 的情况下，需要手动保存关联对象
         testEntityManager.persist(category);
 
         var product = new Product();
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(10000);
-        product.getCategories().add(category);
+        product.addCategory(category);
         testEntityManager.persist(product);
 
         var product2 = new Product();
@@ -222,6 +226,8 @@ public class ProductRepositoryTests {
         product2.setPrice(10100);
         product2.getCategories().add(category);
         testEntityManager.persist(product2);
+
+        testEntityManager.flush();
 
         Product productQuery = new Product();
         productQuery.setName("Test");
@@ -239,5 +245,29 @@ public class ProductRepositoryTests {
         var products = productRepository.findAll(example);
 
         assertEquals(2, products.size());
+    }
+
+    @Test
+    public void testProductAndProductImage() throws Exception {
+        var imageUrl = "https://via.placeholder.com/150";
+        var productImage = new ProductImage();
+
+        productImage.setImageUrl(imageUrl);
+
+        var product = new Product();
+        product.setName("Test Product");
+        product.setDescription("Test Description");
+        product.setPrice(10000);
+        product.addImage(productImage);
+        testEntityManager.persist(product);
+
+        testEntityManager.flush();
+
+        var matched = productRepository.findById(product.getId());
+
+        assertEquals("Test Product", matched.get().getName());
+        assertEquals("Test Description", matched.get().getDescription());
+        assertEquals(10000, matched.get().getPrice());
+        assertTrue(matched.get().getImages().stream().anyMatch(image -> image.getImageUrl().equals(imageUrl)) );
     }
 }

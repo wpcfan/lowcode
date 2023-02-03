@@ -40,10 +40,10 @@ public class PageBlockEntity {
     private BlockConfig config;
 
     @ManyToOne
-    @JoinColumn(name = "page_id", nullable = false)
+    @JoinColumn(name = "page_id")
     private PageEntity page;
 
-    @OneToMany(mappedBy = "pageBlock", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "pageBlock", cascade = CascadeType.REMOVE, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
     private Set<PageBlockDataEntity> data = new HashSet<>();

@@ -27,7 +27,7 @@ public class Category extends Auditable {
     @ManyToOne
     // @JoinColumn 这个注解是用来指定外键的
     // 如果不指定，会默认使用外键名为：实体名_主键名
-//    @JoinColumn(name = "parent_id")
+    // @JoinColumn(name = "parent_id")
     private Category parent;
 
     @OneToMany(mappedBy = "parent")
@@ -41,6 +41,21 @@ public class Category extends Auditable {
     public void addChild(Category child) {
         children.add(child);
         child.setParent(this);
+    }
+
+    public void removeChild(Category child) {
+        children.remove(child);
+        child.setParent(null);
+    }
+
+    public void addProduct(Product product) {
+        products.add(product);
+        product.getCategories().add(this);
+    }
+
+    public void removeProduct(Product product) {
+        products.remove(product);
+        product.getCategories().remove(this);
     }
 
     @Override

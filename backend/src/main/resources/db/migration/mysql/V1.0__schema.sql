@@ -70,7 +70,7 @@ CREATE TABLE mooc_page_blocks
     type    VARCHAR(255)          NOT NULL,
     sort    INT                   NOT NULL,
     config  JSON                  NOT NULL,
-    page_id BIGINT                NOT NULL,
+    page_id BIGINT                NULL,
     CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
 );
 
@@ -82,7 +82,7 @@ CREATE TABLE mooc_page_block_data
     id            BIGINT AUTO_INCREMENT NOT NULL,
     sort          INT                   NOT NULL,
     content       JSON                  NOT NULL,
-    page_block_id BIGINT                NOT NULL,
+    page_block_id BIGINT                NULL,
     CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
 );
 

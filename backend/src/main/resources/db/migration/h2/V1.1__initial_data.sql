@@ -1,83 +1,83 @@
-insert into mooc_categories (`id`, `code`, `name`)
-values (1, 'cat_b_m', 'Business & Management');
-insert into mooc_categories (`id`, `code`, `name`)
-values (2, 'cat_c_s', 'Computer Science');
-insert into mooc_categories (`id`, `code`, `name`)
-values (3, 'cat_d_s', 'Data Science');
-insert into mooc_categories (`id`, `code`, `name`)
-values (4, 'cat_d', 'Design');
-insert into mooc_categories (`id`, `code`, `name`)
-values (5, 'cat_h', 'Health');
-insert into mooc_categories (`id`, `code`, `name`)
-values (6, 'cat_l', 'Language');
-insert into mooc_categories (`id`, `code`, `name`)
-values (7, 'cat_m_l', 'Math & Logic');
-insert into mooc_categories (`id`, `code`, `name`)
-values (8, 'cat_p_d', 'Personal Development');
-insert into mooc_categories (`id`, `code`, `name`)
-values (9, 'cat_p_s_e', 'Physical Science & Engineering');
-insert into mooc_categories (`id`, `code`, `name`)
-values (10, 'cat_s_s', 'Social Sciences');
-insert into mooc_categories (`id`, `code`, `name`)
-values (11, 'cat_t_p', 'Test Prep');
-insert into mooc_categories (`id`, `code`, `name`)
-values (12, 'cat_n', 'None');
-insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
-values (13, 'cat_java', 'Java', 2);
-insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
-values (14, 'cat_py', 'Python', 2);
-insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
-values (15, 'cat_dart', 'Dart', 2);
-insert into mooc_categories (`id`, `code`, `name`, `parent_id`)
-values (16, 'cat_java_spring', 'Spring', 13);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (1, 'Business & Management 1', 'Learn how to use data to make better decisions', 10);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (2, 'Computer Science 2', 'Learn how to use data to make better decisions', 20);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (3, 'Computer Science 3', 'Learn how to use data to make better decisions', 30);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (4, 'Data Science 4', 'Learn how to use data to make better decisions', 40);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (5, 'Data Science 5', 'Learn how to use data to make better decisions', 50);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (6, 'Data Science 6', 'Learn how to use data to make better decisions', 60);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (7, 'Design 7', 'Learn how to use data to make better decisions', 70);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (8, 'Health 8', 'Learn how to use data to make better decisions', 80);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (9, 'Health 9', 'Learn how to use data to make better decisions', 90);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (10, 'Language 10', 'Learn how to use data to make better decisions', 100);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (11, 'Language 11', 'Learn how to use data to make better decisions', 110);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (12, 'Language 12', 'Learn how to use data to make better decisions', 120);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (13, 'Math & Logic 13', 'Learn how to use data to make better decisions', 130);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (14, 'Math & Logic 14', 'Learn how to use data to make better decisions', 140);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (15, 'Personal Development 15', 'Learn how to use data to make better decisions', 150);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (16, 'Physical Science & Engineering 16', 'Learn how to use data to make better decisions', 160);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (17, 'Social Sciences 17', 'Learn how to use data to make better decisions', 170);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (18, 'Test Prep 18', 'Learn how to use data to make better decisions', 180);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (19, 'Test Prep 19', 'Learn how to use data to make better decisions', 190);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (20, 'Test Prep 20', 'Learn how to use data to make better decisions', 200);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (21, 'None 21', 'Learn how to use data to make better decisions', 210);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (22, 'None 22', 'Learn how to use data to make better decisions', 220);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (23, 'None 23', 'Learn how to use data to make better decisions', 230);
-insert into mooc_products (`id`, `name`, `description`, `price`)
-values (24, 'None 24', 'Learn how to use data to make better decisions', 240);
+insert into mooc_categories (`code`, `name`)
+values ('cat_b_m', 'Business & Management');
+insert into mooc_categories (`code`, `name`)
+values ('cat_c_s', 'Computer Science');
+insert into mooc_categories (`code`, `name`)
+values ('cat_d_s', 'Data Science');
+insert into mooc_categories (`code`, `name`)
+values ('cat_d', 'Design');
+insert into mooc_categories (`code`, `name`)
+values ('cat_h', 'Health');
+insert into mooc_categories (`code`, `name`)
+values ('cat_l', 'Language');
+insert into mooc_categories (`code`, `name`)
+values ('cat_m_l', 'Math & Logic');
+insert into mooc_categories (`code`, `name`)
+values ('cat_p_d', 'Personal Development');
+insert into mooc_categories (`code`, `name`)
+values ('cat_p_s_e', 'Physical Science & Engineering');
+insert into mooc_categories (`code`, `name`)
+values ('cat_s_s', 'Social Sciences');
+insert into mooc_categories (`code`, `name`)
+values ('cat_t_p', 'Test Prep');
+insert into mooc_categories (`code`, `name`)
+values ('cat_n', 'None');
+insert into mooc_categories (`code`, `name`, `parent_id`)
+values ('cat_java', 'Java', 2);
+insert into mooc_categories (`code`, `name`, `parent_id`)
+values ('cat_py', 'Python', 2);
+insert into mooc_categories (`code`, `name`, `parent_id`)
+values ('cat_dart', 'Dart', 2);
+insert into mooc_categories (`code`, `name`, `parent_id`)
+values ('cat_java_spring', 'Spring', 13);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Business & Management 1', 'Learn how to use data to make better decisions', 10);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Computer Science 2', 'Learn how to use data to make better decisions', 20);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Computer Science 3', 'Learn how to use data to make better decisions', 30);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Data Science 4', 'Learn how to use data to make better decisions', 40);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Data Science 5', 'Learn how to use data to make better decisions', 50);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Data Science 6', 'Learn how to use data to make better decisions', 60);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Design 7', 'Learn how to use data to make better decisions', 70);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Health 8', 'Learn how to use data to make better decisions', 80);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Health 9', 'Learn how to use data to make better decisions', 90);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Language 10', 'Learn how to use data to make better decisions', 100);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Language 11', 'Learn how to use data to make better decisions', 110);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Language 12', 'Learn how to use data to make better decisions', 120);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Math & Logic 13', 'Learn how to use data to make better decisions', 130);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Math & Logic 14', 'Learn how to use data to make better decisions', 140);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Personal Development 15', 'Learn how to use data to make better decisions', 150);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Physical Science & Engineering 16', 'Learn how to use data to make better decisions', 160);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Social Sciences 17', 'Learn how to use data to make better decisions', 170);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Test Prep 18', 'Learn how to use data to make better decisions', 180);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Test Prep 19', 'Learn how to use data to make better decisions', 190);
+insert into mooc_products (`name`, `description`, `price`)
+values ('Test Prep 20', 'Learn how to use data to make better decisions', 200);
+insert into mooc_products (`name`, `description`, `price`)
+values ('None 21', 'Learn how to use data to make better decisions', 210);
+insert into mooc_products (`name`, `description`, `price`)
+values ('None 22', 'Learn how to use data to make better decisions', 220);
+insert into mooc_products (`name`, `description`, `price`)
+values ('None 23', 'Learn how to use data to make better decisions', 230);
+insert into mooc_products (`name`, `description`, `price`)
+values ('None 24', 'Learn how to use data to make better decisions', 240);
 insert into mooc_product_categories (`product_id`, `category_id`)
 values (1, 1);
 insert into mooc_product_categories (`product_id`, `category_id`)

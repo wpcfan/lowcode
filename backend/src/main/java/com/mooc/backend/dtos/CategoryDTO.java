@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Value;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Value
@@ -48,7 +49,7 @@ public class CategoryDTO {
                 .name(getName())
                 .code(getCode())
                 .build();
-        getChildren().forEach(child -> category.addChild(child.toEntity()));
+        Optional.ofNullable(getChildren()).orElse(new HashSet<>()).forEach(child -> category.addChild(child.toEntity()));
         return category;
     }
 }

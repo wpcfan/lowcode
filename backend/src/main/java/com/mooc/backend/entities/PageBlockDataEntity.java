@@ -28,6 +28,6 @@ public class PageBlockDataEntity {
     private BlockData content;
 
     @ManyToOne
-    @JoinColumn(name = "page_block_id", nullable = false)
+    @JoinColumn(name = "page_block_id")
     private PageBlockEntity pageBlock;
 }

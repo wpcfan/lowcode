@@ -1,22 +1,21 @@
 package com.mooc.backend.entities;
 
-import com.mooc.backend.entities.blocks.PageBlock;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.Type;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "mooc_pages")
 public class PageEntity extends Auditable {
@@ -33,10 +32,15 @@ public class PageEntity extends Auditable {
     @Column(name = "page_type", nullable = false)
     private PageType pageType;
 
-//    @Lob
-    @Type(JsonType.class)
-    @Column(name = "content", nullable = false, columnDefinition = "json")
-    private List<PageBlock> content;
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @Builder.Default
+    private Set<PageBlockEntity> pageBlocks = new HashSet<>();
+
+    public void addPageBlock(PageBlockEntity pageBlockEntity) {
+        pageBlocks.add(pageBlockEntity);
+        pageBlockEntity.setPage(this);
+    }
 
     @Type(JsonType.class)
     @Column(name = "config", nullable = false, columnDefinition = "json")

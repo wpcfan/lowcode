@@ -41,7 +41,7 @@ public class Product extends Auditable {
 
     @OneToMany(mappedBy = "product")
     @ToString.Exclude
-    private Set<ProductImage> images;
+    private Set<ProductImage> images = new HashSet<>();
 
     @Override
     public boolean equals(Object obj) {

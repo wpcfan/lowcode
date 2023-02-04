@@ -2,8 +2,11 @@ package com.mooc.backend.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mooc.backend.dtos.FileRecord;
+import com.mooc.backend.error.CustomException;
 import com.qiniu.common.QiniuException;
 import com.qiniu.storage.UploadManager;
+import com.qiniu.util.StringMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -19,17 +22,17 @@ public class QiniuService {
     @Value("${qiniu.bucket}")
     private String bucket;
 
-    public void upload(byte[] uploadBytes, String key) {
+    public FileRecord upload(byte[] uploadBytes, String key) {
         ByteArrayInputStream byteInputStream = new ByteArrayInputStream(uploadBytes);
         String upToken = auth.uploadToken(bucket);
         try {
             var mapper = new ObjectMapper();
             var response = uploadManager.put(byteInputStream, key, upToken, null, null);
             var putRet = mapper.readValue(response.bodyString(), com.qiniu.storage.model.DefaultPutRet.class);
-            System.out.println(putRet.key);
-            System.out.println(putRet.hash);
+            return new FileRecord(putRet.key, putRet.hash);
         } catch (QiniuException | JsonProcessingException e) {
             e.printStackTrace();
+            throw new CustomException("File Upload error", e.getMessage(), 500);
         }
     }
 }

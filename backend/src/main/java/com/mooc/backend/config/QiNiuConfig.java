@@ -12,17 +12,8 @@ public class QiNiuConfig {
 
     @Bean
     public com.qiniu.storage.Configuration configuration() {
-        com.qiniu.storage.Region region = new com.qiniu.storage.Region.Builder()
-                .region("z0")
-                .accUpHost("up.qiniup.com")
-                .srcUpHost("upload.qiniup.com")
-                .iovipHost("iovip.qiniuio.com")
-                .rsHost("rs.qiniu.com")
-                .rsfHost("rsf.qiniu.com")
-                .apiHost("api.qiniu.com")
-                .build();
-        var cfg = new com.qiniu.storage.Configuration(region);
-        cfg.useHttpsDomains = false;
+        var cfg = new com.qiniu.storage.Configuration(com.qiniu.storage.Region.autoRegion());
+        cfg.useHttpsDomains = true;
         cfg.resumableUploadAPIVersion = com.qiniu.storage.Configuration.ResumableUploadAPIVersion.V2;
         return cfg;
     }

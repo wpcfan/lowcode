@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class PageSpecs {
-    public static Function<PageFilter, Specification<PageEntity>> pageSpec = (PageFilter filter) -> (root, query, builder) -> {
+    public static Function<PageFilter, Specification<PageEntity>> pageSpec = (filter) -> (root, query, builder) -> {
         List<Predicate> predicates = new ArrayList<>();
         if (filter.title() != null) {
             predicates.add(builder.like(root.get("title"), "%" + filter.title().toLowerCase() + "%"));

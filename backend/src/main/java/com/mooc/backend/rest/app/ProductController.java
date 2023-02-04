@@ -1,6 +1,6 @@
 package com.mooc.backend.rest.app;
 
-import com.mooc.backend.dtos.PageRecord;
+import com.mooc.backend.dtos.PageWrapper;
 import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.Product;
@@ -25,7 +25,7 @@ public class ProductController {
     }
 
     @GetMapping("/by-example")
-    public PageRecord<ProductDTO> findPageableByExample(
+    public PageWrapper<ProductDTO> findPageableByExample(
             @RequestParam(required = false) String keyword,
             @ParameterObject Pageable pageable
     ) {
@@ -42,7 +42,7 @@ public class ProductController {
                 .withMatcher("categories.name", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains());
         Example<Product> example = Example.of(productQuery, matcher);
         var result = productService.findPageableByExample(example, pageable).map(ProductDTO::fromEntity);
-        return new PageRecord<>(pageable.getPageNumber(), pageable.getPageSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
+        return new PageWrapper<>(pageable.getPageNumber(), pageable.getPageSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
     }
 
     @GetMapping("/by-category/{id}")
@@ -54,10 +54,10 @@ public class ProductController {
     }
 
     @GetMapping("/by-category/{id}/page")
-    public PageRecord<ProductDTO> findPageableByCategoriesId(
+    public PageWrapper<ProductDTO> findPageableByCategoriesId(
             @PathVariable Long id,
             @PageableDefault(page = 0, size = 20, sort = "id", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable) {
         var result = productService.findPageableByCategoriesId(id, pageable).map(ProductDTO::fromProjection);
-        return new PageRecord<>(result.getNumber(), result.getSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
+        return new PageWrapper<>(result.getNumber(), result.getSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
     }
 }

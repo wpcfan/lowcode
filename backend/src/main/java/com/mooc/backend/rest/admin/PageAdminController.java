@@ -1,10 +1,12 @@
 package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.dtos.*;
+import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.PageCreateService;
 import com.mooc.backend.services.PageDeleteService;
 import com.mooc.backend.services.PageUpdateService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class PageAdminController {
     public PageDTO updatePage(@PathVariable Long id, @RequestBody CreateOrUpdatePageRecord page) {
         return pageUpdateService.updatePage(id, page)
                 .map(PageDTO::fromEntity)
-                .orElseThrow();
+                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found", HttpStatus.NOT_FOUND.value()));
     }
 
     @DeleteMapping("/{id}")
@@ -36,14 +38,14 @@ public class PageAdminController {
     public PageBlockDTO addBlock(@PathVariable Long id, @RequestBody CreateOrUpdatePageBlockRecord block) {
         return pageCreateService.addBlockToPage(id, block)
                 .map(PageBlockDTO::fromEntity)
-                .orElseThrow();
+                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found", HttpStatus.NOT_FOUND.value()));
     }
 
     @PutMapping("/blocks/{blockId}")
     public PageBlockDTO updateBlock(@PathVariable Long blockId, @RequestBody CreateOrUpdatePageBlockRecord block) {
         return pageUpdateService.updateBlock(blockId, block)
                 .map(PageBlockDTO::fromEntity)
-                .orElseThrow();
+                .orElseThrow(() -> new CustomException("PageBlock not found", "PageBlock " + blockId + " not found", HttpStatus.NOT_FOUND.value()));
     }
 
     @DeleteMapping("/blocks/{blockId}")
@@ -55,14 +57,14 @@ public class PageAdminController {
     public PageBlockDataDTO addData(@PathVariable Long blockId, @RequestBody CreateOrUpdatePageBlockDataRecord data) {
         return pageCreateService.addDataToBlock(blockId, data)
                 .map(PageBlockDataDTO::fromEntity)
-                .orElseThrow();
+                .orElseThrow(() -> new CustomException("PageBlock not found", "PageBlock " + blockId + " not found", HttpStatus.NOT_FOUND.value()));
     }
 
     @PutMapping("/data/{dataId}")
     public PageBlockDataDTO updateData(@PathVariable Long dataId, @RequestBody CreateOrUpdatePageBlockDataRecord data) {
         return pageUpdateService.updateData(dataId, data)
                 .map(PageBlockDataDTO::fromEntity)
-                .orElseThrow();
+                .orElseThrow(() -> new CustomException("PageBlockData not found", "PageBlockData " + dataId + " not found", HttpStatus.NOT_FOUND.value()));
     }
 
     @DeleteMapping("/data/{dataId}")

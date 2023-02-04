@@ -19,6 +19,7 @@ public class CategoryQueryService {
 
     /**
      * 使用投影
+     *
      * @return 带子类目的列表
      */
     public List<CategoryInfo> findAll() {
@@ -27,6 +28,7 @@ public class CategoryQueryService {
 
     /**
      * 直接使用 DTO
+     *
      * @return 带子类目的列表
      */
     public List<CategoryRecord> findAllDTOs() {

@@ -165,6 +165,7 @@ public class PageEntityRepositoryTests {
                 .pageType(PageType.Home)
                 .platform(Platform.Android)
                 .config(pageConfig)
+                .title("Test Page 1")
                 .build();
 
         page.addPageBlock(pinnedHeader);

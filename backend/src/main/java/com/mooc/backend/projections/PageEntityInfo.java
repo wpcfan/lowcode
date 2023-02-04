@@ -12,6 +12,8 @@ import java.util.Set;
 public interface PageEntityInfo {
     Long getId();
 
+    String getTitle();
+
     Platform getPlatform();
 
     PageType getPageType();

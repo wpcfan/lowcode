@@ -7,14 +7,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.net.URI;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -30,7 +28,7 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleRecordNotFoundException(CustomException ex, WebRequest request) {
 
         ProblemDetail body = ProblemDetail
-                .forStatusAndDetail(HttpStatusCode.valueOf(500),ex.getLocalizedMessage());
+                .forStatusAndDetail(HttpStatusCode.valueOf(500), ex.getLocalizedMessage());
         body.setType(URI.create(hostname + "/errors/" + ex.getCode()));
         body.setTitle(ex.getMessage());
         body.setProperty("hostname", hostname);

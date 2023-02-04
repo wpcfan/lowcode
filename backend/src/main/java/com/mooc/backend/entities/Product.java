@@ -1,7 +1,10 @@
 package com.mooc.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,9 +32,9 @@ public class Product extends Auditable {
 
     @ManyToMany
     @JoinTable(
-        name = "mooc_product_categories",
-        joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id")
+            name = "mooc_product_categories",
+            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id")
     )
     @ToString.Exclude
     private Set<Category> categories = new HashSet<>();

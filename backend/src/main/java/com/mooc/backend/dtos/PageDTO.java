@@ -15,6 +15,7 @@ import java.util.Set;
 @Builder
 public class PageDTO {
     private Long id;
+    private String title;
     private Platform platform;
     private PageType pageType;
     private PageConfig config;
@@ -24,6 +25,7 @@ public class PageDTO {
     public static PageDTO fromProjection(PageEntityInfo page) {
         return PageDTO.builder()
                 .id(page.getId())
+                .title(page.getTitle())
                 .platform(page.getPlatform())
                 .pageType(page.getPageType())
                 .config(page.getConfig())
@@ -36,6 +38,7 @@ public class PageDTO {
     public static PageDTO fromEntity(PageEntity page) {
         return PageDTO.builder()
                 .id(page.getId())
+                .title(page.getTitle())
                 .platform(page.getPlatform())
                 .pageType(page.getPageType())
                 .config(page.getConfig())
@@ -47,6 +50,7 @@ public class PageDTO {
 
     public PageEntity toEntity() {
         var pageEntity = PageEntity.builder()
+                .title(getTitle())
                 .platform(getPlatform())
                 .pageType(getPageType())
                 .config(getConfig())

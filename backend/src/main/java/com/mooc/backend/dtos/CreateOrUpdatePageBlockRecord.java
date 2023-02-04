@@ -7,10 +7,10 @@ import com.mooc.backend.enumerations.BlockType;
 public record CreateOrUpdatePageBlockRecord(String title, BlockType type, Integer sort, BlockConfig config) {
     public PageBlockEntity toEntity() {
         return PageBlockEntity.builder()
-            .title(title)
-            .type(type)
-            .sort(sort)
-            .config(config)
-            .build();
+                .title(title)
+                .type(type)
+                .sort(sort)
+                .config(config)
+                .build();
     }
 }

@@ -25,6 +25,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     /**
      * 全局配置分页参数
+     *
      * @return PageableHandlerMethodArgumentResolver
      */
     @Bean

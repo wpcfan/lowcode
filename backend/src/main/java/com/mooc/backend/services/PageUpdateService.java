@@ -26,6 +26,7 @@ public class PageUpdateService {
     public Optional<PageEntity> updatePage(Long id, CreateOrUpdatePageRecord page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
+                    pageEntity.setTitle(page.title());
                     pageEntity.setConfig(page.config());
                     pageEntity.setPageType(page.pageType());
                     pageEntity.setPlatform(page.platform());

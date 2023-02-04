@@ -38,10 +38,10 @@ public class ProductAdminService {
     public Optional<Product> addCategoryToProduct(Long id, Long categoryId) {
         return productRepository.findById(id)
                 .flatMap(p -> categoryRepository.findById(categoryId)
-                                .map(c -> {
-                                    p.addCategory(c);
-                                    return productRepository.save(p);
-                                }));
+                        .map(c -> {
+                            p.addCategory(c);
+                            return productRepository.save(p);
+                        }));
     }
 
     public Optional<Product> removeCategoryFromProduct(Long id, Long categoryId) {

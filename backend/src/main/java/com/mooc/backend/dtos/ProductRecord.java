@@ -6,7 +6,8 @@ import com.mooc.backend.entities.ProductImage;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record ProductRecord(Long id, String name, String description, Integer price, Set<CategoryDTO> categories, Set<String> images) {
+public record ProductRecord(Long id, String name, String description, Integer price, Set<CategoryDTO> categories,
+                            Set<String> images) {
 
     public static ProductRecord fromEntity(Product product) {
         return new ProductRecord(

@@ -1,6 +1,8 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.*;
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataRecord;
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockRecord;
+import com.mooc.backend.dtos.CreateOrUpdatePageRecord;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
@@ -21,6 +23,7 @@ public class PageCreateService {
     private final PageEntityRepository pageEntityRepository;
     private final PageBlockEntityRepository pageBlockEntityRepository;
     private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
+
     public PageEntity createPage(CreateOrUpdatePageRecord page) {
         var pageEntity = pageEntityRepository.save(page.toEntity());
         return pageEntity;

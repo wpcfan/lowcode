@@ -18,5 +18,5 @@ public interface PageEntityInfo {
 
     PageConfig getConfig();
 
-    Set<PageBlockEntityInfo> getBlocks();
+    Set<PageBlockEntityInfo> getPageBlocks();
 }

@@ -27,7 +27,7 @@ public class PageDTO {
                 .platform(page.getPlatform())
                 .pageType(page.getPageType())
                 .config(page.getConfig())
-                .blocks(page.getBlocks().stream()
+                .blocks(page.getPageBlocks().stream()
                         .map(PageBlockDTO::fromProjection)
                         .collect(HashSet::new, Set::add, Set::addAll))
                 .build();

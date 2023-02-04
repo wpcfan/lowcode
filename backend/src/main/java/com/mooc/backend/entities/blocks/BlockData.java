@@ -8,6 +8,6 @@ import java.io.Serializable;
 @JsonDeserialize(using = BlockDataDeserializer.class)
 public interface BlockData extends Serializable {
 
-    public Integer getSort();
+    Integer getSort();
 
 }

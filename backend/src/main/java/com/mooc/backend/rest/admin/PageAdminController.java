@@ -1,9 +1,6 @@
 package com.mooc.backend.rest.admin;
 
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockRecord;
-import com.mooc.backend.dtos.CreateOrUpdatePageRecord;
-import com.mooc.backend.dtos.PageBlockDTO;
-import com.mooc.backend.dtos.PageDTO;
+import com.mooc.backend.dtos.*;
 import com.mooc.backend.services.PageCreateService;
 import com.mooc.backend.services.PageDeleteService;
 import com.mooc.backend.services.PageUpdateService;
@@ -42,16 +39,34 @@ public class PageAdminController {
                 .orElseThrow();
     }
 
-    @PutMapping("/{id}/blocks/{blockId}")
-    public PageBlockDTO updateBlock(@PathVariable Long id, @PathVariable Long blockId, @RequestBody CreateOrUpdatePageBlockRecord block) {
+    @PutMapping("/blocks/{blockId}")
+    public PageBlockDTO updateBlock(@PathVariable Long blockId, @RequestBody CreateOrUpdatePageBlockRecord block) {
         return pageUpdateService.updateBlock(blockId, block)
                 .map(PageBlockDTO::fromEntity)
                 .orElseThrow();
     }
 
-    @DeleteMapping("/{id}/blocks/{blockId}")
-    public void deleteBlock(@PathVariable Long id, @PathVariable Long blockId) {
+    @DeleteMapping("/blocks/{blockId}")
+    public void deleteBlock(@PathVariable Long blockId) {
         pageDeleteService.deleteBlock(blockId);
     }
 
+    @PostMapping("/{blockId}/data")
+    public PageBlockDataDTO addData(@PathVariable Long blockId, @RequestBody CreateOrUpdatePageBlockDataRecord data) {
+        return pageCreateService.addDataToBlock(blockId, data)
+                .map(PageBlockDataDTO::fromEntity)
+                .orElseThrow();
+    }
+
+    @PutMapping("/data/{dataId}")
+    public PageBlockDataDTO updateData(@PathVariable Long dataId, @RequestBody CreateOrUpdatePageBlockDataRecord data) {
+        return pageUpdateService.updateData(dataId, data)
+                .map(PageBlockDataDTO::fromEntity)
+                .orElseThrow();
+    }
+
+    @DeleteMapping("/data/{dataId}")
+    public void deleteData(@PathVariable Long dataId) {
+        pageDeleteService.deleteData(dataId);
+    }
 }

@@ -37,10 +37,14 @@ public class PageCreateService {
                 });
     }
 
-    public PageBlockDataEntity addDataToBlock(Long blockId, PageBlockDataDTO dataDTO) {
-        var blockEntity = pageBlockEntityRepository.findById(blockId).orElseThrow();
-        var dataEntity = dataDTO.toEntity();
-        dataEntity.setPageBlock(blockEntity);
-        return pageBlockDataEntityRepository.save(dataEntity);
+    public Optional<PageBlockDataEntity> addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataRecord data) {
+        return pageBlockEntityRepository.findById(blockId)
+                .map(blockEntity -> {
+                    var dataEntity = data.toEntity();
+                    pageBlockDataEntityRepository.save(dataEntity);
+                    blockEntity.addData(dataEntity);
+                    pageBlockEntityRepository.save(blockEntity);
+                    return dataEntity;
+                });
     }
 }

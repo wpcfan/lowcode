@@ -75,4 +75,14 @@ public class PageEntity extends Auditable {
         pageBlocks.add(pageBlockEntity);
         pageBlockEntity.setPage(this);
     }
+
+    /**
+     * 删除一个页面区块
+     * 这个方式是 JPA 中常见的双向关联的删除方式，我们会在集合删除子元素的同时，将子元素的父元素设置为 null
+     * @param pageBlockEntity
+     */
+    public void removePageBlock(PageBlockEntity pageBlockEntity) {
+        pageBlocks.remove(pageBlockEntity);
+        pageBlockEntity.setPage(null);
+    }
 }

@@ -1,22 +1,19 @@
 package com.mooc.backend.services;
 
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataRecord;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockRecord;
 import com.mooc.backend.dtos.CreateOrUpdatePageRecord;
-import com.mooc.backend.dtos.PageDTO;
+import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
-import com.mooc.backend.entities.PageConfig;
 import com.mooc.backend.entities.PageEntity;
-import com.mooc.backend.enumerations.PageType;
-import com.mooc.backend.enumerations.Platform;
+import com.mooc.backend.repositories.PageBlockDataEntityRepository;
 import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.stream.LongStream;
 
 @Transactional
 @RequiredArgsConstructor
@@ -24,6 +21,7 @@ import java.util.stream.LongStream;
 public class PageUpdateService {
     private final PageEntityRepository pageEntityRepository;
     private final PageBlockEntityRepository pageBlockEntityRepository;
+    private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
     public Optional<PageEntity> updatePage(Long id, CreateOrUpdatePageRecord page) {
         return pageEntityRepository.findById(id)
@@ -44,6 +42,15 @@ public class PageUpdateService {
                     pageBlockEntity.setTitle(block.title());
                     pageBlockEntity.setType(block.type());
                     return pageBlockEntityRepository.save(pageBlockEntity);
+                });
+    }
+
+    public Optional<PageBlockDataEntity> updateData(Long dataId, CreateOrUpdatePageBlockDataRecord data) {
+        return pageBlockDataEntityRepository.findById(dataId)
+                .map(pageBlockDataEntity -> {
+                    pageBlockDataEntity.setSort(data.sort());
+                    pageBlockDataEntity.setContent(data.content());
+                    return pageBlockDataEntityRepository.save(pageBlockDataEntity);
                 });
     }
 }

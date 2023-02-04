@@ -14,9 +14,7 @@ public class ProductAdminController {
 
     @PostMapping()
     public ProductDTO createProduct(@RequestBody CreateOrUpdateProductRecord product) {
-        return productAdminService.createProduct(product)
-                .map(ProductDTO::fromEntity)
-                .orElseThrow();
+        return ProductDTO.fromEntity(productAdminService.createProduct(product));
     }
 
     @PutMapping("/{id}")

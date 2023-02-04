@@ -13,7 +13,7 @@ public class QiNiuConfig {
     @Bean
     public com.qiniu.storage.Configuration configuration() {
         var cfg = new com.qiniu.storage.Configuration(com.qiniu.storage.Region.autoRegion());
-        cfg.useHttpsDomains = true;
+        cfg.useHttpsDomains = false;
         cfg.resumableUploadAPIVersion = com.qiniu.storage.Configuration.ResumableUploadAPIVersion.V2;
         return cfg;
     }

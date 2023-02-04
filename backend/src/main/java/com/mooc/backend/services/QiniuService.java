@@ -22,6 +22,9 @@ public class QiniuService {
     @Value("${qiniu.bucket}")
     private String bucket;
 
+    @Value("${qiniu.domain}")
+    private String domain;
+
     public FileRecord upload(byte[] uploadBytes, String key) {
         ByteArrayInputStream byteInputStream = new ByteArrayInputStream(uploadBytes);
         String upToken = auth.uploadToken(bucket);
@@ -29,7 +32,7 @@ public class QiniuService {
             var mapper = new ObjectMapper();
             var response = uploadManager.put(byteInputStream, key, upToken, null, null);
             var putRet = mapper.readValue(response.bodyString(), com.qiniu.storage.model.DefaultPutRet.class);
-            return new FileRecord(putRet.key, putRet.hash);
+            return new FileRecord(domain + "/" + putRet.key, putRet.hash);
         } catch (QiniuException | JsonProcessingException e) {
             e.printStackTrace();
             throw new CustomException("File Upload error", e.getMessage(), 500);

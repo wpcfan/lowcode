@@ -17,4 +17,13 @@ public enum Platform {
     public String getValue() {
         return value;
     }
+
+    public static Platform fromValue(String value) {
+        for (Platform platform : Platform.values()) {
+            if (platform.value.equals(value)) {
+                return platform;
+            }
+        }
+        throw new IllegalArgumentException("Invalid Platform value: " + value);
+    }
 }

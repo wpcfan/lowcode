@@ -19,4 +19,13 @@ public enum BlockType {
     public String getValue() {
         return value;
     }
+
+    public static BlockType fromValue(String value) {
+        for (BlockType blockType : BlockType.values()) {
+            if (blockType.value.equals(value)) {
+                return blockType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid BlockType value: " + value);
+    }
 }

@@ -17,4 +17,13 @@ public enum PageType {
     public String getValue() {
         return value;
     }
+
+    public static PageType fromValue(String value) {
+        for (PageType pageType : PageType.values()) {
+            if (pageType.value.equals(value)) {
+                return pageType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid PageType value: " + value);
+    }
 }

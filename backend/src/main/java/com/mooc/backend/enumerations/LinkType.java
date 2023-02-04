@@ -16,4 +16,13 @@ public enum LinkType {
     public String getValue() {
         return value;
     }
+
+    public static LinkType fromValue(String value) {
+        for (LinkType linkType : LinkType.values()) {
+            if (linkType.value.equals(value)) {
+                return linkType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid LinkType value: " + value);
+    }
 }

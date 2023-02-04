@@ -1,5 +1,6 @@
 package com.mooc.backend.entities;
 
+import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
@@ -7,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,6 +70,19 @@ public class PageEntity extends Auditable {
     @Column(name = "config", nullable = false, columnDefinition = "json")
     @ToString.Exclude
     private PageConfig config;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "start_time")
+    private LocalDateTime startTime;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "end_time")
+    private LocalDateTime endTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private PageStatus status = PageStatus.Draft;
 
     /**
      * 添加一个页面区块

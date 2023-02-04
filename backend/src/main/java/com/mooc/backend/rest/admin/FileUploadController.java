@@ -20,7 +20,7 @@ import java.util.UUID;
 public class FileUploadController {
 
     private final QiniuService qiniuService;
-    @PostMapping(value = "/file",consumes = "multipart/form-data")
+    @PostMapping(value = "/file", consumes = "multipart/form-data")
     public FileRecord upload(@RequestParam("file") MultipartFile file) {
         try {
             return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
@@ -29,7 +29,7 @@ public class FileUploadController {
         }
     }
 
-    @PostMapping(value = "/files",consumes = "multipart/form-data")
+    @PostMapping(value = "/files", consumes = "multipart/form-data")
     public List<FileRecord> uploadFiles(@RequestParam("files") List<? extends MultipartFile> files) {
         return files.stream().map(file -> {
             try {

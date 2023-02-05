@@ -1,5 +1,75 @@
 # 后台 API
 
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [后台 API](#-后台-api)
+  - [Java 版本](#-java-版本)
+    - [Java 各版本的新特性](#-java-各版本的新特性)
+      - [Lambda 表达式](#-lambda-表达式)
+      - [方法引用](#-方法引用)
+      - [Stream API](#-stream-api)
+      - [Optional](#-optional)
+      - [Date/Time API](#-datetime-api)
+      - [模块化系统](#-模块化系统)
+      - [JShell](#-jshell)
+      - [Process API](#-process-api)
+      - [JFR](#-jfr)
+      - [HttpClient](#-httpclient)
+      - [JSON API](#-json-api)
+      - [var](#-var)
+      - [ZGC](#-zgc)
+      - [Records](#-records)
+      - [Switch 模式匹配](#-switch-模式匹配)
+      - [Text Blocks](#-text-blocks)
+      - [Pattern Matching for instanceof](#-pattern-matching-for-instanceof)
+      - [Sealed Classes](#-sealed-classes)
+  - [SpringBoot 的测试](#-springboot-的测试)
+    - [单元测试](#-单元测试)
+      - [Mock](#-mock)
+      - [MockMvc](#-mockmvc)
+    - [集成测试](#-集成测试)
+      - [Spring Boot 的集成测试](#-spring-boot-的集成测试)
+    - [测试的配置文件](#-测试的配置文件)
+  - [Spring Data JPA](#-spring-data-jpa)
+    - [Spring Data JPA 的使用](#-spring-data-jpa-的使用)
+      - [Spring Data JPA 的依赖](#-spring-data-jpa-的依赖)
+      - [Spring Data JPA 的配置](#-spring-data-jpa-的配置)
+    - [Spring Data JPA 的实体类](#-spring-data-jpa-的实体类)
+      - [实体类和数据库表的映射关系](#-实体类和数据库表的映射关系)
+      - [实体类的主键生成策略](#-实体类的主键生成策略)
+      - [实体类中枚举类型的映射](#-实体类中枚举类型的映射)
+      - [在 API 参数中使用枚举](#-在-api-参数中使用枚举)
+      - [表关联的映射](#-表关联的映射)
+    - [表的自动创建](#-表的自动创建)
+      - [导出数据库脚本](#-导出数据库脚本)
+    - [Spring Data JPA 的接口](#-spring-data-jpa-的接口)
+    - [Spring Data JPA 的查询](#-spring-data-jpa-的查询)
+      - [命名形式查询](#-命名形式查询)
+      - [返回的对象类型选择](#-返回的对象类型选择)
+      - [@Query 注解查询](#-query-注解查询)
+      - [Example 查询](#-example-查询)
+      - [Specification 查询](#-specification-查询)
+      - [自定义 Repository](#-自定义-repository)
+    - [Spring Data JPA 的分页支持](#-spring-data-jpa-的分页支持)
+    - [Spring Data JPA 的排序支持](#-spring-data-jpa-的排序支持)
+      - [Slice 分页](#-slice-分页)
+    - [Spring Data JPA 的测试](#-spring-data-jpa-的测试)
+  - [Flyway 管理数据库版本](#-flyway-管理数据库版本)
+  - [SpringBoot Validation](#-springboot-validation)
+    - [Bean Validation](#-bean-validation)
+  - [Lombok](#-lombok)
+    - [@Data](#-data)
+    - [@Builder](#-builder)
+    - [@RequiredArgsConstructor](#-requiredargsconstructor)
+    - [@Value](#-value)
+    - [val](#-val)
+    - [日志](#-日志)
+    - [在实体类中使用需要注意的问题](#-在实体类中使用需要注意的问题)
+
+<!-- /code_chunk_output -->
+
 后台的技术架构采用 `SpringBoot 3.0` , `SpringBoot 3.0` 是一次重大的升级， 要求 JDK 版本为 17 以上， 本项目采用 `JDK 19` 进行开发。
 
 ## Java 版本
@@ -7,21 +77,21 @@
 Java 目前每年都会发布新的版本， 但是新版本的发布并不是每个人都能够及时的升级， 本项目采用 `JDK 19` 进行开发， 但是也会考虑向下兼容， 也就是说， 本项目的代码可以在 `JDK 17` 以上的版本上运行。
 需要注意的是，在生产环境下我们最好使用 LTS 版本，也就是长期维护版本。Java 目前的 LTS 版本和其维护截止日期如下：
 
-| 版本     | 维护截止日期     |
-|--------|------------|
-| JDK 8  | 2025-03-18 |
-| JDK 11 | 2026-09-14 |
-| JDK 17 | 2029-09-14 |
+| 版本   | 维护截止日期 |
+| ------ | ------------ |
+| JDK 8  | 2025-03-18   |
+| JDK 11 | 2026-09-14   |
+| JDK 17 | 2029-09-14   |
 
 中间的过渡版本会引入新的特性，但是不会有长期的维护，在新特性稳定后才会发布 LTS 版本。
 
 ### Java 各版本的新特性
 
-| 版本     | 新特性                                               |
-|--------|---------------------------------------------------|
+| 版本   | 新特性                                                       |
+| ------ | ------------------------------------------------------------ |
 | JDK 8  | Lambda 表达式，方法引用，Stream API，Optional，Date/Time API |
-| JDK 11 | 模块化系统，HTTP 客户端，JSON API，var，ZGC                   |
-| JDK 17 | Records，Sealed Classes，Pattern Matching           |
+| JDK 11 | 模块化系统，HTTP 客户端，JSON API，var，ZGC                  |
+| JDK 17 | Records，Sealed Classes，Pattern Matching                    |
 
 #### Lambda 表达式
 
@@ -112,7 +182,7 @@ String formattedDate = now.format(formatter);
 #### 模块化系统
 
 模块化系统是 Java 9 中引入的一个新特性，它允许把 Java 代码分成不同的模块，每个模块都有自己的命名空间，模块之间的依赖关系通过模块描述符来描述。模块化系统使得 Java 代码的组织变得更加清晰，也使得 Java 代码的重用变得更加容易。
-简单来说模块化就是"Java包的包"，在包的上一层再抽象一层，把包组织成模块，模块之间的依赖关系通过模块描述符来描述。
+简单来说模块化就是"Java 包的包"，在包的上一层再抽象一层，把包组织成模块，模块之间的依赖关系通过模块描述符来描述。
 
 Java 从 JDK 9 开始本身就是一个模块化的系统，可以通过以下命令查看 Java 9 或以上的 JDK 中的模块。
 
@@ -736,17 +806,17 @@ public class User {
 
 在 Spring Data JPA 中，实体类和数据库表的映射关系如下：
 
-| 实体类属性类型    | 数据库字段类型  |
-|------------|----------|
-| String     | VARCHAR  |
-| Integer    | INT      |
-| Long       | BIGINT   |
-| Float      | FLOAT    |
-| Double     | DOUBLE   |
-| BigDecimal | DECIMAL  |
-| Boolean    | BIT      |
-| Date       | DATETIME |
-| byte[]     | BLOB     |
+| 实体类属性类型 | 数据库字段类型 |
+| -------------- | -------------- |
+| String         | VARCHAR        |
+| Integer        | INT            |
+| Long           | BIGINT         |
+| Float          | FLOAT          |
+| Double         | DOUBLE         |
+| BigDecimal     | DECIMAL        |
+| Boolean        | BIT            |
+| Date           | DATETIME       |
+| byte[]         | BLOB           |
 
 #### 实体类的主键生成策略
 
@@ -765,12 +835,12 @@ public class User {
 
 在 `@GeneratedValue` 注解中，我们可以设置 `strategy` 属性来指定主键生成策略，比如：
 
-| 主键生成策略   | 说明                                                          |
-|----------|-------------------------------------------------------------|
-| AUTO     | 主键由程序控制，是默认选项，不设置就是这个策略。                                    |
-| IDENTITY | 主键由数据库自动生成（主要是自动增长型）                                        |
-| SEQUENCE | 通过数据库的序列产生主键，通过 `@SequenceGenerator` 注解指定序列名，MySql 不支持这种方式。 |
-| TABLE    | 通过特定的数据库表产生主键，使用该策略可以使应用更易于数据库移植。                           |
+| 主键生成策略 | 说明                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| AUTO         | 主键由程序控制，是默认选项，不设置就是这个策略。                                           |
+| IDENTITY     | 主键由数据库自动生成（主要是自动增长型）                                                   |
+| SEQUENCE     | 通过数据库的序列产生主键，通过 `@SequenceGenerator` 注解指定序列名，MySql 不支持这种方式。 |
+| TABLE        | 通过特定的数据库表产生主键，使用该策略可以使应用更易于数据库移植。                         |
 
 #### 实体类中枚举类型的映射
 
@@ -804,10 +874,10 @@ public class PageEntity extends Auditable {
 
 在 `@Enumerated` 注解中，我们可以设置 `EnumType` 属性来指定枚举类型的映射方式，比如：
 
-| 枚举类型映射方式 | 说明                                                |
-|----------|---------------------------------------------------|
-| ORDINAL  | 默认值，使用枚举的序数来映射枚举类型，比如：`PageStatus.Draft` 映射为 `0`。 |
-| STRING   | 使用枚举的名称来映射枚举类型，比如：`PageStatus.Draft` 映射为 `Draft`。 |
+| 枚举类型映射方式 | 说明                                                                        |
+| ---------------- | --------------------------------------------------------------------------- |
+| ORDINAL          | 默认值，使用枚举的序数来映射枚举类型，比如：`PageStatus.Draft` 映射为 `0`。 |
+| STRING           | 使用枚举的名称来映射枚举类型，比如：`PageStatus.Draft` 映射为 `Draft`。     |
 
 注意采用不同的策略，会影响到枚举类型的值的存储，比如：
 
@@ -828,7 +898,7 @@ mysql> desc mooc_pages;
 
 一般来说，我们会采用 `STRING` 策略来映射枚举类型，这样可以避免枚举类型的值发生变化时，数据库中的值也会发生变化。
 
-很多时候，我们可能会使用字符串类型的枚举类型，比如：
+很多时候，我们可能会类型参数的枚举类型，比如：
 
 ```java
 public enum PageType {
@@ -849,7 +919,7 @@ public enum PageType {
     public String getValue() {
         return value;
     }
-    
+
     @JsonCreator
     public static PageType fromValue(String value) {
         for (PageType pageType : PageType.values()) {
@@ -890,6 +960,40 @@ public enum PageType {
 }
 ```
 
+#### 在 API 参数中使用枚举
+
+比如在一个 `@GetMapping` 注解的方法中，我们可以使用 `@RequestParam` 注解来接收 API 参数，比如：
+
+```java
+@GetMapping("/pages")
+public List<Page> getPages(@RequestParam("page_type") PageType pageType) {
+    return pageService.getPages(pageType);
+}
+```
+
+这样，我们就可以通过 `page_type` 参数来指定查询的页面类型，比如：
+
+```bash
+curl http://localhost:8080/pages?page_type=home
+```
+
+但要注意的是如果 PageType 是一个有类型参数的枚举的话，我们需要自定义一个 converter 来将 API 参数转换成枚举类型，比如：
+
+```java
+import com.mooc.backend.enumerations.PageType;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+
+@Configuration
+public class PageTypeConverter implements Converter<String, PageType> {
+    @Override
+    public PageType convert(String source) {
+        return PageType.fromValue(source);
+    }
+}
+```
+
+我们只需添加 `@Configuration` 注解，框架会自动注册这个 `Converter`，在请求中遇到参数实际值是 `String` 但是参数类型是 `PageType` 时，就会自动调用这个 `Converter` 来转换参数值。
 
 #### 表关联的映射
 
@@ -1303,13 +1407,13 @@ spring.jpa.hibernate.ddl-auto=create
 
 Spring Data JPA 支持的表的自动创建策略如下：
 
-| 策略          | 说明                                                                                                             |
-|-------------|----------------------------------------------------------------------------------------------------------------|
-| create      | 每次加载 Hibernate 时都会删除上一次的生成的表，然后根据你的 model 类再重新来生成新表，即使两次没有任何改变，也要删除表后重新创建。                                     |
-| create-drop | 每次加载 Hibernate 时根据 model 类生成表，但是 sessionFactory 一关闭,表就自动删除。                                                    |
+| 策略        | 说明                                                                                                                                                                                     |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| create      | 每次加载 Hibernate 时都会删除上一次的生成的表，然后根据你的 model 类再重新来生成新表，即使两次没有任何改变，也要删除表后重新创建。                                                       |
+| create-drop | 每次加载 Hibernate 时根据 model 类生成表，但是 sessionFactory 一关闭,表就自动删除。                                                                                                      |
 | update      | 最常用的属性，第一次加载 Hibernate 时根据 model 类会自动建立起表的结构（前提是先建立好数据库），以后加载 Hibernate 时根据 model 类自动更新表结构，即使表结构改变了，但表中的行仍然存在。 |
-| validate    | 每次加载 Hibernate 时，验证创建数据库表结构，只会和数据库中的表进行比较，不会创建新表，但是会插入新值。                                                      |
-| none        | 什么都不做。                                                                                                         |
+| validate    | 每次加载 Hibernate 时，验证创建数据库表结构，只会和数据库中的表进行比较，不会创建新表，但是会插入新值。                                                                                  |
+| none        | 什么都不做。                                                                                                                                                                             |
 
 一般情况下在开发阶段，我们会使用这种自动的方式来创建表，但是在生产环境中，我们会使用数据库的脚本来创建表，这样可以保证表的创建和数据的初始化是分开的。
 
@@ -1374,7 +1478,7 @@ Spring Data JPA 中的命名形式查询是一种在不编写实际查询的情�
 
 命名形式查询规则如下：
 
-1. 查询以“find…By”开头。
+1. 查询以 “find…By” 或者 “read…By” 或者 “query…By” 或者 “count…By” 开头。
 2. 在“By”之后指定要查询的字段。
 3. 可以指定一个或多个字段。
 4. 可以使用“And”和“Or”来连接多个字段。
@@ -1426,6 +1530,34 @@ public interface UserRepository extends CrudRepository<User, Long> {
 ```
 
 注意，这里的 `Roles` 是 `User` 实体类中的一个属性，是用户的角色集合，`Name` 是 `Role` 实体类中的一个属性。
+
+#### 返回的对象类型选择
+
+一般来说，查询一个集合时，可以使用 `List` 或者 `Set` 来接收返回值。例如，如果想要查询所有用户，可以使用以下方法：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    List<User> findAll();
+}
+```
+
+而查询单个对象时，可以使用 `Optional` 来接收返回值。例如，如果想要查询某个用户，可以使用以下方法：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    Optional<User> findById(Long id);
+}
+```
+
+有时我们还会希望返回 `Stream` 对象，这时可以使用 `Stream` 来接收返回值。例如，如果想要查询所有用户，可以使用以下方法：
+
+```java
+public interface UserRepository extends CrudRepository<User, Long> {
+    Stream<User> findAll();
+}
+```
+
+使用 `Stream` 对象可以实现延迟加载，提高查询效率。
 
 #### @Query 注解查询
 
@@ -1944,6 +2076,35 @@ public Page<User> getUsers(@PageableDefault(size = 10, sort = {"id"}, direction 
 }
 ```
 
+需要注意的是，默认这种分页方式是从 0 开始的，如果我们想从 1 开始，那么可以通过 `@PageableDefault(page = 1)` 来设置。
+
+注意到，上面的分页其实是两次查询，第一次查询 count，第二次查询数据。如果我们只需要查询数据，那么可以通过 `@Query` 注解来实现。
+
+```java
+@Query(value = "select * from user", countQuery = "select count(*) from user", nativeQuery = true)
+Page<User> getUsers(Pageable pageable);
+```
+
+#### Slice 分页
+
+对于海量数据的分页，为避免性能损耗，我们可以通过 `Slice` 分页的方式来实现。
+
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+
+    Slice<User> findAll(Pageable pageable);
+}
+
+@GetMapping("/users")
+public Slice<User> getUsers(Pageable pageable) {
+    return userRepository.findAll(pageable);
+}
+```
+
+`Slice` 和 `Page` 的主要区别在于 `Slice` 不知道总数量，它只有是否有下一页的信息。
+
+从 UX 角度，类似微博的无尽滚动加载，就可以使用 `Slice` 分页。类似后台管理系统的分页，就可以使用 `Page` 的分页。
+
 ### Spring Data JPA 的测试
 
 进行数据库测试的时候，Spring Data JPA 提供了一个 @DataJpaTest 注解，它可以帮助我们自动配置 Spring Data JPA 所需要的组件，比如 EntityManager、DataSource、JdbcTemplate 等。
@@ -1967,7 +2128,7 @@ class DemoApplicationTests {
         user.setEmail("zhangsan@local.dev");
         entityManager.persist(user);
         entityManager.flush();
-        
+
         List<User> users = userRepository.findAll();
         Assertions.assertEquals(1, users.size());
         Assertions.assertEquals("张三", users.get(0).getName());
@@ -2372,10 +2533,85 @@ public class User extends Auditable {
             return false;
         return true;
     }
-    
+
     @Override
     public int hashCode() {
         return 0;
+    }
+}
+```
+
+## Rest API 的可测试文档 Swagger
+
+在 SpringBoot 中，我们可以使用 Swagger 来生成 Rest API 的可测试文档。这里我们使用一个第三方类库 `springdoc` ，它可以帮助我们生成更加丰富的文档。
+
+### 添加依赖
+
+在 `build.gradle` 中添加依赖：
+
+```groovy
+implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+```
+
+### 添加配置
+
+在 `application.properties` 中添加配置，当然这都是默认配置，其实不添加也一样可以生效：
+
+```properties
+springdoc.api-docs.enabled=true
+springdoc.swagger-ui.enabled=true
+springdoc.swagger-ui.path=/swagger-ui.html
+```
+
+### 使用
+
+在我们的 Rest API 中，我们可以使用 `@Operation` 注解来为我们的 API 添加描述信息。
+
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+    private final UserService userService;
+
+    @Operation(summary = "Get user by id")
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+}
+```
+
+启动项目，访问 `http://localhost:8080/swagger-ui.html`，我们就可以看到我们的 API 文档了。
+
+除了 `@Operation` 注解，我们还可以使用 `@Parameter` 注解来为我们的 API 添加参数描述信息。
+
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+    private final UserService userService;
+
+    @Operation(summary = "Get user by id")
+    @GetMapping("/{id}")
+    public User getUserById(@Parameter(description = "User id") @PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+}
+```
+
+随着 API 数量的增多，我们的文档也会越来越长，我们可以使用 `@Tag` 注解来为我们的 API 分组。
+
+```java
+@RestController
+@RequestMapping("/api/v1/users")
+@Tag(name = "User", description = "User API")
+public class UserController {
+    private final UserService userService;
+
+    @Operation(summary = "Get user by id")
+    @GetMapping("/{id}")
+    public User getUserById(@Parameter(description = "User id") @PathVariable Long id) {
+        return userService.getUserById(id);
     }
 }
 ```

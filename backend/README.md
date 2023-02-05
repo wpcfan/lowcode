@@ -748,6 +748,149 @@ public class User {
 | Date       | DATETIME |
 | byte[]     | BLOB     |
 
+#### 实体类的主键生成策略
+
+在 Spring Data JPA 中，我们可以使用 `@Id` 注解来标注实体类的主键，比如：
+
+```java
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // getter and setter
+}
+```
+
+在 `@GeneratedValue` 注解中，我们可以设置 `strategy` 属性来指定主键生成策略，比如：
+
+| 主键生成策略   | 说明                                                          |
+|----------|-------------------------------------------------------------|
+| AUTO     | 主键由程序控制，是默认选项，不设置就是这个策略。                                    |
+| IDENTITY | 主键由数据库自动生成（主要是自动增长型）                                        |
+| SEQUENCE | 通过数据库的序列产生主键，通过 `@SequenceGenerator` 注解指定序列名，MySql 不支持这种方式。 |
+| TABLE    | 通过特定的数据库表产生主键，使用该策略可以使应用更易于数据库移植。                           |
+
+#### 实体类中枚举类型的映射
+
+在 Spring Data JPA 中，我们可以使用 `@Enumerated` 注解来标注实体类中的枚举类型，比如：
+
+```java
+@Entity
+@Table(name = "mooc_pages")
+public class PageEntity extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @Column(name = "title", nullable = false, unique = true)
+    private String title;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "platform", nullable = false)
+    private Platform platform;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "page_type", nullable = false)
+    private PageType pageType;
+
+    @Enumerated(EnumType.ORDINAL)
+    @Column(name = "status", nullable = false)
+    private PageStatus status = PageStatus.Draft;
+}
+```
+
+在 `@Enumerated` 注解中，我们可以设置 `EnumType` 属性来指定枚举类型的映射方式，比如：
+
+| 枚举类型映射方式 | 说明                                                |
+|----------|---------------------------------------------------|
+| ORDINAL  | 默认值，使用枚举的序数来映射枚举类型，比如：`PageStatus.Draft` 映射为 `0`。 |
+| STRING   | 使用枚举的名称来映射枚举类型，比如：`PageStatus.Draft` 映射为 `Draft`。 |
+
+注意采用不同的策略，会影响到枚举类型的值的存储，比如：
+
+```sql
+mysql> desc mooc_pages;
++------------+--------------+------+-----+---------+----------------+
+| Field      | Type         | Null | Key | Default | Extra          |
++------------+--------------+------+-----+---------+----------------+
+| id         | bigint(20)   | NO   | PRI | NULL    | auto_increment |
+| title      | varchar(255) | NO   | UNI | NULL    |                |
+| platform   | varchar(255) | NO   |     | NULL    |                |
+| page_type  | varchar(255) | NO   |     | NULL    |                |
+| status     | int(11)      | NO   |     | 0       |                |
+| created_at | datetime     | YES  |     | NULL    |                |
+| updated_at | datetime     | YES  |     | NULL    |                |
++------------+--------------+------+-----+---------+----------------+
+```
+
+一般来说，我们会采用 `STRING` 策略来映射枚举类型，这样可以避免枚举类型的值发生变化时，数据库中的值也会发生变化。
+
+很多时候，我们可能会使用字符串类型的枚举类型，比如：
+
+```java
+public enum PageType {
+    Home("首页"),
+    About("关于我们"),
+    Contact("联系我们"),
+    News("新闻中心"),
+    Product("产品中心"),
+    Service("服务中心");
+
+    private String value;
+
+    PageType(String value) {
+        this.value = value;
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+    
+    @JsonCreator
+    public static PageType fromValue(String value) {
+        for (PageType pageType : PageType.values()) {
+            if (pageType.getValue().equals(value)) {
+                return pageType;
+            }
+        }
+        throw new IllegalArgumentException("No matching constant for [" + value + "]");
+    }
+}
+```
+
+注意，上面的 `@JsonValue` 和 `@JsonCreator` 注解是用来支持 JSON 序列化和反序列化的，如果我们不使用这两个注解，那么在序列化和反序列化时，枚举类型的值会变成枚举类型的名称，比如：
+
+```json
+{
+  "id": 1,
+  "title": "首页",
+  "platform": "PC",
+  "pageType": "Home",
+  "status": "Draft",
+  "createdAt": "2019-03-01T16:00:00",
+  "updatedAt": "2019-03-01T16:00:00"
+}
+```
+
+如果我们使用了 `@JsonValue` 和 `@JsonCreator` 注解，那么在序列化和反序列化时，枚举类型的值会变成枚举类型的值，比如：
+
+```json
+{
+  "id": 1,
+  "title": "首页",
+  "platform": "PC",
+  "pageType": "首页",
+  "status": "草稿",
+  "createdAt": "2019-03-01T16:00:00",
+  "updatedAt": "2019-03-01T16:00:00"
+}
+```
+
+
 #### 表关联的映射
 
 在 Spring Data JPA 中，我们可以使用 `@ManyToOne`、`@OneToOne`、`@OneToMany`、`@ManyToMany` 注解来标注实体类之间的关联关系，比如：

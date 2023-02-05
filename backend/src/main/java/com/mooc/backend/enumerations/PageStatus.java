@@ -1,29 +1,18 @@
 package com.mooc.backend.enumerations;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 public enum PageStatus {
-    Draft("Draft"),
-    Published("Published"),
-    Archived("Archived");
+    Draft("草稿"),
+    Published("发布"),
+    Archived("归档");
 
+    // 如果不加 @JsonValue 注解，那么在序列化时，会使用枚举的名称，而不是 value 字段的值
     private final String value;
 
     PageStatus(String value) {
         this.value = value;
     }
 
-    @JsonValue
     public String getValue() {
         return value;
-    }
-
-    public static PageStatus fromValue(String value) {
-        for (PageStatus pageStatus : PageStatus.values()) {
-            if (pageStatus.value.equals(value)) {
-                return pageStatus;
-            }
-        }
-        throw new IllegalArgumentException("Invalid PageStatus value: " + value);
     }
 }

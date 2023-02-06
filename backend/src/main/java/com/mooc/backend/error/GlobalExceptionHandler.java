@@ -34,6 +34,7 @@ public class GlobalExceptionHandler {
         body.setProperty("hostname", hostname);
         body.setProperty("code", ex.getCode());
         body.setProperty("User-Agent", Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown"));
+        body.setProperty("locale", request.getLocale().toString());
         return body;
     }
 
@@ -49,6 +50,8 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining(", "));
         body.setDetail(details);
         body.setProperty("hostname", hostname);
+        body.setProperty("User-Agent", Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown"));
+        body.setProperty("locale", request.getLocale().toString());
         return body;
     }
 
@@ -60,6 +63,7 @@ public class GlobalExceptionHandler {
         body.setTitle(messageSource.getMessage("error.uncaught", null, request.getLocale()));
         body.setProperty("hostname", hostname);
         body.setProperty("User-Agent", Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown"));
+        body.setProperty("locale", request.getLocale().toString());
         return body;
     }
 

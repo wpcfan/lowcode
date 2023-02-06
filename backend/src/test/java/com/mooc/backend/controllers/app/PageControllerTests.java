@@ -1,6 +1,5 @@
 package com.mooc.backend.controllers.app;
 
-import com.mooc.backend.dtos.PageDTO;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
@@ -14,7 +13,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -50,7 +48,7 @@ public class PageControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.title").value("Page 1"))
-                .andExpect(jsonPath("$.pageType").value("home"))
-                .andExpect(jsonPath("$.platform").value("iOS"));
+                .andExpect(jsonPath("$.pageType").value(PageType.Home.getValue()))
+                .andExpect(jsonPath("$.platform").value(Platform.iOS.name()));
     }
 }

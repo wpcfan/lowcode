@@ -43,7 +43,7 @@ public class CategoryRepositoryTests {
     @Autowired
     private TestEntityManager testEntityManager;
 
-    private static final MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:5.7")
+    private static final MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8")
             .withDatabaseName("low_code")
             .withUsername("user")
             .withPassword("password");

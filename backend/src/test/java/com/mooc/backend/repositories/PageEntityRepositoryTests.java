@@ -6,15 +6,17 @@ import com.mooc.backend.entities.blocks.BlockConfig;
 import com.mooc.backend.entities.blocks.ImageData;
 import com.mooc.backend.entities.blocks.Link;
 import com.mooc.backend.entities.blocks.ProductData;
-import com.mooc.backend.enumerations.BlockType;
-import com.mooc.backend.enumerations.LinkType;
-import com.mooc.backend.enumerations.PageType;
-import com.mooc.backend.enumerations.Platform;
+import com.mooc.backend.enumerations.*;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -27,9 +29,13 @@ public class PageEntityRepositoryTests {
     @Autowired
     private TestEntityManager testEntityManager;
 
-    @Test
-    public void testFindAll() {
+    private PageEntity page1;
+    private PageEntity page2;
+    private PageEntity page3;
+    private PageEntity page4;
 
+    @BeforeEach
+    void beforeEach() {
         var linkBaidu = Link.builder()
                 .type(LinkType.Url)
                 .value("https://www.baidu.com")
@@ -161,20 +167,72 @@ public class PageEntityRepositoryTests {
         productRow.addData(productData1);
         productRow.addData(productData2);
 
-        var page = PageEntity.builder()
+        page1 = PageEntity.builder()
                 .pageType(PageType.Home)
                 .platform(Platform.Android)
                 .config(pageConfig)
                 .title("Test Page 1")
                 .build();
 
-        page.addPageBlock(pinnedHeader);
-        page.addPageBlock(imageRow);
-        page.addPageBlock(productRow);
+        page1.addPageBlock(pinnedHeader);
+        page1.addPageBlock(imageRow);
+        page1.addPageBlock(productRow);
 
-        testEntityManager.persist(page);
+        testEntityManager.persist(page1);
+
+        page2 = PageEntity.builder()
+                .pageType(PageType.Home)
+                .platform(Platform.Android)
+                .config(pageConfig)
+                .title("Test Page 2")
+                .build();
+
+        page2.addPageBlock(pinnedHeader);
+        page2.addPageBlock(imageRow);
+        page2.addPageBlock(imageRow);
+        page2.addPageBlock(productRow);
+        page2.addPageBlock(productRow);
+
+        testEntityManager.persist(page2);
+
+        page3 = PageEntity.builder()
+                .pageType(PageType.Category)
+                .platform(Platform.Android)
+                .config(pageConfig)
+                .title("Test Page 3")
+                .build();
+
+        page3.addPageBlock(pinnedHeader);
+        page3.addPageBlock(imageRow);
+        page3.addPageBlock(imageRow);
+        page3.addPageBlock(productRow);
+        page3.addPageBlock(productRow);
+
+        testEntityManager.persist(page3);
+
+        page4 = PageEntity.builder()
+                .pageType(PageType.Category)
+                .platform(Platform.iOS)
+                .config(pageConfig)
+                .title("Test Page 4")
+                .build();
+
+        page4.addPageBlock(imageRow);
+        page4.addPageBlock(productRow);
+        page4.addPageBlock(imageRow);
+        page4.addPageBlock(productRow);
+
+        testEntityManager.persist(page4);
         testEntityManager.flush();
+    }
 
+    @AfterEach
+    void afterEach() {
+        testEntityManager.clear();
+    }
+
+    @Test
+    public void testFindAll() {
         var pages = pageEntityRepository.findAll();
 
         assertEquals(1, pages.size());
@@ -184,5 +242,31 @@ public class PageEntityRepositoryTests {
         assertEquals(2, pages.get(0).getPageBlocks().stream().filter(block -> block.getType() == BlockType.PinnedHeader).findFirst().get().getData().size());
         assertEquals(3, pages.get(0).getPageBlocks().stream().filter(block -> block.getType() == BlockType.ImageRow).findFirst().get().getData().size());
         assertEquals(2, pages.get(0).getPageBlocks().stream().filter(block -> block.getType() == BlockType.ProductRow).findFirst().get().getData().size());
+    }
+
+    @Test
+    public void testFindPublishedPage() throws Exception {
+        var now = LocalDateTime.now();
+        page1.setStartTime(now.minusDays(1));
+        page1.setEndTime(now.plusDays(1));
+        page1.setStatus(PageStatus.Published);
+        testEntityManager.persist(page1);
+
+        page2.setStartTime(now.minusMinutes(59));
+        page2.setEndTime(now.plusMinutes(59));
+        page2.setStatus(PageStatus.Published);
+        testEntityManager.persist(page2);
+
+        testEntityManager.flush();
+
+        var stream1 = pageEntityRepository.findPublishedPage(now, Platform.Android, PageType.Home);
+        var stream2 = pageEntityRepository.findPublishedPage(now, Platform.Android, PageType.Home);
+
+        assertEquals(2, stream1.count());
+        assertEquals(1, stream2
+                .peek(p -> System.out.println("Before filter: " + p.getId()))
+                .filter(p -> p.getEndTime().isAfter(now.plusHours(1)))
+                .peek(p -> System.out.println("After filter: " + p.getId()))
+                .count());
     }
 }

@@ -25,6 +25,13 @@
       - [Text Blocks](#-text-blocks)
       - [Pattern Matching for instanceof](#-pattern-matching-for-instanceof)
       - [Sealed Classes](#-sealed-classes)
+  - [SpringBoot 对 Gradle 的支持](#-springboot-对-gradle-的支持)
+    - [在 IDEA 中创建 Gradle 项目](#-在-idea-中创建-gradle-项目)
+    - [Gradle 的基本语法](#-gradle-的基本语法)
+    - [Gradle 的依赖管理](#-gradle-的依赖管理)
+    - [Gradle 的任务](#-gradle-的任务)
+    - [Gradle 的仓库](#-gradle-的仓库)
+    - [命令行](#-命令行)
   - [SpringBoot 的测试](#-springboot-的测试)
     - [单元测试](#-单元测试)
       - [Mock](#-mock)
@@ -67,6 +74,10 @@
     - [val](#-val)
     - [日志](#-日志)
     - [在实体类中使用需要注意的问题](#-在实体类中使用需要注意的问题)
+  - [Rest API 的可测试文档 Swagger](#-rest-api-的可测试文档-swagger)
+    - [添加依赖](#-添加依赖)
+    - [添加配置](#-添加配置)
+    - [使用](#-使用)
 
 <!-- /code_chunk_output -->
 
@@ -447,6 +458,155 @@ public final class Circle extends Shape {
 public final class Rectangle extends Shape {
 }
 ```
+
+## SpringBoot 对 Gradle 的支持
+
+SpringBoot 对 Maven 和 Gradle 的支持都非常好，它支持多种类型的项目，比如普通的 Java 项目、Web 项目、SpringBoot 项目、SpringCloud 项目等。
+
+目前的趋势是使用 Gradle 来构建项目，因为它的语法更加简洁，也更加易读。而且 Gradle 是基于 Groovy 的，Groovy 是一种动态语言，它更加强大，也更加灵活。
+
+### 在 IDEA 中创建 Gradle 项目
+
+我们采用 `Spring Initializr` 来创建一个 Gradle 项目。在 IDEA 中，我们可以通过 `File -> New -> Project` 来创建一个新的项目。
+
+![图 1](images/91c34d94a8ea794e1b34cf14eb8e1cdfdf5d492c2b6a50c3ad6b4c78306b559f.png)
+
+然后选中 `Spring Initializr`，语言选中 `Java`，类型选择 `Gradle - Groovy`，JDK 版本选择 `19`，Java 选择 `19` ，然后点击 `下一步`。
+
+![图 2](images/0d010dbd6f45331e1972a6a632561273416a0bea45bbd5022790e1e2f190ec6b.png)
+
+`Spring Boot` 选择 `3.0.2` ，然后在依赖项中选择图中右侧所示的依赖项，然后点击 `创建`。
+
+### Gradle 的基本语法
+
+创建工程后，在项目根目录下会生成一个 `build.gradle` 文件，这个文件就是 Gradle 的构建文件，它的语法和 Maven 的 POM 文件的语法非常类似。
+
+```groovy
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.0.2'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.mooc'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('testcontainersVersion', "1.17.6")
+}
+
+dependencies {
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.1.1'
+    implementation 'com.qiniu:qiniu-java-sdk:7.12.1'
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.hamcrest:hamcrest-library'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:mysql'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+```
+
+其中，`plugins` 用来声明插件，`repositories` 用来声明仓库，`dependencies` 用来声明依赖，`tasks` 用来声明任务。
+
+### Gradle 的依赖管理
+
+Gradle 的依赖管理和 Maven 的依赖管理非常类似，它也是通过 groupId、artifactId 和 version 来唯一标识一个依赖。
+
+- `implementation` 用来声明编译时和运行时的依赖
+- `compileOnly` 用来声明编译时的依赖，
+- `runtimeOnly` 用来声明运行时的依赖，
+- `testImplementation` 用来声明测试时的依赖。
+
+如果遇到依赖冲突，可以使用 `resolutionStrategy` 来解决。
+
+```groovy
+configurations.all {
+    resolutionStrategy {
+        force 'org.springframework.boot:spring-boot-starter-web:2.5.5'
+    }
+}
+```
+
+也可以使用 `exclude` 来排除依赖。
+
+```groovy
+dependencies {
+    implementation('org.springframework.boot:spring-boot-starter-web') {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+}
+```
+
+### Gradle 的任务
+
+Gradle 的任务和 Maven 的插件非常类似，它也是通过 `tasks` 来声明任务，然后通过 `doLast` 来声明任务的具体内容。比如我们可以通过下面的方式来声明一个 `hello` 任务。
+
+```groovy
+task hello {
+    doLast {
+        println 'Hello Gradle!'
+    }
+}
+```
+
+再一个例子，比如我们在编译后，将一个目录下的文件复制到另一个目录下，可以通过下面的方式来实现。
+
+```groovy
+task copyFiles(type: Copy) {
+    from 'src/main/resources'
+    into 'build/resources/main'
+}
+```
+
+和 Maven 类似的，我们可以指定在某个生命周期中执行某个任务，比如我们可以在 `compileJava` 任务之后执行 `copyFiles` 任务。
+
+```groovy
+compileJava.dependsOn copyFiles
+```
+
+### Gradle 的仓库
+
+Gradle 的仓库和 Maven 的仓库非常类似，它也是通过 `repositories` 来声明仓库，然后通过 `maven` 来声明 Maven 仓库，通过 `jcenter` 来声明 JCenter 仓库，通过 `mavenCentral` 来声明 Maven 中央仓库。
+
+```groovy
+repositories {
+    maven { url 'https://repo.spring.io/milestone' }
+    jcenter()
+    mavenCentral()
+}
+```
+
+### 命令行
+
+Gradle 的命令行和 Maven 的命令行非常类似，它也是通过 `gradle` 命令来执行任务，比如我们可以通过 `gradle hello` 来执行 `hello` 任务。
+
+启动 SpringBoot 应用的命令也是一样的，比如我们可以通过 `gradle bootRun` 来启动 SpringBoot 应用。
 
 ## SpringBoot 的测试
 
@@ -2593,7 +2753,7 @@ public class UserController {
 
     @Operation(summary = "Get user by id")
     @GetMapping("/{id}")
-    public User getUserById(@Parameter(description = "User id") @PathVariable Long id) {
+    public User getUserById(@Parameter(description = "User id", name="id") @PathVariable Long id) {
         return userService.getUserById(id);
     }
 }
@@ -2612,6 +2772,22 @@ public class UserController {
     @GetMapping("/{id}")
     public User getUserById(@Parameter(description = "User id") @PathVariable Long id) {
         return userService.getUserById(id);
+    }
+}
+```
+
+对于 Post/Put 请求，我们可以使用 `@Schema` 注解来为我们的 API 添加请求体描述信息。
+
+```java
+@Schema(description = "创建类目时以 JSON 格式传递的数据")
+public record CreateOrUpdateCategoryRecord(
+        @Schema(description = "类目名称", example = "category1") String name,
+        @Schema(description = "类目代码", example = "code_1") String code) {
+    public Category toEntity() {
+        return Category.builder()
+                .name(name)
+                .code(code)
+                .build();
     }
 }
 ```

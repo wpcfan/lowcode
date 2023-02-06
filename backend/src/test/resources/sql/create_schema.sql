@@ -4,8 +4,8 @@ CREATE TABLE mooc_categories
     code      VARCHAR(255)          NOT NULL,
     name      VARCHAR(255)          NOT NULL,
     parent_id BIGINT,
-    created_at datetime              NULL,
-    updated_at datetime              NULL,
+    created_at datetime             NULL,
+    updated_at datetime             NULL,
     CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
 );
 
@@ -28,8 +28,8 @@ CREATE TABLE mooc_products
     name          VARCHAR(255)          NOT NULL,
     `description` VARCHAR(255)          NOT NULL,
     price         INT                   NOT NULL,
-    created_at datetime              NULL,
-    updated_at datetime              NULL,
+    created_at    datetime              NULL,
+    updated_at    datetime              NULL,
     CONSTRAINT pk_mooc_products PRIMARY KEY (id)
 );
 

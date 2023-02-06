@@ -3,16 +3,15 @@ package com.mooc.backend.error;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.net.URI;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -31,34 +30,37 @@ public class GlobalExceptionHandler {
                 .forStatusAndDetail(HttpStatusCode.valueOf(500), ex.getLocalizedMessage());
         body.setType(URI.create(hostname + "/errors/" + ex.getCode()));
         body.setTitle(ex.getMessage());
+        body.setDetail(ex.getDetails());
         body.setProperty("hostname", hostname);
         body.setProperty("code", ex.getCode());
-        body.setProperty("details", ex.getDetails());
-
+        body.setProperty("User-Agent", Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown"));
         return body;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, WebRequest request) {
+    public ProblemDetail handleMethodArgumentNotValidException(MethodArgumentNotValidException e, WebRequest request) {
+        ProblemDetail body = ProblemDetail
+                .forStatusAndDetail(HttpStatusCode.valueOf(400), e.getLocalizedMessage());
+
+        body.setType(URI.create(hostname + "/errors/validation"));
+        body.setTitle(e.getMessage());
         String details = e.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
                 .collect(Collectors.joining(", "));
-        String errorMessage = messageSource.getMessage("error.argument.invalid", null, request.getLocale());
-        String path = request.getDescription(false);
-        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST, errorMessage, path, details);
-        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        body.setDetail(details);
+        body.setProperty("hostname", hostname);
+        return body;
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleException(Exception ex, WebRequest request) {
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        String errorMessage = messageSource.getMessage("error.internal.server", null, request.getLocale());
-//        String message = ex.getMessage();
-        String path = request.getDescription(false);
-
-        ApiErrorResponse errorResponse = new ApiErrorResponse(status, errorMessage, path);
-
-        return new ResponseEntity<>(errorResponse, status);
+    public ProblemDetail handleException(Exception ex, WebRequest request) {
+        ProblemDetail body = ProblemDetail
+                .forStatusAndDetail(HttpStatusCode.valueOf(500), ex.getLocalizedMessage());
+        body.setType(URI.create(hostname + "/errors/uncaught"));
+        body.setTitle(messageSource.getMessage("error.uncaught", null, request.getLocale()));
+        body.setProperty("hostname", hostname);
+        body.setProperty("User-Agent", Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown"));
+        return body;
     }
 
 }

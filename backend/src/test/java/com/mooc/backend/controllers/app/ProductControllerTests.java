@@ -1,7 +1,5 @@
 package com.mooc.backend.controllers.app;
 
-import com.mooc.backend.dtos.CategoryDTO;
-import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.rest.app.ProductController;

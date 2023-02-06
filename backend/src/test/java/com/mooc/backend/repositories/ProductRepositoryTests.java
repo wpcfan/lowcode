@@ -193,15 +193,16 @@ public class ProductRepositoryTests {
 
         testEntityManager.flush();
 
-        var products = productRepository.streamByNameLikeIgnoreCaseAndCategoriesCode("%test%", "cat_one").toList();
-
-        assertEquals(2, products.size());
-        assertEquals("Test Product", products.get(0).getName());
-        assertEquals("Test Description", products.get(0).getDescription());
-        assertEquals(10000, products.get(0).getPrice());
-        assertEquals("Test Product 2", products.get(1).getName());
-        assertEquals("Test Description 2", products.get(1).getDescription());
-        assertEquals(10100, products.get(1).getPrice());
+        try (var stream = productRepository.streamByNameLikeIgnoreCaseAndCategoriesCode("%test%", "cat_one")) {
+            var products = stream.toList();
+            assertEquals(2, products.size());
+            assertEquals("Test Product", products.get(0).getName());
+            assertEquals("Test Description", products.get(0).getDescription());
+            assertEquals(10000, products.get(0).getPrice());
+            assertEquals("Test Product 2", products.get(1).getName());
+            assertEquals("Test Description 2", products.get(1).getDescription());
+            assertEquals(10100, products.get(1).getPrice());
+        }
     }
 
     @Test

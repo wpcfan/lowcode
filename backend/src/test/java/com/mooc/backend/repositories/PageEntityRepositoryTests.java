@@ -15,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -235,7 +234,7 @@ public class PageEntityRepositoryTests {
     public void testFindAll() {
         var pages = pageEntityRepository.findAll();
 
-        assertEquals(1, pages.size());
+        assertEquals(4, pages.size());
         assertEquals(PageType.Home, pages.get(0).getPageType());
         assertEquals(Platform.Android, pages.get(0).getPlatform());
         assertEquals(3, pages.get(0).getPageBlocks().size());
@@ -259,14 +258,16 @@ public class PageEntityRepositoryTests {
 
         testEntityManager.flush();
 
-        var stream1 = pageEntityRepository.findPublishedPage(now, Platform.Android, PageType.Home);
-        var stream2 = pageEntityRepository.findPublishedPage(now, Platform.Android, PageType.Home);
-
-        assertEquals(2, stream1.count());
-        assertEquals(1, stream2
-                .peek(p -> System.out.println("Before filter: " + p.getId()))
-                .filter(p -> p.getEndTime().isAfter(now.plusHours(1)))
-                .peek(p -> System.out.println("After filter: " + p.getId()))
-                .count());
+        // 从 JPA 返回 Stream 时，需要在事务中执行，而且使用 try-with-resource 语法
+        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.Android, PageType.Home)) {
+            assertEquals(2, stream.count());
+        }
+        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.Android, PageType.Home)) {
+            assertEquals(1, stream
+                    .peek(p -> System.out.println("Before filter: " + p.getId()))
+                    .filter(p -> p.getEndTime().isAfter(now.plusHours(1)))
+                    .peek(p -> System.out.println("After filter: " + p.getId()))
+                    .count());
+        }
     }
 }

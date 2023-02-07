@@ -42,8 +42,6 @@ public class PageUpdateService {
     public Optional<PageEntity> publishPage(Long id, PublishPageRecord page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
-                    var count = pageEntityRepository.updatePageStatusToDraft(LocalDateTime.now(), pageEntity.getPlatform(), pageEntity.getPageType());
-                    log.debug("update {} pages to draft", count);
                     pageEntity.setStatus(PageStatus.Published);
                     pageEntity.setStartTime(page.startTime());
                     pageEntity.setEndTime(page.endTime());

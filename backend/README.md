@@ -1592,14 +1592,15 @@ public interface CategoryProjection {
 }
 ```
 
-在使用投影的时候，需要注意以下几点：
+当然投影的实体类也可以是一个 DTO，比如：
 
-- 投影接口不能继承其他接口，也不能有其他的方法。
-- 投影接口中的方法不能有方法体。
-- 投影接口中的方法不能是默认方法。
-- 投影接口中的方法不能是静态方法。
-
-
+```java
+public interface CategoryDTO {
+    Long getId();
+    String getName();
+    CategoryDTO getParent();
+}
+```
 
 ### 表的自动创建
 
@@ -2323,6 +2324,51 @@ public Slice<User> getUsers(Pageable pageable) {
 `Slice` 和 `Page` 的主要区别在于 `Slice` 不知道总数量，它只有是否有下一页的信息。
 
 从 UX 角度，类似微博的无尽滚动加载，就可以使用 `Slice` 分页。类似后台管理系统的分页，就可以使用 `Page` 的分页。
+
+### 对于 Insert/Update/Delete 的支持
+
+Spring Data JPA 为我们提供了 `@Modifying` 注解，它可以帮助我们进行 Insert/Update/Delete 操作。
+
+```java
+@Modifying
+@Query("update User u set u.name = ?1 where u.id = ?2")
+int updateNameById(String name, Long id);
+```
+
+当然我们可以使用 `nativeQuery` 来进行原生 SQL 的操作。
+
+```java
+@Modifying
+@Query(value = "update user set name = ?1 where id = ?2", nativeQuery = true)
+int updateNameById(String name, Long id);
+```
+
+整形的返回值代表受影响的行数。
+
+需要指出的是，很多情况下，我们不需要使用 `@Modifying` 注解，Spring Data JPA 会自动帮我们进行 Insert/Update/Delete 操作。
+
+```java
+User user = new User();
+user.setName("test");
+userRepository.save(user);
+```
+
+需要使用 `@Modifying` 注解的情况是，我们需要自定义 SQL 语句的时候。但这种时候往往会导致 `PersistenceContext` 过时，但我们可以通过设置 `@Modifying(clearAutomatically = true)` 来解决。
+
+```java
+@Modifying(clearAutomatically = true)
+@Query("update User u set u.name = ?1 where u.id = ?2")
+int updateNameById(String name, Long id);
+```
+
+`clearAutomatically = true` 意味着，当我们执行完 SQL 语句之后，会自动清除 `PersistenceContext`。也就是说，我们不需要手动调用 `entityManager.clear()` 来清除 `PersistenceContext`。
+但这样做会有另一个问题，如果我们清除了 `PersistenceContext`，而其中有未保存的数据，那么这些数据就会丢失。所以，我们需要在 `@Modifying` 注解中设置 `flushAutomatically = true`，这样就可以保证在清除 `PersistenceContext` 之前，会先将数据保存到数据库中。
+
+```java
+@Modifying(clearAutomatically = true, flushAutomatically = true)
+@Query("update User u set u.name = ?1 where u.id = ?2")
+int updateNameById(String name, Long id);
+```
 
 ### Spring Data JPA 的测试
 

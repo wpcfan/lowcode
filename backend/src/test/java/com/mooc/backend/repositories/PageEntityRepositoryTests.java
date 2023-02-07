@@ -285,7 +285,7 @@ public class PageEntityRepositoryTests {
         // 因为在 updatePageStatusToDraft() 方法中，我们使用了 @Modifying(flushAutomatically = true)
         testEntityManager.flush();
 
-        var count = pageEntityRepository.updatePageStatusToArchived(now, Platform.Android, PageType.Home);
+        var count = pageEntityRepository.updatePageStatusToArchived(now);
         assertEquals(1, count);
 
         // 在执行完上面的 updatePageStatusToDraft() 方法后，`PersistenceContext` 中的缓存会被清空

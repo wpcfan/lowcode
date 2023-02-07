@@ -52,8 +52,6 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      * 注意 Spring Data JPA 中使用 `@Modifying` 注解来标记需要修改的方法
      *
      * @param currentTime 当前时间
-     * @param platform 平台
-     * @param pageType 页面类型
      * @return 修改的记录数
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
@@ -61,8 +59,6 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
             " set p.status = com.mooc.backend.enumerations.PageStatus.Archived" +
             " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
             " and p.startTime is not null and p.endTime is not null" +
-            " and p.endTime < ?1" +
-            " and p.platform = ?2" +
-            " and p.pageType = ?3")
-    int updatePageStatusToArchived(LocalDateTime currentTime, Platform platform, PageType pageType);
+            " and p.endTime < ?1")
+    int updatePageStatusToArchived(LocalDateTime currentTime);
 }

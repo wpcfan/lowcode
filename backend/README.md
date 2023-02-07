@@ -706,6 +706,44 @@ class DemoApplicationTests {
 testImplementation 'org.hamcrest:hamcrest-library'
 ```
 
+上面代码中会把所有 Spring Boot 的上下文都加载进来，这样一方面是非常耗时的，另一方面也会影响测试的效率，所以我们可以使用 `@WebMvcTest` 来进行测试，它只会加载 Web 层的上下文，而不会加载 Spring Boot 的上下文。
+
+```java
+@WebMvcTest
+class DemoApplicationTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void test() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/user"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name"), Matchers.is("张三"));
+    }
+}
+```
+
+甚至我们可以指定只加载某个 Controller 的上下文，这样可以进一步提高测试的效率。
+
+```java
+@WebMvcTest(UserController.class)
+class DemoApplicationTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void test() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/user"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name"), Matchers.is("张三"));
+    }
+}
+```
+
 ### 集成测试
 
 集成测试是指将多个模块组合在一起进行测试，它的目的是为了验证各个模块之间的交互是否符合预期，以及验证整个系统是否符合需求。
@@ -1541,6 +1579,27 @@ public class Category {
 ```
 
 另一种方式是使用 DTO，将实体类转换为 DTO，然后再将 DTO 转换为 JSON，这样就可以避免关联的属性形成环的问题。
+
+### 投影
+
+在实际的开发中，我们可能只需要查询实体类的部分属性，而不是所有的属性，这时候就可以使用投影的方式，比如：
+
+```java
+public interface CategoryProjection {
+    Long getId();
+    String getName();
+    CategoryProjection getParent();
+}
+```
+
+在使用投影的时候，需要注意以下几点：
+
+- 投影接口不能继承其他接口，也不能有其他的方法。
+- 投影接口中的方法不能有方法体。
+- 投影接口中的方法不能是默认方法。
+- 投影接口中的方法不能是静态方法。
+
+
 
 ### 表的自动创建
 
@@ -2791,3 +2850,69 @@ public record CreateOrUpdateCategoryRecord(
     }
 }
 ```
+
+## 异常处理
+
+在 SpringBoot 中，我们可以使用 `@ControllerAdvice` 注解来处理全局异常。
+
+```java
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(value = {Exception.class})
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+}
+```
+
+当然也可以使用 `@RestControllerAdvice` 注解来处理全局异常。这个注解是用于处理 Rest API 的异常。
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(value = {Exception.class})
+    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse(e.getMessage()));
+    }
+}
+```
+
+### rfc7807
+
+rfc7807 是一种异常处理的标准，在 Spring Framework 6 中，提供了 `ProblemDetail` 类来支持 rfc7807。
+
+```java
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(value = {Exception.class})
+    public ResponseEntity<ProblemDetail> handleException(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ProblemDetail.builder()
+                        .title("Internal Server Error")
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .detail(e.getMessage())
+                        .build());
+    }
+}
+```
+
+rfc7807 以 JSON 格式返回异常信息，其标准格式如下：
+
+```json
+{
+  "type": "https://example.com/probs/out-of-credit",
+  "title": "You do not have enough credit.",
+  "detail": "Your current balance is 30, but that costs 50.",
+  "instance": "/account/12345/msgs/abc",
+  "balance": 30,
+  "accounts": ["/account/12345",
+               "/account/67890"]
+}
+```
+
+其中 `type` 为异常类型，`title` 为异常标题，`detail` 为异常详细信息，`instance` 为异常实例，其他字段为自定义字段。
+注意：`type` 和 `title` 字段是必须的。而且 `type` 字段必须是一个 URL。
+
+这种 json 格式有自己特定的 MIME 类型 `application/problem+json`。

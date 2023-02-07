@@ -36,15 +36,16 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      */
     @Query("select p from PageEntity p" +
             " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
+            " and p.startTime is not null and p.endTime is not null" +
             " and p.startTime < ?1 and p.endTime > ?1" +
             " and p.platform = ?2" +
             " and p.pageType = ?3")
     Stream<PageEntity> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
 
     /**
-     * 修改所有满足条件的状态为Draft
+     * 修改所有满足条件的状态为 Archived
      * 条件为：
-     * 1. 当前时间在开始时间和结束时间之间
+     * 1. 结束时间小于当前时间
      * 2. 平台为指定平台
      * 3. 页面类型为指定页面类型
      *
@@ -57,10 +58,11 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update PageEntity p" +
-            " set p.status = com.mooc.backend.enumerations.PageStatus.Draft" +
+            " set p.status = com.mooc.backend.enumerations.PageStatus.Archived" +
             " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
-            " and p.startTime < ?1 and p.endTime > ?1" +
+            " and p.startTime is not null and p.endTime is not null" +
+            " and p.endTime < ?1" +
             " and p.platform = ?2" +
             " and p.pageType = ?3")
-    int updatePageStatusToDraft(LocalDateTime currentTime, Platform platform, PageType pageType);
+    int updatePageStatusToArchived(LocalDateTime currentTime, Platform platform, PageType pageType);
 }

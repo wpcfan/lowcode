@@ -274,23 +274,23 @@ public class PageEntityRepositoryTests {
     }
 
     @Test
-    void testUpdatePageStatusToDraft() {
+    void testUpdatePageStatusToArchived() {
         var page1 = testEntityManager.find(PageEntity.class, this.page1.getId());
         var now = LocalDateTime.now();
-        page1.setStartTime(now.minusDays(1));
-        page1.setEndTime(now.plusDays(1));
+        page1.setStartTime(now.minusDays(2));
+        page1.setEndTime(now.minusDays(1));
         page1.setStatus(PageStatus.Published);
         testEntityManager.persist(page1);
         // 即使我们不加这一行，也会在下面的 updatePageStatusToDraft() 方法中自动 flush
         // 因为在 updatePageStatusToDraft() 方法中，我们使用了 @Modifying(flushAutomatically = true)
         testEntityManager.flush();
 
-        var count = pageEntityRepository.updatePageStatusToDraft(now, Platform.Android, PageType.Home);
+        var count = pageEntityRepository.updatePageStatusToArchived(now, Platform.Android, PageType.Home);
         assertEquals(1, count);
 
         // 在执行完上面的 updatePageStatusToDraft() 方法后，`PersistenceContext` 中的缓存会被清空
         // 大家可以尝试一下，如果不设置 `clearAutomatically = true`，那么下面的 `assertEquals` 会失败
         var result = pageEntityRepository.findById(this.page1.getId());
-        assertEquals(PageStatus.Draft, result.get().getStatus());
+        assertEquals(PageStatus.Archived, result.get().getStatus());
     }
 }

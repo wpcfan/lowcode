@@ -30,7 +30,7 @@ public class PageController {
     @GetMapping("/published/{pageType}")
     public PageDTO findPublished(
             @Parameter(description = "页面类型", name = "pageType") @PathVariable PageType pageType,
-            @Parameter(description = "User-Agent", in = ParameterIn.HEADER) @RequestHeader("User-Agent") String uaString) {
+            @Parameter(description = "User-Agent", in = ParameterIn.HEADER, hidden = true) @RequestHeader("User-Agent") String uaString) {
         Parser uaParser = new Parser();
         Client c = uaParser.parse(uaString);
         var os = c.os.family;

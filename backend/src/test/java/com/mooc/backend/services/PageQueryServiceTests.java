@@ -22,7 +22,7 @@ public class PageQueryServiceTests {
 
     @Test
     void testFindPublished() {
-        var platform = Platform.Android;
+        var platform = Platform.App;
         var pageType = PageType.Home;
 
         var page1 = PageEntity.builder()

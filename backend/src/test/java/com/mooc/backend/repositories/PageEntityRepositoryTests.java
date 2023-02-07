@@ -168,7 +168,7 @@ public class PageEntityRepositoryTests {
 
         page1 = PageEntity.builder()
                 .pageType(PageType.Home)
-                .platform(Platform.Android)
+                .platform(Platform.App)
                 .config(pageConfig)
                 .title("Test Page 1")
                 .build();
@@ -181,7 +181,7 @@ public class PageEntityRepositoryTests {
 
         page2 = PageEntity.builder()
                 .pageType(PageType.Home)
-                .platform(Platform.Android)
+                .platform(Platform.App)
                 .config(pageConfig)
                 .title("Test Page 2")
                 .build();
@@ -196,7 +196,7 @@ public class PageEntityRepositoryTests {
 
         page3 = PageEntity.builder()
                 .pageType(PageType.Category)
-                .platform(Platform.Android)
+                .platform(Platform.App)
                 .config(pageConfig)
                 .title("Test Page 3")
                 .build();
@@ -211,7 +211,7 @@ public class PageEntityRepositoryTests {
 
         page4 = PageEntity.builder()
                 .pageType(PageType.Category)
-                .platform(Platform.iOS)
+                .platform(Platform.Web)
                 .config(pageConfig)
                 .title("Test Page 4")
                 .build();
@@ -236,7 +236,7 @@ public class PageEntityRepositoryTests {
 
         assertEquals(4, pages.size());
         assertEquals(PageType.Home, pages.get(0).getPageType());
-        assertEquals(Platform.Android, pages.get(0).getPlatform());
+        assertEquals(Platform.App, pages.get(0).getPlatform());
         assertEquals(3, pages.get(0).getPageBlocks().size());
         assertEquals(2, pages.get(0).getPageBlocks().stream().filter(block -> block.getType() == BlockType.PinnedHeader).findFirst().get().getData().size());
         assertEquals(3, pages.get(0).getPageBlocks().stream().filter(block -> block.getType() == BlockType.ImageRow).findFirst().get().getData().size());
@@ -261,10 +261,10 @@ public class PageEntityRepositoryTests {
         testEntityManager.flush();
 
         // 从 JPA 返回 Stream 时，需要在事务中执行，而且使用 try-with-resource 语法
-        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.Android, PageType.Home)) {
+        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.App, PageType.Home)) {
             assertEquals(2, stream.count());
         }
-        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.Android, PageType.Home)) {
+        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.App, PageType.Home)) {
             assertEquals(1, stream
                     .peek(p -> System.out.println("Before filter: " + p.getId()))
                     .filter(p -> p.getEndTime().isAfter(now.plusHours(1)))
@@ -292,5 +292,32 @@ public class PageEntityRepositoryTests {
         // 大家可以尝试一下，如果不设置 `clearAutomatically = true`，那么下面的 `assertEquals` 会失败
         var result = pageEntityRepository.findById(this.page1.getId());
         assertEquals(PageStatus.Archived, result.get().getStatus());
+    }
+
+    @Test
+    void testCountPublishedTimeConflict() throws Exception {
+        var page1 = testEntityManager.find(PageEntity.class, this.page1.getId());
+        var now = LocalDateTime.now();
+        page1.setStartTime(now.minusDays(1));
+        page1.setEndTime(now.plusDays(1));
+        page1.setStatus(PageStatus.Published);
+        testEntityManager.persist(page1);
+
+        var page2 = testEntityManager.find(PageEntity.class, this.page2.getId());
+        page2.setStartTime(now.minusMinutes(59));
+        page2.setEndTime(now.plusMinutes(59));
+        page2.setStatus(PageStatus.Draft);
+        testEntityManager.persist(page2);
+
+        testEntityManager.flush();
+
+        var count = pageEntityRepository.countPublishedTimeConflict(now, Platform.App, PageType.Home);
+        assertEquals(1, count);
+
+        var count2 = pageEntityRepository.countPublishedTimeConflict(now, Platform.App, PageType.Category);
+        assertEquals(0, count2);
+
+        var count3 = pageEntityRepository.countPublishedTimeConflict(now, Platform.Web, PageType.Home);
+        assertEquals(0, count3);
     }
 }

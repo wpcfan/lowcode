@@ -8,15 +8,16 @@ import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageStatus;
+import com.mooc.backend.error.CustomException;
 import com.mooc.backend.repositories.PageBlockDataEntityRepository;
 import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -42,6 +43,12 @@ public class PageUpdateService {
     public Optional<PageEntity> publishPage(Long id, PublishPageRecord page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
+                    if (pageEntityRepository.countPublishedTimeConflict(page.startTime(), pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
+                        throw new CustomException("时间冲突", "开始时间和已有数据冲突", HttpStatus.BAD_REQUEST.value());
+                    }
+                    if (pageEntityRepository.countPublishedTimeConflict(page.endTime(), pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
+                        throw new CustomException("时间冲突", "结束时间和已有数据冲突", HttpStatus.BAD_REQUEST.value());
+                    }
                     pageEntity.setStatus(PageStatus.Published);
                     pageEntity.setStartTime(page.startTime());
                     pageEntity.setEndTime(page.endTime());

@@ -2325,6 +2325,39 @@ public Slice<User> getUsers(Pageable pageable) {
 
 从 UX 角度，类似微博的无尽滚动加载，就可以使用 `Slice` 分页。类似后台管理系统的分页，就可以使用 `Page` 的分页。
 
+### `PersistenceContext` 和 `PersistenceUnit`
+
+持久化上下文是 JPA 的核心概念，它是一个实体管理器的集合，它可以管理多个实体管理器。
+
+`PersistenceContext` 是一个注解，它可以帮助我们在方法上注入一个实体管理器。
+
+```java
+@PersistenceContext
+private EntityManager entityManager;
+```
+
+而持久化单元是 JPA 的另一个核心概念，它是一个持久化上下文的集合，它可以管理多个持久化上下文。
+
+`PersistenceUnit` 是一个注解，它可以帮助我们在方法上注入一个持久化上下文。
+
+```java
+@PersistenceUnit
+private EntityManagerFactory entityManagerFactory;
+```
+
+当然如果使用 Spring Boot 的话，这些都是不需要我们手动配置的，Spring Boot 会自动帮我们配置好。
+
+### `@Transactional`
+
+`@Transactional` 是 Spring 的注解，它可以帮助我们在方法上添加事务。
+
+```java
+@Transactional
+public void saveUser(User user) {
+    userRepository.save(user);
+}
+```
+
 ### 对于 Insert/Update/Delete 的支持
 
 Spring Data JPA 为我们提供了 `@Modifying` 注解，它可以帮助我们进行 Insert/Update/Delete 操作。

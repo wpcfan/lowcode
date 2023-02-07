@@ -34,7 +34,7 @@ public class PageController {
         Parser uaParser = new Parser();
         Client c = uaParser.parse(uaString);
         var os = c.os.family;
-        var platform = os.equals("Android") ? Platform.Android : os.equals("iOS") ? Platform.iOS : Platform.Web;
+        var platform = os.equals("Android") || os.equals("iOS") ?  Platform.App  : Platform.Web;
         return pageQueryService.findPublished(platform, pageType)
                 .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Page not found", "No published page found",

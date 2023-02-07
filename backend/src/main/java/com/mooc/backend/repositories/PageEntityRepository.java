@@ -1,6 +1,7 @@
 package com.mooc.backend.repositories;
 
 import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.projections.PageEntityInfo;
@@ -41,6 +42,14 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
             " and p.platform = ?2" +
             " and p.pageType = ?3")
     Stream<PageEntity> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
+
+    @Query("select count(p) from PageEntity p" +
+            " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
+            " and p.startTime is not null and p.endTime is not null" +
+            " and p.startTime < ?1 and p.endTime > ?1" +
+            " and p.platform = ?2" +
+            " and p.pageType = ?3")
+    int countPublishedTimeConflict(LocalDateTime time, Platform platform, PageType pageType);
 
     /**
      * 修改所有满足条件的状态为 Archived

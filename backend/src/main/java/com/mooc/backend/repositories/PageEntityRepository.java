@@ -55,8 +55,9 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      * @param pageType 页面类型
      * @return 修改的记录数
      */
-    @Modifying
-    @Query("update PageEntity p set p.status = com.mooc.backend.enumerations.PageStatus.Draft" +
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("update PageEntity p" +
+            " set p.status = com.mooc.backend.enumerations.PageStatus.Draft" +
             " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
             " and p.startTime < ?1 and p.endTime > ?1" +
             " and p.platform = ?2" +

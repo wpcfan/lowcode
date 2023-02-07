@@ -3,24 +3,11 @@ package com.mooc.backend.rest.admin;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.mooc.backend.dtos.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataRecord;
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockRecord;
-import com.mooc.backend.dtos.CreateOrUpdatePageRecord;
-import com.mooc.backend.dtos.PageBlockDTO;
-import com.mooc.backend.dtos.PageBlockDataDTO;
-import com.mooc.backend.dtos.PageDTO;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
@@ -94,6 +81,39 @@ public class PageAdminController {
     public void deletePage(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id) {
         pageDeleteService.deletePage(id);
+    }
+
+    @Operation(summary = "发布页面")
+    @PatchMapping("/{id}/publish")
+    public PageDTO publishPage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @RequestBody PublishPageRecord publishPageRecord) {
+        if (publishPageRecord.startTime() == null) {
+            throw new CustomException("Start time is required", "Start time is required",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        if (publishPageRecord.endTime() == null) {
+            throw new CustomException("End time is required", "End time is required",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        if (publishPageRecord.startTime().isAfter(publishPageRecord.endTime())) {
+            throw new CustomException("Start time must be before end time", "Start time must be before end time",
+                    HttpStatus.BAD_REQUEST.value());
+        }
+        return pageUpdateService.publishPage(id, publishPageRecord)
+                .map(PageDTO::fromEntity)
+                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
+                        HttpStatus.NOT_FOUND.value()));
+    }
+
+    @Operation(summary = "取消发布页面")
+    @PatchMapping("/{id}/draft")
+    public PageDTO draftPage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id) {
+        return pageUpdateService.draftPage(id)
+                .map(PageDTO::fromEntity)
+                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
+                        HttpStatus.NOT_FOUND.value()));
     }
 
     @Operation(summary = "添加页面区块")

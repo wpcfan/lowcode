@@ -7,11 +7,11 @@ import com.mooc.backend.projections.ProductImageInfo;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record ProductRecord(Long id, String name, String description, Integer price, Set<CategoryDTO> categories,
-                            Set<ProductImageInfo> images) {
+public record ProductAdminDTO(Long id, String name, String description, Integer price, Set<CategoryDTO> categories,
+                              Set<ProductImageInfo> images) {
 
-    public static ProductRecord fromEntity(Product product) {
-        return new ProductRecord(
+    public static ProductAdminDTO fromEntity(Product product) {
+        return new ProductAdminDTO(
                 product.getId(),
                 product.getName(),
                 product.getDescription(),

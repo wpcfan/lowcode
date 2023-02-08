@@ -1,6 +1,6 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.CreateOrUpdateProductRecord;
+import com.mooc.backend.dtos.CreateOrUpdateProductDTO;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.repositories.CategoryRepository;
@@ -18,11 +18,11 @@ public class ProductAdminService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 
-    public Product createProduct(CreateOrUpdateProductRecord product) {
+    public Product createProduct(CreateOrUpdateProductDTO product) {
         return productRepository.save(product.toEntity());
     }
 
-    public Optional<Product> updateProduct(Long id, CreateOrUpdateProductRecord product) {
+    public Optional<Product> updateProduct(Long id, CreateOrUpdateProductDTO product) {
         return productRepository.findById(id)
                 .map(p -> {
                     p.setName(product.name());

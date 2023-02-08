@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.mooc.backend.dtos.FileRecord;
+import com.mooc.backend.dtos.FileDTO;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.QiniuService;
 
@@ -28,7 +28,7 @@ public class FileUploadController {
 
     @Operation(summary = "上传一个文件")
     @PostMapping(value = "/file", consumes = "multipart/form-data")
-    public FileRecord upload(@RequestParam("file") MultipartFile file) {
+    public FileDTO upload(@RequestParam("file") MultipartFile file) {
         try {
             return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
         } catch (IOException e) {
@@ -38,7 +38,7 @@ public class FileUploadController {
 
     @Operation(summary = "上传多个文件")
     @PostMapping(value = "/files", consumes = "multipart/form-data")
-    public List<FileRecord> uploadFiles(@RequestParam("files") List<? extends MultipartFile> files) {
+    public List<FileDTO> uploadFiles(@RequestParam("files") List<? extends MultipartFile> files) {
         return files.stream().map(file -> {
             try {
                 return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());

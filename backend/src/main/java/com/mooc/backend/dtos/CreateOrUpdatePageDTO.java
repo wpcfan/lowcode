@@ -5,7 +5,7 @@ import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 
-public record CreateOrUpdatePageRecord(
+public record CreateOrUpdatePageDTO(
         String title,
         Platform platform,
         PageType pageType,

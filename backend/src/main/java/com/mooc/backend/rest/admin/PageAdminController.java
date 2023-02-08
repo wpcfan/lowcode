@@ -61,7 +61,7 @@ public class PageAdminController {
 
     @Operation(summary = "添加页面")
     @PostMapping()
-    public PageDTO createPage(@RequestBody CreateOrUpdatePageRecord page) {
+    public PageDTO createPage(@RequestBody CreateOrUpdatePageDTO page) {
         return PageDTO.fromEntity(pageCreateService.createPage(page));
     }
 
@@ -69,7 +69,7 @@ public class PageAdminController {
     @PutMapping("/{id}")
     public PageDTO updatePage(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdatePageRecord page) {
+            @RequestBody CreateOrUpdatePageDTO page) {
         return pageUpdateService.updatePage(id, page)
                 .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
@@ -87,20 +87,20 @@ public class PageAdminController {
     @PatchMapping("/{id}/publish")
     public PageDTO publishPage(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody PublishPageRecord publishPageRecord) {
-        if (publishPageRecord.startTime() == null) {
+            @RequestBody PublishPageDTO publishPageDTO) {
+        if (publishPageDTO.startTime() == null) {
             throw new CustomException("Start time is required", "Start time is required",
                     HttpStatus.BAD_REQUEST.value());
         }
-        if (publishPageRecord.endTime() == null) {
+        if (publishPageDTO.endTime() == null) {
             throw new CustomException("End time is required", "End time is required",
                     HttpStatus.BAD_REQUEST.value());
         }
-        if (publishPageRecord.startTime().isAfter(publishPageRecord.endTime())) {
+        if (publishPageDTO.startTime().isAfter(publishPageDTO.endTime())) {
             throw new CustomException("Start time must be before end time", "Start time must be before end time",
                     HttpStatus.BAD_REQUEST.value());
         }
-        return pageUpdateService.publishPage(id, publishPageRecord)
+        return pageUpdateService.publishPage(id, publishPageDTO)
                 .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
                         HttpStatus.NOT_FOUND.value()));
@@ -120,7 +120,7 @@ public class PageAdminController {
     @PostMapping("/{id}/blocks")
     public PageBlockDTO addBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdatePageBlockRecord block) {
+            @RequestBody CreateOrUpdatePageBlockDTO block) {
         return pageCreateService.addBlockToPage(id, block)
                 .map(PageBlockDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
@@ -131,7 +131,7 @@ public class PageAdminController {
     @PutMapping("/blocks/{blockId}")
     public PageBlockDTO updateBlock(
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable("blockId") Long blockId,
-            @RequestBody CreateOrUpdatePageBlockRecord block) {
+            @RequestBody CreateOrUpdatePageBlockDTO block) {
         return pageUpdateService.updateBlock(blockId, block)
                 .map(PageBlockDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("PageBlock not found", "PageBlock " + blockId + " not found",
@@ -149,7 +149,7 @@ public class PageAdminController {
     @PostMapping("/{blockId}/data")
     public PageBlockDataDTO addData(
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable("blockId") Long blockId,
-            @RequestBody CreateOrUpdatePageBlockDataRecord data) {
+            @RequestBody CreateOrUpdatePageBlockDataDTO data) {
         return pageCreateService.addDataToBlock(blockId, data)
                 .map(PageBlockDataDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("PageBlock not found", "PageBlock " + blockId + " not found",
@@ -160,7 +160,7 @@ public class PageAdminController {
     @PutMapping("/data/{dataId}")
     public PageBlockDataDTO updateData(
             @Parameter(description = "页面区块数据 id", name = "dataId") @PathVariable Long dataId,
-            @RequestBody CreateOrUpdatePageBlockDataRecord data) {
+            @RequestBody CreateOrUpdatePageBlockDataDTO data) {
         return pageUpdateService.updateData(dataId, data)
                 .map(PageBlockDataDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("PageBlockData not found",

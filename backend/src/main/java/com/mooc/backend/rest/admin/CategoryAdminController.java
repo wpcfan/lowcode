@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mooc.backend.dtos.CategoryDTO;
 import com.mooc.backend.dtos.CategoryRecord;
-import com.mooc.backend.dtos.CreateOrUpdateCategoryRecord;
+import com.mooc.backend.dtos.CreateOrUpdateCategoryDTO;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.CategoryAdminService;
 import com.mooc.backend.services.CategoryQueryService;
@@ -54,7 +54,7 @@ public class CategoryAdminController {
     @Operation(summary = "添加类目")
     @PostMapping()
     public CategoryDTO createCategory(
-            @RequestBody CreateOrUpdateCategoryRecord category) {
+            @RequestBody CreateOrUpdateCategoryDTO category) {
         return CategoryDTO.fromEntity(categoryAdminService.createCategory(category));
     }
 
@@ -62,7 +62,7 @@ public class CategoryAdminController {
     @PutMapping("/{id}")
     public CategoryDTO updateCategory(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdateCategoryRecord category) {
+            @RequestBody CreateOrUpdateCategoryDTO category) {
         return categoryAdminService.updateCategory(id, category)
                 .map(CategoryDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Category not found", "Category " + id + " not found",

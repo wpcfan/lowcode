@@ -1,6 +1,6 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.PublishPageRecord;
+import com.mooc.backend.dtos.PublishPageDTO;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
@@ -37,7 +37,7 @@ public class PageUpdateServiceTests {
         var now = LocalDateTime.now();
         var startTime = now.minusDays(1);
         var endTime = now.plusDays(1);
-        var page = new PublishPageRecord(startTime, endTime);
+        var page = new PublishPageDTO(startTime, endTime);
         var entity = PageEntity.builder()
                 .id(1L)
                 .title("title")

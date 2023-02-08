@@ -1,8 +1,8 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataRecord;
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockRecord;
-import com.mooc.backend.dtos.CreateOrUpdatePageRecord;
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockDTO;
+import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
@@ -24,12 +24,12 @@ public class PageCreateService {
     private final PageBlockEntityRepository pageBlockEntityRepository;
     private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
-    public PageEntity createPage(CreateOrUpdatePageRecord page) {
+    public PageEntity createPage(CreateOrUpdatePageDTO page) {
         var pageEntity = pageEntityRepository.save(page.toEntity());
         return pageEntity;
     }
 
-    public Optional<PageBlockEntity> addBlockToPage(Long pageId, CreateOrUpdatePageBlockRecord block) {
+    public Optional<PageBlockEntity> addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
         return pageEntityRepository.findById(pageId)
                 .map(pageEntity -> {
                     var blockEntity = block.toEntity();
@@ -40,7 +40,7 @@ public class PageCreateService {
                 });
     }
 
-    public Optional<PageBlockDataEntity> addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataRecord data) {
+    public Optional<PageBlockDataEntity> addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
         return pageBlockEntityRepository.findById(blockId)
                 .map(blockEntity -> {
                     var dataEntity = data.toEntity();

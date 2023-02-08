@@ -1,9 +1,9 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataRecord;
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockRecord;
-import com.mooc.backend.dtos.CreateOrUpdatePageRecord;
-import com.mooc.backend.dtos.PublishPageRecord;
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockDTO;
+import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
+import com.mooc.backend.dtos.PublishPageDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
@@ -29,7 +29,7 @@ public class PageUpdateService {
     private final PageBlockEntityRepository pageBlockEntityRepository;
     private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
-    public Optional<PageEntity> updatePage(Long id, CreateOrUpdatePageRecord page) {
+    public Optional<PageEntity> updatePage(Long id, CreateOrUpdatePageDTO page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     pageEntity.setTitle(page.title());
@@ -40,7 +40,7 @@ public class PageUpdateService {
                 });
     }
 
-    public Optional<PageEntity> publishPage(Long id, PublishPageRecord page) {
+    public Optional<PageEntity> publishPage(Long id, PublishPageDTO page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     if (pageEntityRepository.countPublishedTimeConflict(page.startTime(), pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
@@ -66,7 +66,7 @@ public class PageUpdateService {
                 });
     }
 
-    public Optional<PageBlockEntity> updateBlock(Long blockId, CreateOrUpdatePageBlockRecord block) {
+    public Optional<PageBlockEntity> updateBlock(Long blockId, CreateOrUpdatePageBlockDTO block) {
         return pageBlockEntityRepository.findById(blockId)
                 .map(pageBlockEntity -> {
                     pageBlockEntity.setConfig(block.config());
@@ -77,7 +77,7 @@ public class PageUpdateService {
                 });
     }
 
-    public Optional<PageBlockDataEntity> updateData(Long dataId, CreateOrUpdatePageBlockDataRecord data) {
+    public Optional<PageBlockDataEntity> updateData(Long dataId, CreateOrUpdatePageBlockDataDTO data) {
         return pageBlockDataEntityRepository.findById(dataId)
                 .map(pageBlockDataEntity -> {
                     pageBlockDataEntity.setSort(data.sort());

@@ -1,11 +1,11 @@
 package com.mooc.backend.rest.admin;
 
-import com.mooc.backend.dtos.ProductRecord;
+import com.mooc.backend.dtos.ProductAdminDTO;
 import com.mooc.backend.services.QiniuService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import com.mooc.backend.dtos.CreateOrUpdateProductRecord;
+import com.mooc.backend.dtos.CreateOrUpdateProductDTO;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.ProductAdminService;
 
@@ -28,39 +28,39 @@ public class ProductAdminController {
 
     @Operation(summary = "添加商品")
     @PostMapping()
-    public ProductRecord createProduct(@RequestBody CreateOrUpdateProductRecord product) {
-        return ProductRecord.fromEntity(productAdminService.createProduct(product));
+    public ProductAdminDTO createProduct(@RequestBody CreateOrUpdateProductDTO product) {
+        return ProductAdminDTO.fromEntity(productAdminService.createProduct(product));
     }
 
     @Operation(summary = "修改商品")
     @PutMapping("/{id}")
-    public ProductRecord updateProduct(
+    public ProductAdminDTO updateProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
-            CreateOrUpdateProductRecord product) {
+            CreateOrUpdateProductDTO product) {
         return productAdminService.updateProduct(id, product)
-                .map(ProductRecord::fromEntity)
+                .map(ProductAdminDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
                         HttpStatus.NOT_FOUND.value()));
     }
 
     @Operation(summary = "给商品添加类目")
     @PutMapping("/{id}/category/{categoryId}")
-    public ProductRecord addCategoryToProduct(
+    public ProductAdminDTO addCategoryToProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @Parameter(description = "类目 id", name = "categoryId") @PathVariable Long categoryId) {
         return productAdminService.addCategoryToProduct(id, categoryId)
-                .map(ProductRecord::fromEntity)
+                .map(ProductAdminDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
                         HttpStatus.NOT_FOUND.value()));
     }
 
     @Operation(summary = "删除商品的类目")
     @DeleteMapping("/{id}/category/{categoryId}")
-    public ProductRecord removeCategoryFromProduct(
+    public ProductAdminDTO removeCategoryFromProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @Parameter(description = "类目 id", name = "categoryId") @PathVariable("categoryId") Long categoryId) {
         return productAdminService.removeCategoryFromProduct(id, categoryId)
-                .map(ProductRecord::fromEntity)
+                .map(ProductAdminDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
                         HttpStatus.NOT_FOUND.value()));
     }
@@ -74,13 +74,13 @@ public class ProductAdminController {
 
     @Operation(summary = "添加商品图片")
     @PostMapping(value = "/{id}/images", consumes = "multipart/form-data")
-    public ProductRecord addImageToProduct(
+    public ProductAdminDTO addImageToProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
         try {
             var result =  qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
             return productAdminService.addImageToProduct(id, result.url())
-                    .map(ProductRecord::fromEntity)
+                    .map(ProductAdminDTO::fromEntity)
                     .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
                             HttpStatus.NOT_FOUND.value()));
         } catch (IOException e) {
@@ -90,11 +90,11 @@ public class ProductAdminController {
 
     @Operation(summary = "删除商品图片")
     @DeleteMapping("/{id}/images/{imageId}")
-    public ProductRecord removeImageFromProduct(
+    public ProductAdminDTO removeImageFromProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @Parameter(description = "图片 id", name = "imageId") @PathVariable Long imageId) {
         return productAdminService.removeImageFromProduct(id, imageId)
-                .map(ProductRecord::fromEntity)
+                .map(ProductAdminDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
                         HttpStatus.NOT_FOUND.value()));
     }

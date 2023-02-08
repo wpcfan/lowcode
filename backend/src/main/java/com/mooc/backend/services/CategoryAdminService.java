@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.mooc.backend.dtos.CreateOrUpdateCategoryRecord;
+import com.mooc.backend.dtos.CreateOrUpdateCategoryDTO;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.repositories.CategoryRepository;
 import com.mooc.backend.repositories.ProductRepository;
@@ -20,11 +20,11 @@ public class CategoryAdminService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
-    public Category createCategory(CreateOrUpdateCategoryRecord category) {
+    public Category createCategory(CreateOrUpdateCategoryDTO category) {
         return categoryRepository.save(category.toEntity());
     }
 
-    public Optional<Category> updateCategory(Long id, CreateOrUpdateCategoryRecord category) {
+    public Optional<Category> updateCategory(Long id, CreateOrUpdateCategoryDTO category) {
         return categoryRepository.findById(id)
                 .map(c -> {
                     c.setCode(category.code());

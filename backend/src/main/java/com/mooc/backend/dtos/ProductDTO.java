@@ -31,7 +31,7 @@ public class ProductDTO {
                         .map(CategoryDTO::fromProjection)
                         .collect(Collectors.toSet()))
                 .images(product.getImages().stream()
-                        .map(ProductImageInfo::getImageUrl)
+                        .map(ProductImageInfo::imageUrl)
                         .collect(Collectors.toSet()))
                 .build();
     }

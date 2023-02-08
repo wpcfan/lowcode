@@ -43,7 +43,7 @@ CREATE TABLE mooc_product_images
 (
     id         BIGINT AUTO_INCREMENT NOT NULL,
     image_url  VARCHAR(255)          NOT NULL,
-    product_id BIGINT                NOT NULL,
+    product_id BIGINT                NULL,
     created_at datetime              NULL,
     updated_at datetime              NULL,
     CONSTRAINT pk_mooc_product_images PRIMARY KEY (id)

@@ -39,7 +39,7 @@ public class Product extends Auditable {
     @ToString.Exclude
     private Set<Category> categories = new HashSet<>();
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<ProductImage> images = new HashSet<>();
 

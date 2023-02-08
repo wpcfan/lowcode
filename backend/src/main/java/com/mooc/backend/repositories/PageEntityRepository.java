@@ -52,11 +52,7 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
     int countPublishedTimeConflict(LocalDateTime time, Platform platform, PageType pageType);
 
     /**
-     * 修改所有满足条件的状态为 Archived
-     * 条件为：
-     * 1. 结束时间小于当前时间
-     * 2. 平台为指定平台
-     * 3. 页面类型为指定页面类型
+     * 修改所有已过期的页面状态为 Archived
      *
      * 注意 Spring Data JPA 中使用 `@Modifying` 注解来标记需要修改的方法
      *

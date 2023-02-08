@@ -22,7 +22,7 @@ public class ProductImage extends Auditable {
     private String imageUrl;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Override

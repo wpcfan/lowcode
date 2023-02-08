@@ -2,12 +2,13 @@ package com.mooc.backend.dtos;
 
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
+import com.mooc.backend.projections.ProductImageInfo;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public record ProductRecord(Long id, String name, String description, Integer price, Set<CategoryDTO> categories,
-                            Set<String> images) {
+                            Set<ProductImageInfo> images) {
 
     public static ProductRecord fromEntity(Product product) {
         return new ProductRecord(
@@ -19,7 +20,7 @@ public record ProductRecord(Long id, String name, String description, Integer pr
                         .map(CategoryDTO::fromEntity)
                         .collect(Collectors.toSet()),
                 product.getImages().stream()
-                        .map(ProductImage::getImageUrl)
+                        .map(i -> new ProductImageInfo(i.getId(), i.getImageUrl()))
                         .collect(Collectors.toSet())
         );
     }
@@ -33,7 +34,7 @@ public record ProductRecord(Long id, String name, String description, Integer pr
         images().forEach(image -> {
             var productImage = ProductImage.builder()
                     .product(product)
-                    .imageUrl(image)
+                    .imageUrl(image.imageUrl())
                     .build();
             product.addImage(productImage);
         });

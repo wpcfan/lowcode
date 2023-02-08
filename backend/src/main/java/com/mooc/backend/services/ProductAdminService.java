@@ -2,6 +2,7 @@ package com.mooc.backend.services;
 
 import com.mooc.backend.dtos.CreateOrUpdateProductRecord;
 import com.mooc.backend.entities.Product;
+import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.repositories.CategoryRepository;
 import com.mooc.backend.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -53,4 +54,25 @@ public class ProductAdminService {
                         }));
     }
 
+    public Optional<Product> addImageToProduct(Long id, String imageUrl) {
+        return productRepository.findById(id)
+                .map(p -> {
+                    var imageEntity = ProductImage.builder()
+                            .imageUrl(imageUrl)
+                            .build();
+                    p.addImage(imageEntity);
+                    return productRepository.save(p);
+                });
+    }
+
+    public Optional<Product> removeImageFromProduct(Long id, Long imageId) {
+        return productRepository.findById(id)
+                .flatMap(p -> p.getImages().stream()
+                        .filter(img -> img.getId().equals(imageId))
+                        .findFirst()
+                        .map(img -> {
+                            p.removeImage(img);
+                            return productRepository.save(p);
+                        }));
+    }
 }

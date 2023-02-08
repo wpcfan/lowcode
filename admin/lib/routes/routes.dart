@@ -2,7 +2,9 @@ import 'package:admin/components/search_field_with_bloc.dart';
 import 'package:admin/pages/dashboard_page.dart';
 import 'package:admin/pages/drag_drop_list_page.dart';
 import 'package:admin/pages/drag_drop_page.dart';
+import 'package:admin/pages/page_table_page.dart';
 import 'package:admin/repositories/github_repository.dart';
+import 'package:admin/repositories/page_repository.dart';
 import 'package:go_router/go_router.dart';
 
 import 'custom_slide_transition.dart';
@@ -34,6 +36,17 @@ final routes = <RouteBase>[
         builder: (context, state) => const DragDropListPage(),
         pageBuilder: (context, state) => CustomSlideTransition(
             key: state.pageKey, child: const DragDropListPage()),
+      ),
+      GoRoute(
+        path: 'pages',
+        builder: (context, state) => PageTablePage(
+          api: PageRepository(),
+        ),
+        pageBuilder: (context, state) => CustomSlideTransition(
+            key: state.pageKey,
+            child: PageTablePage(
+              api: PageRepository(),
+            )),
       ),
     ],
     pageBuilder: (context, state) =>

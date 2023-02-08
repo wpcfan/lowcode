@@ -47,10 +47,10 @@ class SideMenu extends StatelessWidget {
             },
           ),
           DrawerListTile(
-            title: "Canvas",
+            title: "Pages",
             icon: Icons.draw_outlined,
             press: () {
-              context.go('/canvas');
+              context.go('/pages');
             },
           ),
           DrawerListTile(

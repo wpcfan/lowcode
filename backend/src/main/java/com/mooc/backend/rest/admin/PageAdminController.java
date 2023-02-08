@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.mooc.backend.dtos.*;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +37,7 @@ public class PageAdminController {
 
     @Operation(summary = "查询页面", description = "根据页面标题、平台、页面类型、状态、启用日期、截止日期查询页面", tags = { "页面管理" })
     @GetMapping()
-    public List<PageDTO> getPages(
+    public PageWrapper<PageDTO> getPages(
             @Parameter(description = "页面标题", name = "title") @RequestParam(required = false) String title,
             @Parameter(description = "平台", name = "platform") @RequestParam(required = false) Platform platform,
             @Parameter(description = "页面类型", name = "pageType") @RequestParam(required = false) PageType pageType,
@@ -43,7 +45,8 @@ public class PageAdminController {
             @Parameter(description = "启用日期从", name = "startDateFrom") @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam(required = false) LocalDate startDateFrom,
             @Parameter(description = "启用日期至", name = "startDateTo") @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam(required = false) LocalDate startDateTo,
             @Parameter(description = "截止日期从", name = "endDateFrom") @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam(required = false) LocalDate endDateFrom,
-            @Parameter(description = "截止日期至", name = "endDateTo") @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam(required = false) LocalDate endDateTo) {
+            @Parameter(description = "截止日期至", name = "endDateTo") @DateTimeFormat(pattern = "yyyyMMdd") @RequestParam(required = false) LocalDate endDateTo,
+            @ParameterObject Pageable pageable) {
         var pageFilter = new PageFilter(
                 title,
                 platform,
@@ -53,10 +56,10 @@ public class PageAdminController {
                 startDateTo != null ? startDateTo.atStartOfDay() : null,
                 endDateFrom != null ? endDateFrom.atStartOfDay() : null,
                 endDateTo != null ? endDateTo.atStartOfDay() : null);
-        return pageQueryService.findSpec(pageFilter)
-                .stream()
-                .map(PageDTO::fromEntity)
-                .toList();
+        var result = pageQueryService.findSpec(pageFilter, pageable)
+                .map(PageDTO::fromEntity);
+        return new PageWrapper<>(result.getNumber(), result.getSize(), result.getTotalPages(), result.getTotalElements(),
+                result.getContent());
     }
 
     @Operation(summary = "添加页面")

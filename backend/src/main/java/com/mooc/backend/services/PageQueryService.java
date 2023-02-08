@@ -8,6 +8,8 @@ import com.mooc.backend.repositories.PageEntityRepository;
 import com.mooc.backend.specifications.PageFilter;
 import com.mooc.backend.specifications.PageSpecs;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +27,10 @@ public class PageQueryService {
         return pageEntityRepository.findProjectionById(id);
     }
 
-    public List<PageEntity> findSpec(PageFilter filter) {
+    public Page<PageEntity> findSpec(PageFilter filter, Pageable pageable) {
         // 函数的 apply 方法，会执行函数的 body
         var specification = PageSpecs.pageSpec.apply(filter);
-        return pageEntityRepository.findAll(specification);
+        return pageEntityRepository.findAll(specification, pageable);
     }
 
     /**

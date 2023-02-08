@@ -12,6 +12,7 @@ class PageQuery {
   final String? startDateTo;
   final String? endDateFrom;
   final String? endDateTo;
+  final int page;
 
   PageQuery({
     this.title,
@@ -22,22 +23,23 @@ class PageQuery {
     this.startDateTo,
     this.endDateFrom,
     this.endDateTo,
+    this.page = 0,
   });
 }
 
 class PageRepository {
   final String baseUrl;
-  final Map<String, PageSearchResult> cache;
+  final Map<String, PageWrapper<PageSearchResultItem>> cache;
   final http.Client client;
 
   PageRepository({
     http.Client? client,
-    Map<String, PageSearchResult>? cache,
+    Map<String, PageWrapper<PageSearchResultItem>>? cache,
     this.baseUrl = 'http://localhost:8080/api/v1/admin/pages',
   })  : client = client ?? http.Client(),
-        cache = cache ?? <String, PageSearchResult>{};
+        cache = cache ?? <String, PageWrapper<PageSearchResultItem>>{};
 
-  Future<PageSearchResult> search(PageQuery query) async {
+  Future<PageWrapper<PageSearchResultItem>> search(PageQuery query) async {
     final url = _buildUrl(query);
     final cachedResult = cache[url];
 
@@ -46,7 +48,10 @@ class PageRepository {
     }
 
     final response = await client.get(Uri.parse(url));
-    final result = PageSearchResult.fromJson(jsonDecode(response.body));
+    final result = PageWrapper.fromJson(
+      jsonDecode(response.body),
+      (json) => PageSearchResultItem.fromJson(json),
+    );
 
     cache[url] = result;
 
@@ -88,23 +93,39 @@ class PageRepository {
       params['endDateTo'] = query.endDateTo!;
     }
 
+    params['page'] = query.page.toString();
+
     final url = Uri.parse(baseUrl).replace(queryParameters: params);
 
     return url.toString();
   }
 }
 
-class PageSearchResult {
-  final List<PageSearchResultItem> items;
+class PageWrapper<T> {
+  final List<T> items;
+  final int page;
+  final int size;
+  final int totalPage;
+  final int totalSize;
 
-  PageSearchResult(this.items);
+  PageWrapper({
+    required this.items,
+    required this.page,
+    required this.size,
+    required this.totalPage,
+    required this.totalSize,
+  });
 
-  factory PageSearchResult.fromJson(dynamic json) {
-    final items = (json as List)
-        .map((item) => PageSearchResultItem.fromJson(item))
-        .toList(growable: false);
+  factory PageWrapper.fromJson(dynamic json, T Function(dynamic) fromJson) {
+    final items = (json['items'] as List).map(fromJson).toList(growable: false);
 
-    return PageSearchResult(items);
+    return PageWrapper(
+      items: items,
+      page: json['page'],
+      size: json['size'],
+      totalPage: json['totalPage'],
+      totalSize: json['totalSize'],
+    );
   }
 
   bool get isPopulated => items.isNotEmpty;
@@ -144,7 +165,7 @@ enum PageStatus {
 class PageConfig {
   final int horizontalPadding;
   final int verticalPadding;
-  final int horiozontalSpacing;
+  final int horizontalSpacing;
   final int verticalSpacing;
   final int baselineScreenWidth;
   final int baselineScreenHeight;
@@ -153,35 +174,60 @@ class PageConfig {
   PageConfig({
     this.horizontalPadding = 16,
     this.verticalPadding = 16,
-    this.horiozontalSpacing = 16,
+    this.horizontalSpacing = 16,
     this.verticalSpacing = 16,
     this.baselineScreenWidth = 360,
     this.baselineScreenHeight = 640,
     this.baselineFontSize = 16,
   });
+
+  factory PageConfig.fromJson(dynamic json) {
+    return PageConfig(
+      horizontalPadding: json['horizontalPadding'],
+      verticalPadding: json['verticalPadding'],
+      horizontalSpacing: json['horizontalSpacing'],
+      verticalSpacing: json['verticalSpacing'],
+      baselineScreenWidth: json['baselineScreenWidth'],
+      baselineScreenHeight: json['baselineScreenHeight'],
+      baselineFontSize: json['baselineFontSize'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'horizontalPadding': horizontalPadding,
+      'verticalPadding': verticalPadding,
+      'horizontalSpacing': horizontalSpacing,
+      'verticalSpacing': verticalSpacing,
+      'baselineScreenWidth': baselineScreenWidth,
+      'baselineScreenHeight': baselineScreenHeight,
+      'baselineFontSize': baselineFontSize,
+    };
+  }
 }
 
 class PageSearchResultItem {
   final String title;
-  final String url;
   final Platform platform;
   final PageType pageType;
   final PageConfig config;
   final PageStatus status;
+  final DateTime? startTime;
+  final DateTime? endTime;
 
   PageSearchResultItem({
     required this.title,
-    required this.url,
     required this.platform,
     required this.pageType,
     required this.config,
     required this.status,
+    this.startTime,
+    this.endTime,
   });
 
   factory PageSearchResultItem.fromJson(dynamic json) {
     return PageSearchResultItem(
       title: json['title'] as String,
-      url: json['url'] as String,
       platform: Platform.values.firstWhere(
         (e) => e.value == json['platform'],
         orElse: () => Platform.app,
@@ -190,43 +236,40 @@ class PageSearchResultItem {
         (e) => e.value == json['pageType'],
         orElse: () => PageType.home,
       ),
-      config: PageConfig(
-        horizontalPadding: json['config']['horizontalPadding'] as int,
-        verticalPadding: json['config']['verticalPadding'] as int,
-        horiozontalSpacing: json['config']['horiozontalSpacing'] as int,
-        verticalSpacing: json['config']['verticalSpacing'] as int,
-        baselineScreenWidth: json['config']['baselineScreenWidth'] as int,
-        baselineScreenHeight: json['config']['baselineScreenHeight'] as int,
-        baselineFontSize: json['config']['baselineFontSize'] as int,
-      ),
+      config: PageConfig.fromJson(json['config']),
       status: PageStatus.values.firstWhere(
         (e) => e.value == json['status'],
         orElse: () => PageStatus.draft,
       ),
+      startTime: json['startTime'] == null
+          ? null
+          : DateTime.parse(json['startTime'] as String),
+      endTime: json['endTime'] == null
+          ? null
+          : DateTime.parse(json['endTime'] as String),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'title': title,
-      'url': url,
       'platform': platform.value,
       'pageType': pageType.value,
-      'config': {
-        'horizontalPadding': config.horizontalPadding,
-        'verticalPadding': config.verticalPadding,
-        'horiozontalSpacing': config.horiozontalSpacing,
-        'verticalSpacing': config.verticalSpacing,
-        'baselineScreenWidth': config.baselineScreenWidth,
-        'baselineScreenHeight': config.baselineScreenHeight,
-        'baselineFontSize': config.baselineFontSize,
-      },
+      'config': config.toJson(),
       'status': status.value,
+      'startTime': startTime?.toIso8601String(),
+      'endTime': endTime?.toIso8601String(),
     };
   }
 
+  bool get isDraft => status == PageStatus.draft;
+
+  bool get isPublished => status == PageStatus.published;
+
+  bool get isArchived => status == PageStatus.archived;
+
   @override
   String toString() {
-    return 'PageSearchResultItem(title: $title, url: $url, platform: $platform, pageType: $pageType, config: $config, status: $status)';
+    return 'PageSearchResultItem{title: $title, platform: $platform, pageType: $pageType, config: $config, status: $status, startTime: $startTime, endTime: $endTime}';
   }
 }

@@ -15,10 +15,15 @@ class MyApp extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Admin Panel',
-      theme: ThemeData.dark(useMaterial3: true).copyWith(
+      theme: ThemeData.dark(useMaterial3: false).copyWith(
         scaffoldBackgroundColor: bgColor,
         textTheme: Theme.of(context).textTheme.apply(bodyColor: Colors.white),
         canvasColor: secondaryColor,
+        dataTableTheme: DataTableThemeData(
+          headingRowColor: MaterialStateProperty.all(secondaryColor),
+          dataRowColor: MaterialStateProperty.all(secondaryColor),
+          dividerThickness: 0,
+        ),
       ),
       routerConfig: routerConfig,
     );

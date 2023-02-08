@@ -9,7 +9,7 @@ class PageSearchError extends PageSearchState {}
 class PageSearchInitial extends PageSearchState {}
 
 class PageSearchPopulated extends PageSearchState {
-  final PageSearchResult result;
+  final PageWrapper<PageSearchResultItem> result;
 
   PageSearchPopulated(this.result);
 }

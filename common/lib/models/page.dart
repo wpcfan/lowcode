@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
+import '../enumerations/all.dart';
 import 'product.dart';
 
 part 'page_image_data.dart';

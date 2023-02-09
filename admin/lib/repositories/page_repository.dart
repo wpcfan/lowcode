@@ -3,6 +3,35 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+enum PageType {
+  home('home'),
+  category('category'),
+  about('about');
+
+  final String value;
+
+  const PageType(this.value);
+}
+
+enum Platform {
+  app('App'),
+  web('Web');
+
+  final String value;
+
+  const Platform(this.value);
+}
+
+enum PageStatus {
+  draft('Draft'),
+  published('Published'),
+  archived('Archived');
+
+  final String value;
+
+  const PageStatus(this.value);
+}
+
 class PageQuery {
   final String? title;
   final Platform? platform;
@@ -25,6 +54,44 @@ class PageQuery {
     this.endDateTo,
     this.page = 0,
   });
+
+  PageQuery copyWith({
+    String? title,
+    Platform? platform,
+    PageType? pageType,
+    PageStatus? status,
+    String? startDateFrom,
+    String? startDateTo,
+    String? endDateFrom,
+    String? endDateTo,
+    int? page,
+  }) {
+    return PageQuery(
+      title: title ?? this.title,
+      platform: platform ?? this.platform,
+      pageType: pageType ?? this.pageType,
+      status: status ?? this.status,
+      startDateFrom: startDateFrom ?? this.startDateFrom,
+      startDateTo: startDateTo ?? this.startDateTo,
+      endDateFrom: endDateFrom ?? this.endDateFrom,
+      endDateTo: endDateTo ?? this.endDateTo,
+      page: page ?? this.page,
+    );
+  }
+
+  String toJsonString() {
+    return jsonEncode({
+      'title': title,
+      'platform': platform?.value,
+      'pageType': pageType?.value,
+      'status': status?.value,
+      'startDateFrom': startDateFrom,
+      'startDateTo': startDateTo,
+      'endDateFrom': endDateFrom,
+      'endDateTo': endDateTo,
+      'page': page,
+    });
+  }
 }
 
 class PageRepository {
@@ -131,35 +198,6 @@ class PageWrapper<T> {
   bool get isPopulated => items.isNotEmpty;
 
   bool get isEmpty => items.isEmpty;
-}
-
-enum Platform {
-  app('App'),
-  web('Web');
-
-  final String value;
-
-  const Platform(this.value);
-}
-
-enum PageType {
-  home('home'),
-  category('category'),
-  about('about');
-
-  final String value;
-
-  const PageType(this.value);
-}
-
-enum PageStatus {
-  draft('Draft'),
-  published('Published'),
-  archived('Archived');
-
-  final String value;
-
-  const PageStatus(this.value);
 }
 
 class PageConfig {

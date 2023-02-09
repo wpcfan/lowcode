@@ -1,5 +1,6 @@
 import 'package:common/common.dart';
 import 'package:common/config.dart';
+import 'package:common/models/all.dart';
 import 'package:flutter/material.dart';
 
 class ImageRowWidget extends StatelessWidget {

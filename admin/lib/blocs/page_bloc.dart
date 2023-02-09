@@ -51,10 +51,10 @@ class PageSearchBloc {
           platform: platform,
           pageType: pageType,
           status: pageStatus,
-          startDateFrom: startDateFrom?.formattedYYYYMMDDHHmmsss,
-          startDateTo: startDateTo?.formattedYYYYMMDDHHmmsss,
-          endDateFrom: endDateFrom?.formattedYYYYMMDDHHmmsss,
-          endDateTo: endDateTo?.formattedYYYYMMDDHHmmsss,
+          startDateFrom: startDateFrom?.formattedYYYYMMDD,
+          startDateTo: startDateTo?.formattedYYYYMMDD,
+          endDateFrom: endDateFrom?.formattedYYYYMMDD,
+          endDateTo: endDateTo?.formattedYYYYMMDD,
         );
       },
     )
@@ -120,8 +120,8 @@ class PageSearchBloc {
 extension DateTimeExtension on DateTime {
   DateTime get startOfDay => DateTime(year, month, day);
   DateTime get endOfDay => DateTime(year, month, day, 23, 59, 59);
-  String get formattedYYYYMMDDHHmmsss =>
-      '${year.toString().padLeft(4, '0')}${month.toString().padLeft(2, '0')}${day.toString().padLeft(2, '0')}${hour.toString().padLeft(2, '0')}${minute.toString().padLeft(2, '0')}${second.toString().padLeft(2, '0')}';
+  String get formattedYYYYMMDD =>
+      '${year.toString().padLeft(4, '0')}${month.toString().padLeft(2, '0')}${day.toString().padLeft(2, '0')}';
 
   String get formatted =>
       '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';

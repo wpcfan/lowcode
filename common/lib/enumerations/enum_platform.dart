@@ -1,10 +1,8 @@
 enum Platform {
-  android('Android'),
-  ios('iOS'),
-  mobile('Mobile'),
-  ;
+  app('App'),
+  web('Web');
 
-  final String code;
+  final String value;
 
-  const Platform(this.code);
+  const Platform(this.value);
 }

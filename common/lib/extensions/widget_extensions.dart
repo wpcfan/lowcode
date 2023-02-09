@@ -619,4 +619,30 @@ extension WidgetExtension on Widget {
         dragStartBehavior: dragStartBehavior,
         child: this,
       );
+
+  Widget inkWell({
+    Key? key,
+    GestureTapCallback? onTap,
+    GestureTapCallback? onDoubleTap,
+    GestureLongPressCallback? onLongPress,
+    GestureTapDownCallback? onTapDown,
+    GestureTapCancelCallback? onTapCancel,
+    GestureTapUpCallback? onTapUp,
+    ValueChanged<bool>? onHighlightChanged,
+    ValueChanged<bool>? onHover,
+    MouseCursor? mouseCursor,
+  }) =>
+      InkWell(
+        key: key,
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
+        onTapDown: onTapDown,
+        onTapCancel: onTapCancel,
+        onTapUp: onTapUp,
+        onHighlightChanged: onHighlightChanged,
+        onHover: onHover,
+        mouseCursor: mouseCursor,
+        child: this,
+      );
 }

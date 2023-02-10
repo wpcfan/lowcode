@@ -1,4 +1,4 @@
-import 'package:admin/pages/repository_list_page.dart';
+import 'package:admin/views/repository_list_page.dart';
 import 'package:flutter/material.dart';
 
 class RepositoryDetailPage extends StatelessWidget {

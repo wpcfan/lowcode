@@ -1,6 +1,6 @@
 import 'package:admin/components/side_menu.dart';
 import 'package:admin/controllers/side_menu_controller.dart';
-import 'package:admin/pages/dashboard_page.dart';
+import 'package:admin/views/dashboard_page.dart';
 import 'package:admin/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

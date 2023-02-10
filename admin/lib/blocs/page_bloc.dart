@@ -1,3 +1,4 @@
+import 'package:admin/extensions/all.dart';
 import 'package:admin/repositories/page_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -13,6 +14,7 @@ class PageSearchBloc {
   final Sink<DateTime?> onEndDateFromChanged;
   final Sink<DateTime?> onEndDateToChanged;
   final Sink<int> onPageSizeChanged;
+  final Sink<PageQuery> onClearAll;
 
   final Stream<PageSearchState> state;
 
@@ -26,8 +28,9 @@ class PageSearchBloc {
     final onEndDateFromChanged = PublishSubject<DateTime?>();
     final onEndDateToChanged = PublishSubject<DateTime?>();
     final onPageSizeChanged = PublishSubject<int>();
+    final onClearAll = PublishSubject<PageQuery>();
 
-    final state = CombineLatestStream.combine9(
+    final columnFilterStream = CombineLatestStream.combine9(
       onTitleChanged.startWith(null),
       onPlatformChanged.startWith(null),
       onPageTypeChanged.startWith(null),
@@ -57,7 +60,11 @@ class PageSearchBloc {
           endDateTo: endDateTo?.formattedYYYYMMDD,
         );
       },
-    )
+    );
+
+    final state = columnFilterStream
+        .mergeWith([onClearAll])
+        .distinct()
         .debounceTime(const Duration(milliseconds: 250))
         .switchMap<PageSearchState>((PageQuery query) => _search(query, repo))
         .startWith(PageSearchInitial());
@@ -72,6 +79,7 @@ class PageSearchBloc {
       onEndDateFromChanged,
       onEndDateToChanged,
       onPageSizeChanged,
+      onClearAll,
       state,
     );
   }
@@ -86,6 +94,7 @@ class PageSearchBloc {
     this.onEndDateFromChanged,
     this.onEndDateToChanged,
     this.onPageSizeChanged,
+    this.onClearAll,
     this.state,
   );
 
@@ -99,6 +108,7 @@ class PageSearchBloc {
     onEndDateFromChanged.close();
     onEndDateToChanged.close();
     onPageSizeChanged.close();
+    onClearAll.close();
   }
 
   static Stream<PageSearchState> _search(
@@ -106,23 +116,9 @@ class PageSearchBloc {
     yield PageSearchLoading();
     try {
       final pages = await repo.search(query);
-      if (pages.isEmpty) {
-        yield PageSearchEmpty();
-      } else {
-        yield PageSearchPopulated(pages);
-      }
+      yield PageSearchPopulated(pages, query);
     } catch (e) {
       yield PageSearchError();
     }
   }
-}
-
-extension DateTimeExtension on DateTime {
-  DateTime get startOfDay => DateTime(year, month, day);
-  DateTime get endOfDay => DateTime(year, month, day, 23, 59, 59);
-  String get formattedYYYYMMDD =>
-      '${year.toString().padLeft(4, '0')}${month.toString().padLeft(2, '0')}${day.toString().padLeft(2, '0')}';
-
-  String get formatted =>
-      '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
 import 'package:http/http.dart' as http;
 
 enum PageType {
@@ -32,7 +33,7 @@ enum PageStatus {
   const PageStatus(this.value);
 }
 
-class PageQuery {
+class PageQuery extends Equatable {
   final String? title;
   final Platform? platform;
   final PageType? pageType;
@@ -43,7 +44,7 @@ class PageQuery {
   final String? endDateTo;
   final int page;
 
-  PageQuery({
+  const PageQuery({
     this.title,
     this.platform,
     this.pageType,
@@ -92,6 +93,19 @@ class PageQuery {
       'page': page,
     });
   }
+
+  @override
+  List<Object?> get props => [
+        title,
+        platform,
+        pageType,
+        status,
+        startDateFrom,
+        startDateTo,
+        endDateFrom,
+        endDateTo,
+        page,
+      ];
 }
 
 class PageRepository {
@@ -128,7 +142,7 @@ class PageRepository {
   String _buildUrl(PageQuery query) {
     final params = <String, String>{};
 
-    if (query.title != null) {
+    if (query.title != null && query.title!.isNotEmpty) {
       params['title'] = query.title!;
     }
 

@@ -156,7 +156,7 @@ void main() {
 }
 ```
 
-在 `lib/pages/home.dart` 中，可以通过 `Consumer` 来读取状态：
+在 `lib/views/home.dart` 中，可以通过 `Consumer` 来读取状态：
 
 ```dart
 import 'package:provider/provider.dart';

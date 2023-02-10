@@ -10,8 +10,7 @@ class PageSearchInitial extends PageSearchState {}
 
 class PageSearchPopulated extends PageSearchState {
   final PageWrapper<PageSearchResultItem> result;
+  final PageQuery query;
 
-  PageSearchPopulated(this.result);
+  PageSearchPopulated(this.result, this.query);
 }
-
-class PageSearchEmpty extends PageSearchState {}

@@ -14,6 +14,7 @@ dependencies:
   equatable: ^2.0.5
   carousel_slider: ^4.2.1
   easy_rich_text: ^1.1.0
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:

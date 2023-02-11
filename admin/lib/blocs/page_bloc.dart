@@ -30,37 +30,57 @@ class PageSearchBloc {
     final onPageSizeChanged = PublishSubject<int>();
     final onClearAll = PublishSubject<PageQuery>();
 
-    final columnFilterStream = CombineLatestStream.combine9(
-      onTitleChanged.startWith(null),
-      onPlatformChanged.startWith(null),
-      onPageTypeChanged.startWith(null),
-      onPageStatusChanged.startWith(null),
-      onStartDateFromChanged.startWith(null),
-      onStartDateToChanged.startWith(null),
-      onEndDateFromChanged.startWith(null),
-      onEndDateToChanged.startWith(null),
-      onPageSizeChanged.startWith(0),
-      (String? title,
-          Platform? platform,
-          PageType? pageType,
-          PageStatus? pageStatus,
-          DateTime? startDateFrom,
-          DateTime? startDateTo,
-          DateTime? endDateFrom,
-          DateTime? endDateTo,
-          int pageSize) {
-        return PageQuery(
-          title: title,
-          platform: platform,
-          pageType: pageType,
-          status: pageStatus,
-          startDateFrom: startDateFrom?.formattedYYYYMMDD,
-          startDateTo: startDateTo?.formattedYYYYMMDD,
-          endDateFrom: endDateFrom?.formattedYYYYMMDD,
-          endDateTo: endDateTo?.formattedYYYYMMDD,
-        );
-      },
-    );
+    /// 使用 CombineLatestStream.combineX 的方式，参数是强类型的，但是有个数限制，最多 9 个
+    /// 使用 CombineLatestStream.list 的方式，参数是 List<dynamic>，但是没有参数个数限制
+
+    // final columnFilterStream = CombineLatestStream.combine9(
+    //   onTitleChanged,
+    //   onPlatformChanged,
+    //   onPageTypeChanged,
+    //   onPageStatusChanged,
+    //   onStartDateFromChanged,
+    //   onStartDateToChanged,
+    //   onEndDateFromChanged,
+    //   onEndDateToChanged,
+    //   onPageSizeChanged,
+    //   (title, platform, pageType, status, startDateFrom, startDateTo,
+    //           endDateFrom, endDateTo, page) =>
+    //       PageQuery(
+    //     title: title,
+    //     platform: platform,
+    //     pageType: pageType,
+    //     status: status,
+    //     startDateFrom: startDateFrom?.formattedYYYYMMDD,
+    //     startDateTo: startDateTo?.formattedYYYYMMDD,
+    //     endDateFrom: endDateFrom?.formattedYYYYMMDD,
+    //     endDateTo: endDateTo?.formattedYYYYMMDD,
+    //     page: page,
+    //   ),
+    // );
+
+    final columnFilterStream = CombineLatestStream.list(
+      [
+        onTitleChanged.startWith(null),
+        onPlatformChanged.startWith(null),
+        onPageTypeChanged.startWith(null),
+        onPageStatusChanged.startWith(null),
+        onStartDateFromChanged.startWith(null),
+        onStartDateToChanged.startWith(null),
+        onEndDateFromChanged.startWith(null),
+        onEndDateToChanged.startWith(null),
+        onPageSizeChanged.startWith(0),
+      ],
+    ).map((values) => PageQuery(
+          title: values[0] as String?,
+          platform: values[1] as Platform?,
+          pageType: values[2] as PageType?,
+          status: values[3] as PageStatus?,
+          startDateFrom: (values[4] as DateTime?)?.formattedYYYYMMDD,
+          startDateTo: (values[5] as DateTime?)?.formattedYYYYMMDD,
+          endDateFrom: (values[6] as DateTime?)?.formattedYYYYMMDD,
+          endDateTo: (values[7] as DateTime?)?.formattedYYYYMMDD,
+          page: (values[8] as int?) ?? 0,
+        ));
 
     final state = columnFilterStream
         .mergeWith([onClearAll])

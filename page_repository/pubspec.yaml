@@ -1,8 +1,8 @@
-name: models
+name: page_repository
 description: A new Flutter package project.
 version: 0.0.1
 homepage: https://imooc.com
-publish_to: none
+publish_to: "none"
 
 environment:
   sdk: ">=2.19.2 <3.0.0"
@@ -12,6 +12,9 @@ dependencies:
   equatable: ^2.0.5
   flutter:
     sdk: flutter
+  http: ^0.13.5
+  models:
+    path: ../models
 
 dev_dependencies:
   flutter_test:

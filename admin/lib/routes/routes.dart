@@ -1,11 +1,11 @@
 import 'package:admin/components/search_field_with_bloc.dart';
 import 'package:admin/repositories/github_repository.dart';
-import 'package:admin/repositories/page_repository.dart';
 import 'package:admin/views/dashboard_page.dart';
 import 'package:admin/views/drag_drop_list_page.dart';
 import 'package:admin/views/drag_drop_page.dart';
 import 'package:admin/views/page/page_table_view.dart';
 import 'package:go_router/go_router.dart';
+import 'package:page_repository/page_repository.dart';
 
 import 'custom_slide_transition.dart';
 

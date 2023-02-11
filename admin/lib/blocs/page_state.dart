@@ -1,4 +1,5 @@
-import '../repositories/page_repository.dart';
+import 'package:models/models.dart';
+import 'package:page_repository/page_repository.dart';
 
 class PageSearchState {}
 

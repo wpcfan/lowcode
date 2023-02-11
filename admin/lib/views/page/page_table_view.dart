@@ -1,8 +1,8 @@
 import 'package:admin/blocs/page_bloc.dart';
 import 'package:admin/blocs/page_state.dart';
-import 'package:admin/repositories/page_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
+import 'package:page_repository/page_repository.dart';
 
 import 'page_search_error_widget.dart';
 import 'page_search_init_widget.dart';
@@ -55,7 +55,7 @@ class _PageTableViewState extends State<PageTableView> {
     } else if (state is PageSearchPopulated) {
       return PageSearchResultWidget(
         query: state.query,
-        pageSearchResult: state.result,
+        pageSearchResult: state.result as PageWrapper<PageSearchResultItem>,
         onPageChanged: (int? value) {
           if (value != null) {
             bloc.onPageSizeChanged.add(value);

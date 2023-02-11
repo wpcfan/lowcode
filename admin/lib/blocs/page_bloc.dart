@@ -1,6 +1,6 @@
-import 'package:admin/repositories/page_repository.dart';
 import 'package:common/common.dart';
 import 'package:models/models.dart';
+import 'package:page_repository/page_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'page_state.dart';
@@ -139,6 +139,7 @@ class PageSearchBloc {
       final pages = await repo.search(query);
       yield PageSearchPopulated(pages, query);
     } catch (e) {
+      print(e);
       yield PageSearchError();
     }
   }

@@ -1,7 +1,7 @@
-import 'package:admin/repositories/page_repository.dart';
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
+import 'package:page_repository/page_repository.dart';
 
 class CustomPaginatedTableHeader extends StatefulWidget {
   const CustomPaginatedTableHeader({super.key});

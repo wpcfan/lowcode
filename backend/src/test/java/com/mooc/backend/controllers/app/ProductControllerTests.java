@@ -66,14 +66,14 @@ public class ProductControllerTests {
                                 .andExpect(jsonPath("$[0].id", is(1)))
                                 .andExpect(jsonPath("$[0].name", is("Product 1")))
                                 .andExpect(jsonPath("$[0].description", is("Description 1")))
-                                .andExpect(jsonPath("$[0].price", is(100000)))
+                                .andExpect(jsonPath("$[0].price", is("¥100,000.00")))
                                 .andExpect(jsonPath("$[0].categories", hasSize(1)))
                                 .andExpect(jsonPath("$[0].categories[0].code", is("cat_one")))
                                 .andExpect(jsonPath("$[0].categories[0].name", is("Category 1")))
                                 .andExpect(jsonPath("$[1].id", is(2)))
                                 .andExpect(jsonPath("$[1].name", is("Product 2")))
                                 .andExpect(jsonPath("$[1].description", is("Description 2")))
-                                .andExpect(jsonPath("$[1].price", is(200000)))
+                                .andExpect(jsonPath("$[1].price", is("¥200,000.00")))
                                 .andExpect(jsonPath("$[1].categories", hasSize(1)))
                                 .andExpect(jsonPath("$[1].categories[0].code", is("cat_one")))
                                 .andExpect(jsonPath("$[1].categories[0].name", is("Category 1")));
@@ -100,7 +100,7 @@ public class ProductControllerTests {
                 product2.setPrice(BigDecimal.valueOf(200000));
                 product2.setCategories(Set.of(category));
 
-                var pageSize = 20;
+                var pageSize = 10;
                 var pageNumber = 0;
                 var pageRequest = Pageable.ofSize(pageSize).withPage(pageNumber);
 
@@ -117,20 +117,20 @@ public class ProductControllerTests {
                                 .andExpect(jsonPath("$.size", is(pageSize)))
                                 .andExpect(jsonPath("$.totalSize", is(2)))
                                 .andExpect(jsonPath("$.totalPage", is(1)))
-                                .andExpect(jsonPath("$.data", hasSize(2)))
-                                .andExpect(jsonPath("$.data[0].id", is(1)))
-                                .andExpect(jsonPath("$.data[0].name", is("Product 1")))
-                                .andExpect(jsonPath("$.data[0].description", is("Description 1")))
-                                .andExpect(jsonPath("$.data[0].price", is("¥100000.00")))
-                                .andExpect(jsonPath("$.data[0].categories", hasSize(1)))
-                                .andExpect(jsonPath("$.data[0].categories[0].code", is("cat_one")))
-                                .andExpect(jsonPath("$.data[0].categories[0].name", is("Category 1")))
-                                .andExpect(jsonPath("$.data[1].id", is(2)))
-                                .andExpect(jsonPath("$.data[1].name", is("Product 2")))
-                                .andExpect(jsonPath("$.data[1].description", is("Description 2")))
-                                .andExpect(jsonPath("$.data[1].price", is("¥200000.00")))
-                                .andExpect(jsonPath("$.data[1].categories", hasSize(1)))
-                                .andExpect(jsonPath("$.data[1].categories[0].code", is("cat_one")))
-                                .andExpect(jsonPath("$.data[1].categories[0].name", is("Category 1")));
+                                .andExpect(jsonPath("$.items", hasSize(2)))
+                                .andExpect(jsonPath("$.items[0].id", is(1)))
+                                .andExpect(jsonPath("$.items[0].name", is("Product 1")))
+                                .andExpect(jsonPath("$.items[0].description", is("Description 1")))
+                                .andExpect(jsonPath("$.items[0].price", is("¥100,000.00")))
+                                .andExpect(jsonPath("$.items[0].categories", hasSize(1)))
+                                .andExpect(jsonPath("$.items[0].categories[0].code", is("cat_one")))
+                                .andExpect(jsonPath("$.items[0].categories[0].name", is("Category 1")))
+                                .andExpect(jsonPath("$.items[1].id", is(2)))
+                                .andExpect(jsonPath("$.items[1].name", is("Product 2")))
+                                .andExpect(jsonPath("$.items[1].description", is("Description 2")))
+                                .andExpect(jsonPath("$.items[1].price", is("¥200,000.00")))
+                                .andExpect(jsonPath("$.items[1].categories", hasSize(1)))
+                                .andExpect(jsonPath("$.items[1].categories[0].code", is("cat_one")))
+                                .andExpect(jsonPath("$.items[1].categories[0].name", is("Category 1")));
         }
 }

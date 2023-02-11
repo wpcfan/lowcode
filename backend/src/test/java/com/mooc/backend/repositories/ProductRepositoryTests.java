@@ -42,7 +42,7 @@ public class ProductRepositoryTests {
         assertEquals(1, products.size());
         assertEquals("Test Product", products.get(0).getName());
         assertEquals("Test Description", products.get(0).getDescription());
-        assertEquals(10000, products.get(0).getPrice());
+        assertEquals(BigDecimal.valueOf(10000), products.get(0).getPrice());
 
         var product2 = new Product();
         product2.setName("Test Product 2");
@@ -112,10 +112,10 @@ public class ProductRepositoryTests {
         assertEquals(2, products.size());
         assertEquals("Test Product", products.get(0).getName());
         assertEquals("Test Description", products.get(0).getDescription());
-        assertEquals(BigDecimal.valueOf(10000), products.get(0).getPrice());
+        assertEquals(BigDecimal.valueOf(10000).setScale(2), products.get(0).getPrice());
         assertEquals("Test Product 2", products.get(1).getName());
         assertEquals("Test Description 2", products.get(1).getDescription());
-        assertEquals(BigDecimal.valueOf(10100), products.get(1).getPrice());
+        assertEquals(BigDecimal.valueOf(10100).setScale(2), products.get(1).getPrice());
 
         var category2 = new Category();
         category2.setCode("cat_two");
@@ -130,7 +130,7 @@ public class ProductRepositoryTests {
         assertEquals(1, products.size());
         assertEquals("Test Product", products.get(0).getName());
         assertEquals("Test Description", products.get(0).getDescription());
-        assertEquals(BigDecimal.valueOf(10000), products.get(0).getPrice());
+        assertEquals(BigDecimal.valueOf(10000).setScale(2), products.get(0).getPrice());
     }
 
     @Test
@@ -201,10 +201,10 @@ public class ProductRepositoryTests {
             assertEquals(2, products.size());
             assertEquals("Test Product", products.get(0).getName());
             assertEquals("Test Description", products.get(0).getDescription());
-            assertEquals(10000, products.get(0).getPrice());
+            assertEquals(BigDecimal.valueOf(10000), products.get(0).getPrice());
             assertEquals("Test Product 2", products.get(1).getName());
             assertEquals("Test Description 2", products.get(1).getDescription());
-            assertEquals(10100, products.get(1).getPrice());
+            assertEquals(BigDecimal.valueOf(10100), products.get(1).getPrice());
         }
     }
 

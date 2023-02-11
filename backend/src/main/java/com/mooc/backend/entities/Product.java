@@ -7,9 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
-import java.text.NumberFormat;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 
 @Getter

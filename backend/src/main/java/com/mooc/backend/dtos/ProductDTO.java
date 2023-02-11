@@ -1,7 +1,6 @@
 package com.mooc.backend.dtos;
 
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
@@ -13,9 +12,6 @@ import lombok.Value;
 import lombok.With;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.NumberFormat;
-import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,19 +28,10 @@ public class ProductDTO {
     private Long id;
     private String name;
     private String description;
-//    @JsonSerialize(using = BigDecimalSerializer.class)
+    @JsonSerialize(using = BigDecimalSerializer.class)
     private BigDecimal price;
     private Set<CategoryDTO> categories;
     private Set<String> images;
-
-    private Locale locale;
-
-    @JsonProperty("formattedPrice")
-    public String getFormattedPrice() {
-        var rounded = price.setScale(2, RoundingMode.HALF_EVEN);
-        NumberFormat format = NumberFormat.getCurrencyInstance(locale);
-        return format.format(rounded);
-    }
 
     public static ProductDTO fromProjection(ProductInfo product) {
         return ProductDTO.builder()

@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.hibernate.query.Query;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class CustomProductRepositoryImpl implements CustomProductRepository {
@@ -53,7 +54,7 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
                             .id((Long) tuple[aliasToIndexMap.get("id")])
                             .name((String) tuple[aliasToIndexMap.get("name")])
                             .description((String) tuple[aliasToIndexMap.get("description")])
-                            .price((Integer) tuple[aliasToIndexMap.get("price")])
+                            .price((BigDecimal) tuple[aliasToIndexMap.get("price")])
                             .categories(Set.of(CategoryDTO.builder()
                                     .id((Long) tuple[aliasToIndexMap.get("c_id")])
                                     .code((String) tuple[aliasToIndexMap.get("c_code")])

@@ -4,10 +4,11 @@ import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.projections.ProductImageInfo;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record ProductAdminDTO(Long id, String name, String description, Integer price, Set<CategoryDTO> categories,
+public record ProductAdminDTO(Long id, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
                               Set<ProductImageInfo> images) {
 
     public static ProductAdminDTO fromEntity(Product product) {

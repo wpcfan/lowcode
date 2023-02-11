@@ -8,6 +8,7 @@ import com.mooc.backend.projections.ProductInfo;
 import lombok.Builder;
 import lombok.Value;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,7 @@ public class ProductDTO {
     private Long id;
     private String name;
     private String description;
-    private Integer price;
+    private BigDecimal price;
     private Set<CategoryDTO> categories;
     private Set<String> images;
 

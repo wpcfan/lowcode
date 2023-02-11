@@ -1,5 +1,6 @@
 package com.mooc.backend.projections;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -12,7 +13,7 @@ public interface ProductInfo {
 
     String getDescription();
 
-    Integer getPrice();
+    BigDecimal getPrice();
 
     Set<CategoryInfo> getCategories();
 

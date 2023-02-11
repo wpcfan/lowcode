@@ -2,7 +2,9 @@ package com.mooc.backend.dtos;
 
 import com.mooc.backend.entities.Product;
 
-public record CreateOrUpdateProductDTO(String name, String description, Integer price) {
+import java.math.BigDecimal;
+
+public record CreateOrUpdateProductDTO(String name, String description, BigDecimal price) {
     public Product toEntity() {
         return Product.builder()
                 .name(name())

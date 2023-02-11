@@ -6,7 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 @Getter
@@ -28,7 +31,7 @@ public class Product extends Auditable {
     private String description;
 
     @Column(name = "price", nullable = false)
-    private Integer price;
+    private BigDecimal price;
 
     @ManyToMany
     @JoinTable(
@@ -88,6 +91,11 @@ public class Product extends Auditable {
         return result;
     }
 
+    public String getFormattedPrice(Locale locale) {
+        NumberFormat format = NumberFormat.getCurrencyInstance(locale);
+        return format.format(price);
+    }
+
     public static ProductBuilder builder() {
         return new ProductBuilder();
     }
@@ -95,7 +103,7 @@ public class Product extends Auditable {
     public static class ProductBuilder {
         private String name;
         private String description;
-        private Integer price;
+        private BigDecimal price;
         private Set<Category> categories = new HashSet<>();
         private Set<ProductImage> images = new HashSet<>();
 
@@ -109,7 +117,7 @@ public class Product extends Auditable {
             return this;
         }
 
-        public ProductBuilder price(Integer price) {
+        public ProductBuilder price(BigDecimal price) {
             this.price = price;
             return this;
         }

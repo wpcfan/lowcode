@@ -91,11 +91,6 @@ public class Product extends Auditable {
         return result;
     }
 
-    public String getFormattedPrice(Locale locale) {
-        NumberFormat format = NumberFormat.getCurrencyInstance(locale);
-        return format.format(price);
-    }
-
     public static ProductBuilder builder() {
         return new ProductBuilder();
     }

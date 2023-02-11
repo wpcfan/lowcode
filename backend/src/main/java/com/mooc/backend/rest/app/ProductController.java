@@ -1,6 +1,7 @@
 package com.mooc.backend.rest.app;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Example;
@@ -54,11 +55,18 @@ public class ProductController {
                 result.getTotalElements(), result.getContent());
     }
 
+    /**
+     * 根据商品 ID 查询商品
+     * @param id 商品 ID
+     * @param locale 请求的区域
+     * @return 商品列表
+     */
     @GetMapping("/by-category/{id}")
-    public List<ProductDTO> findAllByCategory(@PathVariable Long id) {
+    public List<ProductDTO> findAllByCategory(@PathVariable Long id, Locale locale) {
         return productService.findPageableByCategory(id)
                 .stream()
                 .map(ProductDTO::fromEntity)
+                .map(product -> product.withLocale(locale)) // 为每个商品设置 Locale
                 .toList();
     }
 

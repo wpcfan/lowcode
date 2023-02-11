@@ -6,6 +6,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     required this.data,
     required this.width,
     required this.height,
+    required this.errorImage,
     this.addToCart,
     this.onTap,
   });
@@ -14,6 +15,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
   final double height;
   final void Function()? addToCart;
   final void Function()? onTap;
+  final String errorImage;
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +114,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
       image: data.product.images.first,
       width: imageHeight,
       height: imageHeight,
+      errorImage: errorImage,
     ).padding(right: listHorizontalPadding);
     // 商品图片和右边的名称和描述和价格形成一行
     return [productImage, right]

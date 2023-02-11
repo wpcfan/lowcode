@@ -5,11 +5,13 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     super.key,
     required this.data,
     required this.width,
+    required this.errorImage,
     this.addToCart,
     this.onTap,
   });
   final ProductData data;
   final double width;
+  final String errorImage;
   final void Function()? addToCart;
   final void Function()? onTap;
 
@@ -84,6 +86,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       image: data.product.images.first,
       width: width - listHorizontalPadding * 2,
       height: width - listVerticalPadding * 2,
+      errorImage: errorImage,
     ).padding(
       bottom: spaceVertical,
     );

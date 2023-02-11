@@ -46,6 +46,8 @@ dependencies:
   # local package
   common:
     path: ../common
+  models:
+    path: ../models
 
 dev_dependencies:
   flutter_test:

@@ -3,35 +3,7 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:http/http.dart' as http;
-
-enum PageType {
-  home('home'),
-  category('category'),
-  about('about');
-
-  final String value;
-
-  const PageType(this.value);
-}
-
-enum Platform {
-  app('App'),
-  web('Web');
-
-  final String value;
-
-  const Platform(this.value);
-}
-
-enum PageStatus {
-  draft('Draft'),
-  published('Published'),
-  archived('Archived');
-
-  final String value;
-
-  const PageStatus(this.value);
-}
+import 'package:models/models.dart';
 
 class PageQuery extends Equatable {
   final String? title;

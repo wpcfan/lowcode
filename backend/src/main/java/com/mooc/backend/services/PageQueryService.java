@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -35,6 +34,7 @@ public class PageQueryService {
 
     /**
      * 使用 JPA 返回的 Stream，必须在事务中执行，如果不加 @Transactional 注解，会报错
+     * 
      * @param platform 平台
      * @param pageType 页面类型
      * @return 页面

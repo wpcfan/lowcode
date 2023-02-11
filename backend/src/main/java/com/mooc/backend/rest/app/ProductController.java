@@ -1,7 +1,6 @@
 package com.mooc.backend.rest.app;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Example;
@@ -57,6 +56,7 @@ public class ProductController {
 
     /**
      * 根据商品 ID 查询商品
+     * 
      * @param id 商品 ID
      * @return 商品列表
      */

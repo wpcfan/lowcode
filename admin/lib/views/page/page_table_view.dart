@@ -2,6 +2,7 @@ import 'package:admin/blocs/page_bloc.dart';
 import 'package:admin/blocs/page_state.dart';
 import 'package:admin/repositories/page_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:models/models.dart';
 
 import 'page_search_error_widget.dart';
 import 'page_search_init_widget.dart';

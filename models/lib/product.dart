@@ -15,7 +15,7 @@ class Product extends Equatable {
   final String? id;
   final String? name;
   final String? description;
-  final int? price;
+  final String? price;
   final List<String> images;
   final List<Category>? categories;
 
@@ -33,7 +33,7 @@ class Product extends Equatable {
     String? id,
     String? name,
     String? description,
-    int? price,
+    String? price,
     List<String>? images,
     List<Category>? categories,
   }) {
@@ -56,7 +56,7 @@ class Product extends Equatable {
         id: json['id'] as String?,
         name: json['name'] as String?,
         description: json['description'] as String?,
-        price: (json['price'] as num?)?.toInt(),
+        price: json['price'] as String?,
         images: (json['images'] as List<dynamic>?)
                 ?.map((e) => e as String)
                 .toList() ??

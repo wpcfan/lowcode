@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @JsonDeserialize(as = ImageData.class)
 public class ImageData implements BlockData {
     private Integer sort;
-    private String image;
-    private Link link;
-    private String title;
+
+    private ImageDTO data;
 }

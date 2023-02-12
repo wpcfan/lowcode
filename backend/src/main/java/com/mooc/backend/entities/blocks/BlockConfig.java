@@ -12,6 +12,6 @@ public class BlockConfig {
     private Integer verticalPadding;
     private Integer horizontalSpacing;
     private Integer verticalSpacing;
-
-    private Double aspectRatio;
+    private Double itemWidth;
+    private Double itemHeight;
 }

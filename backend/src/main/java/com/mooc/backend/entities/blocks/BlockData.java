@@ -10,4 +10,5 @@ public interface BlockData extends Serializable {
 
     Integer getSort();
 
+    <T> T getData();
 }

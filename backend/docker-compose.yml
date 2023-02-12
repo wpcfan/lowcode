@@ -21,6 +21,8 @@ services:
     restart: always
     ports:
       - "8081:8080" # host:container
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
 
 volumes:
     mysql:

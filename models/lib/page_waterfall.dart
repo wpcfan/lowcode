@@ -1,52 +1,35 @@
 part of 'page_block.dart';
 
-enum WaterfallDataType {
-  category('category'),
-  product('product'),
-  ;
-
-  final String value;
-
-  const WaterfallDataType(this.value);
-}
-
 class WaterfallPageBlock extends PageBlock {
-  final int? width;
-  final int? height;
-  final List<WaterfallData> data;
+  final List<CategoryData> data;
 
   const WaterfallPageBlock({
     required int id,
+    required String title,
     required int sort,
-    required Platform platform,
-    required String target,
-    this.width,
-    this.height,
+    required BlockConfig config,
     required this.data,
   }) : super(
           id: id,
+          title: title,
           type: PageBlockType.waterfall,
           sort: sort,
-          platform: platform,
-          target: target,
+          config: config,
         );
 
   @override
-  List<Object?> get props =>
-      [id, type, sort, data, width, height, platform, target];
+  List<Object?> get props => [id, type, sort, data, title];
 
   factory WaterfallPageBlock.fromJson(Map<String, dynamic> json) {
     return WaterfallPageBlock(
       id: json['id'],
+      title: json['title'],
       sort: json['sort'],
+      config: BlockConfig.fromJson(json['config']),
       data: (json['data'] as List)
-          .map((e) => WaterfallData.fromJson(e))
+          .map((e) => CategoryData.fromJson(e))
           .toList()
-          .cast<WaterfallData>(),
-      width: json['width'],
-      height: json['height'],
-      platform: json['platform'],
-      target: json['target'],
+          .cast<CategoryData>(),
     );
   }
 
@@ -54,13 +37,32 @@ class WaterfallPageBlock extends PageBlock {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'type': type.value,
+      'title': title,
+      'type': describeEnum(type),
       'sort': sort,
+      'config': config.toJson(),
       'data': data.map((e) => e.toJson()).toList(),
-      'width': width,
-      'height': height,
-      'platform': platform,
-      'target': target,
     };
+  }
+
+  WaterfallPageBlock copyWith({
+    int? id,
+    String? title,
+    int? sort,
+    BlockConfig? config,
+    List<CategoryData>? data,
+  }) {
+    return WaterfallPageBlock(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      sort: sort ?? this.sort,
+      config: config ?? this.config,
+      data: data ?? this.data,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'WaterfallPageBlock(id: $id, title: $title, sort: $sort, config: $config, data: $data)';
   }
 }

@@ -1,10 +1,12 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 
+import 'category.dart';
 import 'enumerations.dart';
 import 'product.dart';
 
 part 'page_block_config.dart';
+part 'page_category_data.dart';
 part 'page_config.dart';
 part 'page_image_data.dart';
 part 'page_image_row.dart';
@@ -12,10 +14,8 @@ part 'page_link.dart';
 part 'page_pinned_header.dart';
 part 'page_product_data.dart';
 part 'page_product_row.dart';
-part 'page_ranking.dart';
 part 'page_slider.dart';
 part 'page_waterfall.dart';
-part 'page_waterfall_data.dart';
 
 abstract class PageBlock extends Equatable {
   const PageBlock({
@@ -47,8 +47,6 @@ abstract class PageBlock extends Equatable {
         return SliderPageBlock.fromJson(json);
       case PageBlockType.pinnedHeader:
         return PinnedHeaderPageBlock.fromJson(json);
-      case PageBlockType.ranking:
-        return RankingPageBlock.fromJson(json);
       case PageBlockType.unknown:
       default:
         throw Exception('Unknown PageBlockType: $type');

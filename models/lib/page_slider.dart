@@ -1,48 +1,32 @@
 part of 'page_block.dart';
 
 class SliderPageBlock extends PageBlock {
-  @override
-  final String? title;
-  final int? width;
-  final int? height;
   final List<ImageData> data;
 
   const SliderPageBlock({
     required int id,
+    required String title,
     required int sort,
-    required Platform platform,
-    required String target,
-    this.title,
-    this.width,
-    this.height,
+    required BlockConfig config,
     required this.data,
   }) : super(
           id: id,
+          title: title,
           type: PageBlockType.slider,
           sort: sort,
-          platform: platform,
-          target: target,
+          config: config,
         );
 
   @override
-  List<Object?> get props =>
-      [id, type, sort, data, title, width, height, platform, target];
+  List<Object?> get props => [id, type, sort, data, title];
 
   factory SliderPageBlock.fromJson(Map<String, dynamic> json) {
-    final imageData = json['data'] as List;
-    imageData.sort((a, b) => a['sort'] - b['sort']);
     return SliderPageBlock(
       id: json['id'],
-      sort: json['sort'],
-      data: imageData
-          .map((e) => ImageData.fromJson(e))
-          .toList()
-          .cast<ImageData>(),
       title: json['title'],
-      width: json['width'],
-      height: json['height'],
-      platform: json['platform'],
-      target: json['target'],
+      sort: json['sort'],
+      config: BlockConfig.fromJson(json['config']),
+      data: (json['data'] as List).map((e) => ImageData.fromJson(e)).toList(),
     );
   }
 
@@ -50,14 +34,27 @@ class SliderPageBlock extends PageBlock {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'type': type.value,
-      'sort': sort,
-      'data': data.map((e) => e.toJson()).toList(),
       'title': title,
-      'width': width,
-      'height': height,
-      'platform': platform,
-      'target': target,
+      'type': describeEnum(type),
+      'sort': sort,
+      'config': config.toJson(),
+      'data': data.map((e) => e.toJson()).toList(),
     };
+  }
+
+  SliderPageBlock copyWith({
+    int? id,
+    String? title,
+    int? sort,
+    BlockConfig? config,
+    List<ImageData>? data,
+  }) {
+    return SliderPageBlock(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      sort: sort ?? this.sort,
+      config: config ?? this.config,
+      data: data ?? this.data,
+    );
   }
 }

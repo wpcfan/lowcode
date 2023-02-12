@@ -1,7 +1,7 @@
 part of 'page_block.dart';
 
-class Link extends Equatable {
-  const Link({
+class MyLink extends Equatable {
+  const MyLink({
     required this.type,
     required this.value,
   });
@@ -12,9 +12,8 @@ class Link extends Equatable {
   @override
   List<Object?> get props => [type, value];
 
-  factory Link.fromJson(Map<String, dynamic> json) {
-    debugPrint('Link.fromJson: $json');
-    return Link(
+  factory MyLink.fromJson(Map<String, dynamic> json) {
+    return MyLink(
       type: LinkType.values.firstWhere((e) => e.value == json['type']),
       value: json['value'],
     );

@@ -120,10 +120,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start)
         .parent(page)
-        .gestures(onTap: () {
-      if (onTap != null) {
-        onTap!(product);
-      }
-    });
+        .gestures(onTap: onTap != null ? () => onTap!(product) : null);
   }
 }

@@ -1,6 +1,8 @@
 import 'package:admin/constants.dart';
 import 'package:admin/responsive.dart';
 import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+import 'package:page_block_widgets/page_block_widgets.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -29,6 +31,38 @@ class DashboardPage extends StatelessWidget {
                       Container(
                         color: Colors.purple,
                         height: 300,
+                      ),
+                      const SizedBox(height: defaultPadding),
+                      BannerWidget(
+                        data: const [
+                          ImageData(
+                              image:
+                                  'https://via.placeholder.com/300x150/FF0000/FFFFFF?text=1',
+                              link: MyLink(
+                                type: LinkType.url,
+                                value: '/draggable',
+                              )),
+                          ImageData(
+                              image:
+                                  'https://via.placeholder.com/300x150/00FF00/FFFFFF?text=2',
+                              link: MyLink(
+                                type: LinkType.url,
+                                value: '/draggable',
+                              )),
+                          ImageData(
+                              image:
+                                  'https://via.placeholder.com/300x150/0000FF/FFFFFF?text=3',
+                              link: MyLink(
+                                type: LinkType.url,
+                                value: '/draggable',
+                              )),
+                        ],
+                        height: 150,
+                        errorImage: 'assets/images/error_400_120.png',
+                        // 如果提示 Invalid constant value，可以尝试去掉 BannerWidget 前面的 const 关键字。
+                        onImageSelected: (link) {
+                          print(link);
+                        },
                       ),
                       // if (Responsive.isMobile(context))
                       //   const SizedBox(height: defaultPadding),

@@ -2,6 +2,8 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
+import 'image.dart';
+
 class ImageRowWidget extends StatelessWidget {
   const ImageRowWidget({
     super.key,

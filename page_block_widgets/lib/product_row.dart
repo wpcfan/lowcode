@@ -2,6 +2,8 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
+import 'image.dart';
+
 part 'product_card_one_row_one.dart';
 part 'product_card_one_row_two.dart';
 

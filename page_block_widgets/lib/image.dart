@@ -1,4 +1,6 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
+import 'package:models/models.dart';
 
 class ImageWidget extends StatelessWidget {
   const ImageWidget({
@@ -9,6 +11,8 @@ class ImageWidget extends StatelessWidget {
     this.height = double.infinity,
     this.width = double.infinity,
     this.alignment = Alignment.center,
+    this.link,
+    this.onTap,
   });
   final String imageUrl;
   final String errorImage;
@@ -16,6 +20,8 @@ class ImageWidget extends StatelessWidget {
   final double height;
   final double width;
   final Alignment alignment;
+  final MyLink? link;
+  final void Function(MyLink?)? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +45,6 @@ class ImageWidget extends StatelessWidget {
       errorBuilder: (context, error, stackTrace) {
         return Image.asset(errorImage);
       },
-    );
+    ).inkWell(onTap: () => onTap!(link));
   }
 }

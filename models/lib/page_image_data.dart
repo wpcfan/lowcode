@@ -8,13 +8,13 @@ class ImageData extends Equatable {
   });
 
   final String image;
-  final Link? link;
+  final MyLink? link;
   final String? title;
 
   factory ImageData.fromJson(Map<String, dynamic> json) {
     return ImageData(
       image: json['image'],
-      link: json['link'] != null ? Link.fromJson(json['link']) : null,
+      link: json['link'] != null ? MyLink.fromJson(json['link']) : null,
       title: json['title'],
     );
   }

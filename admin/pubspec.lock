@@ -198,6 +198,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  page_block_widgets:
+    dependency: "direct main"
+    description:
+      path: "../page_block_widgets"
+      relative: true
+    source: path
+    version: "0.0.1"
   page_repository:
     dependency: "direct main"
     description:

@@ -47,6 +47,8 @@ dependencies:
     path: ../common
   models:
     path: ../models
+  page_block_widgets:
+    path: ../page_block_widgets
   page_repository:
     path: ../page_repository
 

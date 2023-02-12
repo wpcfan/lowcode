@@ -3,30 +3,33 @@ part of 'product_row.dart';
 class ProductCardOneRowTwoWidget extends StatelessWidget {
   const ProductCardOneRowTwoWidget({
     super.key,
-    required this.data,
+    required this.product,
     required this.width,
+    required this.height,
+    required this.horizontalSpacing,
+    required this.verticalSpacing,
+    required this.errorImage,
     this.addToCart,
     this.onTap,
   });
-  final ProductData data;
+  final Product product;
   final double width;
-  final void Function()? addToCart;
-  final void Function()? onTap;
+  final double height;
+  final double horizontalSpacing;
+  final double verticalSpacing;
+  final String errorImage;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTap;
 
   @override
   Widget build(BuildContext context) {
-    const double spaceVertical = 4;
-    page({required Widget child}) => Styled.widget(child: child)
-        .padding(
-          horizontal: listHorizontalPadding,
-          vertical: listVerticalPadding,
-        )
-        .constrained(maxWidth: width)
+    page({required Widget child}) => SwiftUi.widget(child: child)
+        .constrained(maxWidth: width, maxHeight: height)
         .backgroundColor(Colors.white)
         .border(all: 1, color: Colors.grey);
     // 商品名称
     final productName = Text(
-      data.product.name ?? '',
+      product.name ?? '',
       style: const TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 14,
@@ -35,10 +38,10 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       softWrap: true,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-    ).padding(bottom: spaceVertical);
+    ).padding(bottom: verticalSpacing);
     // 商品描述
     final productDescription = Text(
-      data.product.description ?? '',
+      product.description ?? '',
       style: const TextStyle(
         fontSize: 12,
         color: Colors.black54,
@@ -46,46 +49,37 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       softWrap: true,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-    ).padding(bottom: spaceVertical);
-
-    final discounts = data.product.discounts ?? [];
-    final discount = discounts.isNotEmpty
-        ? discounts.firstWhere(
-            (el) => el.isApplied,
-            orElse: () => discounts.first,
-          )
-        : null;
+    ).padding(bottom: verticalSpacing);
 
     // 商品原价：划线价
-    final productOriginalPrice = data.product.price != null &&
-            discount != null &&
-            discount.type == DiscountType.discount &&
-            (discount as DiscountPromotion).discount?.amount != null &&
-            discount.discount?.amount != data.product.price
-        ? data.product.price!
+    final productOriginalPrice = product.originalPrice != null
+        ? product.originalPrice!
             .toString()
             .lineThru()
-            .padding(bottom: spaceVertical)
+            .padding(bottom: verticalSpacing)
         : null;
     // 商品价格
-    final productPrice = discount != null &&
-            discount.type == DiscountType.discount &&
-            (discount as DiscountPromotion).discount?.formatted != null
-        ? discount.discount?.formatted!
+    final productPrice = product.price != null
+        ? product.price!
             .toPriceWithDecimalSize(defaultFontSize: 14, decimalFontSize: 10)
         : null;
     // 购物车图标
     const double buttonSize = 30.0;
     final cartBtn = const Icon(Icons.add_shopping_cart, color: Colors.white)
         .rounded(size: buttonSize, color: Colors.red)
-        .gestures(onTap: addToCart);
+        .gestures(onTap: () {
+      if (addToCart != null) {
+        addToCart!(product);
+      }
+    });
     // 商品图片
     final productImage = ImageWidget(
-      image: data.product.images.first,
-      width: width - listHorizontalPadding * 2,
-      height: width - listVerticalPadding * 2,
+      imageUrl: product.images.first,
+      width: width,
+      height: width,
+      errorImage: errorImage,
     ).padding(
-      bottom: spaceVertical,
+      bottom: verticalSpacing,
     );
     // 商品图片、名称和描述形成一列
     final imageNameAndDesc = <Widget>[
@@ -115,6 +109,10 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start);
 
-    return nameDescAndPrice.parent(page).gestures(onTap: onTap);
+    return nameDescAndPrice.parent(page).gestures(onTap: () {
+      if (onTap != null) {
+        onTap!(product);
+      }
+    });
   }
 }

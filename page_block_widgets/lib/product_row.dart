@@ -6,80 +6,75 @@ part 'product_card_one_row_one.dart';
 part 'product_card_one_row_two.dart';
 
 class ProductRowWidget extends StatelessWidget {
-  const ProductRowWidget({super.key, required this.pageBlock});
-  final ProductRowPageBlock pageBlock;
+  const ProductRowWidget({
+    super.key,
+    required this.data,
+    required this.horizontalPadding,
+    required this.verticalPadding,
+    required this.width,
+    required this.height,
+    required this.errorImage,
+    required this.config,
+    required this.ratio,
+    this.addToCart,
+    this.onTap,
+  }) : assert(data.length <= 2 && data.length > 0);
+  final List<ProductData> data;
+  final double horizontalPadding;
+  final double verticalPadding;
+  final double width;
+  final double height;
+  final String errorImage;
+  final BlockConfig config;
+  final double ratio;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTap;
 
   @override
   Widget build(BuildContext context) {
-    if (pageBlock.data.isEmpty) {
-      return const SizedBox();
-    }
-    final aspectRatio = pageBlock.width! / pageBlock.height!;
-    final width =
-        MediaQuery.of(context).size.width - screenHorizontalPadding * 2;
-    final height = (width / aspectRatio).ceilToDouble();
-    final cartBloc = context.read<CartBloc>();
-    final messageCubit = context.read<MessageCubit>();
-    wrapper(child) => BlocListener<CartBloc, CartState>(
-        listener: (context, state) {
-          if (state.addStatus == BlocStatus.success) {
-            messageCubit.showMessage('Added to cart');
-          } else if (state.loadStatus == BlocStatus.failure) {
-            messageCubit.showMessage('Failed to add to cart');
-          }
-        },
-        child: child);
-    if (pageBlock.data.length == 1) {
-      final product = pageBlock.data.first.product;
-      final orderQuantity = product.orderQuantity;
-      final oneRowOne = SizedBox(
-          height: height + 2 * spaceBetweenListItems,
-          child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: screenHorizontalPadding,
-                vertical: spaceBetweenListItems,
-              ),
-              child: ProductCardOneRowOneWidget(
-                data: pageBlock.data.first,
-                width: width,
-                height: height,
-                addToCart: () {
-                  cartBloc.add(CartAddItemEvent(
-                    product: product,
-                    quantity: orderQuantity.min,
-                  ));
-                },
-                onTap: () =>
-                    debugPrint('on tap ${pageBlock.data.first.product.id}'),
-              )));
-      return wrapper(oneRowOne);
-    }
-    final oneRowTwo = IntrinsicHeight(
-      child: pageBlock.data
-          .take(2)
-          .map((el) {
-            final product = el.product;
-            final orderQuantity = product.metadata != null
-                ? OrderQuantity.fromJson(product.metadata!['order_quantity'])
-                : OrderQuantity();
-            return ProductCardOneRowTwoWidget(
-              data: el,
-              width: (width - spaceBetweenListItems) / 2,
-              addToCart: () => cartBloc.add(CartAddItemEvent(
-                product: product,
-                quantity: orderQuantity.min,
-              )),
-              onTap: () => debugPrint('on tap ${el.product.id}'),
-            );
-          })
-          .toList()
-          .toRow(
+    page({required Widget child}) => SwiftUi.widget(child: child)
+        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
+        .constrained(maxWidth: width, maxHeight: height)
+        .backgroundColor(Colors.white)
+        .border(all: 1, color: Colors.grey);
+
+    switch (data.length) {
+      case 1:
+        final product = data.first.product;
+
+        return ProductCardOneRowOneWidget(
+          product: data[0].product,
+          width: width,
+          height: height,
+          horizontalPadding: (config.horizontalPadding ?? 0) * ratio,
+          verticalPadding: (config.verticalPadding ?? 0) * ratio,
+          horizontalSpacing: (config.horizontalSpacing ?? 0) * ratio,
+          verticalSpacing: (config.verticalSpacing ?? 0) * ratio,
+          errorImage: errorImage,
+          onTap: onTap,
+          addToCart: addToCart,
+        ).parent(page);
+      case 2:
+        return data
+            .map((e) => e.product)
+            .map((product) => ProductCardOneRowTwoWidget(
+                  product: product,
+                  width: width / 2 - (config.horizontalPadding ?? 0) * ratio,
+                  height: height - 2 * (config.verticalPadding ?? 0) * ratio,
+                  horizontalSpacing: (config.horizontalSpacing ?? 0) * ratio,
+                  verticalSpacing: (config.verticalSpacing ?? 0) * ratio,
+                  errorImage: errorImage,
+                  onTap: onTap,
+                  addToCart: addToCart,
+                ))
+            .toList()
+            .toRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start)
-          .padding(
-              horizontal: screenHorizontalPadding,
-              vertical: spaceBetweenListItems / 2),
-    );
-    return wrapper(oneRowTwo);
+              crossAxisAlignment: CrossAxisAlignment.start,
+            )
+            .parent(page);
+      default:
+        return Container();
+    }
   }
 }

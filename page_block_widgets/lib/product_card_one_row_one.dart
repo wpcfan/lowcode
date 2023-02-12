@@ -3,31 +3,40 @@ part of 'product_row.dart';
 class ProductCardOneRowOneWidget extends StatelessWidget {
   const ProductCardOneRowOneWidget({
     super.key,
-    required this.data,
+    required this.product,
     required this.width,
     required this.height,
+    required this.horizontalPadding,
+    required this.verticalPadding,
+    required this.horizontalSpacing,
+    required this.verticalSpacing,
+    required this.errorImage,
     this.addToCart,
     this.onTap,
   });
-  final ProductData data;
+  final Product product;
   final double width;
   final double height;
-  final void Function()? addToCart;
-  final void Function()? onTap;
+  final double horizontalPadding;
+  final double verticalPadding;
+  final double horizontalSpacing;
+  final double verticalSpacing;
+  final String errorImage;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final imageHeight = height - 2 * listHorizontalPadding;
+    final imageHeight = height - 2 * verticalPadding;
     const double spaceVertical = 4;
-    page({required Widget child}) => Styled.widget(child: child)
-        .padding(
-            horizontal: listHorizontalPadding, vertical: listVerticalPadding)
+    page({required Widget child}) => SwiftUi.widget(child: child)
+        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: width, maxHeight: height)
         .backgroundColor(Colors.white)
         .border(all: 1, color: Colors.grey);
     // 商品名称
     final productName = Text(
-      data.product.name ?? '',
+      product.name ?? '',
       style: const TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 16,
@@ -39,7 +48,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     ).padding(bottom: spaceVertical);
     // 商品描述
     final productDescription = Text(
-      data.product.description ?? '',
+      product.description ?? '',
       style: const TextStyle(
         fontSize: 14,
         color: Colors.black54,
@@ -49,39 +58,30 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
     ).padding(bottom: spaceVertical);
 
-    final discounts = data.product.discounts ?? [];
-    final discount = discounts.isNotEmpty
-        ? discounts.firstWhere(
-            (el) => el.isApplied,
-            orElse: () => discounts.first,
-          )
-        : null;
     // 商品原价：划线价
-    final productOriginalPrice = data.product.price != null &&
-            discount != null &&
-            discount.type == DiscountType.discount &&
-            (discount as DiscountPromotion).discount?.amount != null &&
-            discount.discount?.amount != data.product.price
-        ? data.product.price
-            .toString()
+    final productOriginalPrice = product.originalPrice != null
+        ? product.originalPrice!
             .lineThru()
             .padding(bottom: spaceVertical, right: 8)
             .alignment(Alignment.centerRight)
         : null;
     // 商品价格
-    final productPrice = discount != null &&
-            discount.type == DiscountType.discount &&
-            (discount as DiscountPromotion).discount?.formatted != null
-        ? discount.discount?.formatted!
+    final productPrice = product.price != null
+        ? product.price!
             .toPriceWithDecimalSize(defaultFontSize: 16, decimalFontSize: 12)
             .padding(bottom: spaceVertical, right: 8)
             .alignment(Alignment.centerRight)
         : null;
+
     // 购物车图标
     const double buttonSize = 30.0;
     final cartBtn = const Icon(Icons.add_shopping_cart, color: Colors.white)
         .rounded(size: buttonSize, color: Colors.red)
-        .gestures(onTap: addToCart);
+        .gestures(onTap: () {
+      if (addToCart != null) {
+        addToCart!(product);
+      }
+    });
 
     final priceRow = [
       productOriginalPrice,
@@ -105,20 +105,25 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
         .toColumn(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start)
-        .padding(right: screenHorizontalPadding)
+        .padding(right: horizontalSpacing)
         .expanded();
     // 商品图片
     final productImage = ImageWidget(
-      image: data.product.images.first,
+      imageUrl: product.images.first,
       width: imageHeight,
       height: imageHeight,
-    ).padding(right: listHorizontalPadding);
+      errorImage: errorImage,
+    ).padding(right: horizontalSpacing);
     // 商品图片和右边的名称和描述和价格形成一行
     return [productImage, right]
         .toRow(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.start)
         .parent(page)
-        .gestures(onTap: onTap);
+        .gestures(onTap: () {
+      if (onTap != null) {
+        onTap!(product);
+      }
+    });
   }
 }

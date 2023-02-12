@@ -1,5 +1,6 @@
 import 'package:admin/constants.dart';
 import 'package:admin/responsive.dart';
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
@@ -63,7 +64,7 @@ class DashboardPage extends StatelessWidget {
                         onImageSelected: (link) {
                           print(link);
                         },
-                      ),
+                      ).constrained(width: 400),
                       // if (Responsive.isMobile(context))
                       //   const SizedBox(height: defaultPadding),
                       // if (Responsive.isMobile(context))

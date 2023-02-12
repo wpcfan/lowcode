@@ -9,17 +9,17 @@ import 'package:models/models.dart';
 
 class PageRepository {
   final String baseUrl;
-  final Map<String, PageWrapper<PageSearchResultItem>> cache;
+  final Map<String, PageWrapper<PageLayout>> cache;
   final http.Client client;
 
   PageRepository({
     http.Client? client,
-    Map<String, PageWrapper<PageSearchResultItem>>? cache,
+    Map<String, PageWrapper<PageLayout>>? cache,
     this.baseUrl = 'http://localhost:8080/api/v1/admin/pages',
   })  : client = client ?? http.Client(),
-        cache = cache ?? <String, PageWrapper<PageSearchResultItem>>{};
+        cache = cache ?? <String, PageWrapper<PageLayout>>{};
 
-  Future<PageWrapper<PageSearchResultItem>> search(PageQuery query) async {
+  Future<PageWrapper<PageLayout>> search(PageQuery query) async {
     final url = _buildUrl(query);
     final cachedResult = cache[url];
 
@@ -31,7 +31,7 @@ class PageRepository {
 
     final result = PageWrapper.fromJson(
       jsonDecode(response.body),
-      (json) => PageSearchResultItem.fromJson(json),
+      (json) => PageLayout.fromJson(json),
     );
 
     cache[url] = result;
@@ -79,118 +79,6 @@ class PageRepository {
     final url = Uri.parse(baseUrl).replace(queryParameters: params);
 
     return url.toString();
-  }
-}
-
-class PageConfig {
-  final int horizontalPadding;
-  final int verticalPadding;
-  final int horizontalSpacing;
-  final int verticalSpacing;
-  final int baselineScreenWidth;
-  final int baselineScreenHeight;
-  final int baselineFontSize;
-
-  PageConfig({
-    this.horizontalPadding = 16,
-    this.verticalPadding = 16,
-    this.horizontalSpacing = 16,
-    this.verticalSpacing = 16,
-    this.baselineScreenWidth = 360,
-    this.baselineScreenHeight = 640,
-    this.baselineFontSize = 16,
-  });
-
-  factory PageConfig.fromJson(dynamic json) {
-    return PageConfig(
-      horizontalPadding: json['horizontalPadding'],
-      verticalPadding: json['verticalPadding'],
-      horizontalSpacing: json['horizontalSpacing'],
-      verticalSpacing: json['verticalSpacing'],
-      baselineScreenWidth: json['baselineScreenWidth'],
-      baselineScreenHeight: json['baselineScreenHeight'],
-      baselineFontSize: json['baselineFontSize'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'horizontalPadding': horizontalPadding,
-      'verticalPadding': verticalPadding,
-      'horizontalSpacing': horizontalSpacing,
-      'verticalSpacing': verticalSpacing,
-      'baselineScreenWidth': baselineScreenWidth,
-      'baselineScreenHeight': baselineScreenHeight,
-      'baselineFontSize': baselineFontSize,
-    };
-  }
-}
-
-class PageSearchResultItem {
-  final String title;
-  final Platform platform;
-  final PageType pageType;
-  final PageConfig config;
-  final PageStatus status;
-  final DateTime? startTime;
-  final DateTime? endTime;
-
-  PageSearchResultItem({
-    required this.title,
-    required this.platform,
-    required this.pageType,
-    required this.config,
-    required this.status,
-    this.startTime,
-    this.endTime,
-  });
-
-  factory PageSearchResultItem.fromJson(dynamic json) {
-    return PageSearchResultItem(
-      title: json['title'] as String,
-      platform: Platform.values.firstWhere(
-        (e) => e.value == json['platform'],
-        orElse: () => Platform.app,
-      ),
-      pageType: PageType.values.firstWhere(
-        (e) => e.value == json['pageType'],
-        orElse: () => PageType.home,
-      ),
-      config: PageConfig.fromJson(json['config']),
-      status: PageStatus.values.firstWhere(
-        (e) => e.value == json['status'],
-        orElse: () => PageStatus.draft,
-      ),
-      startTime: json['startTime'] == null
-          ? null
-          : DateTime.parse(json['startTime'] as String),
-      endTime: json['endTime'] == null
-          ? null
-          : DateTime.parse(json['endTime'] as String),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'platform': platform.value,
-      'pageType': pageType.value,
-      'config': config.toJson(),
-      'status': status.value,
-      'startTime': startTime?.toIso8601String(),
-      'endTime': endTime?.toIso8601String(),
-    };
-  }
-
-  bool get isDraft => status == PageStatus.draft;
-
-  bool get isPublished => status == PageStatus.published;
-
-  bool get isArchived => status == PageStatus.archived;
-
-  @override
-  String toString() {
-    return 'PageSearchResultItem{title: $title, platform: $platform, pageType: $pageType, config: $config, status: $status, startTime: $startTime, endTime: $endTime}';
   }
 }
 

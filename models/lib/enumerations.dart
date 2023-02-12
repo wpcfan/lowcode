@@ -53,7 +53,7 @@ enum PageBlockType {
   productRow('product_row'),
   waterfall('waterfall'),
   ranking('ranking'),
-  ;
+  unknown('unknown');
 
   final String value;
   const PageBlockType(this.value);

@@ -23,7 +23,7 @@ class PageSearchResultWidget extends StatelessWidget {
     required this.query,
   });
 
-  final PageWrapper<PageSearchResultItem> pageSearchResult;
+  final PageWrapper<PageLayout> pageSearchResult;
   final void Function(int?)? onPageChanged;
   final void Function(String?) onTitleChanged;
   final void Function(Platform?) onPlatformChanged;

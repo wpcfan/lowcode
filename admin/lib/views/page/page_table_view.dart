@@ -55,7 +55,7 @@ class _PageTableViewState extends State<PageTableView> {
     } else if (state is PageSearchPopulated) {
       return PageSearchResultWidget(
         query: state.query,
-        pageSearchResult: state.result as PageWrapper<PageSearchResultItem>,
+        pageSearchResult: state.result,
         onPageChanged: (int? value) {
           if (value != null) {
             bloc.onPageSizeChanged.add(value);

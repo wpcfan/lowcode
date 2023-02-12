@@ -6,7 +6,7 @@ import 'package:page_repository/page_repository.dart';
 class PageSearchResultDataSource extends DataTableSource {
   PageSearchResultDataSource(this.pageSearchResult);
 
-  final PageWrapper<PageSearchResultItem> pageSearchResult;
+  final PageWrapper<PageLayout> pageSearchResult;
 
   @override
   DataRow getRow(int index) {

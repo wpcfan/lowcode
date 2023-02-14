@@ -9,12 +9,14 @@ class MyCustomScrollView extends StatelessWidget {
     required this.slivers,
     required this.onRefresh,
     this.onScrollPosition,
-    this.refreshIndicatorIndex = 0,
+    this.sliverAppBar,
+    this.decoration,
   });
   final List<Widget> slivers;
   final Future<void> Function() onRefresh;
   final void Function(ScrollPosition)? onScrollPosition;
-  final int refreshIndicatorIndex;
+  final Widget? sliverAppBar;
+  final BoxDecoration? decoration;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class MyCustomScrollView extends StatelessWidget {
         },
         child: CustomScrollView(
           slivers: [
-            ...slivers.sublist(0, refreshIndicatorIndex),
+            sliverAppBar,
             CupertinoSliverRefreshControl(
               refreshTriggerPullDistance: 100,
               refreshIndicatorExtent: 60,
@@ -45,31 +47,26 @@ class MyCustomScrollView extends StatelessWidget {
               builder: (context, refreshState, pulledExtent,
                       refreshTriggerPullDistance, refreshIndicatorExtent) =>
                   Container(
-                color: Colors.blueAccent,
+                decoration: decoration,
                 height: pulledExtent,
                 alignment: Alignment.center,
                 child: _buildRefreshIndicator(
-                  context,
                   refreshState,
-                  pulledExtent,
-                  refreshTriggerPullDistance,
-                  refreshIndicatorExtent,
                 ),
               ),
             ),
-            ...slivers.sublist(refreshIndicatorIndex),
-          ],
+            ...slivers
+          ]
+              // 用于过滤掉空的 Widget
+              .whereType<Widget>()
+              .toList(),
         ),
       ),
     );
   }
 
   _buildRefreshIndicator(
-    BuildContext context,
     RefreshIndicatorMode refreshState,
-    double pulledExtent,
-    double refreshTriggerPullDistance,
-    double refreshIndicatorExtent,
   ) {
     switch (refreshState) {
       case RefreshIndicatorMode.drag:

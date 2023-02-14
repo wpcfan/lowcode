@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 
@@ -35,32 +36,112 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MyCustomScrollView(
-      refreshIndicatorIndex: 1,
-      slivers: [
-        const SliverAppBar(
-          title: Text('Home'),
-          floating: true,
-          snap: false,
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return Container(
-                height: 100,
-                color: Colors.primaries[index % Colors.primaries.length],
-              );
-            },
-            childCount: 100,
+    const decoration = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.blue,
+          Colors.green,
+        ],
+      ),
+    );
+    return Scaffold(
+      // appBar: AppBar(
+      //   title: const CupertinoSearchTextField(
+      //     placeholder: 'Search',
+      //     placeholderStyle: TextStyle(color: Colors.white30),
+      //     prefixIcon: Icon(Icons.search, color: Colors.white),
+      //     backgroundColor: Colors.black12,
+      //     style: TextStyle(color: Colors.white),
+      //   ),
+      //   leading: const Icon(Icons.branding_watermark_outlined),
+      //   actions: [
+      //     IconButton(
+      //       icon: const Icon(Icons.notification_important),
+      //       onPressed: () {},
+      //     ),
+      //   ],
+
+      //   /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
+      //   flexibleSpace: Container(
+      //     decoration: const BoxDecoration(
+      //       gradient: LinearGradient(
+      //         begin: Alignment.topLeft,
+      //         end: Alignment.bottomRight,
+      //         colors: [
+      //           Colors.blue,
+      //           Colors.green,
+      //         ],
+      //       ),
+      //     ),
+      //   ),
+      // ),
+      body: MyCustomScrollView(
+        decoration: decoration,
+        slivers: [
+          SliverAppBar(
+            floating: true,
+            title: const CupertinoSearchTextField(
+              placeholder: 'Search',
+              placeholderStyle: TextStyle(color: Colors.white30),
+              prefixIcon: Icon(Icons.search, color: Colors.white),
+              backgroundColor: Colors.black12,
+              style: TextStyle(color: Colors.white),
+            ),
+            leading: const Icon(Icons.branding_watermark_outlined),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.notification_important),
+                onPressed: () {},
+              ),
+            ],
+
+            /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
+            flexibleSpace: Container(
+              decoration: decoration,
+            ),
           ),
-        ),
-      ],
-      onRefresh: () async {
-        await Future.delayed(const Duration(seconds: 2));
-      },
-      onScrollPosition: (position) {
-        print(position);
-      },
+          SliverGrid.count(
+            crossAxisCount: 3,
+            children: List.generate(
+              10,
+              (index) => Container(
+                color: Colors.primaries[index % Colors.primaries.length],
+              ),
+            ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                return Container(
+                  height: 100,
+                  color: Colors.primaries[index % Colors.primaries.length],
+                );
+              },
+              childCount: 30,
+            ),
+          ),
+          SliverGrid.count(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            mainAxisSpacing: 12,
+            crossAxisSpacing: 12,
+            children: List.generate(
+              10,
+              (index) => Container(
+                color: Colors.primaries[index % Colors.primaries.length],
+              ),
+            ),
+          )
+        ],
+        onRefresh: () async {
+          await Future.delayed(const Duration(seconds: 2));
+        },
+        onScrollPosition: (position) {
+          print(position);
+        },
+      ),
     );
   }
 }

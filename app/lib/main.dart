@@ -79,29 +79,30 @@ class HomeView extends StatelessWidget {
       // ),
       body: MyCustomScrollView(
         decoration: decoration,
-        slivers: [
-          SliverAppBar(
-            floating: true,
-            title: const CupertinoSearchTextField(
-              placeholder: 'Search',
-              placeholderStyle: TextStyle(color: Colors.white30),
-              prefixIcon: Icon(Icons.search, color: Colors.white),
-              backgroundColor: Colors.black12,
-              style: TextStyle(color: Colors.white),
-            ),
-            leading: const Icon(Icons.branding_watermark_outlined),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.notification_important),
-                onPressed: () {},
-              ),
-            ],
-
-            /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
-            flexibleSpace: Container(
-              decoration: decoration,
-            ),
+        sliverAppBar: SliverAppBar(
+          floating: true,
+          pinned: false,
+          title: const CupertinoSearchTextField(
+            placeholder: 'Search',
+            placeholderStyle: TextStyle(color: Colors.white30),
+            prefixIcon: Icon(Icons.search, color: Colors.white),
+            backgroundColor: Colors.black12,
+            style: TextStyle(color: Colors.white),
           ),
+          leading: const Icon(Icons.branding_watermark_outlined),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notification_important),
+              onPressed: () {},
+            ),
+          ],
+
+          /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
+          flexibleSpace: Container(
+            decoration: decoration,
+          ),
+        ),
+        slivers: [
           SliverGrid.count(
             crossAxisCount: 3,
             children: List.generate(

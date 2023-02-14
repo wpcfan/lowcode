@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:page_block_widgets/page_block_widgets.dart';
 
 void main() {
   runApp(const MyApp());
@@ -24,7 +25,42 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomeView(),
+    );
+  }
+}
+
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MyCustomScrollView(
+      refreshIndicatorIndex: 1,
+      slivers: [
+        const SliverAppBar(
+          title: Text('Home'),
+          floating: true,
+          snap: false,
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              return Container(
+                height: 100,
+                color: Colors.primaries[index % Colors.primaries.length],
+              );
+            },
+            childCount: 100,
+          ),
+        ),
+      ],
+      onRefresh: () async {
+        await Future.delayed(const Duration(seconds: 2));
+      },
+      onScrollPosition: (position) {
+        print(position);
+      },
     );
   }
 }
@@ -100,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),

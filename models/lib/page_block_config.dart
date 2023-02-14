@@ -1,10 +1,10 @@
 part of 'page_block.dart';
 
 class BlockConfig {
-  final int? horizontalPadding;
-  final int? verticalPadding;
-  final int? horizontalSpacing;
-  final int? verticalSpacing;
+  final double? horizontalPadding;
+  final double? verticalPadding;
+  final double? horizontalSpacing;
+  final double? verticalSpacing;
   final double? itemWidth;
   final double? itemHeight;
 
@@ -19,10 +19,10 @@ class BlockConfig {
 
   factory BlockConfig.fromJson(Map<String, dynamic> json) {
     return BlockConfig(
-      horizontalPadding: json['horizontalPadding'] as int?,
-      verticalPadding: json['verticalPadding'] as int?,
-      horizontalSpacing: json['horizontalSpacing'] as int?,
-      verticalSpacing: json['verticalSpacing'] as int?,
+      horizontalPadding: json['horizontalPadding'] as double?,
+      verticalPadding: json['verticalPadding'] as double?,
+      horizontalSpacing: json['horizontalSpacing'] as double?,
+      verticalSpacing: json['verticalSpacing'] as double?,
       itemWidth: json['itemWidth'] as double?,
       itemHeight: json['itemHeight'] as double?,
     );
@@ -40,10 +40,10 @@ class BlockConfig {
   }
 
   BlockConfig copyWith({
-    int? horizontalPadding,
-    int? verticalPadding,
-    int? horizontalSpacing,
-    int? verticalSpacing,
+    double? horizontalPadding,
+    double? verticalPadding,
+    double? horizontalSpacing,
+    double? verticalSpacing,
     double? itemWidth,
     double? itemHeight,
   }) {

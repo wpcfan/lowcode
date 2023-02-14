@@ -43,9 +43,8 @@ class ProductRowWidget extends StatelessWidget {
     switch (data.length) {
       case 1:
         final product = data.first.product;
-
         return ProductCardOneRowOneWidget(
-          product: data[0].product,
+          product: product,
           width: width,
           height: height,
           horizontalPadding: (config.horizontalPadding ?? 0) * ratio,

@@ -6,23 +6,40 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: <Widget>[
-        SliverMasonryGrid.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: 4,
-          crossAxisSpacing: 4,
-          itemBuilder: (context, index) {
-            return Container(
-              height: index % 2 == 0 ? 100 : 200,
-              color: Colors.primaries[index % Colors.primaries.length],
-              child: Center(
-                child: Text('$index'),
-              ),
-            );
-          },
-        )
-      ],
+    return NotificationListener(
+      onNotification: (scrollNotification) {
+        if (scrollNotification is ScrollEndNotification) {
+          if (scrollNotification.metrics.pixels ==
+              scrollNotification.metrics.maxScrollExtent) {
+            print('end');
+          }
+        }
+        if (scrollNotification is ScrollStartNotification) {
+          if (scrollNotification.metrics.pixels == 0) {
+            print('top');
+          }
+        }
+        return true;
+      },
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverMasonryGrid.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 4,
+            crossAxisSpacing: 4,
+            itemBuilder: (context, index) {
+              return Container(
+                height: index % 2 == 0 ? 100 : 200,
+                color: Colors.primaries[index % Colors.primaries.length],
+                child: Center(
+                  child: Text('$index'),
+                ),
+              );
+            },
+            childCount: 100,
+          )
+        ],
+      ),
     );
     //   return SafeArea(
     //     child: SingleChildScrollView(

@@ -1,42 +1,41 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-enum ScrollPosition { top, end }
-
 class MyCustomScrollView extends StatelessWidget {
   const MyCustomScrollView({
     super.key,
     required this.slivers,
     required this.onRefresh,
-    this.onScrollPosition,
+    this.onLoadMore,
     this.sliverAppBar,
     this.decoration,
+    this.hasMore = false,
+    this.loadMoreWidget = const CupertinoActivityIndicator(),
   });
   final List<Widget> slivers;
   final Future<void> Function() onRefresh;
-  final void Function(ScrollPosition)? onScrollPosition;
+  final Future<void> Function()? onLoadMore;
   final Widget? sliverAppBar;
   final BoxDecoration? decoration;
+  final bool hasMore;
+  final Widget loadMoreWidget;
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: NotificationListener(
-        onNotification: (scrollNotification) {
-          if (scrollNotification is ScrollEndNotification) {
-            if (scrollNotification.metrics.pixels ==
-                scrollNotification.metrics.maxScrollExtent) {
-              onScrollPosition?.call(ScrollPosition.end);
-            }
-          }
-          if (scrollNotification is ScrollStartNotification) {
-            if (scrollNotification.metrics.pixels == 0) {
-              onScrollPosition?.call(ScrollPosition.top);
-            }
-          }
-          return true;
-        },
+        onNotification: hasMore
+            ? (scrollNotification) {
+                if (scrollNotification is ScrollEndNotification) {
+                  if (scrollNotification.metrics.pixels ==
+                      scrollNotification.metrics.maxScrollExtent) {
+                    onLoadMore?.call();
+                  }
+                }
+                return true;
+              }
+            : null,
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(
               parent: AlwaysScrollableScrollPhysics()),
@@ -57,7 +56,15 @@ class MyCustomScrollView extends StatelessWidget {
                 ),
               ),
             ),
-            ...slivers
+            ...slivers,
+            if (hasMore)
+              SliverToBoxAdapter(
+                child: Container(
+                  height: 60,
+                  alignment: Alignment.center,
+                  child: loadMoreWidget,
+                ),
+              ),
           ]
               // 用于过滤掉空的 Widget
               .whereType<Widget>()

@@ -31,8 +31,15 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  int page = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +85,7 @@ class HomeView extends StatelessWidget {
       //   ),
       // ),
       body: MyCustomScrollView(
+        hasMore: true,
         decoration: decoration,
         sliverAppBar: SliverAppBar(
           floating: true,
@@ -129,7 +137,7 @@ class HomeView extends StatelessWidget {
             mainAxisSpacing: 12,
             crossAxisSpacing: 12,
             children: List.generate(
-              10,
+              (page + 1) * 10,
               (index) => Container(
                 color: Colors.primaries[index % Colors.primaries.length],
               ),
@@ -138,9 +146,15 @@ class HomeView extends StatelessWidget {
         ],
         onRefresh: () async {
           await Future.delayed(const Duration(seconds: 2));
+          setState(() {
+            page = 0;
+          });
         },
-        onScrollPosition: (position) {
-          print(position);
+        onLoadMore: () async {
+          await Future.delayed(const Duration(seconds: 2));
+          setState(() {
+            page++;
+          });
         },
       ),
     );

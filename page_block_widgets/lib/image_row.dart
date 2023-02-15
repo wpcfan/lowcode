@@ -14,6 +14,7 @@ class ImageRowWidget extends StatelessWidget {
     required this.horizontalPadding,
     required this.spaceBetweenItems,
     required this.errorImage,
+    this.onTap,
   });
   final List<ImageData> items;
   final double itemWidth;
@@ -22,6 +23,7 @@ class ImageRowWidget extends StatelessWidget {
   final double horizontalPadding;
   final double spaceBetweenItems;
   final String errorImage;
+  final void Function(MyLink?)? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -38,27 +40,20 @@ class ImageRowWidget extends StatelessWidget {
 
   Widget _buildSingleImage(BuildContext context) {
     final item = items.first;
-    return InkWell(
-      onTap: () {
-        if (item.link != null) {
-          Navigator.of(context).pushNamed(
-            item.link!.value,
-          );
-        }
-      },
-      child: Container(
-        width: itemWidth,
-        height: itemHeight,
-        padding: EdgeInsets.symmetric(
-          vertical: verticalPadding,
-          horizontal: horizontalPadding,
-        ),
-        child: ImageWidget(
-          imageUrl: item.image,
-          width: itemWidth - horizontalPadding * 2,
-          height: itemHeight - verticalPadding * 2,
-          errorImage: errorImage,
-        ),
+    return Container(
+      width: itemWidth,
+      height: itemHeight,
+      padding: EdgeInsets.symmetric(
+        vertical: verticalPadding,
+        horizontal: horizontalPadding,
+      ),
+      child: ImageWidget(
+        imageUrl: item.image,
+        width: itemWidth - horizontalPadding * 2,
+        height: itemHeight - verticalPadding * 2,
+        errorImage: errorImage,
+        link: item.link,
+        onTap: onTap,
       ),
     );
   }
@@ -76,20 +71,13 @@ class ImageRowWidget extends StatelessWidget {
         children: items
             .mapWithIndex(
               (item, index) => Expanded(
-                child: InkWell(
-                  onTap: () {
-                    if (item.link != null) {
-                      Navigator.of(context).pushNamed(
-                        item.link!.value,
-                      );
-                    }
-                  },
-                  child: ImageWidget(
-                    imageUrl: item.image,
-                    width: double.infinity,
-                    height: double.infinity,
-                    errorImage: errorImage,
-                  ),
+                child: ImageWidget(
+                  imageUrl: item.image,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorImage: errorImage,
+                  link: item.link,
+                  onTap: onTap,
                 ),
               ),
             )
@@ -110,26 +98,19 @@ class ImageRowWidget extends StatelessWidget {
         scrollDirection: Axis.horizontal,
         children: items
             .mapWithIndex(
-              (item, index) => InkWell(
-                onTap: () {
-                  if (item.link != null) {
-                    Navigator.of(context).pushNamed(
-                      item.link!.value,
-                    );
-                  }
-                },
-                child: Container(
-                  width: itemWidth - horizontalPadding * 2,
-                  height: itemHeight - verticalPadding * 2,
-                  margin: EdgeInsets.only(
-                    right: index == items.length - 1 ? 0 : spaceBetweenItems,
-                  ),
-                  child: ImageWidget(
-                    imageUrl: item.image,
-                    width: double.infinity,
-                    height: double.infinity,
-                    errorImage: errorImage,
-                  ),
+              (item, index) => Container(
+                width: itemWidth - horizontalPadding * 2,
+                height: itemHeight - verticalPadding * 2,
+                margin: EdgeInsets.only(
+                  right: index == items.length - 1 ? 0 : spaceBetweenItems,
+                ),
+                child: ImageWidget(
+                  imageUrl: item.image,
+                  width: double.infinity,
+                  height: double.infinity,
+                  errorImage: errorImage,
+                  link: item.link,
+                  onTap: onTap,
                 ),
               ),
             )

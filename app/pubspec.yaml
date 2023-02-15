@@ -39,7 +39,7 @@ dependencies:
     path: ../page_block_widgets
   page_repository:
     path: ../page_repository
-  easy_refresh: ^3.3.0+1
+  url_launcher: ^6.1.9
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

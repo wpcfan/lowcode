@@ -64,6 +64,7 @@ enum PageBlockType {
 /// - deepLink: 深度链接
 enum LinkType {
   url('url'),
+  route('route'),
   deepLink('deep_link'),
   ;
 

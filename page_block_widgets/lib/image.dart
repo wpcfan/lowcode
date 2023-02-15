@@ -7,11 +7,11 @@ class ImageWidget extends StatelessWidget {
     super.key,
     required this.imageUrl,
     required this.errorImage,
+    this.link,
     this.fit = BoxFit.cover,
     this.height = double.infinity,
     this.width = double.infinity,
     this.alignment = Alignment.center,
-    this.link,
     this.onTap,
   });
   final String imageUrl;
@@ -45,6 +45,6 @@ class ImageWidget extends StatelessWidget {
       errorBuilder: (context, error, stackTrace) {
         return Image.asset(errorImage);
       },
-    ).inkWell(onTap: () => onTap!(link));
+    ).inkWell(onTap: () => onTap?.call(link));
   }
 }

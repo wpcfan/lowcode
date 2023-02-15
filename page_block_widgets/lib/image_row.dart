@@ -71,13 +71,18 @@ class ImageRowWidget extends StatelessWidget {
         children: items
             .mapWithIndex(
               (item, index) => Expanded(
-                child: ImageWidget(
-                  imageUrl: item.image,
-                  width: double.infinity,
-                  height: double.infinity,
-                  errorImage: errorImage,
-                  link: item.link,
-                  onTap: onTap,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: index == items.length - 1 ? 0 : spaceBetweenItems,
+                  ),
+                  child: ImageWidget(
+                    imageUrl: item.image,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorImage: errorImage,
+                    link: item.link,
+                    onTap: onTap,
+                  ),
                 ),
               ),
             )

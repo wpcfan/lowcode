@@ -49,8 +49,6 @@ class ImageRowWidget extends StatelessWidget {
       ),
       child: ImageWidget(
         imageUrl: item.image,
-        width: itemWidth - horizontalPadding * 2,
-        height: itemHeight - verticalPadding * 2,
         errorImage: errorImage,
         link: item.link,
         onTap: onTap,
@@ -77,8 +75,6 @@ class ImageRowWidget extends StatelessWidget {
                   ),
                   child: ImageWidget(
                     imageUrl: item.image,
-                    width: double.infinity,
-                    height: double.infinity,
                     errorImage: errorImage,
                     link: item.link,
                     onTap: onTap,
@@ -101,6 +97,7 @@ class ImageRowWidget extends StatelessWidget {
       ),
       child: ListView(
         scrollDirection: Axis.horizontal,
+        itemExtent: itemWidth,
         children: items
             .mapWithIndex(
               (item, index) => Container(
@@ -111,8 +108,6 @@ class ImageRowWidget extends StatelessWidget {
                 ),
                 child: ImageWidget(
                   imageUrl: item.image,
-                  width: double.infinity,
-                  height: double.infinity,
                   errorImage: errorImage,
                   link: item.link,
                   onTap: onTap,

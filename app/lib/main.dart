@@ -171,9 +171,15 @@ class _HomeViewState extends State<HomeView> {
                     MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
                 title: 'title2',
               ),
+              ImageData(
+                image: 'https://picsum.photos/200/300',
+                link:
+                    MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
+                title: 'title2',
+              ),
             ],
-            itemWidth: 30,
-            itemHeight: 40,
+            itemWidth: 100,
+            itemHeight: 160,
             verticalPadding: 10,
             horizontalPadding: 10,
             spaceBetweenItems: 10,

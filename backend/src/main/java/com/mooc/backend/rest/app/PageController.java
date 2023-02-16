@@ -26,7 +26,7 @@ public class PageController {
 
     final PageQueryService pageQueryService;
 
-    @Operation(summary = "根据 id 获取页面信息")
+    @Operation(summary = "根据 pageType 获取页面信息")
     @GetMapping("/published/{pageType}")
     public PageDTO findPublished(
             @Parameter(description = "页面类型", name = "pageType") @PathVariable PageType pageType,

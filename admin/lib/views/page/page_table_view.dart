@@ -10,7 +10,7 @@ import 'page_search_loading_widget.dart';
 import 'page_search_result_widget.dart';
 
 class PageTableView extends StatefulWidget {
-  final PageRepository api;
+  final PageAdminRepository api;
   const PageTableView({super.key, required this.api});
 
   @override

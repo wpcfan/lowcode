@@ -8,24 +8,35 @@ group = 'com.mooc'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '19'
 
+// 项目依赖版本号定义
+ext {
+    uaParserVersion = '1.5.3'
+    qiNiuVersion = '7.12.1'
+    springdocVersion = '2.0.2'
+    hypersistenceVersion = '3.1.1'
+    testcontainersVersion = '1.17.6'
+}
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
     }
 }
 
+// 项目依赖仓库
 repositories {
     mavenCentral()
 }
 
+// 项目依赖
 dependencies {
-    implementation 'com.github.ua-parser:uap-java:1.5.3'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation "com.github.ua-parser:uap-java:${uaParserVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.1.1'
-    implementation 'com.qiniu:qiniu-java-sdk:7.12.1'
+    implementation "io.hypersistence:hypersistence-utils-hibernate-60:${hypersistenceVersion}"
+    implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
     compileOnly 'org.projectlombok:lombok'
@@ -36,8 +47,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.hamcrest:hamcrest-library'
-    testImplementation 'org.testcontainers:junit-jupiter:1.17.6'
-    testImplementation 'org.testcontainers:mysql:1.17.6'
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:mysql:${testcontainersVersion}"
 }
 
 tasks.named('test') {

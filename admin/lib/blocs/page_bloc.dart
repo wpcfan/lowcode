@@ -19,7 +19,7 @@ class PageSearchBloc {
 
   final Stream<PageSearchState> state;
 
-  factory PageSearchBloc(PageRepository repo) {
+  factory PageSearchBloc(PageAdminRepository repo) {
     final onTitleChanged = PublishSubject<String?>();
     final onPlatformChanged = PublishSubject<Platform?>();
     final onPageTypeChanged = PublishSubject<PageType?>();
@@ -133,13 +133,12 @@ class PageSearchBloc {
   }
 
   static Stream<PageSearchState> _search(
-      PageQuery query, PageRepository repo) async* {
+      PageQuery query, PageAdminRepository repo) async* {
     yield PageSearchLoading();
     try {
       final pages = await repo.search(query);
       yield PageSearchPopulated(pages, query);
     } catch (e) {
-      print(e);
       yield PageSearchError();
     }
   }

@@ -1,8 +1,12 @@
+import 'package:app/blocs/page_state.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
+import 'package:page_repository/page_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'blocs/page_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,22 +32,40 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const HomeView(),
+      home: HomeView(
+        api: PageRepository(),
+      ),
     );
   }
 }
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  const HomeView({super.key, required this.api});
+  final PageRepository api;
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
+  late final PageLayoutBloc bloc;
   int page = 0;
   int _selectedIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  void initState() {
+    super.initState();
+
+    bloc = PageLayoutBloc(widget.api);
+  }
+
+  @override
+  void dispose() {
+    bloc.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     const decoration = BoxDecoration(
@@ -120,132 +142,136 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  MyCustomScrollView _buildBody(BoxDecoration decoration) {
-    return MyCustomScrollView(
-      hasMore: true,
-      loadMoreWidget: Container(
-        height: 60,
-        alignment: Alignment.center,
-        child: const CircularProgressIndicator(),
+  StreamBuilder<PageLayoutState> _buildBody(BoxDecoration decoration) {
+    final sliverAppBar = SliverAppBar(
+      floating: true,
+      pinned: false,
+      title: const CupertinoSearchTextField(
+        placeholder: 'Search',
+        placeholderStyle: TextStyle(color: Colors.white30),
+        prefixIcon: Icon(Icons.search, color: Colors.white),
+        backgroundColor: Colors.black12,
+        style: TextStyle(color: Colors.white),
       ),
-      decoration: decoration,
-      sliverAppBar: SliverAppBar(
-        floating: true,
-        pinned: false,
-        title: const CupertinoSearchTextField(
-          placeholder: 'Search',
-          placeholderStyle: TextStyle(color: Colors.white30),
-          prefixIcon: Icon(Icons.search, color: Colors.white),
-          backgroundColor: Colors.black12,
-          style: TextStyle(color: Colors.white),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.notification_important),
+          onPressed: () {
+            _scaffoldKey.currentState?.openEndDrawer();
+          },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notification_important),
-            onPressed: () {
-              _scaffoldKey.currentState?.openEndDrawer();
-            },
-          ),
-        ],
-
-        /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
-        /// 如果使用了 SliverAppBar，那么这个属性起到的作用不仅是 AppBar 的背景，而且
-        /// 下拉的时候，会有一段距离是这个背景，这个 Flexible 就是用来控制这个距离的
-        flexibleSpace: Container(
-          decoration: decoration,
-        ),
-      ),
-      slivers: [
-        SliverToBoxAdapter(
-          child: ImageRowWidget(
-            items: const [
-              ImageData(
-                image: 'https://picsum.photos/200/300',
-                link:
-                    MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
-                title: 'title1',
-              ),
-              ImageData(
-                image: 'https://picsum.photos/200/300',
-                link:
-                    MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
-                title: 'title2',
-              ),
-              ImageData(
-                image: 'https://picsum.photos/200/300',
-                link:
-                    MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
-                title: 'title2',
-              ),
-            ],
-            itemWidth: 100,
-            itemHeight: 160,
-            verticalPadding: 10,
-            horizontalPadding: 10,
-            spaceBetweenItems: 10,
-            errorImage: 'assets/images/error.png',
-            onTap: (link) {
-              if (link != null) {
-                switch (link.type) {
-                  case LinkType.route:
-                    Navigator.of(context).pushNamed(
-                      link.value,
-                    );
-                    break;
-                  case LinkType.url:
-                  case LinkType.deepLink:
-                    launchUrl(Uri.parse(link.value));
-                    break;
-                  default:
-                }
-              }
-            },
-          ),
-        ),
-        SliverGrid.count(
-          crossAxisCount: 3,
-          children: List.generate(
-            10,
-            (index) => Container(
-              color: Colors.primaries[index % Colors.primaries.length],
-            ),
-          ),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return Container(
-                height: 100,
-                color: Colors.primaries[index % Colors.primaries.length],
-              );
-            },
-            childCount: 30,
-          ),
-        ),
-        SliverGrid.count(
-          crossAxisCount: 2,
-          childAspectRatio: 0.75,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: 12,
-          children: List.generate(
-            (page + 1) * 10,
-            (index) => Container(
-              color: Colors.primaries[index % Colors.primaries.length],
-            ),
-          ),
-        )
       ],
-      onRefresh: () async {
-        await Future.delayed(const Duration(seconds: 2));
-        setState(() {
-          page = 0;
-        });
-      },
-      onLoadMore: () async {
-        await Future.delayed(const Duration(seconds: 2));
-        setState(() {
-          page++;
-        });
+
+      /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
+      /// 如果使用了 SliverAppBar，那么这个属性起到的作用不仅是 AppBar 的背景，而且
+      /// 下拉的时候，会有一段距离是这个背景，这个 Flexible 就是用来控制这个距离的
+      flexibleSpace: Container(
+        decoration: decoration,
+      ),
+    );
+    final loadMoreWidget = Container(
+      height: 60,
+      alignment: Alignment.center,
+      child: const CircularProgressIndicator(),
+    );
+    final slivers = [
+      SliverToBoxAdapter(
+        child: ImageRowWidget(
+          items: const [
+            ImageData(
+              image: 'https://picsum.photos/200/300',
+              link: MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
+              title: 'title1',
+            ),
+            ImageData(
+              image: 'https://picsum.photos/200/300',
+              link: MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
+              title: 'title2',
+            ),
+            ImageData(
+              image: 'https://picsum.photos/200/300',
+              link: MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
+              title: 'title2',
+            ),
+          ],
+          itemWidth: 100,
+          itemHeight: 160,
+          verticalPadding: 10,
+          horizontalPadding: 10,
+          spaceBetweenItems: 10,
+          errorImage: 'assets/images/error.png',
+          onTap: (link) {
+            if (link != null) {
+              switch (link.type) {
+                case LinkType.route:
+                  Navigator.of(context).pushNamed(
+                    link.value,
+                  );
+                  break;
+                case LinkType.url:
+                case LinkType.deepLink:
+                  launchUrl(Uri.parse(link.value));
+                  break;
+                default:
+              }
+            }
+          },
+        ),
+      ),
+      SliverGrid.count(
+        crossAxisCount: 3,
+        children: List.generate(
+          10,
+          (index) => Container(
+            color: Colors.primaries[index % Colors.primaries.length],
+          ),
+        ),
+      ),
+      SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return Container(
+              height: 100,
+              color: Colors.primaries[index % Colors.primaries.length],
+            );
+          },
+          childCount: 30,
+        ),
+      ),
+      SliverGrid.count(
+        crossAxisCount: 2,
+        childAspectRatio: 0.75,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        children: List.generate(
+          (page + 1) * 10,
+          (index) => Container(
+            color: Colors.primaries[index % Colors.primaries.length],
+          ),
+        ),
+      )
+    ];
+    return StreamBuilder<PageLayoutState>(
+      stream: bloc.state,
+      initialData: PageLayoutInitial(),
+      builder: (context, snapshot) {
+        final state = snapshot.requireData;
+        return MyCustomScrollView(
+          hasMore: true,
+          loadMoreWidget: loadMoreWidget,
+          decoration: decoration,
+          sliverAppBar: sliverAppBar,
+          slivers: slivers,
+          onRefresh: () async {
+            bloc.onPageTypeChanged.add(PageType.home);
+          },
+          onLoadMore: () async {
+            await Future.delayed(const Duration(seconds: 2));
+            setState(() {
+              page++;
+            });
+          },
+        );
       },
     );
   }

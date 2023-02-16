@@ -40,12 +40,12 @@ final routes = <RouteBase>[
       GoRoute(
         path: 'pages',
         builder: (context, state) => PageTableView(
-          api: PageRepository(),
+          api: PageAdminRepository(),
         ),
         pageBuilder: (context, state) => CustomSlideTransition(
             key: state.pageKey,
             child: PageTableView(
-              api: PageRepository(),
+              api: PageAdminRepository(),
             )),
       ),
     ],

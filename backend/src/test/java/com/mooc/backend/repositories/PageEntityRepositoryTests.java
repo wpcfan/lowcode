@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.mooc.backend.dtos.ProductAdminDTO;
 import com.mooc.backend.entities.blocks.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageConfig;
@@ -65,27 +65,12 @@ public class PageEntityRepositoryTests {
                 .horizontalSpacing(8)
                 .verticalSpacing(8)
                 .build();
-        var bannerImageData1 = ImageData.builder()
-                .data(new ImageDTO(bannerImage, "Test Image 1", linkBaidu))
-                .sort(1)
-                .build();
+        var bannerImageData1 = new ImageDTO(bannerImage, "Test Image 1", linkBaidu);
 
-        var bannerImageData2 = ImageData.builder()
-                .data(new ImageDTO(bannerImage, "Test Image 2", linkSina))
-                .sort(2)
-                .build();
-        var rowImageData1 = ImageData.builder()
-                .data(new ImageDTO(rowImage, "Test Image 1", linkBaidu))
-                .sort(1)
-                .build();
-        var rowImageData2 = ImageData.builder()
-                .data(new ImageDTO(rowImage, "Test Image 2", linkBaidu))
-                .sort(2)
-                .build();
-        var rowImageData3 = ImageData.builder()
-                .data(new ImageDTO(rowImage, "Test Image 3", linkBaidu))
-                .sort(3)
-                .build();
+        var bannerImageData2 = new ImageDTO(bannerImage, "Test Image 2", linkSina);
+        var rowImageData1 = new ImageDTO(rowImage, "Test Image 1", linkBaidu);
+        var rowImageData2 = new ImageDTO(rowImage, "Test Image 2", linkBaidu);
+        var rowImageData3 = new ImageDTO(rowImage, "Test Image 3", linkBaidu);
         var bannerBlockData1 = PageBlockDataEntity.builder()
                 .sort(1)
                 .content(bannerImageData1)
@@ -138,14 +123,8 @@ public class PageEntityRepositoryTests {
         product.setPrice(BigDecimal.valueOf(10000));
         testEntityManager.persist(product);
 
-        var productBlockData1 = ProductData.builder()
-                .sort(1)
-                .data(product)
-                .build();
-        var productBlockData2 = ProductData.builder()
-                .sort(2)
-                .data(product)
-                .build();
+        var productBlockData1 = ProductAdminDTO.fromEntity(product);
+        var productBlockData2 = ProductAdminDTO.fromEntity(product);;
         var productData1 = PageBlockDataEntity.builder()
                 .sort(1)
                 .content(productBlockData1)

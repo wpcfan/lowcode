@@ -1,15 +1,19 @@
 package com.mooc.backend.dtos;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
+import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.projections.ProductImageInfo;
 
 import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@JsonDeserialize(as = ProductAdminDTO.class)
+
 public record ProductAdminDTO(Long id, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
-                              Set<ProductImageInfo> images) {
+                              Set<ProductImageInfo> images) implements BlockData {
 
     public static ProductAdminDTO fromEntity(Product product) {
         return new ProductAdminDTO(

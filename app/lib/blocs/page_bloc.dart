@@ -13,8 +13,9 @@ class PageLayoutBloc {
     final onPageTypeChanged = PublishSubject<PageType>();
 
     final state = onPageTypeChanged
+        .startWith(PageType.home)
         .switchMap((value) => _getByType(value, repo))
-        .startWith(PageLayoutInitial());
+        .shareReplay(maxSize: 1);
 
     return PageLayoutBloc._(
       onPageTypeChanged: onPageTypeChanged,

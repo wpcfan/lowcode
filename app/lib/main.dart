@@ -1,12 +1,16 @@
-import 'package:app/blocs/page_state.dart';
+import 'package:app/controllers/scaffold_controller.dart';
+import 'package:app/widgets/home_error.dart';
+import 'package:app/widgets/home_initial.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 import 'package:page_repository/page_repository.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/page_bloc.dart';
+import 'blocs/page_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -32,39 +36,32 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: HomeView(
-        api: PageRepository(),
+      home: MultiProvider(
+        providers: [
+          Provider(
+            create: (context) => PageRepository(),
+          ),
+          ChangeNotifierProvider(create: (context) => ScaffoldController()),
+          Provider(
+              create: (context) =>
+                  PageLayoutBloc(context.read<PageRepository>()))
+        ],
+        child: const HomeView(),
       ),
     );
   }
 }
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key, required this.api});
-  final PageRepository api;
+  const HomeView({super.key});
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
-  late final PageLayoutBloc bloc;
   int page = 0;
   int _selectedIndex = 0;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  @override
-  void initState() {
-    super.initState();
-
-    bloc = PageLayoutBloc(widget.api);
-  }
-
-  @override
-  void dispose() {
-    bloc.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,71 +75,83 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
     );
-    return Scaffold(
-      key: _scaffoldKey,
-      // appBar: AppBar(
-      //   title: const CupertinoSearchTextField(
-      //     placeholder: 'Search',
-      //     placeholderStyle: TextStyle(color: Colors.white30),
-      //     prefixIcon: Icon(Icons.search, color: Colors.white),
-      //     backgroundColor: Colors.black12,
-      //     style: TextStyle(color: Colors.white),
-      //   ),
-      //   leading: const Icon(Icons.branding_watermark_outlined),
-      //   actions: [
-      //     IconButton(
-      //       icon: const Icon(Icons.notification_important),
-      //       onPressed: () {},
-      //     ),
-      //   ],
 
-      //   /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
-      //   flexibleSpace: Container(
-      //     decoration: const BoxDecoration(
-      //       gradient: LinearGradient(
-      //         begin: Alignment.topLeft,
-      //         end: Alignment.bottomRight,
-      //         colors: [
-      //           Colors.blue,
-      //           Colors.green,
-      //         ],
-      //       ),
-      //     ),
-      //   ),
-      // ),
-      body: _buildBody(decoration),
-      bottomNavigationBar: _buildBottomNavigationBar(),
-      drawer: const LeftDrawer(),
-      endDrawer: const RightDrawer(),
+    const searchField = CupertinoSearchTextField(
+      placeholder: 'Search',
+      placeholderStyle: TextStyle(color: Colors.white30),
+      prefixIcon: Icon(Icons.search, color: Colors.white),
+      backgroundColor: Colors.black12,
+      style: TextStyle(color: Colors.white),
     );
-  }
 
-  BottomNavigationBar _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      onTap: (index) {
-        setState(() {
-          _selectedIndex = index;
-        });
+    final endDrawerButton = IconButton(
+      icon: const Icon(Icons.notification_important),
+      onPressed: () {
+        context.read<ScaffoldController>().openEndDrawer();
       },
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Search',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Person',
-        ),
-      ],
     );
+
+    final appBar = AppBar(
+      title: searchField,
+      actions: [
+        endDrawerButton,
+      ],
+
+      /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
+      flexibleSpace: Container(
+        decoration: decoration,
+      ),
+    );
+
+    final bottomBar = MyBottomBar(
+        selectedIndex: _selectedIndex,
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        });
+
+    final scaffoldKey = context.read<ScaffoldController>().scaffoldKey;
+
+    return StreamBuilder<PageLayoutState>(
+        stream: Provider.of<PageLayoutBloc>(context).state,
+        initialData: PageLayoutInitial(),
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+
+          if (state is PageLayoutInitial) {
+            return Scaffold(
+              key: scaffoldKey,
+              appBar: appBar,
+              body: const HomeInitial(isLoading: true),
+              bottomNavigationBar: bottomBar,
+              drawer: const LeftDrawer(),
+              endDrawer: const RightDrawer(),
+            );
+          }
+
+          if (state is PageLayoutError) {
+            return Scaffold(
+              key: scaffoldKey,
+              appBar: appBar,
+              body: const HomeError(),
+              bottomNavigationBar: bottomBar,
+              drawer: const LeftDrawer(),
+              endDrawer: const RightDrawer(),
+            );
+          }
+
+          return Scaffold(
+            key: scaffoldKey,
+            body: _buildBody(context, decoration),
+            bottomNavigationBar: bottomBar,
+            drawer: const LeftDrawer(),
+            endDrawer: const RightDrawer(),
+          );
+        });
   }
 
-  StreamBuilder<PageLayoutState> _buildBody(BoxDecoration decoration) {
+  Widget _buildBody(BuildContext context, BoxDecoration decoration) {
     final sliverAppBar = SliverAppBar(
       floating: true,
       pinned: false,
@@ -157,7 +166,7 @@ class _HomeViewState extends State<HomeView> {
         IconButton(
           icon: const Icon(Icons.notification_important),
           onPressed: () {
-            _scaffoldKey.currentState?.openEndDrawer();
+            context.read<ScaffoldController>().openEndDrawer();
           },
         ),
       ],
@@ -169,11 +178,13 @@ class _HomeViewState extends State<HomeView> {
         decoration: decoration,
       ),
     );
+
     final loadMoreWidget = Container(
       height: 60,
       alignment: Alignment.center,
       child: const CircularProgressIndicator(),
     );
+
     final slivers = [
       SliverToBoxAdapter(
         child: ImageRowWidget(
@@ -251,27 +262,23 @@ class _HomeViewState extends State<HomeView> {
         ),
       )
     ];
-    return StreamBuilder<PageLayoutState>(
-      stream: bloc.state,
-      initialData: PageLayoutInitial(),
-      builder: (context, snapshot) {
-        final state = snapshot.requireData;
-        return MyCustomScrollView(
-          hasMore: true,
-          loadMoreWidget: loadMoreWidget,
-          decoration: decoration,
-          sliverAppBar: sliverAppBar,
-          slivers: slivers,
-          onRefresh: () async {
-            bloc.onPageTypeChanged.add(PageType.home);
-          },
-          onLoadMore: () async {
-            await Future.delayed(const Duration(seconds: 2));
-            setState(() {
-              page++;
-            });
-          },
-        );
+
+    return MyCustomScrollView(
+      hasMore: true,
+      loadMoreWidget: loadMoreWidget,
+      decoration: decoration,
+      sliverAppBar: sliverAppBar,
+      slivers: slivers,
+      onRefresh: () async {
+        Provider.of<PageLayoutBloc>(context)
+            .onPageTypeChanged
+            .add(PageType.home);
+      },
+      onLoadMore: () async {
+        await Future.delayed(const Duration(seconds: 2));
+        setState(() {
+          page++;
+        });
       },
     );
   }
@@ -304,6 +311,38 @@ class RightDrawer extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class MyBottomBar extends StatelessWidget {
+  const MyBottomBar({
+    super.key,
+    required this.selectedIndex,
+    this.onTap,
+  });
+  final int selectedIndex;
+  final void Function(int)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return BottomNavigationBar(
+      currentIndex: selectedIndex,
+      onTap: onTap,
+      items: const [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.search),
+          label: 'Search',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Person',
+        ),
+      ],
     );
   }
 }

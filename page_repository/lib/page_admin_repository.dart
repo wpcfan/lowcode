@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
@@ -21,23 +22,40 @@ class PageAdminRepository {
   /// 按条件查询页面
   /// [query] 查询条件
   Future<PageWrapper<PageLayout>> search(PageQuery query) async {
+    debugPrint('PageAdminRepository.search($query)');
+
     final url = _buildUrl(query);
     final cachedResult = cache[url];
 
     if (cachedResult != null && !cachedResult.isExpired) {
+      debugPrint('PageAdminRepository.search($query) - cache hit');
       return cachedResult.value;
     }
 
-    final response = await client.get(Uri.parse(url));
+    debugPrint('PageAdminRepository.search($query) - cache miss');
+
+    final response = await client.get(Uri.parse(url), headers: {
+      'User-Agent': 'Flutter',
+    });
+
+    if (response.statusCode != 200) {
+      final problem = Problem.fromJson(jsonDecode(response.body));
+      debugPrint('PageAdminRepository.search($query) - error: $problem');
+      throw Exception(problem.title);
+    }
 
     final result = PageWrapper.fromJson(
       jsonDecode(response.body),
       (json) => PageLayout.fromJson(json),
     );
 
+    debugPrint('PageAdminRepository.search($query) - success');
+
     cache[url] = PageLayoutCache(
         value: result,
         expires: DateTime.now().add(const Duration(minutes: 10)));
+
+    debugPrint('PageAdminRepository.search($query) - cache set');
 
     return result;
   }

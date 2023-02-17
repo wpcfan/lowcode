@@ -1,18 +1,16 @@
 package com.mooc.backend.rest.admin;
 
-import com.mooc.backend.dtos.ProductAdminDTO;
-import com.mooc.backend.services.QiniuService;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
 import com.mooc.backend.dtos.CreateOrUpdateProductDTO;
+import com.mooc.backend.dtos.ProductAdminDTO;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.ProductAdminService;
-
+import com.mooc.backend.services.QiniuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -78,7 +76,7 @@ public class ProductAdminController {
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @RequestParam("file") MultipartFile file) {
         try {
-            var result =  qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
+            var result = qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
             return productAdminService.addImageToProduct(id, result.url())
                     .map(ProductAdminDTO::fromEntity)
                     .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",

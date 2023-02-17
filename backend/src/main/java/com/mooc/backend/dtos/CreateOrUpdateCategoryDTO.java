@@ -1,7 +1,6 @@
 package com.mooc.backend.dtos;
 
 import com.mooc.backend.entities.Category;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "创建类目时以 JSON 格式传递的数据")

@@ -1,5 +1,6 @@
 package com.mooc.backend.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,16 +15,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 import java.util.Locale;
 
+@RequiredArgsConstructor
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
-    private static final int DEFAULT_PAGE_SIZE = 10;
-
-    private static final int DEFAULT_PAGE_NUMBER = 0;
-
-    private static final String DEFAULT_SORT_FIELD = "id";
-
-    private static final Sort.Direction DEFAULT_SORT_DIRECTION = Sort.Direction.DESC;
+    private final PageProperties pageProperties;
 
     /**
      * 全局配置分页参数
@@ -33,7 +29,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Bean
     public PageableHandlerMethodArgumentResolver pageableResolver() {
         PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
-        resolver.setFallbackPageable(PageRequest.of(DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE, Sort.by(DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD)));
+        resolver.setFallbackPageable(PageRequest.of(
+                pageProperties.defaultPageNumber,
+                pageProperties.defaultPageSize,
+                Sort.by(
+                        pageProperties.defaultSortDirection,
+                        pageProperties.defaultSortField
+                )));
         return resolver;
     }
 

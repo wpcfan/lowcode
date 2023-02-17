@@ -41,6 +41,10 @@ public class Category extends Auditable {
     @ToString.Exclude
     private Set<Product> products = new HashSet<>();
 
+    public static CategoryBuilder builder() {
+        return new CategoryBuilder();
+    }
+
     public void addChild(Category child) {
         children.add(child);
         child.setParent(this);
@@ -79,15 +83,8 @@ public class Category extends Auditable {
             return false;
         Category other = (Category) obj;
         if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
-    }
-
-    public static CategoryBuilder builder() {
-        return new CategoryBuilder();
+            return other.id == null;
+        } else return id.equals(other.id);
     }
 
     public static class CategoryBuilder {

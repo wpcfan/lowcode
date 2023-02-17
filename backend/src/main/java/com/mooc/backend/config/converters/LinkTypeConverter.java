@@ -7,8 +7,8 @@ import org.springframework.core.convert.converter.Converter;
 @Configuration
 public class LinkTypeConverter implements Converter<String, LinkType> {
 
-        @Override
-        public LinkType convert(String source) {
-            return LinkType.fromValue(source);
-        }
+    @Override
+    public LinkType convert(String source) {
+        return LinkType.fromValue(source);
+    }
 }

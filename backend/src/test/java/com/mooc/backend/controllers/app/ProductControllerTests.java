@@ -10,11 +10,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
+import com.mooc.backend.config.PageProperties;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,7 @@ import com.mooc.backend.rest.app.ProductController;
 import com.mooc.backend.services.ProductQueryService;
 
 @ActiveProfiles("test")
+@Import(PageProperties.class)
 @WebMvcTest(controllers = ProductController.class)
 public class ProductControllerTests {
 

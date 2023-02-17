@@ -1,15 +1,18 @@
 package com.mooc.backend.controllers.app;
 
+import com.mooc.backend.config.PageProperties;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.rest.app.PageController;
 import com.mooc.backend.services.PageQueryService;
+import com.mooc.backend.services.ProductQueryService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -20,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ActiveProfiles("test")
+@Import(PageProperties.class)
 @WebMvcTest(controllers = PageController.class)
 public class PageControllerTests {
 
@@ -28,6 +32,10 @@ public class PageControllerTests {
 
     @MockBean
     PageQueryService pageQueryService;
+    @MockBean
+    ProductQueryService productQueryService;
+    @Autowired
+    PageProperties pageProperties;
 
     @Test
     void testFindPublished() throws Exception {

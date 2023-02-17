@@ -7,6 +7,7 @@ plugins {
 group = 'com.mooc'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '19'
+targetCompatibility = '19'
 
 // 项目依赖版本号定义
 ext {

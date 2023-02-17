@@ -25,6 +25,10 @@ public class ProductImage extends Auditable {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    public static ProductImageBuilder builder() {
+        return new ProductImageBuilder();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -35,11 +39,8 @@ public class ProductImage extends Auditable {
             return false;
         ProductImage other = (ProductImage) obj;
         if (id == null) {
-            if (other.id != null)
-                return false;
-        } else if (!id.equals(other.id))
-            return false;
-        return true;
+            return other.id == null;
+        } else return id.equals(other.id);
     }
 
     @Override
@@ -48,10 +49,6 @@ public class ProductImage extends Auditable {
         int result = 1;
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
-    }
-
-    public static ProductImageBuilder builder() {
-        return new ProductImageBuilder();
     }
 
     public static class ProductImageBuilder {

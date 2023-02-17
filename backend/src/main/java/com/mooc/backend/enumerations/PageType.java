@@ -13,11 +13,6 @@ public enum PageType {
         this.value = value;
     }
 
-    @JsonValue
-    public String getValue() {
-        return value;
-    }
-
     public static PageType fromValue(String value) {
         for (PageType pageType : PageType.values()) {
             if (pageType.value.equals(value)) {
@@ -25,5 +20,10 @@ public enum PageType {
             }
         }
         throw new IllegalArgumentException("Invalid PageType value: " + value);
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
     }
 }

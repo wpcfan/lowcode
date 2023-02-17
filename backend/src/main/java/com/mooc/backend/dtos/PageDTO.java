@@ -46,6 +46,7 @@ public class PageDTO {
                         .map(PageBlockDTO::fromProjection)
                         .collect(HashSet::new, Set::add, Set::addAll))
                 .startTime(page.getStartTime())
+                .endTime(page.getEndTime())
                 .status(page.getStatus())
                 .build();
     }
@@ -61,6 +62,7 @@ public class PageDTO {
                         .map(PageBlockDTO::fromEntity)
                         .collect(HashSet::new, Set::add, Set::addAll))
                 .startTime(page.getStartTime())
+                .endTime(page.getEndTime())
                 .status(page.getStatus())
                 .build();
     }

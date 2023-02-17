@@ -1,16 +1,14 @@
 package com.mooc.backend.services;
 
-import java.util.Optional;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.mooc.backend.dtos.CreateOrUpdateCategoryDTO;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.repositories.CategoryRepository;
 import com.mooc.backend.repositories.ProductRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Transactional
 @RequiredArgsConstructor

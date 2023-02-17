@@ -1,9 +1,11 @@
 package com.mooc.backend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.entities.blocks.BlockData;
+import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.projections.ProductImageInfo;
 
 import java.math.BigDecimal;
@@ -48,5 +50,11 @@ public record ProductAdminDTO(Long id, String name, String description, BigDecim
             product.addCategory(categoryEntity);
         });
         return product;
+    }
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Override
+    public BlockDataType getDataType() {
+        return BlockDataType.Product;
     }
 }

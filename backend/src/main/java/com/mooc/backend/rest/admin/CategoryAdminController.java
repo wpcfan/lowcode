@@ -1,27 +1,18 @@
 package com.mooc.backend.rest.admin;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.mooc.backend.dtos.CategoryDTO;
 import com.mooc.backend.dtos.CategoryRecord;
 import com.mooc.backend.dtos.CreateOrUpdateCategoryDTO;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.CategoryAdminService;
 import com.mooc.backend.services.CategoryQueryService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "类目管理", description = "添加、修改、删除类目，以及给类目添加父类目，删除父类目")
 @RestController
@@ -31,7 +22,7 @@ public class CategoryAdminController {
     private final CategoryAdminService categoryAdminService;
 
     public CategoryAdminController(CategoryQueryService categoryQueryService,
-            CategoryAdminService categoryAdminService) {
+                                   CategoryAdminService categoryAdminService) {
         this.categoryQueryService = categoryQueryService;
         this.categoryAdminService = categoryAdminService;
     }

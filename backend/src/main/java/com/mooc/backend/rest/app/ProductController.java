@@ -1,27 +1,21 @@
 package com.mooc.backend.rest.app;
 
-import java.util.List;
-
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.mooc.backend.dtos.PageWrapper;
 import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.dtos.SliceWrapper;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.services.ProductQueryService;
-
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "商品查询", description = "根据条件查询商品")
 @RestController
@@ -56,7 +50,7 @@ public class ProductController {
 
     /**
      * 根据商品 ID 查询商品
-     * 
+     *
      * @param id 商品 ID
      * @return 商品列表
      */

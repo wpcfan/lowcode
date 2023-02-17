@@ -9,15 +9,10 @@ public enum BlockType {
     ProductRow("product_row"),
     Waterfall("waterfall");
 
-    private String value;
+    private final String value;
 
     BlockType(String value) {
         this.value = value;
-    }
-
-    @JsonValue
-    public String getValue() {
-        return value;
     }
 
     public static BlockType fromValue(String value) {
@@ -27,5 +22,10 @@ public enum BlockType {
             }
         }
         throw new IllegalArgumentException("Invalid BlockType value: " + value);
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
     }
 }

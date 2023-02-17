@@ -12,11 +12,6 @@ public enum LinkType {
         this.value = value;
     }
 
-    @JsonValue
-    public String getValue() {
-        return value;
-    }
-
     public static LinkType fromValue(String value) {
         for (LinkType linkType : LinkType.values()) {
             if (linkType.value.equals(value)) {
@@ -24,5 +19,10 @@ public enum LinkType {
             }
         }
         throw new IllegalArgumentException("Invalid LinkType value: " + value);
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
     }
 }

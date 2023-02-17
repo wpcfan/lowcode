@@ -13,17 +13,17 @@ import lombok.*;
 @NoArgsConstructor
 public class PageConfig {
     // 水平内边距
-    private Integer horizontalPadding;
+    private Double horizontalPadding;
     // 垂直内边距
-    private Integer verticalPadding;
+    private Double verticalPadding;
     // 水平间距
-    private Integer horizontalSpacing;
+    private Double horizontalSpacing;
     // 垂直间距
-    private Integer verticalSpacing;
+    private Double verticalSpacing;
     // 基准屏幕宽度
-    private Integer baselineScreenWidth;
+    private Double baselineScreenWidth;
     // 基准屏幕高度
-    private Integer baselineScreenHeight;
+    private Double baselineScreenHeight;
     // 基准字体大小
-    private Integer baselineFontSize;
+    private Double baselineFontSize;
 }

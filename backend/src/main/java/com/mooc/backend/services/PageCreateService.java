@@ -1,7 +1,7 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDTO;
+import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;

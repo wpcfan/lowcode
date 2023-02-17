@@ -1,19 +1,24 @@
 package com.mooc.backend.rest.app;
 
+import com.mooc.backend.config.PageProperties;
+import com.mooc.backend.dtos.CategoryWithProductSlice;
+import com.mooc.backend.dtos.PageDTO;
+import com.mooc.backend.dtos.ProductDTO;
+import com.mooc.backend.dtos.SliceWrapper;
+import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
-import com.mooc.backend.dtos.PageDTO;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.PageQueryService;
-
+import com.mooc.backend.services.ProductQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 import ua_parser.Client;
 import ua_parser.Parser;
 
@@ -25,6 +30,8 @@ import ua_parser.Parser;
 public class PageController {
 
     final PageQueryService pageQueryService;
+    final ProductQueryService productQueryService;
+    final PageProperties pageProperties;
 
     @Operation(summary = "根据 pageType 获取页面信息")
     @GetMapping("/published/{pageType}")
@@ -34,9 +41,29 @@ public class PageController {
         Parser uaParser = new Parser();
         Client c = uaParser.parse(uaString);
         var os = c.os.family;
-        var platform = os.equals("Android") || os.equals("iOS") ?  Platform.App  : Platform.Web;
+        var platform = os.equals("Android") || os.equals("iOS") ? Platform.App : Platform.Web;
         return pageQueryService.findPublished(platform, pageType)
-                .map(PageDTO::fromEntity)
+                .map(page -> {
+                    var dto = PageDTO.fromEntity(page);
+                    dto.getBlocks().forEach(block -> {
+                        block.getData().forEach(data -> {
+                            if (data.getContent().getDataType() == BlockDataType.Category) {
+                                var categoryDto = (CategoryWithProductSlice) data.getContent();
+                                var pageable = Pageable.ofSize(pageProperties.getDefaultPageSize());
+                                var sliceProducts = productQueryService
+                                        .findPageableByCategoriesId(categoryDto.getId(), pageable)
+                                        .map(ProductDTO::fromProjection);
+                                categoryDto.setProductSlice(new SliceWrapper<>(
+                                        0,
+                                        pageable.getPageSize(),
+                                        sliceProducts.hasNext(),
+                                        sliceProducts.getContent()
+                                ));
+                            }
+                        });
+                    });
+                    return dto;
+                })
                 .orElseThrow(() -> new CustomException("Page not found", "No published page found",
                         HttpStatus.NOT_FOUND.value()));
     }

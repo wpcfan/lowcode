@@ -10,14 +10,14 @@ import java.util.function.Function;
 
 public class PageSpecs {
     /**
-     *  用于构造动态查询条件
-     *  1. 通过 PageFilter 对象获取查询条件
-     *  2. 通过 builder 构造查询条件
-     *  3. 通过 query 构造最终的查询语句
-     *  4. 返回查询语句
-     *
-     *  通过 Function 接口，将 PageFilter 对象转换为 Specification 对象
-     *  通过 Specification 对象，可以构造动态查询条件
+     * 用于构造动态查询条件
+     * 1. 通过 PageFilter 对象获取查询条件
+     * 2. 通过 builder 构造查询条件
+     * 3. 通过 query 构造最终的查询语句
+     * 4. 返回查询语句
+     * <p>
+     * 通过 Function 接口，将 PageFilter 对象转换为 Specification 对象
+     * 通过 Specification 对象，可以构造动态查询条件
      */
     public static Function<PageFilter, Specification<PageEntity>> pageSpec = (filter) -> (root, query, builder) -> {
         // root: 代表查询的实体类

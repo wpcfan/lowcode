@@ -1,13 +1,13 @@
 import 'package:app/controllers/scaffold_controller.dart';
 import 'package:app/widgets/home_error.dart';
 import 'package:app/widgets/home_initial.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 import 'package:page_repository/page_repository.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/page_bloc.dart';
 import 'blocs/page_state.dart';
@@ -38,8 +38,11 @@ class MyApp extends StatelessWidget {
       ),
       home: MultiProvider(
         providers: [
+          Provider(create: (context) => AppDio.getInstance()),
           Provider(
-            create: (context) => PageRepository(),
+            create: (context) => PageRepository(
+              client: context.read<Dio>(),
+            ),
           ),
           ChangeNotifierProvider(create: (context) => ScaffoldController()),
           Provider(
@@ -119,7 +122,7 @@ class _HomeViewState extends State<HomeView> {
         builder: (context, snapshot) {
           final state = snapshot.data;
 
-          if (state is PageLayoutInitial) {
+          if (state == null || state is PageLayoutInitial) {
             return Scaffold(
               key: scaffoldKey,
               appBar: appBar,
@@ -143,7 +146,7 @@ class _HomeViewState extends State<HomeView> {
 
           return Scaffold(
             key: scaffoldKey,
-            body: _buildBody(context, decoration),
+            body: _buildBody(context, decoration, state),
             bottomNavigationBar: bottomBar,
             drawer: const LeftDrawer(),
             endDrawer: const RightDrawer(),
@@ -151,7 +154,8 @@ class _HomeViewState extends State<HomeView> {
         });
   }
 
-  Widget _buildBody(BuildContext context, BoxDecoration decoration) {
+  Widget _buildBody(
+      BuildContext context, BoxDecoration decoration, PageLayoutState state) {
     final sliverAppBar = SliverAppBar(
       floating: true,
       pinned: false,
@@ -185,83 +189,54 @@ class _HomeViewState extends State<HomeView> {
       child: const CircularProgressIndicator(),
     );
 
-    final slivers = [
-      SliverToBoxAdapter(
-        child: ImageRowWidget(
-          items: const [
-            ImageData(
-              image: 'https://picsum.photos/200/300',
-              link: MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
-              title: 'title1',
+    const errorImage = '';
+    final layout = state.result;
+    final blocks = layout?.blocks ?? [];
+    final screenWidth = MediaQuery.of(context).size.width;
+    final ratio = screenWidth / (layout?.config.baselineScreenWidth ?? 1);
+    final slivers = blocks.map((block) {
+      switch (block.type) {
+        case PageBlockType.imageRow:
+          final it = block as ImageRowPageBlock;
+          return SliverToBoxAdapter(
+            child: ImageRowWidget(
+              items: it.data.map((di) => di.content).toList(),
+              itemWidth: it.config.itemWidth ?? 0,
+              itemHeight: it.config.itemHeight ?? 0,
+              verticalPadding: it.config.verticalPadding ?? 0,
+              horizontalPadding: it.config.horizontalPadding ?? 0,
+              spaceBetweenItems: it.config.horizontalSpacing ?? 0,
+              errorImage: errorImage,
             ),
-            ImageData(
-              image: 'https://picsum.photos/200/300',
-              link: MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
-              title: 'title2',
+          );
+        case PageBlockType.productRow:
+          final it = block as ProductRowPageBlock;
+          return SliverToBoxAdapter(
+            child: ProductRowWidget(
+              items: it.data.map((di) => di.content).toList(),
+              width: screenWidth - (it.config.horizontalPadding ?? 0) * 2,
+              height: (layout?.config.baselineScreenHeight ?? 0) / ratio,
+              verticalPadding: it.config.verticalPadding ?? 0,
+              horizontalPadding: it.config.horizontalPadding ?? 0,
+              config: it.config,
+              errorImage: errorImage,
+              ratio: ratio,
             ),
-            ImageData(
-              image: 'https://picsum.photos/200/300',
-              link: MyLink(type: LinkType.url, value: 'https://www.baidu.com'),
-              title: 'title2',
-            ),
-          ],
-          itemWidth: 100,
-          itemHeight: 160,
-          verticalPadding: 10,
-          horizontalPadding: 10,
-          spaceBetweenItems: 10,
-          errorImage: 'assets/images/error.png',
-          onTap: (link) {
-            if (link != null) {
-              switch (link.type) {
-                case LinkType.route:
-                  Navigator.of(context).pushNamed(
-                    link.value,
-                  );
-                  break;
-                case LinkType.url:
-                case LinkType.deepLink:
-                  launchUrl(Uri.parse(link.value));
-                  break;
-                default:
-              }
-            }
-          },
-        ),
-      ),
-      SliverGrid.count(
-        crossAxisCount: 3,
-        children: List.generate(
-          10,
-          (index) => Container(
-            color: Colors.primaries[index % Colors.primaries.length],
-          ),
-        ),
-      ),
-      SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (context, index) {
-            return Container(
-              height: 100,
-              color: Colors.primaries[index % Colors.primaries.length],
-            );
-          },
-          childCount: 30,
-        ),
-      ),
-      SliverGrid.count(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        children: List.generate(
-          (page + 1) * 10,
-          (index) => Container(
-            color: Colors.primaries[index % Colors.primaries.length],
-          ),
-        ),
-      )
-    ];
+          );
+        case PageBlockType.waterfall:
+          final it = block as WaterfallPageBlock;
+          return WaterfallWidget(
+            products:
+                it.data.map((di) => di.content.productSlice).first?.data ?? [],
+            config: it.config,
+            errorImage: errorImage,
+          );
+        default:
+          return SliverToBoxAdapter(
+            child: Container(),
+          );
+      }
+    }).toList();
 
     return MyCustomScrollView(
       hasMore: true,
@@ -280,37 +255,6 @@ class _HomeViewState extends State<HomeView> {
           page++;
         });
       },
-    );
-  }
-}
-
-class RightDrawer extends StatelessWidget {
-  const RightDrawer({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: const <Widget>[
-            ListTile(
-              leading: Icon(Icons.message),
-              title: Text('Messages 1'),
-            ),
-            ListTile(
-              leading: Icon(Icons.account_circle),
-              title: Text('Messages 2'),
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Messages 3'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -383,6 +327,37 @@ class LeftDrawer extends StatelessWidget {
             title: Text('Settings'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class RightDrawer extends StatelessWidget {
+  const RightDrawer({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Drawer(
+      child: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: const <Widget>[
+            ListTile(
+              leading: Icon(Icons.message),
+              title: Text('Messages 1'),
+            ),
+            ListTile(
+              leading: Icon(Icons.account_circle),
+              title: Text('Messages 2'),
+            ),
+            ListTile(
+              leading: Icon(Icons.settings),
+              title: Text('Messages 3'),
+            ),
+          ],
+        ),
       ),
     );
   }

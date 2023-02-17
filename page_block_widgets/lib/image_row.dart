@@ -27,22 +27,24 @@ class ImageRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final width = screenWidth - horizontalPadding * 2;
     switch (items.length) {
       case 1:
-        return _buildSingleImage(context);
+        return _buildSingleImage(context, width);
       case 2:
       case 3:
-        return _buildImages(context);
+        return _buildImages(context, width);
       default:
-        return _buildScrollableImages(context);
+        return _buildScrollableImages(context, width);
     }
   }
 
-  Widget _buildSingleImage(BuildContext context) {
+  Widget _buildSingleImage(BuildContext context, double width) {
     final item = items.first;
     return Container(
-      width: itemWidth,
-      height: itemHeight,
+      width: itemWidth > 0 ? itemWidth : width,
+      height: itemHeight > 0 ? itemHeight : null,
       padding: EdgeInsets.symmetric(
         vertical: verticalPadding,
         horizontal: horizontalPadding,
@@ -56,16 +58,15 @@ class ImageRowWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildImages(BuildContext context) {
+  Widget _buildImages(BuildContext context, double width) {
     return Container(
-      width: itemWidth,
-      height: itemHeight,
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
         vertical: verticalPadding,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.max,
         children: items
             .mapWithIndex(
               (item, index) => Expanded(
@@ -87,22 +88,22 @@ class ImageRowWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildScrollableImages(BuildContext context) {
-    return Container(
-      width: itemWidth,
-      height: itemHeight,
+  Widget _buildScrollableImages(BuildContext context, double width) {
+    final liItemWidth = itemWidth > 0 ? itemWidth : width / 3;
+    return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
         vertical: verticalPadding,
       ),
       child: ListView(
         scrollDirection: Axis.horizontal,
-        itemExtent: itemWidth,
+        itemExtent: liItemWidth,
         children: items
             .mapWithIndex(
               (item, index) => Container(
-                width: itemWidth - horizontalPadding * 2,
-                height: itemHeight - verticalPadding * 2,
+                width: liItemWidth - horizontalPadding * 2,
+                height:
+                    itemHeight > 0 ? itemHeight - verticalPadding * 2 : null,
                 margin: EdgeInsets.only(
                   right: index == items.length - 1 ? 0 : spaceBetweenItems,
                 ),

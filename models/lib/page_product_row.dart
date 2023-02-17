@@ -1,7 +1,7 @@
 part of 'page_block.dart';
 
 class ProductRowPageBlock extends PageBlock {
-  final List<ProductData> data;
+  final List<BlockData<Product>> data;
 
   const ProductRowPageBlock({
     required int id,
@@ -25,11 +25,10 @@ class ProductRowPageBlock extends PageBlock {
       id: json['id'],
       title: json['title'],
       sort: json['sort'],
-      data: (json['data'] as List)
-          .map((e) => ProductData.fromJson(e))
-          .toList()
-          .cast<ProductData>(),
       config: BlockConfig.fromJson(json['config']),
+      data: (json['data'] as List)
+          .map((e) => BlockData.fromJson(e, Product.fromJson))
+          .toList(),
     );
   }
 

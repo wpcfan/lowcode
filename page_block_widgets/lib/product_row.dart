@@ -10,7 +10,7 @@ part 'product_card_one_row_two.dart';
 class ProductRowWidget extends StatelessWidget {
   const ProductRowWidget({
     super.key,
-    required this.data,
+    required this.items,
     required this.horizontalPadding,
     required this.verticalPadding,
     required this.width,
@@ -20,8 +20,8 @@ class ProductRowWidget extends StatelessWidget {
     required this.ratio,
     this.addToCart,
     this.onTap,
-  }) : assert(data.length <= 2 && data.length > 0);
-  final List<ProductData> data;
+  }) : assert(items.length <= 2 && items.length > 0);
+  final List<Product> items;
   final double horizontalPadding;
   final double verticalPadding;
   final double width;
@@ -40,9 +40,9 @@ class ProductRowWidget extends StatelessWidget {
         .backgroundColor(Colors.white)
         .border(all: 1, color: Colors.grey);
 
-    switch (data.length) {
+    switch (items.length) {
       case 1:
-        final product = data.first.product;
+        final product = items.first;
         return ProductCardOneRowOneWidget(
           product: product,
           width: width,
@@ -56,8 +56,7 @@ class ProductRowWidget extends StatelessWidget {
           addToCart: addToCart,
         ).parent(page);
       case 2:
-        return data
-            .map((e) => e.product)
+        return items
             .map((product) => ProductCardOneRowTwoWidget(
                   product: product,
                   width: width / 2 - (config.horizontalPadding ?? 0) * ratio,

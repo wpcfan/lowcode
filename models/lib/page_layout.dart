@@ -23,7 +23,9 @@ class PageLayout {
     this.blocks = const [],
   });
 
-  factory PageLayout.fromJson(dynamic json) {
+  factory PageLayout.fromJson(
+    dynamic json,
+  ) {
     return PageLayout(
         title: json['title'] as String,
         platform: Platform.values.firstWhere(
@@ -45,7 +47,9 @@ class PageLayout {
         endTime: json['endTime'] == null
             ? null
             : DateTime.parse(json['endTime'] as String),
-        blocks: (json['blocks'] as List<PageBlock>? ?? []));
+        blocks: (json['blocks'] as List<dynamic>)
+            .map((e) => PageBlock.fromJson(e))
+            .toList());
   }
 
   Map<String, dynamic> toJson() {

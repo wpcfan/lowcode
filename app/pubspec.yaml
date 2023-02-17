@@ -44,6 +44,9 @@ dependencies:
   rxdart: ^0.27.7
   skeletons: ^0.0.3
   provider: ^6.0.5
+  ua_client_hints: ^1.1.3
+  dio: ^5.0.0
+  pretty_dio_logger: ^1.3.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

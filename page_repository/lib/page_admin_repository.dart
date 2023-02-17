@@ -1,22 +1,36 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+class AdminDio with DioMixin implements Dio {
+  AdminDio._([BaseOptions? options]) {
+    options = BaseOptions(
+      baseUrl: 'http://localhost:8080/api/v1/admin',
+    );
+
+    this.options = options;
+    interceptors.add(PrettyDioLogger());
+  }
+
+  static Dio getInstance() => AdminDio._();
+}
 
 class PageAdminRepository {
   final String baseUrl;
   final Map<String, PageLayoutCache<PageWrapper<PageLayout>>> cache;
-  final http.Client client;
+  final Dio client;
 
   PageAdminRepository({
-    http.Client? client,
+    Dio? client,
     Map<String, PageLayoutCache<PageWrapper<PageLayout>>>? cache,
-    this.baseUrl = 'http://localhost:8080/api/v1/admin/pages',
-  })  : client = client ?? http.Client(),
+    this.baseUrl = '/pages',
+  })  : client = client ?? AdminDio.getInstance(),
         cache = cache ?? <String, PageLayoutCache<PageWrapper<PageLayout>>>{};
 
   /// 按条件查询页面
@@ -34,18 +48,16 @@ class PageAdminRepository {
 
     debugPrint('PageAdminRepository.search($query) - cache miss');
 
-    final response = await client.get(Uri.parse(url), headers: {
-      'User-Agent': 'Flutter',
-    });
+    final response = await client.get(url);
 
     if (response.statusCode != 200) {
-      final problem = Problem.fromJson(jsonDecode(response.body));
+      final problem = Problem.fromJson(response.data);
       debugPrint('PageAdminRepository.search($query) - error: $problem');
       throw Exception(problem.title);
     }
 
     final result = PageWrapper.fromJson(
-      jsonDecode(response.body),
+      response.data,
       (json) => PageLayout.fromJson(json),
     );
 

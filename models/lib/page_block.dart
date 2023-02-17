@@ -6,13 +6,11 @@ import 'enumerations.dart';
 import 'product.dart';
 
 part 'page_block_config.dart';
-part 'page_category_data.dart';
 part 'page_config.dart';
 part 'page_image_data.dart';
 part 'page_image_row.dart';
 part 'page_link.dart';
 part 'page_pinned_header.dart';
-part 'page_product_data.dart';
 part 'page_product_row.dart';
 part 'page_slider.dart';
 part 'page_waterfall.dart';
@@ -33,7 +31,7 @@ abstract class PageBlock extends Equatable {
 
   factory PageBlock.fromJson(Map<String, dynamic> json) {
     final type = PageBlockType.values.firstWhere(
-      (e) => describeEnum(e) == json['type'],
+      (e) => e.value == json['type'],
       orElse: () => PageBlockType.unknown,
     );
     switch (type) {
@@ -57,23 +55,26 @@ abstract class PageBlock extends Equatable {
 }
 
 class BlockData<T> {
+  final int id;
   final int sort;
-  final T data;
+  final T content;
 
-  BlockData({required this.sort, required this.data});
+  BlockData({required this.id, required this.sort, required this.content});
 
   factory BlockData.fromJson(
       Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
     return BlockData(
+      id: json['id'],
       sort: json['sort'],
-      data: fromJson(json),
+      content: fromJson(json['content']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'sort': sort,
-      'data': data,
+      'data': content,
     };
   }
 }

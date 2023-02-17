@@ -1,7 +1,7 @@
 part of 'page_block.dart';
 
 class WaterfallPageBlock extends PageBlock {
-  final List<CategoryData> data;
+  final List<BlockData<Category>> data;
 
   const WaterfallPageBlock({
     required int id,
@@ -27,9 +27,8 @@ class WaterfallPageBlock extends PageBlock {
       sort: json['sort'],
       config: BlockConfig.fromJson(json['config']),
       data: (json['data'] as List)
-          .map((e) => CategoryData.fromJson(e))
-          .toList()
-          .cast<CategoryData>(),
+          .map((e) => BlockData.fromJson(e, Category.fromJson))
+          .toList(),
     );
   }
 
@@ -50,7 +49,7 @@ class WaterfallPageBlock extends PageBlock {
     String? title,
     int? sort,
     BlockConfig? config,
-    List<CategoryData>? data,
+    List<BlockData<Category>>? data,
   }) {
     return WaterfallPageBlock(
       id: id ?? this.id,

@@ -9,16 +9,16 @@ class ImageWidget extends StatelessWidget {
     required this.errorImage,
     this.link,
     this.fit = BoxFit.cover,
-    this.height = double.infinity,
-    this.width = double.infinity,
+    this.height,
+    this.width,
     this.alignment = Alignment.center,
     this.onTap,
   });
   final String imageUrl;
   final String errorImage;
   final BoxFit fit;
-  final double height;
-  final double width;
+  final double? height;
+  final double? width;
   final Alignment alignment;
   final MyLink? link;
   final void Function(MyLink?)? onTap;

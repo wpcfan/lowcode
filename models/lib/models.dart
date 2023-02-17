@@ -7,3 +7,4 @@ export 'page_layout.dart';
 export 'page_wrapper.dart';
 export 'problem.dart';
 export 'product.dart';
+export 'slice_wrapper.dart';

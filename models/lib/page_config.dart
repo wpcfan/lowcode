@@ -11,13 +11,13 @@ class PageConfig {
     this.baselineFontSize,
   });
 
-  final int? horizontalPadding;
-  final int? verticalPadding;
-  final int? horizontalSpacing;
-  final int? verticalSpacing;
-  final int? baselineScreenWidth;
-  final int? baselineScreenHeight;
-  final int? baselineFontSize;
+  final double? horizontalPadding;
+  final double? verticalPadding;
+  final double? horizontalSpacing;
+  final double? verticalSpacing;
+  final double? baselineScreenWidth;
+  final double? baselineScreenHeight;
+  final double? baselineFontSize;
 
   factory PageConfig.fromJson(Map<String, dynamic> json) {
     return PageConfig(

@@ -1,15 +1,17 @@
 package com.mooc.backend.dtos;
 
-import com.mooc.backend.entities.PageConfig;
+import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
+import jakarta.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Length;
 
 public record CreateOrUpdatePageDTO(
-        String title,
-        Platform platform,
-        PageType pageType,
-        PageConfig config) {
+        @NotNull @Length(min = 2, max = 100) String title,
+        @NotNull Platform platform,
+        @NotNull PageType pageType,
+        @NotNull PageConfig config) {
 
     public PageEntity toEntity() {
         return PageEntity.builder()

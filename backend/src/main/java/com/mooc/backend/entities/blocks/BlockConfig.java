@@ -1,5 +1,7 @@
 package com.mooc.backend.entities.blocks;
 
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -10,20 +12,32 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BlockConfig {
-    @Min(0)
-    @Max(100)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
     private Double horizontalPadding;
-    @Min(0)
-    @Max(100)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
     private Double verticalPadding;
-    @Min(0)
-    @Max(100)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
     private Double horizontalSpacing;
-    @Min(0)
-    @Max(100)
+    @DecimalMin("0.00")
+    @DecimalMax("100.00")
     private Double verticalSpacing;
+
+    @DecimalMin("300")
+    @DecimalMax("1200.00")
     private Double blockWidth;
+
+    @DecimalMin("300")
+    @DecimalMax("1200.00")
     private Double blockHeight;
+
+    @DecimalMin("300")
+    @DecimalMax("1200.00")
     private Double itemWidth;
+
+    @DecimalMin("300")
+    @DecimalMax("1200.00")
     private Double itemHeight;
 }

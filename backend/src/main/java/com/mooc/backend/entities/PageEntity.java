@@ -1,5 +1,6 @@
 package com.mooc.backend.entities;
 
+import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
@@ -34,7 +35,7 @@ public class PageEntity extends Auditable {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false, unique = true)
+    @Column(name = "title", nullable = false, unique = true, length = 100)
     private String title;
 
     @Enumerated(EnumType.STRING)

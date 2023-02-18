@@ -1,12 +1,11 @@
 package com.mooc.backend.json;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mooc.backend.dtos.CategoryWithProductSlice;
+import com.mooc.backend.dtos.CategoryDTO;
 import com.mooc.backend.dtos.ProductAdminDTO;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.entities.blocks.ImageDTO;
@@ -25,7 +24,7 @@ public class BlockDataDeserializer extends JsonDeserializer<BlockData> {
             return mapper.treeToValue(root, ImageDTO.class);
         }
         if (root.has("code")) {
-            return mapper.treeToValue(root, CategoryWithProductSlice.class);
+            return mapper.treeToValue(root, CategoryDTO.class);
         }
         return null;
     }

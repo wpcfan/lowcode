@@ -69,16 +69,17 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理未捕获的异常
-     * @param ex 异常
+     * @param e 异常
      * @param request 请求
      * @return 错误信息
      */
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleException(Exception ex, WebRequest request) {
+    public ProblemDetail handleException(Exception e, WebRequest request) {
         ProblemDetail body = ProblemDetail
-                .forStatusAndDetail(HttpStatusCode.valueOf(500), ex.getLocalizedMessage());
+                .forStatusAndDetail(HttpStatusCode.valueOf(500), e.getLocalizedMessage());
         body.setType(URI.create(hostname + "/errors/uncaught"));
         body.setTitle(messageSource.getMessage("error.uncaught", null, request.getLocale()));
+        body.setDetail(e.getMessage());
         body.setProperty("hostname", hostname);
         body.setProperty("ua", Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown"));
         body.setProperty("locale", request.getLocale().toString());

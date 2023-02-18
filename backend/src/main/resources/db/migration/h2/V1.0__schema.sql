@@ -25,9 +25,9 @@ CREATE TABLE mooc_product_categories
 CREATE TABLE mooc_products
 (
     id          BIGINT AUTO_INCREMENT NOT NULL,
-    name        VARCHAR(255)          NOT NULL,
+    name        VARCHAR(100)          NOT NULL,
     description VARCHAR(255)          NOT NULL,
-    price       DECIMAL               NOT NULL,
+    price       DECIMAL(10,2)         NOT NULL,
     created_at  datetime              NULL,
     updated_at  datetime              NULL,
     CONSTRAINT pk_mooc_products PRIMARY KEY (id)

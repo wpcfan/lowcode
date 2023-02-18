@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,13 +23,13 @@ public class Product extends Auditable {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 100)
     private String name;
 
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
     @ManyToMany
@@ -66,6 +67,17 @@ public class Product extends Auditable {
     public void removeImage(ProductImage image) {
         images.remove(image);
         image.setProduct(null);
+    }
+
+    /**
+     * 在存储前将价格转换为两位小数
+     * `@PrePersist` 在保存前执行
+     * `@PreUpdate` 在更新前执行
+     */
+    @PrePersist
+    @PreUpdate
+    public void pricePrecisionConversion() {
+        price.setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override

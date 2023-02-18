@@ -19,7 +19,7 @@ public class BigDecimalSerializer extends JsonSerializer<BigDecimal> {
 
     @Override
     public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        var rounded = value.setScale(2, RoundingMode.HALF_EVEN);
+        var rounded = value.setScale(2, RoundingMode.HALF_UP);
         var locale = Locale.of("zh", "CN");
         NumberFormat format = NumberFormat.getCurrencyInstance(locale);
         gen.writeString(format.format(rounded));

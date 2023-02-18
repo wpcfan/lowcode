@@ -1,6 +1,10 @@
 package com.mooc.backend.dtos;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.entities.Category;
+import com.mooc.backend.entities.blocks.BlockData;
+import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.projections.CategoryInfo;
 import lombok.Builder;
 import lombok.Value;
@@ -9,9 +13,10 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+@JsonDeserialize(as = CategoryDTO.class)
 @Value
 @Builder
-public class CategoryDTO {
+public class CategoryDTO implements BlockData {
 
     private Long id;
     private String name;
@@ -51,5 +56,11 @@ public class CategoryDTO {
                 .build();
         Optional.ofNullable(getChildren()).orElse(new HashSet<>()).forEach(child -> category.addChild(child.toEntity()));
         return category;
+    }
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Override
+    public BlockDataType getDataType() {
+        return BlockDataType.Category;
     }
 }

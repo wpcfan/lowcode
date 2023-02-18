@@ -26,19 +26,19 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理自定义异常
-     * @param ex 异常
+     * @param e 异常
      * @param request 请求
      * @return 错误信息
      */
     @ExceptionHandler(CustomException.class)
-    public ProblemDetail handleRecordNotFoundException(CustomException ex, WebRequest request) {
+    public ProblemDetail handleRecordNotFoundException(CustomException e, WebRequest request) {
         ProblemDetail body = ProblemDetail
-                .forStatusAndDetail(HttpStatusCode.valueOf(500), ex.getLocalizedMessage());
-        body.setType(URI.create(hostname + "/errors/" + ex.getCode()));
-        body.setTitle(ex.getMessage());
-        body.setDetail(ex.getDetails());
+                .forStatusAndDetail(HttpStatusCode.valueOf(500), e.getLocalizedMessage());
+        body.setType(URI.create(hostname + "/errors/" + e.getCode()));
+        body.setTitle(e.getMessage());
+        body.setDetail(e.getDetails());
         body.setProperty("hostname", hostname);
-        body.setProperty("code", ex.getCode());
+        body.setProperty("code", e.getCode());
         body.setProperty("ua", Optional.ofNullable(request.getHeader("User-Agent")).orElse("Unknown"));
         body.setProperty("locale", request.getLocale().toString());
         return body;

@@ -50,11 +50,13 @@ class PageRepository {
   final String baseUrl;
   final Map<String, PageLayoutCache> cache;
   final Dio client;
+  final bool enableCache;
 
   PageRepository({
     Dio? client,
     Map<String, PageLayoutCache>? cache,
     this.baseUrl = '/pages',
+    this.enableCache = true,
   })  : client = client ?? AppDio.getInstance(),
         cache = cache ?? <String, PageLayoutCache>{};
 
@@ -64,7 +66,7 @@ class PageRepository {
     final url = '$baseUrl/published/${pageType.value}';
     final cachedResult = cache[url];
 
-    if (cachedResult != null && !cachedResult.isExpired) {
+    if (enableCache && cachedResult != null && !cachedResult.isExpired) {
       debugPrint('PageRepository.getByPageType($pageType) - cache hit');
       return cachedResult.value;
     }

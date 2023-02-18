@@ -1,7 +1,7 @@
 part of 'page_block.dart';
 
 class PinnedHeaderPageBlock extends PageBlock {
-  final List<ImageData> data;
+  final List<BlockData<ImageData>> data;
 
   const PinnedHeaderPageBlock({
     required int id,
@@ -21,16 +21,15 @@ class PinnedHeaderPageBlock extends PageBlock {
   List<Object?> get props => [id, type, sort, title, data, config];
 
   factory PinnedHeaderPageBlock.fromJson(Map<String, dynamic> json) {
-    final imageData = json['data'] as List;
-    imageData.sort((a, b) => a['sort'] - b['sort']);
+    final data = (json['data'] as List)
+        .map((e) => BlockData.fromJson(e, ImageData.fromJson))
+        .toList();
+    data.sort((a, b) => a.sort.compareTo(b.sort));
     return PinnedHeaderPageBlock(
       id: json['id'],
       sort: json['sort'],
       title: json['title'],
-      data: imageData
-          .map((e) => ImageData.fromJson(e))
-          .toList()
-          .cast<ImageData>(),
+      data: data,
       config: BlockConfig.fromJson(json['config']),
     );
   }

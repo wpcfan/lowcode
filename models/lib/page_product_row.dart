@@ -21,14 +21,16 @@ class ProductRowPageBlock extends PageBlock {
   List<Object?> get props => [id, type, sort, data, config, title];
 
   factory ProductRowPageBlock.fromJson(Map<String, dynamic> json) {
+    final data = (json['data'] as List)
+        .map((e) => BlockData.fromJson(e, Product.fromJson))
+        .toList();
+    data.sort((a, b) => a.sort.compareTo(b.sort));
     return ProductRowPageBlock(
       id: json['id'],
       title: json['title'],
       sort: json['sort'],
       config: BlockConfig.fromJson(json['config']),
-      data: (json['data'] as List)
-          .map((e) => BlockData.fromJson(e, Product.fromJson))
-          .toList(),
+      data: data,
     );
   }
 

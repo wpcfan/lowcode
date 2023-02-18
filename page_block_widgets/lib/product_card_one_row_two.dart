@@ -23,8 +23,14 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final double itemWidth = (screenWidth - horizontalSpacing) / 2;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final double itemHeight = screenHeight - verticalSpacing;
     page({required Widget child}) => SwiftUi.widget(child: child)
-        .constrained(maxWidth: width, maxHeight: height)
+        .constrained(
+            maxWidth: width > 0 ? width : itemWidth,
+            maxHeight: height > 0 ? height : itemHeight)
         .backgroundColor(Colors.white)
         .border(all: 1, color: Colors.grey);
     // 商品名称
@@ -75,8 +81,8 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     // 商品图片
     final productImage = ImageWidget(
       imageUrl: product.images.first,
-      width: width,
-      height: width,
+      width: itemWidth,
+      height: itemWidth,
       errorImage: errorImage,
     ).padding(
       bottom: verticalSpacing,
@@ -88,6 +94,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       productDescription,
     ].toColumn(
         mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start);
     // 商品价格和划线价格形成一列
     final priceColumn = [productOriginalPrice, productPrice]
@@ -107,6 +114,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     );
     final nameDescAndPrice = [imageNameAndDesc, priceRow].toColumn(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start);
 
     return nameDescAndPrice.parent(page).gestures(onTap: () {

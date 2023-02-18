@@ -24,6 +24,7 @@ class WaterfallWidget extends StatelessWidget {
       crossAxisCount: 2,
       mainAxisSpacing: config.horizontalSpacing ?? 0,
       crossAxisSpacing: config.verticalSpacing ?? 0,
+      childCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
         return ProductCardOneRowTwoWidget(

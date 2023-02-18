@@ -62,7 +62,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     super.initState();
-    _layoutBloc = PageLayoutBloc(PageRepository());
+    _layoutBloc = PageLayoutBloc(PageRepository(enableCache: false));
     _waterfallBloc = WaterfallBloc(ProductRepository());
   }
 
@@ -207,58 +207,57 @@ class _HomeViewState extends State<HomeView> {
     if (waterfallBlocks.isNotEmpty &&
         waterfallBlocks.first.data.isNotEmpty &&
         waterfallBlocks.first.data.first.content.id != null) {
-      _waterfallBloc.onLoadMore
+      _waterfallBloc.onCategoryChanged
           .add(waterfallBlocks.first.data.first.content.id!);
     }
-    final slivers = blocks.map((block) {
-      switch (block.type) {
-        case PageBlockType.imageRow:
-          final it = block as ImageRowPageBlock;
-          return SliverToBoxAdapter(
-            child: ImageRowWidget(
-              items: it.data.map((di) => di.content).toList(),
-              itemWidth: it.config.itemWidth ?? 0,
-              itemHeight: it.config.itemHeight ?? 0,
-              verticalPadding: it.config.verticalPadding ?? 0,
-              horizontalPadding: it.config.horizontalPadding ?? 0,
-              spaceBetweenItems: it.config.horizontalSpacing ?? 0,
-              errorImage: errorImage,
-            ),
-          );
-        case PageBlockType.productRow:
-          final it = block as ProductRowPageBlock;
-          return SliverToBoxAdapter(
-            child: ProductRowWidget(
-              items: it.data.map((di) => di.content).toList(),
-              width: screenWidth - (it.config.horizontalPadding ?? 0) * 2,
-              height: (layout?.config.baselineScreenHeight ?? 0) / ratio,
-              verticalPadding: it.config.verticalPadding ?? 0,
-              horizontalPadding: it.config.horizontalPadding ?? 0,
-              config: it.config,
-              errorImage: errorImage,
-              ratio: ratio,
-            ),
-          );
-        case PageBlockType.waterfall:
-          final it = block as WaterfallPageBlock;
-          return WaterfallWidget(
-            products:
-                it.data.map((di) => di.content.productSlice).first?.data ?? [],
-            config: it.config,
-            errorImage: errorImage,
-          );
-        default:
-          return SliverToBoxAdapter(
-            child: Container(),
-          );
-      }
-    }).toList();
 
     return StreamBuilder<WaterfallState>(
         stream: _waterfallBloc.state,
         initialData: WaterfallInitial(),
         builder: (context, snapshot) {
           final state = snapshot.data;
+          final slivers = blocks.map((block) {
+            switch (block.type) {
+              case PageBlockType.imageRow:
+                final it = block as ImageRowPageBlock;
+                return SliverToBoxAdapter(
+                  child: ImageRowWidget(
+                    items: it.data.map((di) => di.content).toList(),
+                    itemWidth: it.config.itemWidth ?? 0,
+                    itemHeight: it.config.itemHeight ?? 0,
+                    verticalPadding: it.config.verticalPadding ?? 0,
+                    horizontalPadding: it.config.horizontalPadding ?? 0,
+                    spaceBetweenItems: it.config.horizontalSpacing ?? 0,
+                    errorImage: errorImage,
+                  ),
+                );
+              case PageBlockType.productRow:
+                final it = block as ProductRowPageBlock;
+                return SliverToBoxAdapter(
+                  child: ProductRowWidget(
+                    items: it.data.map((di) => di.content).toList(),
+                    width: screenWidth - (it.config.horizontalPadding ?? 0) * 2,
+                    height: (layout?.config.baselineScreenHeight ?? 0) / ratio,
+                    verticalPadding: it.config.verticalPadding ?? 0,
+                    horizontalPadding: it.config.horizontalPadding ?? 0,
+                    config: it.config,
+                    errorImage: errorImage,
+                    ratio: ratio,
+                  ),
+                );
+              case PageBlockType.waterfall:
+                final it = block as WaterfallPageBlock;
+                return WaterfallWidget(
+                  products: state?.products ?? [],
+                  config: it.config,
+                  errorImage: errorImage,
+                );
+              default:
+                return SliverToBoxAdapter(
+                  child: Container(),
+                );
+            }
+          }).toList();
           return MyCustomScrollView(
             hasMore: state != null && state.hasNext,
             loadMoreWidget: loadMoreWidget,

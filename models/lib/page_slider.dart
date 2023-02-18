@@ -1,7 +1,7 @@
 part of 'page_block.dart';
 
 class SliderPageBlock extends PageBlock {
-  final List<ImageData> data;
+  final List<BlockData<ImageData>> data;
 
   const SliderPageBlock({
     required int id,
@@ -21,12 +21,16 @@ class SliderPageBlock extends PageBlock {
   List<Object?> get props => [id, type, sort, data, title];
 
   factory SliderPageBlock.fromJson(Map<String, dynamic> json) {
+    final data = (json['data'] as List)
+        .map((e) => BlockData.fromJson(e, ImageData.fromJson))
+        .toList();
+    data.sort((a, b) => a.sort.compareTo(b.sort));
     return SliderPageBlock(
       id: json['id'],
       title: json['title'],
       sort: json['sort'],
       config: BlockConfig.fromJson(json['config']),
-      data: (json['data'] as List).map((e) => ImageData.fromJson(e)).toList(),
+      data: data,
     );
   }
 
@@ -47,7 +51,7 @@ class SliderPageBlock extends PageBlock {
     String? title,
     int? sort,
     BlockConfig? config,
-    List<ImageData>? data,
+    List<BlockData<ImageData>>? data,
   }) {
     return SliderPageBlock(
       id: id ?? this.id,

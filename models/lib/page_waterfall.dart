@@ -21,14 +21,16 @@ class WaterfallPageBlock extends PageBlock {
   List<Object?> get props => [id, type, sort, data, title];
 
   factory WaterfallPageBlock.fromJson(Map<String, dynamic> json) {
+    final data = (json['data'] as List)
+        .map((e) => BlockData.fromJson(e, Category.fromJson))
+        .toList();
+    data.sort((a, b) => a.sort.compareTo(b.sort));
     return WaterfallPageBlock(
       id: json['id'],
       title: json['title'],
       sort: json['sort'],
       config: BlockConfig.fromJson(json['config']),
-      data: (json['data'] as List)
-          .map((e) => BlockData.fromJson(e, Category.fromJson))
-          .toList(),
+      data: data,
     );
   }
 

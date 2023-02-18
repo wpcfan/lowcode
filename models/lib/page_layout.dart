@@ -26,30 +26,33 @@ class PageLayout {
   factory PageLayout.fromJson(
     dynamic json,
   ) {
+    final blocks = (json['blocks'] as List<dynamic>)
+        .map((e) => PageBlock.fromJson(e))
+        .toList();
+    blocks.sort((a, b) => a.sort.compareTo(b.sort));
     return PageLayout(
-        title: json['title'] as String,
-        platform: Platform.values.firstWhere(
-          (e) => e.value == json['platform'],
-          orElse: () => Platform.app,
-        ),
-        pageType: PageType.values.firstWhere(
-          (e) => e.value == json['pageType'],
-          orElse: () => PageType.home,
-        ),
-        config: PageConfig.fromJson(json['config']),
-        status: PageStatus.values.firstWhere(
-          (e) => e.value == json['status'],
-          orElse: () => PageStatus.draft,
-        ),
-        startTime: json['startTime'] == null
-            ? null
-            : DateTime.parse(json['startTime'] as String),
-        endTime: json['endTime'] == null
-            ? null
-            : DateTime.parse(json['endTime'] as String),
-        blocks: (json['blocks'] as List<dynamic>)
-            .map((e) => PageBlock.fromJson(e))
-            .toList());
+      title: json['title'] as String,
+      platform: Platform.values.firstWhere(
+        (e) => e.value == json['platform'],
+        orElse: () => Platform.app,
+      ),
+      pageType: PageType.values.firstWhere(
+        (e) => e.value == json['pageType'],
+        orElse: () => PageType.home,
+      ),
+      config: PageConfig.fromJson(json['config']),
+      status: PageStatus.values.firstWhere(
+        (e) => e.value == json['status'],
+        orElse: () => PageStatus.draft,
+      ),
+      startTime: json['startTime'] == null
+          ? null
+          : DateTime.parse(json['startTime'] as String),
+      endTime: json['endTime'] == null
+          ? null
+          : DateTime.parse(json['endTime'] as String),
+      blocks: blocks,
+    );
   }
 
   Map<String, dynamic> toJson() {

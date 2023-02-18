@@ -8,6 +8,7 @@ import com.mooc.backend.services.QiniuService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class ProductAdminController {
 
     @Operation(summary = "添加商品")
     @PostMapping()
-    public ProductAdminDTO createProduct(@RequestBody CreateOrUpdateProductDTO product) {
+    public ProductAdminDTO createProduct(@Valid @RequestBody CreateOrUpdateProductDTO product) {
         return ProductAdminDTO.fromEntity(productAdminService.createProduct(product));
     }
 
@@ -34,7 +35,7 @@ public class ProductAdminController {
     @PutMapping("/{id}")
     public ProductAdminDTO updateProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
-            CreateOrUpdateProductDTO product) {
+            @Valid @RequestBody CreateOrUpdateProductDTO product) {
         return productAdminService.updateProduct(id, product)
                 .map(ProductAdminDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",

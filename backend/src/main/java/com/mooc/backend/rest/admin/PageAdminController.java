@@ -13,6 +13,7 @@ import com.mooc.backend.specifications.PageFilter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -62,7 +63,7 @@ public class PageAdminController {
 
     @Operation(summary = "添加页面")
     @PostMapping()
-    public PageDTO createPage(@RequestBody CreateOrUpdatePageDTO page) {
+    public PageDTO createPage(@Valid @RequestBody CreateOrUpdatePageDTO page) {
         return PageDTO.fromEntity(pageCreateService.createPage(page));
     }
 
@@ -70,7 +71,7 @@ public class PageAdminController {
     @PutMapping("/{id}")
     public PageDTO updatePage(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdatePageDTO page) {
+            @Valid @RequestBody CreateOrUpdatePageDTO page) {
         return pageUpdateService.updatePage(id, page)
                 .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",

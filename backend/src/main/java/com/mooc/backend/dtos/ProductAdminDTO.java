@@ -27,7 +27,17 @@ public record ProductAdminDTO(Long id, String name, String description, BigDecim
                         .map(CategoryDTO::fromEntity)
                         .collect(Collectors.toSet()),
                 product.getImages().stream()
-                        .map(i -> new ProductImageInfo(i.getId(), i.getImageUrl()))
+                        .map(i -> new ProductImageInfo() {
+                            @Override
+                            public Long getId() {
+                                return i.getId();
+                            }
+
+                            @Override
+                            public String getImageUrl() {
+                                return i.getImageUrl();
+                            }
+                        })
                         .collect(Collectors.toSet())
         );
     }
@@ -41,7 +51,7 @@ public record ProductAdminDTO(Long id, String name, String description, BigDecim
         images().forEach(image -> {
             var productImage = ProductImage.builder()
                     .product(product)
-                    .imageUrl(image.imageUrl())
+                    .imageUrl(image.getImageUrl())
                     .build();
             product.addImage(productImage);
         });

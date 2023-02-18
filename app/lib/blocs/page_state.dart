@@ -9,20 +9,26 @@ enum FetchStatus {
 
 class PageLayoutState {
   final FetchStatus status;
-  final PageLayout? result;
+  final PageLayout? layout;
 
-  PageLayoutState({this.status = FetchStatus.initial, this.result});
+  PageLayoutState({
+    this.status = FetchStatus.initial,
+    this.layout,
+  });
 
-  PageLayoutState copyWith({FetchStatus? status, PageLayout? result}) {
+  PageLayoutState copyWith({
+    FetchStatus? status,
+    PageLayout? layout,
+  }) {
     return PageLayoutState(
       status: status ?? this.status,
-      result: result ?? this.result,
+      layout: layout ?? this.layout,
     );
   }
 
   @override
   String toString() {
-    return 'PageLayoutState{status: $status, result: $result}';
+    return 'PageLayoutState{status: $status, layout: $layout}';
   }
 }
 
@@ -35,10 +41,14 @@ class PageLayoutError extends PageLayoutState {
 }
 
 class PageLayoutInitial extends PageLayoutState {
-  PageLayoutInitial() : super(status: FetchStatus.initial);
+  PageLayoutInitial()
+      : super(
+          status: FetchStatus.initial,
+          layout: null,
+        );
 }
 
 class PageLayoutPopulated extends PageLayoutState {
   PageLayoutPopulated(PageLayout result)
-      : super(status: FetchStatus.populated, result: result);
+      : super(status: FetchStatus.populated, layout: result);
 }

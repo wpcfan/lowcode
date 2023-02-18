@@ -22,7 +22,8 @@ public class BlockConfig {
     @Min(0)
     @Max(100)
     private Double verticalSpacing;
-
+    private Double blockWidth;
+    private Double blockHeight;
     private Double itemWidth;
     private Double itemHeight;
 }

@@ -10,6 +10,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 import 'package:ua_client_hints/ua_client_hints.dart';
 
 export 'page_admin_repository.dart';
+export 'product_repository.dart';
 
 class AppDio with DioMixin implements Dio {
   AppDio._([BaseOptions? options]) {

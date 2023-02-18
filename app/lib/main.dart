@@ -1,7 +1,7 @@
+import 'package:app/blocs/waterfall_bloc.dart';
 import 'package:app/controllers/scaffold_controller.dart';
 import 'package:app/widgets/home_error.dart';
 import 'package:app/widgets/home_initial.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import 'blocs/page_bloc.dart';
 import 'blocs/page_state.dart';
+import 'blocs/waterfall_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,16 +39,7 @@ class MyApp extends StatelessWidget {
       ),
       home: MultiProvider(
         providers: [
-          Provider(create: (context) => AppDio.getInstance()),
-          Provider(
-            create: (context) => PageRepository(
-              client: context.read<Dio>(),
-            ),
-          ),
-          ChangeNotifierProvider(create: (context) => ScaffoldController()),
-          Provider(
-              create: (context) =>
-                  PageLayoutBloc(context.read<PageRepository>()))
+          ChangeNotifierProvider(create: (context) => ScaffoldController())
         ],
         child: const HomeView(),
       ),
@@ -63,8 +55,23 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  int page = 0;
   int _selectedIndex = 0;
+  late PageLayoutBloc _layoutBloc;
+  late WaterfallBloc _waterfallBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _layoutBloc = PageLayoutBloc(PageRepository());
+    _waterfallBloc = WaterfallBloc(ProductRepository());
+  }
+
+  @override
+  void dispose() {
+    _waterfallBloc.dispose();
+    _layoutBloc.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +124,7 @@ class _HomeViewState extends State<HomeView> {
     final scaffoldKey = context.read<ScaffoldController>().scaffoldKey;
 
     return StreamBuilder<PageLayoutState>(
-        stream: Provider.of<PageLayoutBloc>(context).state,
+        stream: _layoutBloc.state,
         initialData: PageLayoutInitial(),
         builder: (context, snapshot) {
           final state = snapshot.data;
@@ -190,10 +197,19 @@ class _HomeViewState extends State<HomeView> {
     );
 
     const errorImage = '';
-    final layout = state.result;
+    final layout = state.layout;
     final blocks = layout?.blocks ?? [];
     final screenWidth = MediaQuery.of(context).size.width;
     final ratio = screenWidth / (layout?.config.baselineScreenWidth ?? 1);
+    final waterfallBlocks = blocks
+        .where((element) => element.type == PageBlockType.waterfall)
+        .map((e) => e as WaterfallPageBlock);
+    if (waterfallBlocks.isNotEmpty &&
+        waterfallBlocks.first.data.isNotEmpty &&
+        waterfallBlocks.first.data.first.content.id != null) {
+      _waterfallBloc.onLoadMore
+          .add(waterfallBlocks.first.data.first.content.id!);
+    }
     final slivers = blocks.map((block) {
       switch (block.type) {
         case PageBlockType.imageRow:
@@ -238,24 +254,33 @@ class _HomeViewState extends State<HomeView> {
       }
     }).toList();
 
-    return MyCustomScrollView(
-      hasMore: true,
-      loadMoreWidget: loadMoreWidget,
-      decoration: decoration,
-      sliverAppBar: sliverAppBar,
-      slivers: slivers,
-      onRefresh: () async {
-        Provider.of<PageLayoutBloc>(context)
-            .onPageTypeChanged
-            .add(PageType.home);
-      },
-      onLoadMore: () async {
-        await Future.delayed(const Duration(seconds: 2));
-        setState(() {
-          page++;
+    return StreamBuilder<WaterfallState>(
+        stream: _waterfallBloc.state,
+        initialData: WaterfallInitial(),
+        builder: (context, snapshot) {
+          final state = snapshot.data;
+          return MyCustomScrollView(
+            hasMore: state != null && state.hasNext,
+            loadMoreWidget: loadMoreWidget,
+            decoration: decoration,
+            sliverAppBar: sliverAppBar,
+            slivers: slivers,
+            onRefresh: () async {
+              _layoutBloc.onPageTypeChanged.add(PageType.home);
+              await _layoutBloc.state
+                  .where((event) =>
+                      event is PageLayoutPopulated || event is PageLayoutError)
+                  .first;
+            },
+            onLoadMore: () async {
+              _waterfallBloc.onLoadMore.add((state?.page ?? 0) + 1);
+              await _waterfallBloc.state
+                  .where((event) =>
+                      event is WaterfallPopulated || event is WaterfallError)
+                  .first;
+            },
+          );
         });
-      },
-    );
   }
 }
 

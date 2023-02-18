@@ -50,6 +50,7 @@ class MyCustomScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: onRefresh,
+      triggerMode: RefreshIndicatorTriggerMode.onEdge,
       child: NotificationListener(
         onNotification: hasMore
             ? (scrollNotification) {

@@ -8,12 +8,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.validator.constraints.Length;
+import jakarta.validation.constraints.Size;
 
 public record CreateOrUpdatePageDTO(
-        @Schema(description = "布局标题", example = "首页布局") @NotBlank @Length(min = 2, max = 100) String title,
-        @Schema(description = "平台") @NotNull Platform platform,
-        @Schema(description = "页面类型") @NotNull PageType pageType,
+        @Schema(description = "布局标题", example = "首页布局") @NotBlank @Size(min = 2, max = 100) String title,
+        @Schema(description = "平台", example = "App") @NotNull Platform platform,
+        @Schema(description = "页面类型", example = "home") @NotNull PageType pageType,
         @NotNull @Valid PageConfig config) {
 
     public PageEntity toEntity() {

@@ -22,10 +22,14 @@ class WaterfallWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
+    final verticalPadding = (config.verticalPadding ?? 0) / ratio;
     final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
     final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
-    final itemWidth = (config.itemWidth ?? 0) / ratio;
-    final itemHeight = (config.itemHeight ?? 0) / ratio;
+    final blockWidth = (config.blockWidth ?? 0) / ratio;
+    final blockHeight = (config.blockHeight ?? 0) / ratio;
+    final itemWidth = (blockWidth - 2 * horizontalPadding) / 2;
+    final itemHeight = (blockHeight - 2 * verticalPadding) / 2;
     return SliverMasonryGrid.count(
       crossAxisCount: 2,
       mainAxisSpacing: horizontalSpacing,

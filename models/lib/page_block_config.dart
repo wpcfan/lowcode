@@ -5,8 +5,6 @@ class BlockConfig {
   final double? verticalPadding;
   final double? horizontalSpacing;
   final double? verticalSpacing;
-  final double? itemWidth;
-  final double? itemHeight;
   final double? blockWidth;
   final double? blockHeight;
 
@@ -15,8 +13,6 @@ class BlockConfig {
     this.verticalPadding,
     this.horizontalSpacing,
     this.verticalSpacing,
-    this.itemWidth,
-    this.itemHeight,
     this.blockWidth,
     this.blockHeight,
   });
@@ -27,8 +23,6 @@ class BlockConfig {
       verticalPadding: json['verticalPadding'] as double?,
       horizontalSpacing: json['horizontalSpacing'] as double?,
       verticalSpacing: json['verticalSpacing'] as double?,
-      itemWidth: json['itemWidth'] as double?,
-      itemHeight: json['itemHeight'] as double?,
       blockWidth: json['blockWidth'] as double?,
       blockHeight: json['blockHeight'] as double?,
     );
@@ -40,8 +34,6 @@ class BlockConfig {
       'verticalPadding': verticalPadding,
       'horizontalSpacing': horizontalSpacing,
       'verticalSpacing': verticalSpacing,
-      'itemWidth': itemWidth,
-      'itemHeight': itemHeight,
       'blockWidth': blockWidth,
       'blockHeight': blockHeight,
     };
@@ -52,8 +44,6 @@ class BlockConfig {
     double? verticalPadding,
     double? horizontalSpacing,
     double? verticalSpacing,
-    double? itemWidth,
-    double? itemHeight,
     double? blockWidth,
     double? blockHeight,
   }) {
@@ -62,8 +52,6 @@ class BlockConfig {
       verticalPadding: verticalPadding ?? this.verticalPadding,
       horizontalSpacing: horizontalSpacing ?? this.horizontalSpacing,
       verticalSpacing: verticalSpacing ?? this.verticalSpacing,
-      itemWidth: itemWidth ?? this.itemWidth,
-      itemHeight: itemHeight ?? this.itemHeight,
       blockWidth: blockWidth ?? this.blockWidth,
       blockHeight: blockHeight ?? this.blockHeight,
     );
@@ -71,6 +59,6 @@ class BlockConfig {
 
   @override
   String toString() {
-    return 'BlockConfig { horizontalPadding: $horizontalPadding, verticalPadding: $verticalPadding, horizontalSpacing: $horizontalSpacing, verticalSpacing: $verticalSpacing, itemWidth: $itemWidth, itemHeight: $itemHeight, blockWidth: $blockWidth, blockHeight: $blockHeight}';
+    return 'BlockConfig { horizontalPadding: $horizontalPadding, verticalPadding: $verticalPadding, horizontalSpacing: $horizontalSpacing, verticalSpacing: $verticalSpacing, blockWidth: $blockWidth, blockHeight: $blockHeight}';
   }
 }

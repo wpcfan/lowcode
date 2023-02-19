@@ -17,7 +17,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
-import com.mooc.backend.entities.PageConfig;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.enumerations.BlockType;
@@ -53,17 +52,14 @@ public class PageEntityRepositoryTests {
         var bannerImage = "https://via.placeholder.com/400/50";
         var rowImage = "https://via.placeholder.com/120/50";
         var pageConfig = PageConfig.builder()
-                .baselineScreenWidth(375)
-                .baselineScreenHeight(667)
-                .horizontalPadding(16)
-                .horizontalSpacing(12)
-                .verticalSpacing(8)
+                .baselineScreenWidth(375.0)
+                .horizontalPadding(16.0)
                 .build();
         var blockConfig = BlockConfig.builder()
-                .horizontalPadding(12)
-                .verticalPadding(8)
-                .horizontalSpacing(8)
-                .verticalSpacing(8)
+                .horizontalPadding(12.0)
+                .verticalPadding(8.0)
+                .horizontalSpacing(8.0)
+                .verticalSpacing(8.0)
                 .build();
         var bannerImageData1 = new ImageDTO(bannerImage, "Test Image 1", linkBaidu);
 

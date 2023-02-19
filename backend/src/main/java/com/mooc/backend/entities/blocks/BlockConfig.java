@@ -44,7 +44,6 @@ public class BlockConfig {
     @DecimalMax("1200.00")
     private Double blockWidth;
     @Schema(description = "区块高度", example = "94.0")
-    @NotNull
     @DecimalMin("300")
     @DecimalMax("1200.00")
     private Double blockHeight;

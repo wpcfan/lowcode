@@ -6,6 +6,9 @@ import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.enumerations.BlockType;
+import com.mooc.backend.enumerations.PageStatus;
+import com.mooc.backend.error.CustomException;
 import com.mooc.backend.repositories.PageBlockDataEntityRepository;
 import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
@@ -32,6 +35,12 @@ public class PageCreateService {
     public Optional<PageBlockEntity> addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
         return pageEntityRepository.findById(pageId)
                 .map(pageEntity -> {
+                    if (pageEntity.getStatus() != PageStatus.Draft) {
+                        throw new CustomException("只有草稿状态的页面才能添加区块", "页面状态不是草稿状态", 400);
+                    }
+                    if (block.type() == BlockType.Waterfall && pageBlockEntityRepository.countByTypeAndPageId(BlockType.Waterfall, pageId) > 0L) {
+                        throw new CustomException("瀑布流区块只能有一个", "页面中已经存在一个瀑布流区块", 400);
+                    }
                     var blockEntity = block.toEntity();
                     pageBlockEntityRepository.save(blockEntity);
                     pageEntity.addPageBlock(blockEntity);

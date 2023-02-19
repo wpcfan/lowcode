@@ -8,47 +8,48 @@ class ImageRowWidget extends StatelessWidget {
   const ImageRowWidget({
     super.key,
     required this.items,
-    required this.itemWidth,
-    required this.itemHeight,
-    required this.verticalPadding,
-    required this.horizontalPadding,
-    required this.spaceBetweenItems,
+    required this.config,
+    required this.ratio,
     required this.errorImage,
     this.onTap,
   });
   final List<ImageData> items;
-  final double itemWidth;
-  final double itemHeight;
-  final double verticalPadding;
-  final double horizontalPadding;
-  final double spaceBetweenItems;
+  final BlockConfig config;
+  final double ratio;
   final String errorImage;
   final void Function(MyLink?)? onTap;
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final width = screenWidth - horizontalPadding * 2;
+    final blockWidth = (config.blockWidth ?? 0) / ratio;
+    final blockHeight = (config.blockHeight ?? 0) / ratio;
+    final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
+    final verticalPadding = (config.verticalPadding ?? 0) / ratio;
+    final itemWidth = blockWidth - horizontalPadding;
+    final itemHeight = blockHeight - verticalPadding;
+    page({required Widget child}) => SwiftUi.widget(child: child)
+        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
+        .constrained(maxWidth: blockWidth, maxHeight: blockHeight)
+        .backgroundColor(Colors.white)
+        .border(all: 1, color: Colors.grey);
     switch (items.length) {
       case 1:
-        return _buildSingleImage(context, width);
+        return _buildSingleImage(context, itemWidth, itemHeight).parent(page);
       case 2:
       case 3:
-        return _buildImages(context, width);
+        return _buildImages(context, itemWidth).parent(page);
       default:
-        return _buildScrollableImages(context, width);
+        return _buildScrollableImages(context, itemWidth, itemHeight)
+            .parent(page);
     }
   }
 
-  Widget _buildSingleImage(BuildContext context, double width) {
+  Widget _buildSingleImage(
+      BuildContext context, double blockWidth, double blockHeight) {
     final item = items.first;
-    return Container(
-      width: itemWidth > 0 ? itemWidth : width,
-      height: itemHeight > 0 ? itemHeight : null,
-      padding: EdgeInsets.symmetric(
-        vertical: verticalPadding,
-        horizontal: horizontalPadding,
-      ),
+    return SizedBox(
+      width: blockWidth,
+      height: blockHeight,
       child: ImageWidget(
         imageUrl: item.image,
         errorImage: errorImage,
@@ -59,52 +60,15 @@ class ImageRowWidget extends StatelessWidget {
   }
 
   Widget _buildImages(BuildContext context, double width) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalPadding,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.max,
-        children: items
-            .mapWithIndex(
-              (item, index) => Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: index == items.length - 1 ? 0 : spaceBetweenItems,
-                  ),
-                  child: ImageWidget(
-                    imageUrl: item.image,
-                    errorImage: errorImage,
-                    link: item.link,
-                    onTap: onTap,
-                  ),
-                ),
-              ),
-            )
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _buildScrollableImages(BuildContext context, double width) {
-    final liItemWidth = itemWidth > 0 ? itemWidth : width / 3;
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalPadding,
-      ),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        itemExtent: liItemWidth,
-        children: items
-            .mapWithIndex(
-              (item, index) => Container(
-                width: liItemWidth - horizontalPadding * 2,
-                height:
-                    itemHeight > 0 ? itemHeight - verticalPadding * 2 : null,
-                margin: EdgeInsets.only(
+    final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.max,
+      children: items
+          .mapWithIndex(
+            (item, index) => Expanded(
+              child: Padding(
+                padding: EdgeInsets.only(
                   right: index == items.length - 1 ? 0 : spaceBetweenItems,
                 ),
                 child: ImageWidget(
@@ -114,9 +78,36 @@ class ImageRowWidget extends StatelessWidget {
                   onTap: onTap,
                 ),
               ),
-            )
-            .toList(),
-      ),
+            ),
+          )
+          .toList(),
+    );
+  }
+
+  Widget _buildScrollableImages(
+      BuildContext context, double blockWidth, double itemHeight) {
+    final itemWidth = blockWidth / 3;
+    final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
+    return ListView(
+      scrollDirection: Axis.horizontal,
+      itemExtent: itemWidth,
+      children: items
+          .mapWithIndex(
+            (item, index) => Container(
+              width: itemWidth - spaceBetweenItems * 2,
+              height: itemHeight,
+              margin: EdgeInsets.only(
+                right: index == items.length - 1 ? 0 : spaceBetweenItems,
+              ),
+              child: ImageWidget(
+                imageUrl: item.image,
+                errorImage: errorImage,
+                link: item.link,
+                onTap: onTap,
+              ),
+            ),
+          )
+          .toList(),
     );
   }
 }

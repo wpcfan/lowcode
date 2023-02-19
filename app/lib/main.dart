@@ -153,7 +153,7 @@ class _HomeViewState extends State<HomeView> {
 
           return Scaffold(
             key: scaffoldKey,
-            body: _buildBody(context, decoration, state),
+            body: _buildBody(context, decoration, searchField, state),
             bottomNavigationBar: bottomBar,
             drawer: const LeftDrawer(),
             endDrawer: const RightDrawer(),
@@ -161,18 +161,12 @@ class _HomeViewState extends State<HomeView> {
         });
   }
 
-  Widget _buildBody(
-      BuildContext context, BoxDecoration decoration, PageLayoutState state) {
+  Widget _buildBody(BuildContext context, BoxDecoration decoration,
+      CupertinoSearchTextField searchField, PageLayoutState state) {
     final sliverAppBar = SliverAppBar(
       floating: true,
       pinned: false,
-      title: const CupertinoSearchTextField(
-        placeholder: 'Search',
-        placeholderStyle: TextStyle(color: Colors.white30),
-        prefixIcon: Icon(Icons.search, color: Colors.white),
-        backgroundColor: Colors.black12,
-        style: TextStyle(color: Colors.white),
-      ),
+      title: searchField,
       actions: [
         IconButton(
           icon: const Icon(Icons.notification_important),
@@ -216,48 +210,8 @@ class _HomeViewState extends State<HomeView> {
         initialData: WaterfallInitial(),
         builder: (context, snapshot) {
           final state = snapshot.data;
-          final slivers = blocks.map((block) {
-            switch (block.type) {
-              case PageBlockType.imageRow:
-                final it = block as ImageRowPageBlock;
-                return SliverToBoxAdapter(
-                  child: ImageRowWidget(
-                    items: it.data.map((di) => di.content).toList(),
-                    itemWidth: it.config.itemWidth ?? 0,
-                    itemHeight: it.config.itemHeight ?? 0,
-                    verticalPadding: it.config.verticalPadding ?? 0,
-                    horizontalPadding: it.config.horizontalPadding ?? 0,
-                    spaceBetweenItems: it.config.horizontalSpacing ?? 0,
-                    errorImage: errorImage,
-                  ),
-                );
-              case PageBlockType.productRow:
-                final it = block as ProductRowPageBlock;
-                return SliverToBoxAdapter(
-                  child: ProductRowWidget(
-                    items: it.data.map((di) => di.content).toList(),
-                    width: screenWidth - (it.config.horizontalPadding ?? 0) * 2,
-                    height: (layout?.config.baselineScreenHeight ?? 0) / ratio,
-                    verticalPadding: it.config.verticalPadding ?? 0,
-                    horizontalPadding: it.config.horizontalPadding ?? 0,
-                    config: it.config,
-                    errorImage: errorImage,
-                    ratio: ratio,
-                  ),
-                );
-              case PageBlockType.waterfall:
-                final it = block as WaterfallPageBlock;
-                return WaterfallWidget(
-                  products: state?.products ?? [],
-                  config: it.config,
-                  errorImage: errorImage,
-                );
-              default:
-                return SliverToBoxAdapter(
-                  child: Container(),
-                );
-            }
-          }).toList();
+          final slivers = _buildBlocks(
+              blocks, errorImage, screenWidth, layout, ratio, state);
           return MyCustomScrollView(
             hasMore: state != null && state.hasNext,
             loadMoreWidget: loadMoreWidget,
@@ -266,9 +220,14 @@ class _HomeViewState extends State<HomeView> {
             slivers: slivers,
             onRefresh: () async {
               _layoutBloc.onPageTypeChanged.add(PageType.home);
+              _waterfallBloc.onLoadMore.add(0);
               await _layoutBloc.state
                   .where((event) =>
                       event is PageLayoutPopulated || event is PageLayoutError)
+                  .first;
+              await _waterfallBloc.state
+                  .where((event) =>
+                      event is WaterfallPopulated || event is WaterfallError)
                   .first;
             },
             onLoadMore: () async {
@@ -280,6 +239,51 @@ class _HomeViewState extends State<HomeView> {
             },
           );
         });
+  }
+
+  List<Widget> _buildBlocks(
+      List<PageBlock> blocks,
+      String errorImage,
+      double screenWidth,
+      PageLayout? layout,
+      double ratio,
+      WaterfallState? state) {
+    return blocks.map((block) {
+      switch (block.type) {
+        case PageBlockType.imageRow:
+          final it = block as ImageRowPageBlock;
+          return SliverToBoxAdapter(
+            child: ImageRowWidget(
+              items: it.data.map((di) => di.content).toList(),
+              config: it.config,
+              ratio: ratio,
+              errorImage: errorImage,
+            ),
+          );
+        case PageBlockType.productRow:
+          final it = block as ProductRowPageBlock;
+          return SliverToBoxAdapter(
+            child: ProductRowWidget(
+              items: it.data.map((di) => di.content).toList(),
+              config: it.config,
+              ratio: ratio,
+              errorImage: errorImage,
+            ),
+          );
+        case PageBlockType.waterfall:
+          final it = block as WaterfallPageBlock;
+          return WaterfallWidget(
+            products: state?.products ?? [],
+            config: it.config,
+            ratio: ratio,
+            errorImage: errorImage,
+          );
+        default:
+          return SliverToBoxAdapter(
+            child: Container(),
+          );
+      }
+    }).toList();
   }
 }
 

@@ -97,7 +97,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     final right = [nameAndDescColumn, priceRow]
         .toColumn(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start)
         .padding(right: horizontalSpacing)
         .expanded();

@@ -27,27 +27,30 @@ class WaterfallWidget extends StatelessWidget {
     final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
     final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
     final blockWidth = (config.blockWidth ?? 0) / ratio;
-    final blockHeight = (config.blockHeight ?? 0) / ratio;
     final itemWidth = (blockWidth - 2 * horizontalPadding) / 2;
-    final itemHeight = (blockHeight - 2 * verticalPadding) / 2;
-    return SliverMasonryGrid.count(
-      crossAxisCount: 2,
-      mainAxisSpacing: horizontalSpacing,
-      crossAxisSpacing: verticalSpacing,
-      childCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return ProductCardOneRowTwoWidget(
-          product: product,
-          itemHeight: itemWidth,
-          itemWidth: itemHeight,
-          horizontalSpacing: horizontalSpacing,
-          verticalSpacing: verticalSpacing,
-          errorImage: errorImage,
-          addToCart: addToCart,
-          onTap: onTap,
-        );
-      },
+    return SliverPadding(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
+      ),
+      sliver: SliverMasonryGrid.count(
+        crossAxisCount: 2,
+        mainAxisSpacing: horizontalSpacing,
+        crossAxisSpacing: verticalSpacing,
+        childCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return ProductCardOneRowTwoWidget(
+            product: product,
+            itemWidth: itemWidth,
+            horizontalSpacing: horizontalSpacing,
+            verticalSpacing: verticalSpacing,
+            errorImage: errorImage,
+            addToCart: addToCart,
+            onTap: onTap,
+          );
+        },
+      ),
     );
   }
 }

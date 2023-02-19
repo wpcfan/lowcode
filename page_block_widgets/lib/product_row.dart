@@ -56,7 +56,7 @@ class ProductRowWidget extends StatelessWidget {
             .map((product) => ProductCardOneRowTwoWidget(
                   product: product,
                   itemWidth: (width - 2 * horizontalPadding) / 2,
-                  itemHeight: (height - 2 * verticalPadding) / 2,
+                  itemHeight: height - 2 * verticalPadding,
                   horizontalSpacing: horizontalSpacing,
                   verticalSpacing: verticalSpacing,
                   errorImage: errorImage,
@@ -66,6 +66,7 @@ class ProductRowWidget extends StatelessWidget {
             .toList()
             .toRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
             )
             .parent(page);

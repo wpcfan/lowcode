@@ -7,6 +7,8 @@ class BlockConfig {
   final double? verticalSpacing;
   final double? itemWidth;
   final double? itemHeight;
+  final double? blockWidth;
+  final double? blockHeight;
 
   BlockConfig({
     this.horizontalPadding,
@@ -15,6 +17,8 @@ class BlockConfig {
     this.verticalSpacing,
     this.itemWidth,
     this.itemHeight,
+    this.blockWidth,
+    this.blockHeight,
   });
 
   factory BlockConfig.fromJson(Map<String, dynamic> json) {
@@ -25,6 +29,8 @@ class BlockConfig {
       verticalSpacing: json['verticalSpacing'] as double?,
       itemWidth: json['itemWidth'] as double?,
       itemHeight: json['itemHeight'] as double?,
+      blockWidth: json['blockWidth'] as double?,
+      blockHeight: json['blockHeight'] as double?,
     );
   }
 
@@ -36,6 +42,8 @@ class BlockConfig {
       'verticalSpacing': verticalSpacing,
       'itemWidth': itemWidth,
       'itemHeight': itemHeight,
+      'blockWidth': blockWidth,
+      'blockHeight': blockHeight,
     };
   }
 
@@ -46,6 +54,8 @@ class BlockConfig {
     double? verticalSpacing,
     double? itemWidth,
     double? itemHeight,
+    double? blockWidth,
+    double? blockHeight,
   }) {
     return BlockConfig(
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
@@ -54,11 +64,13 @@ class BlockConfig {
       verticalSpacing: verticalSpacing ?? this.verticalSpacing,
       itemWidth: itemWidth ?? this.itemWidth,
       itemHeight: itemHeight ?? this.itemHeight,
+      blockWidth: blockWidth ?? this.blockWidth,
+      blockHeight: blockHeight ?? this.blockHeight,
     );
   }
 
   @override
   String toString() {
-    return 'BlockConfig(horizontalPadding: $horizontalPadding, verticalPadding: $verticalPadding, horizontalSpacing: $horizontalSpacing, verticalSpacing: $verticalSpacing, itemWidth: $itemWidth, itemHeight: $itemHeight)';
+    return 'BlockConfig { horizontalPadding: $horizontalPadding, verticalPadding: $verticalPadding, horizontalSpacing: $horizontalSpacing, verticalSpacing: $verticalSpacing, itemWidth: $itemWidth, itemHeight: $itemHeight, blockWidth: $blockWidth, blockHeight: $blockHeight}';
   }
 }

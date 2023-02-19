@@ -11,10 +11,6 @@ class ProductRowWidget extends StatelessWidget {
   const ProductRowWidget({
     super.key,
     required this.items,
-    required this.horizontalPadding,
-    required this.verticalPadding,
-    required this.width,
-    required this.height,
     required this.errorImage,
     required this.config,
     required this.ratio,
@@ -22,10 +18,6 @@ class ProductRowWidget extends StatelessWidget {
     this.onTap,
   }) : assert(items.length <= 2 && items.length > 0);
   final List<Product> items;
-  final double horizontalPadding;
-  final double verticalPadding;
-  final double width;
-  final double height;
   final String errorImage;
   final BlockConfig config;
   final double ratio;
@@ -34,6 +26,12 @@ class ProductRowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = (config.blockWidth ?? 0) / ratio;
+    final height = (config.blockHeight ?? 0) / ratio;
+    final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
+    final verticalPadding = (config.verticalPadding ?? 0) / ratio;
+    final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
+    final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: width, maxHeight: height)
@@ -45,12 +43,10 @@ class ProductRowWidget extends StatelessWidget {
         final product = items.first;
         return ProductCardOneRowOneWidget(
           product: product,
-          width: width,
-          height: height,
-          horizontalPadding: (config.horizontalPadding ?? 0) * ratio,
-          verticalPadding: (config.verticalPadding ?? 0) * ratio,
-          horizontalSpacing: (config.horizontalSpacing ?? 0) * ratio,
-          verticalSpacing: (config.verticalSpacing ?? 0) * ratio,
+          width: width - 2 * horizontalPadding,
+          height: height - 2 * verticalPadding,
+          horizontalSpacing: horizontalSpacing,
+          verticalSpacing: verticalSpacing,
           errorImage: errorImage,
           onTap: onTap,
           addToCart: addToCart,
@@ -59,10 +55,10 @@ class ProductRowWidget extends StatelessWidget {
         return items
             .map((product) => ProductCardOneRowTwoWidget(
                   product: product,
-                  width: width / 2 - (config.horizontalPadding ?? 0) * ratio,
-                  height: height - 2 * (config.verticalPadding ?? 0) * ratio,
-                  horizontalSpacing: (config.horizontalSpacing ?? 0) * ratio,
-                  verticalSpacing: (config.verticalSpacing ?? 0) * ratio,
+                  itemWidth: (width - 2 * horizontalPadding) / 2,
+                  itemHeight: (height - 2 * verticalPadding) / 2,
+                  horizontalSpacing: horizontalSpacing,
+                  verticalSpacing: verticalSpacing,
                   errorImage: errorImage,
                   onTap: onTap,
                   addToCart: addToCart,

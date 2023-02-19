@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
+import 'app_dio.dart';
+
 class ProductRepository {
   final String baseUrl;
   final Map<String, PageLayoutCache<SliceWrapper<Product>>> cache;

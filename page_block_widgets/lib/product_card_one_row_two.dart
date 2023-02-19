@@ -4,8 +4,8 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
   const ProductCardOneRowTwoWidget({
     super.key,
     required this.product,
-    required this.width,
-    required this.height,
+    required this.itemWidth,
+    required this.itemHeight,
     required this.horizontalSpacing,
     required this.verticalSpacing,
     required this.errorImage,
@@ -13,8 +13,8 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     this.onTap,
   });
   final Product product;
-  final double width;
-  final double height;
+  final double itemWidth;
+  final double itemHeight;
   final double horizontalSpacing;
   final double verticalSpacing;
   final String errorImage;
@@ -23,14 +23,8 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final double itemWidth = (screenWidth - horizontalSpacing) / 2;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final double itemHeight = screenHeight - verticalSpacing;
     page({required Widget child}) => SwiftUi.widget(child: child)
-        .constrained(
-            maxWidth: width > 0 ? width : itemWidth,
-            maxHeight: height > 0 ? height : itemHeight)
+        .constrained(maxWidth: itemWidth, maxHeight: itemHeight)
         .backgroundColor(Colors.white)
         .border(all: 1, color: Colors.grey);
     // 商品名称

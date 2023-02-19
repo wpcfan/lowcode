@@ -6,8 +6,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     required this.product,
     required this.width,
     required this.height,
-    required this.horizontalPadding,
-    required this.verticalPadding,
     required this.horizontalSpacing,
     required this.verticalSpacing,
     required this.errorImage,
@@ -17,8 +15,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
   final Product product;
   final double width;
   final double height;
-  final double horizontalPadding;
-  final double verticalPadding;
   final double horizontalSpacing;
   final double verticalSpacing;
   final String errorImage;
@@ -27,10 +23,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imageHeight = height - 2 * verticalPadding;
-    const double spaceVertical = 4;
     page({required Widget child}) => SwiftUi.widget(child: child)
-        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: width, maxHeight: height)
         .backgroundColor(Colors.white)
         .border(all: 1, color: Colors.grey);
@@ -45,7 +38,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
       softWrap: true,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-    ).padding(bottom: spaceVertical);
+    ).padding(bottom: verticalSpacing);
     // 商品描述
     final productDescription = Text(
       product.description ?? '',
@@ -56,20 +49,20 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
       softWrap: true,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-    ).padding(bottom: spaceVertical);
+    ).padding(bottom: verticalSpacing);
 
     // 商品原价：划线价
     final productOriginalPrice = product.originalPrice != null
         ? product.originalPrice!
             .lineThru()
-            .padding(bottom: spaceVertical, right: 8)
+            .padding(bottom: verticalSpacing, right: horizontalSpacing)
             .alignment(Alignment.centerRight)
         : null;
     // 商品价格
     final productPrice = product.price != null
         ? product.price!
             .toPriceWithDecimalSize(defaultFontSize: 16, decimalFontSize: 12)
-            .padding(bottom: spaceVertical, right: 8)
+            .padding(bottom: verticalSpacing, right: horizontalSpacing)
             .alignment(Alignment.centerRight)
         : null;
 
@@ -104,21 +97,24 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     final right = [nameAndDescColumn, priceRow]
         .toColumn(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start)
         .padding(right: horizontalSpacing)
         .expanded();
     // 商品图片
     final productImage = ImageWidget(
       imageUrl: product.images.first,
-      width: imageHeight,
-      height: imageHeight,
+      width: height,
+      height: height,
       errorImage: errorImage,
     ).padding(right: horizontalSpacing);
     // 商品图片和右边的名称和描述和价格形成一行
     return [productImage, right]
         .toRow(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start)
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+        )
         .parent(page)
         .gestures(onTap: onTap != null ? () => onTap!(product) : null);
   }

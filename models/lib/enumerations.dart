@@ -41,14 +41,12 @@ enum PageStatus {
 }
 
 /// 页面区块类型
-/// - pinnedHeader: 固定头部
-/// - slider: 轮播图
+/// - banner: 轮播图
 /// - imageRow: 图片行
 /// - productRow: 商品行
 /// - waterfall: 瀑布流
 enum PageBlockType {
-  pinnedHeader('pinned_header'),
-  slider('slider'),
+  banner('banner'),
   imageRow('image_row'),
   productRow('product_row'),
   waterfall('waterfall'),

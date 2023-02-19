@@ -6,18 +6,20 @@ import 'image.dart';
 /// 轮播图组件
 /// 使用PageView实现
 class BannerWidget extends StatefulWidget {
-  final List<ImageData> data;
+  final List<ImageData> items;
   final String errorImage;
   final int animationDuration;
   final Curve animationCurve;
-  final double height;
+  final BlockConfig config;
+  final double ratio;
   final void Function(MyLink?)? onImageSelected;
 
   const BannerWidget({
     super.key,
-    required this.data,
-    required this.height,
+    required this.items,
+    required this.config,
     required this.errorImage,
+    required this.ratio,
     this.animationDuration = 500,
     this.animationCurve = Curves.ease,
     this.onImageSelected,
@@ -53,12 +55,22 @@ class _BannerWidgetState extends State<BannerWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: widget.height,
+    final blockWidth = (widget.config.blockWidth ?? 0) / widget.ratio;
+    final blockHeight = (widget.config.blockHeight ?? 0) / widget.ratio;
+    final horizontalPadding =
+        (widget.config.horizontalPadding ?? 0) / widget.ratio;
+    final verticalPadding = (widget.config.verticalPadding ?? 0) / widget.ratio;
+    return Container(
+      width: blockWidth,
+      height: blockHeight,
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
+      ),
       child: Stack(
         children: [
           SizedBox(
-            height: widget.height,
+            height: blockHeight - verticalPadding * 2,
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (index) {
@@ -66,13 +78,12 @@ class _BannerWidgetState extends State<BannerWidget> {
                   _currentPage = index;
                 });
               },
-              itemCount: widget.data.length,
+              itemCount: widget.items.length,
               itemBuilder: (context, index) {
                 return ImageWidget(
-                  imageUrl: widget.data[index].image,
+                  imageUrl: widget.items[index].image,
                   errorImage: widget.errorImage,
-                  height: widget.height,
-                  link: widget.data[index].link,
+                  link: widget.items[index].link,
                   onTap: (link) => widget.onImageSelected?.call(link),
                 );
               },
@@ -83,7 +94,7 @@ class _BannerWidgetState extends State<BannerWidget> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
-                widget.data.length,
+                widget.items.length,
                 (index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4.0),
                   child: InkWell(

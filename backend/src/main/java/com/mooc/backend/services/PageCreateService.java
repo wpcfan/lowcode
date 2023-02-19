@@ -36,10 +36,13 @@ public class PageCreateService {
         return pageEntityRepository.findById(pageId)
                 .map(pageEntity -> {
                     if (pageEntity.getStatus() != PageStatus.Draft) {
-                        throw new CustomException("只有草稿状态的页面才能添加区块", "页面状态不是草稿状态", 400);
+                        throw new CustomException("只有草稿状态的页面才能添加区块", "PageCreateService#addBlockToPage", 400);
                     }
                     if (block.type() == BlockType.Waterfall && pageBlockEntityRepository.countByTypeAndPageId(BlockType.Waterfall, pageId) > 0L) {
-                        throw new CustomException("瀑布流区块只能有一个", "页面中已经存在一个瀑布流区块", 400);
+                        throw new CustomException("瀑布流区块只能有一个", "PageCreateService#addBlockToPage", 400);
+                    }
+                    if (block.type() == BlockType.Waterfall && pageBlockEntityRepository.countByTypeAndPageIdAndSortGreaterThanEqual(BlockType.Waterfall, pageId, block.sort()) > 0) {
+                        throw new CustomException("瀑布流区块必须在最后", "PageCreateService#addBlockToPage", 400);
                     }
                     var blockEntity = block.toEntity();
                     pageBlockEntityRepository.save(blockEntity);
@@ -52,6 +55,12 @@ public class PageCreateService {
     public Optional<PageBlockDataEntity> addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
         return pageBlockEntityRepository.findById(blockId)
                 .map(blockEntity -> {
+                    if (blockEntity.getPage().getStatus() != PageStatus.Draft) {
+                        throw new CustomException("只有草稿状态的页面才能添加区块数据", "PageCreateService#addDataToBlock", 400);
+                    }
+                    if (blockEntity.getType() == BlockType.Waterfall && blockEntity.getData().size() > 0) {
+                        throw new CustomException("瀑布流区块只能有一个数据", "PageCreateService#addDataToBlock", 400);
+                    }
                     var dataEntity = data.toEntity();
                     pageBlockDataEntityRepository.save(dataEntity);
                     blockEntity.addData(dataEntity);

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mooc.backend.dtos.CategoryDTO;
-import com.mooc.backend.dtos.ProductAdminDTO;
+import com.mooc.backend.dtos.ProductDataDTO;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.entities.blocks.ImageDTO;
 
@@ -18,7 +18,7 @@ public class BlockDataDeserializer extends JsonDeserializer<BlockData> {
         ObjectMapper mapper = (ObjectMapper) p.getCodec();
         ObjectNode root = mapper.readTree(p);
         if (root.has("price")) {
-            return mapper.treeToValue(root, ProductAdminDTO.class);
+            return mapper.treeToValue(root, ProductDataDTO.class);
         }
         if (root.has("image")) {
             return mapper.treeToValue(root, ImageDTO.class);

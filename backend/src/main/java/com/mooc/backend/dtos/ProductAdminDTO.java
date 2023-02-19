@@ -12,10 +12,9 @@ import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@JsonDeserialize(as = ProductAdminDTO.class)
 
 public record ProductAdminDTO(Long id, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
-                              Set<ProductImageInfo> images) implements BlockData {
+                              Set<ProductImageInfo> images) {
 
     public static ProductAdminDTO fromEntity(Product product) {
         return new ProductAdminDTO(
@@ -60,11 +59,5 @@ public record ProductAdminDTO(Long id, String name, String description, BigDecim
             product.addCategory(categoryEntity);
         });
         return product;
-    }
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @Override
-    public BlockDataType getDataType() {
-        return BlockDataType.Product;
     }
 }

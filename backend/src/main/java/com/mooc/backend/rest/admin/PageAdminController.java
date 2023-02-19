@@ -74,7 +74,7 @@ public class PageAdminController {
             @Valid @RequestBody CreateOrUpdatePageDTO page) {
         return pageUpdateService.updatePage(id, page)
                 .map(PageDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
+                .orElseThrow(() -> new CustomException("要修改的数据不存在", "PageAdminController#updatePage",
                         HttpStatus.NOT_FOUND.value()));
     }
 
@@ -92,7 +92,7 @@ public class PageAdminController {
             @Valid @RequestBody PublishPageDTO publishPageDTO) {
         return pageUpdateService.publishPage(id, publishPageDTO)
                 .map(PageDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
+                .orElseThrow(() -> new CustomException("要发布的页面不存在", "PageAdminController#publishPage",
                         HttpStatus.NOT_FOUND.value()));
     }
 
@@ -102,7 +102,7 @@ public class PageAdminController {
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id) {
         return pageUpdateService.draftPage(id)
                 .map(PageDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
+                .orElseThrow(() -> new CustomException("要取消发布的页面不存在", "PageAdminController#draftPage",
                         HttpStatus.NOT_FOUND.value()));
     }
 
@@ -113,7 +113,7 @@ public class PageAdminController {
             @RequestBody CreateOrUpdatePageBlockDTO block) {
         return pageCreateService.addBlockToPage(id, block)
                 .map(PageBlockDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",
+                .orElseThrow(() -> new CustomException("要添加的页面区块不存在", "PageAdminController#addBlock",
                         HttpStatus.NOT_FOUND.value()));
     }
 
@@ -124,8 +124,7 @@ public class PageAdminController {
             @RequestBody CreateOrUpdatePageBlockDTO block) {
         return pageUpdateService.updateBlock(blockId, block)
                 .map(PageBlockDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("PageBlock not found",
-                        "PageBlock " + blockId + " not found",
+                .orElseThrow(() -> new CustomException("要修改的页面区块不存在", "PageAdminController#updateBlock",
                         HttpStatus.NOT_FOUND.value()));
     }
 
@@ -143,8 +142,7 @@ public class PageAdminController {
             @RequestBody CreateOrUpdatePageBlockDataDTO data) {
         return pageCreateService.addDataToBlock(blockId, data)
                 .map(PageBlockDataDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("PageBlock not found",
-                        "PageBlock " + blockId + " not found",
+                .orElseThrow(() -> new CustomException("要添加的页面区块数据不存在", "PageAdminController#addData",
                         HttpStatus.NOT_FOUND.value()));
     }
 
@@ -155,8 +153,7 @@ public class PageAdminController {
             @RequestBody CreateOrUpdatePageBlockDataDTO data) {
         return pageUpdateService.updateData(dataId, data)
                 .map(PageBlockDataDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("PageBlockData not found",
-                        "PageBlockData " + dataId + " not found",
+                .orElseThrow(() -> new CustomException("要修改的页面区块数据不存在", "PageAdminController#updateData",
                         HttpStatus.NOT_FOUND.value()));
     }
 

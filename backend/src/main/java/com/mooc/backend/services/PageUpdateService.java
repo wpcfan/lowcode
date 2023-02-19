@@ -32,6 +32,9 @@ public class PageUpdateService {
     public Optional<PageEntity> updatePage(Long id, CreateOrUpdatePageDTO page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
+                    if (pageEntity.getStatus() == PageStatus.Published) {
+                        throw new CustomException("已发布的页面不允许修改", "PageUpdateService#updatePage", HttpStatus.BAD_REQUEST.value());
+                    }
                     pageEntity.setTitle(page.title());
                     pageEntity.setConfig(page.config());
                     pageEntity.setPageType(page.pageType());
@@ -44,10 +47,10 @@ public class PageUpdateService {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     if (pageEntityRepository.countPublishedTimeConflict(page.startTime(), pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
-                        throw new CustomException("时间冲突", "开始时间和已有数据冲突", HttpStatus.BAD_REQUEST.value());
+                        throw new CustomException("开始时间和已有数据冲突", "PageUpdateService#publishPage", HttpStatus.BAD_REQUEST.value());
                     }
                     if (pageEntityRepository.countPublishedTimeConflict(page.endTime(), pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
-                        throw new CustomException("时间冲突", "结束时间和已有数据冲突", HttpStatus.BAD_REQUEST.value());
+                        throw new CustomException("结束时间和已有数据冲突", "PageUpdateService#publishPage", HttpStatus.BAD_REQUEST.value());
                     }
                     pageEntity.setStatus(PageStatus.Published);
                     pageEntity.setStartTime(page.startTime());

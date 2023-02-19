@@ -1,6 +1,7 @@
 package com.mooc.backend.repositories;
 
 import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.projections.PageEntityInfo;

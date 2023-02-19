@@ -6,7 +6,6 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     required this.product,
     required this.itemWidth,
     this.itemHeight,
-    required this.horizontalSpacing,
     required this.verticalSpacing,
     required this.errorImage,
     this.addToCart,
@@ -15,7 +14,6 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
   final Product product;
   final double itemWidth;
   final double? itemHeight;
-  final double horizontalSpacing;
   final double verticalSpacing;
   final String errorImage;
   final void Function(Product)? addToCart;

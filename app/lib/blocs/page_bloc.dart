@@ -14,8 +14,7 @@ class PageLayoutBloc {
 
     final state = onPageTypeChanged
         .startWith(PageType.home)
-        .switchMap((value) => _getByType(value, repo))
-        .shareReplay(maxSize: 1);
+        .switchMap((value) => _getByType(value, repo));
 
     return PageLayoutBloc._(
       onPageTypeChanged: onPageTypeChanged,
@@ -34,7 +33,6 @@ class PageLayoutBloc {
 
   static Stream<PageLayoutState> _getByType(
       PageType pageType, PageRepository repo) async* {
-    yield PageLayoutLoading();
     try {
       final page = await repo.getByPageType(pageType);
       yield PageLayoutPopulated(page);

@@ -12,7 +12,7 @@ class BannerWidget extends StatefulWidget {
   final Curve animationCurve;
   final BlockConfig config;
   final double ratio;
-  final void Function(MyLink?)? onImageSelected;
+  final void Function(MyLink?)? onTap;
 
   const BannerWidget({
     super.key,
@@ -22,7 +22,7 @@ class BannerWidget extends StatefulWidget {
     required this.ratio,
     this.animationDuration = 500,
     this.animationCurve = Curves.ease,
-    this.onImageSelected,
+    this.onTap,
   });
 
   @override
@@ -84,7 +84,7 @@ class _BannerWidgetState extends State<BannerWidget> {
                   imageUrl: widget.items[index].image,
                   errorImage: widget.errorImage,
                   link: widget.items[index].link,
-                  onTap: (link) => widget.onImageSelected?.call(link),
+                  onTap: (link) => widget.onTap?.call(link),
                 );
               },
             ),

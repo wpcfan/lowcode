@@ -14,6 +14,9 @@ class ProductRowWidget extends StatelessWidget {
     required this.errorImage,
     required this.config,
     required this.ratio,
+    this.borderWidth = 1,
+    this.borderColor = Colors.grey,
+    this.backgroundColor = Colors.white,
     this.addToCart,
     this.onTap,
   }) : assert(items.length <= 2 && items.length > 0);
@@ -21,6 +24,9 @@ class ProductRowWidget extends StatelessWidget {
   final String errorImage;
   final BlockConfig config;
   final double ratio;
+  final double borderWidth;
+  final Color borderColor;
+  final Color backgroundColor;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTap;
 
@@ -35,8 +41,8 @@ class ProductRowWidget extends StatelessWidget {
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: width, maxHeight: height)
-        .backgroundColor(Colors.white)
-        .border(all: 1, color: Colors.grey);
+        .backgroundColor(backgroundColor)
+        .border(all: borderWidth, color: borderColor);
 
     switch (items.length) {
       case 1:
@@ -57,7 +63,6 @@ class ProductRowWidget extends StatelessWidget {
                   product: product,
                   itemWidth: (width - 2 * horizontalPadding) / 2,
                   itemHeight: height - 2 * verticalPadding,
-                  horizontalSpacing: horizontalSpacing,
                   verticalSpacing: verticalSpacing,
                   errorImage: errorImage,
                   onTap: onTap,

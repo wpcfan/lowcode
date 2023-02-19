@@ -28,7 +28,9 @@ class MyCustomScrollView extends StatelessWidget {
       style: TextStyle(color: Colors.white),
       child: Text('松开刷新'),
     ),
-    this.refreshingWidget = const CupertinoActivityIndicator(),
+    this.refreshingWidget = const CupertinoActivityIndicator(
+      color: Colors.white,
+    ),
     this.refreshCompleteWidget = const DefaultTextStyle(
       style: TextStyle(color: Colors.white),
       child: Text('刷新完成'),
@@ -50,7 +52,9 @@ class MyCustomScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: onRefresh,
-      triggerMode: RefreshIndicatorTriggerMode.onEdge,
+
+      /// 不触发 RefreshIndicator 的下拉刷新
+      notificationPredicate: (notification) => false,
       child: NotificationListener(
         onNotification: hasMore
             ? (scrollNotification) {

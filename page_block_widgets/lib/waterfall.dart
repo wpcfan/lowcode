@@ -27,7 +27,7 @@ class WaterfallWidget extends StatelessWidget {
     final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
     final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
     final blockWidth = (config.blockWidth ?? 0) / ratio;
-    final itemWidth = (blockWidth - 2 * horizontalPadding) / 2;
+    final itemWidth = (blockWidth) / 2;
     return SliverPadding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
@@ -43,7 +43,6 @@ class WaterfallWidget extends StatelessWidget {
           return ProductCardOneRowTwoWidget(
             product: product,
             itemWidth: itemWidth,
-            horizontalSpacing: horizontalSpacing,
             verticalSpacing: verticalSpacing,
             errorImage: errorImage,
             addToCart: addToCart,

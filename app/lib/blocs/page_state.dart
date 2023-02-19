@@ -32,10 +32,6 @@ class PageLayoutState {
   }
 }
 
-class PageLayoutLoading extends PageLayoutState {
-  PageLayoutLoading() : super(status: FetchStatus.loading);
-}
-
 class PageLayoutError extends PageLayoutState {
   PageLayoutError() : super(status: FetchStatus.error);
 }

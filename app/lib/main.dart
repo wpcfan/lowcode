@@ -8,6 +8,7 @@ import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 import 'package:page_repository/page_repository.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/page_bloc.dart';
 import 'blocs/page_state.dart';
@@ -59,13 +60,17 @@ class _HomeViewState extends State<HomeView> {
   late PageLayoutBloc _layoutBloc;
   late WaterfallBloc _waterfallBloc;
 
+  /// initState 是一个生命周期函数，它在 Widget 第一次被插入到 Widget 树时调用
+  /// 通常在这个函数中执行一些初始化操作，比如初始化状态
   @override
   void initState() {
     super.initState();
-    _layoutBloc = PageLayoutBloc(PageRepository(enableCache: false));
+    _layoutBloc = PageLayoutBloc(PageRepository(enableCache: true));
     _waterfallBloc = WaterfallBloc(ProductRepository());
   }
 
+  /// dispose 是一个生命周期函数，它在 Widget 被移除 Widget 树时调用
+  /// 通常在这个函数中执行一些清理操作，比如取消动画，关闭 Stream 等
   @override
   void dispose() {
     _waterfallBloc.dispose();
@@ -193,11 +198,19 @@ class _HomeViewState extends State<HomeView> {
     const errorImage = '';
     final layout = state.layout;
     final blocks = layout?.blocks ?? [];
+
+    /// 屏幕的宽度
     final screenWidth = MediaQuery.of(context).size.width;
-    final ratio = screenWidth / (layout?.config.baselineScreenWidth ?? 1);
+
+    /// 最终的比例
+    final ratio = (layout?.config.baselineScreenWidth ?? 1) / screenWidth;
+
+    /// 找到瀑布流的区块
     final waterfallBlocks = blocks
         .where((element) => element.type == PageBlockType.waterfall)
         .map((e) => e as WaterfallPageBlock);
+
+    /// 如果有瀑布流，那么就把第一个瀑布流的第一个分类的 id 传给瀑布流的 bloc
     if (waterfallBlocks.isNotEmpty &&
         waterfallBlocks.first.data.isNotEmpty &&
         waterfallBlocks.first.data.first.content.id != null) {
@@ -221,14 +234,10 @@ class _HomeViewState extends State<HomeView> {
             onRefresh: () async {
               _layoutBloc.onPageTypeChanged.add(PageType.home);
               _waterfallBloc.onLoadMore.add(0);
-              await _layoutBloc.state
-                  .where((event) =>
-                      event is PageLayoutPopulated || event is PageLayoutError)
-                  .first;
-              await _waterfallBloc.state
-                  .where((event) =>
-                      event is WaterfallPopulated || event is WaterfallError)
-                  .first;
+              await _layoutBloc.state.firstWhere((event) =>
+                  event is PageLayoutPopulated || event is PageLayoutError);
+              await _waterfallBloc.state.firstWhere((event) =>
+                  event is WaterfallPopulated || event is WaterfallError);
             },
             onLoadMore: () async {
               _waterfallBloc.onLoadMore.add((state?.page ?? 0) + 1);
@@ -239,6 +248,23 @@ class _HomeViewState extends State<HomeView> {
             },
           );
         });
+  }
+
+  void onTapImage(MyLink? link) {
+    if (link == null) {
+      return;
+    }
+    switch (link.type) {
+      case LinkType.route:
+        Navigator.of(context).pushNamed(link.value);
+        break;
+      case LinkType.deepLink:
+      case LinkType.url:
+        launchUrl(
+          Uri.parse(link.value),
+        );
+        break;
+    }
   }
 
   List<Widget> _buildBlocks(
@@ -258,6 +284,7 @@ class _HomeViewState extends State<HomeView> {
               config: it.config,
               ratio: ratio,
               errorImage: errorImage,
+              onTap: onTapImage,
             ),
           );
         case PageBlockType.imageRow:
@@ -268,6 +295,7 @@ class _HomeViewState extends State<HomeView> {
               config: it.config,
               ratio: ratio,
               errorImage: errorImage,
+              onTap: onTapImage,
             ),
           );
         case PageBlockType.productRow:

@@ -50,29 +50,24 @@ class PageRepository {
 
     debugPrint('PageRepository.getByPageType($pageType) - cache miss');
 
-    try {
-      final response = await client.get(url);
-      if (response.statusCode != 200) {
-        final problem = Problem.fromJson(response.data);
-        debugPrint('PageRepository.getByPageType($pageType) - error: $problem');
-        throw Exception(problem.title);
-      }
-
-      final result = PageLayout.fromJson(response.data);
-
-      debugPrint('PageRepository.getByPageType($pageType) - success');
-
-      cache[url] = PageLayoutCache(
-        value: result,
-        expires: DateTime.now().add(const Duration(minutes: 10)),
-      );
-
-      debugPrint('PageRepository.getByPageType($pageType) - cache set');
-
-      return result;
-    } catch (e) {
-      debugPrint('PageRepository.getByPageType($pageType) - error: $e');
-      throw Exception(e);
+    final response = await client.get(url);
+    if (response.statusCode != 200) {
+      final problem = Problem.fromJson(response.data);
+      debugPrint('PageRepository.getByPageType($pageType) - error: $problem');
+      throw Exception(problem.title);
     }
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageRepository.getByPageType($pageType) - success');
+
+    cache[url] = PageLayoutCache(
+      value: result,
+      expires: DateTime.now().add(const Duration(minutes: 10)),
+    );
+
+    debugPrint('PageRepository.getByPageType($pageType) - cache set');
+
+    return result;
   }
 }

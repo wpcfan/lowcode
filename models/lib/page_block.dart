@@ -5,14 +5,13 @@ import 'category.dart';
 import 'enumerations.dart';
 import 'product.dart';
 
+part 'page_banner.dart';
 part 'page_block_config.dart';
 part 'page_config.dart';
 part 'page_image_data.dart';
 part 'page_image_row.dart';
 part 'page_link.dart';
-part 'page_pinned_header.dart';
 part 'page_product_row.dart';
-part 'page_slider.dart';
 part 'page_waterfall.dart';
 
 abstract class PageBlock extends Equatable {
@@ -41,10 +40,8 @@ abstract class PageBlock extends Equatable {
         return ProductRowPageBlock.fromJson(json);
       case PageBlockType.waterfall:
         return WaterfallPageBlock.fromJson(json);
-      case PageBlockType.slider:
-        return SliderPageBlock.fromJson(json);
-      case PageBlockType.pinnedHeader:
-        return PinnedHeaderPageBlock.fromJson(json);
+      case PageBlockType.banner:
+        return BannerPageBlock.fromJson(json);
       case PageBlockType.unknown:
       default:
         throw Exception('Unknown PageBlockType: $type');

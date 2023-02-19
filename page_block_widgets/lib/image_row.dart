@@ -25,8 +25,8 @@ class ImageRowWidget extends StatelessWidget {
     final blockHeight = (config.blockHeight ?? 0) / ratio;
     final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
     final verticalPadding = (config.verticalPadding ?? 0) / ratio;
-    final itemWidth = blockWidth - horizontalPadding;
-    final itemHeight = blockHeight - verticalPadding;
+    final itemWidth = blockWidth - horizontalPadding * 2;
+    final itemHeight = blockHeight - verticalPadding * 2;
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: blockWidth, maxHeight: blockHeight)

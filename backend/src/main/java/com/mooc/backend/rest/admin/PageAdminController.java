@@ -89,20 +89,7 @@ public class PageAdminController {
     @PatchMapping("/{id}/publish")
     public PageDTO publishPage(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody PublishPageDTO publishPageDTO) {
-        if (publishPageDTO.startTime() == null) {
-            throw new CustomException("Start time is required", "Start time is required",
-                    HttpStatus.BAD_REQUEST.value());
-        }
-        if (publishPageDTO.endTime() == null) {
-            throw new CustomException("End time is required", "End time is required",
-                    HttpStatus.BAD_REQUEST.value());
-        }
-        if (publishPageDTO.startTime().isAfter(publishPageDTO.endTime())) {
-            throw new CustomException("Start time must be before end time",
-                    "Start time must be before end time",
-                    HttpStatus.BAD_REQUEST.value());
-        }
+            @Valid @RequestBody PublishPageDTO publishPageDTO) {
         return pageUpdateService.publishPage(id, publishPageDTO)
                 .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Page not found", "Page " + id + " not found",

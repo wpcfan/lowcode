@@ -7,7 +7,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+@ValidateDateRange({"startTime", "endTime"})
 public record PublishPageDTO(
-        @Schema(description = "开始时间") @NotNull @ValidateDateRange LocalDateTime startTime,
-        @Schema(description = "结束时间") @NotNull @Future @ValidateDateRange LocalDateTime endTime) {
+        @Schema(description = "开始时间") @NotNull LocalDateTime startTime,
+        @Schema(description = "结束时间") @NotNull @Future LocalDateTime endTime) {
 }

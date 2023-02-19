@@ -3,8 +3,7 @@ package com.mooc.backend.enumerations;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum BlockType {
-    PinnedHeader("pinned_header"),
-    Slider("slider"),
+    Banner("banner"),
     ImageRow("image_row"),
     ProductRow("product_row"),
     Waterfall("waterfall");

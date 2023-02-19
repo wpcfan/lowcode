@@ -4,24 +4,29 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.constraintvalidation.SupportedValidationTarget;
 import jakarta.validation.constraintvalidation.ValidationTarget;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 import java.time.LocalDateTime;
 
 @SupportedValidationTarget(ValidationTarget.ANNOTATED_ELEMENT)
-public class DateRangeValidator implements ConstraintValidator<ValidateDateRange, Object[]> {
+public class DateRangeValidator implements ConstraintValidator<ValidateDateRange, Object> {
+    private static final SpelExpressionParser PARSER = new SpelExpressionParser();
+    private String[] fields;
+
     @Override
-    public boolean isValid(Object[] value, ConstraintValidatorContext context) {
-        if (value.length != 2) {
-            return false;
+    public void initialize(ValidateDateRange constraintAnnotation) {
+        this.fields = constraintAnnotation.value();
+    }
+
+    @Override
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
+        if (fields.length != 2) {
+            throw new IllegalArgumentException("Invalid number of fields");
         }
-//        if (!(value[0] instanceof LocalDateTime) || !(value[1] instanceof LocalDateTime)) {
-//            return false;
-//        }
-//        LocalDateTime start = (LocalDateTime) value[0];
-//        LocalDateTime end = (LocalDateTime) value[1];
-        /// 下面的写法是 Java 10 之后的写法，更简洁
-        if (!(value[0] instanceof LocalDateTime start) || !(value[1] instanceof LocalDateTime end)) {
-            return false;
+        LocalDateTime start = (LocalDateTime) PARSER.parseExpression(fields[0]).getValue(value);
+        LocalDateTime end = (LocalDateTime) PARSER.parseExpression(fields[1]).getValue(value);
+        if (start == null || end == null) {
+            return true;
         }
         return start.isBefore(end);
     }

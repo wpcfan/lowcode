@@ -250,6 +250,16 @@ class _HomeViewState extends State<HomeView> {
       WaterfallState? state) {
     return blocks.map((block) {
       switch (block.type) {
+        case PageBlockType.banner:
+          final it = block as BannerPageBlock;
+          return SliverToBoxAdapter(
+            child: BannerWidget(
+              items: it.data.map((di) => di.content).toList(),
+              config: it.config,
+              ratio: ratio,
+              errorImage: errorImage,
+            ),
+          );
         case PageBlockType.imageRow:
           final it = block as ImageRowPageBlock;
           return SliverToBoxAdapter(

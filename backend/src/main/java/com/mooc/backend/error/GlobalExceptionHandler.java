@@ -3,6 +3,7 @@ package com.mooc.backend.error;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -59,6 +60,11 @@ public class GlobalExceptionHandler {
         String title = e.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
                 .collect(Collectors.joining(", "));
+        if (title.isEmpty()) {
+            title = e.getBindingResult().getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .collect(Collectors.joining(", "));
+        }
         body.setTitle(title);
         body.setDetail(e.getMessage());
         body.setProperty("hostname", hostname);

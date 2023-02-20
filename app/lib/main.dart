@@ -1,18 +1,16 @@
-import 'package:app/blocs/waterfall_bloc.dart';
-import 'package:app/controllers/scaffold_controller.dart';
+import 'package:app/blocs/home_bloc.dart';
+import 'package:app/blocs/home_event.dart';
 import 'package:app/widgets/home_error.dart';
 import 'package:app/widgets/home_initial.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 import 'package:page_repository/page_repository.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import 'blocs/page_bloc.dart';
-import 'blocs/page_state.dart';
-import 'blocs/waterfall_state.dart';
+import 'blocs/home_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -38,11 +36,24 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MultiProvider(
+      home: MultiRepositoryProvider(
         providers: [
-          ChangeNotifierProvider(create: (context) => ScaffoldController())
+          RepositoryProvider<PageRepository>(
+              create: (context) => PageRepository()),
+          RepositoryProvider<ProductRepository>(
+              create: (context) => ProductRepository()),
         ],
-        child: const HomeView(),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<HomeBloc>(
+              create: (context) => HomeBloc(
+                pageRepo: context.read<PageRepository>(),
+                productRepo: context.read<ProductRepository>(),
+              )..add(const HomeEventFetch(PageType.home)),
+            ),
+          ],
+          child: const HomeView(),
+        ),
       ),
     );
   }
@@ -56,30 +67,9 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  int _selectedIndex = 0;
-  late PageLayoutBloc _layoutBloc;
-  late WaterfallBloc _waterfallBloc;
-
-  /// initState 是一个生命周期函数，它在 Widget 第一次被插入到 Widget 树时调用
-  /// 通常在这个函数中执行一些初始化操作，比如初始化状态
-  @override
-  void initState() {
-    super.initState();
-    _layoutBloc = PageLayoutBloc(PageRepository(enableCache: true));
-    _waterfallBloc = WaterfallBloc(ProductRepository());
-  }
-
-  /// dispose 是一个生命周期函数，它在 Widget 被移除 Widget 树时调用
-  /// 通常在这个函数中执行一些清理操作，比如取消动画，关闭 Stream 等
-  @override
-  void dispose() {
-    _waterfallBloc.dispose();
-    _layoutBloc.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final homeBloc = context.read<HomeBloc>();
     const decoration = BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topLeft,
@@ -91,18 +81,12 @@ class _HomeViewState extends State<HomeView> {
       ),
     );
 
-    const searchField = CupertinoSearchTextField(
-      placeholder: 'Search',
-      placeholderStyle: TextStyle(color: Colors.white30),
-      prefixIcon: Icon(Icons.search, color: Colors.white),
-      backgroundColor: Colors.black12,
-      style: TextStyle(color: Colors.white),
-    );
+    const searchField = SearchFieldWidget();
 
     final endDrawerButton = IconButton(
       icon: const Icon(Icons.notification_important),
       onPressed: () {
-        context.read<ScaffoldController>().openEndDrawer();
+        homeBloc.add(const HomeEventOpenDrawer());
       },
     );
 
@@ -118,56 +102,48 @@ class _HomeViewState extends State<HomeView> {
       ),
     );
 
-    final bottomBar = MyBottomBar(
-        selectedIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
+    return BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
+      final bottomBar = MyBottomBar(
+          selectedIndex: state.selectedIndex,
+          onTap: (index) {
+            homeBloc.add(HomeEventSwitchBottomNavigation(index));
           });
-        });
 
-    final scaffoldKey = context.read<ScaffoldController>().scaffoldKey;
+      final scaffoldKey = state.scaffoldKey;
+      if (state.isInitial) {
+        return Scaffold(
+          key: scaffoldKey,
+          appBar: appBar,
+          body: const HomeInitial(isLoading: true),
+          bottomNavigationBar: bottomBar,
+          drawer: const LeftDrawer(),
+          endDrawer: const RightDrawer(),
+        );
+      }
 
-    return StreamBuilder<PageLayoutState>(
-        stream: _layoutBloc.state,
-        initialData: PageLayoutInitial(),
-        builder: (context, snapshot) {
-          final state = snapshot.data;
+      if (state.isError) {
+        return Scaffold(
+          key: scaffoldKey,
+          appBar: appBar,
+          body: const HomeError(),
+          bottomNavigationBar: bottomBar,
+          drawer: const LeftDrawer(),
+          endDrawer: const RightDrawer(),
+        );
+      }
 
-          if (state == null || state is PageLayoutInitial) {
-            return Scaffold(
-              key: scaffoldKey,
-              appBar: appBar,
-              body: const HomeInitial(isLoading: true),
-              bottomNavigationBar: bottomBar,
-              drawer: const LeftDrawer(),
-              endDrawer: const RightDrawer(),
-            );
-          }
-
-          if (state is PageLayoutError) {
-            return Scaffold(
-              key: scaffoldKey,
-              appBar: appBar,
-              body: const HomeError(),
-              bottomNavigationBar: bottomBar,
-              drawer: const LeftDrawer(),
-              endDrawer: const RightDrawer(),
-            );
-          }
-
-          return Scaffold(
-            key: scaffoldKey,
-            body: _buildBody(context, decoration, searchField, state),
-            bottomNavigationBar: bottomBar,
-            drawer: const LeftDrawer(),
-            endDrawer: const RightDrawer(),
-          );
-        });
+      return Scaffold(
+        key: scaffoldKey,
+        body: _buildBody(context, decoration, searchField, state, homeBloc),
+        bottomNavigationBar: bottomBar,
+        drawer: const LeftDrawer(),
+        endDrawer: const RightDrawer(),
+      );
+    });
   }
 
   Widget _buildBody(BuildContext context, BoxDecoration decoration,
-      CupertinoSearchTextField searchField, PageLayoutState state) {
+      SearchFieldWidget searchField, HomeState state, HomeBloc homeBloc) {
     final sliverAppBar = SliverAppBar(
       floating: true,
       pinned: false,
@@ -176,7 +152,7 @@ class _HomeViewState extends State<HomeView> {
         IconButton(
           icon: const Icon(Icons.notification_important),
           onPressed: () {
-            context.read<ScaffoldController>().openEndDrawer();
+            homeBloc.add(const HomeEventOpenDrawer());
           },
         ),
       ],
@@ -205,49 +181,25 @@ class _HomeViewState extends State<HomeView> {
     /// 最终的比例
     final ratio = (layout?.config.baselineScreenWidth ?? 1) / screenWidth;
 
-    /// 找到瀑布流的区块
-    final waterfallBlocks = blocks
-        .where((element) => element.type == PageBlockType.waterfall)
-        .map((e) => e as WaterfallPageBlock);
-
-    /// 如果有瀑布流，那么就把第一个瀑布流的第一个分类的 id 传给瀑布流的 bloc
-    if (waterfallBlocks.isNotEmpty &&
-        waterfallBlocks.first.data.isNotEmpty &&
-        waterfallBlocks.first.data.first.content.id != null) {
-      _waterfallBloc.onCategoryChanged
-          .add(waterfallBlocks.first.data.first.content.id!);
-    }
-
-    return StreamBuilder<WaterfallState>(
-        stream: _waterfallBloc.state,
-        initialData: WaterfallInitial(),
-        builder: (context, snapshot) {
-          final state = snapshot.data;
-          final slivers = _buildBlocks(
-              blocks, errorImage, screenWidth, layout, ratio, state);
-          return MyCustomScrollView(
-            hasMore: state != null && state.hasNext,
-            loadMoreWidget: loadMoreWidget,
-            decoration: decoration,
-            sliverAppBar: sliverAppBar,
-            slivers: slivers,
-            onRefresh: () async {
-              _layoutBloc.onPageTypeChanged.add(PageType.home);
-              _waterfallBloc.onLoadMore.add(0);
-              await _layoutBloc.state.firstWhere((event) =>
-                  event is PageLayoutPopulated || event is PageLayoutError);
-              await _waterfallBloc.state.firstWhere((event) =>
-                  event is WaterfallPopulated || event is WaterfallError);
-            },
-            onLoadMore: () async {
-              _waterfallBloc.onLoadMore.add((state?.page ?? 0) + 1);
-              await _waterfallBloc.state
-                  .where((event) =>
-                      event is WaterfallPopulated || event is WaterfallError)
-                  .first;
-            },
-          );
-        });
+    final slivers = _buildBlocks(
+        blocks, errorImage, screenWidth, layout, ratio, state.waterfallList);
+    return MyCustomScrollView(
+      hasMore: !state.isEnd,
+      loadMoreWidget: loadMoreWidget,
+      decoration: decoration,
+      sliverAppBar: sliverAppBar,
+      slivers: slivers,
+      onRefresh: () async {
+        homeBloc.add(const HomeEventFetch(PageType.home));
+        await homeBloc.stream
+            .firstWhere((element) => element.isPopulated || element.isError);
+      },
+      onLoadMore: () async {
+        homeBloc.add(const HomeEventLoadMore());
+        await homeBloc.stream
+            .firstWhere((element) => element.isPopulated || element.isError);
+      },
+    );
   }
 
   void onTapImage(MyLink? link) {
@@ -273,7 +225,7 @@ class _HomeViewState extends State<HomeView> {
       double screenWidth,
       PageLayout? layout,
       double ratio,
-      WaterfallState? state) {
+      List<Product> products) {
     return blocks.map((block) {
       switch (block.type) {
         case PageBlockType.banner:
@@ -311,7 +263,7 @@ class _HomeViewState extends State<HomeView> {
         case PageBlockType.waterfall:
           final it = block as WaterfallPageBlock;
           return WaterfallWidget(
-            products: state?.products ?? [],
+            products: products,
             config: it.config,
             ratio: ratio,
             errorImage: errorImage,
@@ -322,6 +274,23 @@ class _HomeViewState extends State<HomeView> {
           );
       }
     }).toList();
+  }
+}
+
+class SearchFieldWidget extends StatelessWidget {
+  const SearchFieldWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const CupertinoSearchTextField(
+      placeholder: 'Search',
+      placeholderStyle: TextStyle(color: Colors.white30),
+      prefixIcon: Icon(Icons.search, color: Colors.white),
+      backgroundColor: Colors.black12,
+      style: TextStyle(color: Colors.white),
+    );
   }
 }
 

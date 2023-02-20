@@ -69,3 +69,10 @@ enum LinkType {
   final String value;
   const LinkType(this.value);
 }
+
+enum FetchStatus {
+  initial,
+  loading,
+  populated,
+  error,
+}

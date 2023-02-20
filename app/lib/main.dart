@@ -11,8 +11,11 @@ import 'package:page_repository/page_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/home_state.dart';
+import 'blocs/simple_observer.dart';
 
 void main() {
+  /// 初始化 Bloc 的观察者，用于监听 Bloc 的生命周期
+  Bloc.observer = SimpleBlocObserver();
   runApp(const MyApp());
 }
 

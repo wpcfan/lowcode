@@ -91,6 +91,7 @@ class _BannerWidgetState extends State<BannerWidget> {
           ),
           Container(
             alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(

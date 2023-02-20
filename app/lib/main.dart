@@ -1,24 +1,34 @@
 import 'package:app/blocs/home_bloc.dart';
 import 'package:app/blocs/home_event.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
-import 'package:page_block_widgets/page_block_widgets.dart';
+import 'package:page_repository/app_dio.dart';
 import 'package:page_repository/page_repository.dart';
-import 'package:skeletons/skeletons.dart';
-import 'package:sliver_tools/sliver_tools.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import 'blocs/home_state.dart';
 import 'blocs/simple_observer.dart';
+import 'views/home_view.dart';
 
+/// 入口函数
+/// 运行 Flutter 应用，也可以使用异步方式运行
+/// ```dart
+/// runAppAsync(() async {
+///   await Future.delayed(const Duration(seconds: 3));
+///   return const MyApp();
+/// });
+/// ```
 void main() {
   /// 初始化 Bloc 的观察者，用于监听 Bloc 的生命周期
   Bloc.observer = SimpleBlocObserver();
   runApp(const MyApp());
 }
 
+/// 根 Widget，也就是 Flutter 应用的根 Widget
+/// 一般情况下，我们的应用都是从这里开始的
+/// 我们可以在这里初始化一些全局的配置，比如主题、路由等
+/// 我们也可以在这里初始化一些全局的对象，比如 Dio、SharedPreferences 等
+/// 这个组件尽量保持简单，不要在这里做太多的事情
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -28,26 +38,46 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
+        /// 这里使用了 Colors.blue 作为主题色，swatch 是一个颜色的色系
+        /// 通过 swatch，我们可以获取到该色系的不同颜色
+        /// 例如，我们可以通过 Colors.blue.shade100 来获取该色系的浅色
+        /// 通过 Colors.blue.shade900 来获取该色系的深色
+        /// 通过 Colors.blue.shade500 来获取该色系的中等色
+        /// 通过 Colors.blue.shade50 来获取该色系的最浅色
         primarySwatch: Colors.blue,
+        appBarTheme: const AppBarTheme(
+          foregroundColor: Colors.white,
+        ),
+
+        /// 使用最新的 Material Design 3.0 风格
+        useMaterial3: true,
       ),
+
+      /// 使用 MultiRepositoryProvider 来管理多个 RepositoryProvider
+      /// 使用 MultiBlocProvider 来管理多个 BlocProvider
+      /// 这样做的好处是，我们可以在这里统一管理多个 RepositoryProvider 和 BlocProvider
+      /// 而不需要在每个页面中都添加一个 RepositoryProvider 和 BlocProvider
+      /// 如果我们需要添加一个新的 RepositoryProvider 或 BlocProvider
+      /// 那么我们只需要在这里添加一个 RepositoryProvider 或 BlocProvider 即可
+      /// 而不需要修改每个页面的代码
       home: MultiRepositoryProvider(
         providers: [
+          /// RepositoryProvider 用于管理 Repository，其实不光是 Repository，任何对象都可以通过 RepositoryProvider 来管理
+          /// 它提供的是一种依赖注入的方式，可以在任何地方通过 context.read<T>() 来获取 RepositoryProvider 中的对象
+          RepositoryProvider<Dio>(create: (context) => AppDio.getInstance()),
           RepositoryProvider<PageRepository>(
-              create: (context) => PageRepository()),
+              create: (context) => PageRepository(client: context.read<Dio>())),
           RepositoryProvider<ProductRepository>(
-              create: (context) => ProductRepository()),
+              create: (context) =>
+                  ProductRepository(client: context.read<Dio>())),
         ],
+
+        /// 使用 MultiBlocProvider 来管理多个 BlocProvider
         child: MultiBlocProvider(
           providers: [
+            /// BlocProvider 用于管理 Bloc
+            /// 在构造函数后面的 `..` 是级联操作符，可以用于连续调用多个方法
+            /// 意思就是构造后立刻调用 add 方法，构造 HomeBloc 后立刻调用 HomeEventFetch 事件
             BlocProvider<HomeBloc>(
               create: (context) => HomeBloc(
                 pageRepo: context.read<PageRepository>(),
@@ -55,370 +85,12 @@ class MyApp extends StatelessWidget {
               )..add(const HomeEventFetch(PageType.home)),
             ),
           ],
+
+          /// 需要注意的是，避免在这里使用 BlocBuilder 或 BlocListener
+          /// 因为这里的 BlocProvider 还没有构造完成，所以这里的 BlocBuilder 和 BlocListener 会报错
+          /// 如果需要使用 BlocBuilder 或 BlocListener，那么需要在子 Widget 中使用
           child: const HomeView(),
         ),
-      ),
-    );
-  }
-}
-
-class HomeView extends StatelessWidget {
-  const HomeView({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    const decoration = BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          Colors.blue,
-          Colors.green,
-        ],
-      ),
-    );
-    final key = GlobalKey<ScaffoldState>();
-    const errorImage = '';
-
-    return Scaffold(
-      key: key,
-      body: MyCustomScrollView(
-        loadMoreWidget: const LoadMoreWidget(),
-        decoration: decoration,
-        sliverAppBar: MySliverAppBar(
-          decoration: decoration,
-          onTap: () {
-            context.read<HomeBloc>().add(HomeEventOpenDrawer(key));
-          },
-        ),
-        sliver: SliverBodyWidget(
-          errorImage: errorImage,
-          onTap: (link) => onTapImage(link, context),
-          onTapProduct: (product) => _onTapProduct(product, context),
-          addToCart: (product) => _addToCart(product, context),
-        ),
-        onRefresh: () async {
-          context.read<HomeBloc>().add(const HomeEventFetch(PageType.home));
-          await context
-              .read<HomeBloc>()
-              .stream
-              .firstWhere((element) => element.isPopulated || element.isError);
-          // 加载速度太快，容易看不到加载动画
-          await Future.delayed(const Duration(seconds: 2));
-        },
-        onLoadMore: () async {
-          context.read<HomeBloc>().add(const HomeEventLoadMore());
-          await context
-              .read<HomeBloc>()
-              .stream
-              .firstWhere((element) => element.isPopulated || element.isError);
-        },
-      ),
-      bottomNavigationBar: MyBottomBar(onTap: (index) {
-        context.read<HomeBloc>().add(HomeEventSwitchBottomNavigation(index));
-      }),
-      drawer: const LeftDrawer(),
-      endDrawer: const RightDrawer(),
-    );
-  }
-
-  void _addToCart(Product product, BuildContext context) {
-    debugPrint('Add to cart: ${product.name}');
-  }
-
-  void _onTapProduct(Product product, BuildContext context) {
-    debugPrint('Tap product: ${product.name}');
-  }
-
-  void onTapImage(MyLink? link, BuildContext context) {
-    if (link == null) {
-      return;
-    }
-    switch (link.type) {
-      case LinkType.route:
-        Navigator.of(context).pushNamed(link.value);
-        break;
-      case LinkType.deepLink:
-      case LinkType.url:
-        launchUrl(
-          Uri.parse(link.value),
-        );
-        break;
-    }
-  }
-}
-
-class SearchFieldWidget extends StatelessWidget {
-  const SearchFieldWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const CupertinoSearchTextField(
-      placeholder: 'Search',
-      placeholderStyle: TextStyle(color: Colors.white30),
-      prefixIcon: Icon(Icons.search, color: Colors.white),
-      backgroundColor: Colors.black12,
-      style: TextStyle(color: Colors.white),
-    );
-  }
-}
-
-class MyBottomBar extends StatelessWidget {
-  const MyBottomBar({
-    super.key,
-    this.onTap,
-  });
-  final void Function(int)? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
-      buildWhen: (previous, current) =>
-          previous.selectedIndex != current.selectedIndex,
-      builder: (context, state) {
-        return BottomNavigationBar(
-          currentIndex: state.selectedIndex,
-          onTap: onTap,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.search),
-              label: 'Category',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'About',
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-
-class LeftDrawer extends StatelessWidget {
-  const LeftDrawer({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: const <Widget>[
-          DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
-            child: Text(
-              'Drawer Header',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-          ),
-          ListTile(
-            leading: Icon(Icons.message),
-            title: Text('Messages'),
-          ),
-          ListTile(
-            leading: Icon(Icons.account_circle),
-            title: Text('Profile'),
-          ),
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class RightDrawer extends StatelessWidget {
-  const RightDrawer({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      child: SafeArea(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: const <Widget>[
-            ListTile(
-              leading: Icon(Icons.message),
-              title: Text('Messages 1'),
-            ),
-            ListTile(
-              leading: Icon(Icons.account_circle),
-              title: Text('Messages 2'),
-            ),
-            ListTile(
-              leading: Icon(Icons.settings),
-              title: Text('Messages 3'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SliverBodyWidget extends StatelessWidget {
-  const SliverBodyWidget({
-    super.key,
-    required this.errorImage,
-    this.onTap,
-    this.addToCart,
-    this.onTapProduct,
-  });
-  final String errorImage;
-  final void Function(MyLink?)? onTap;
-  final void Function(Product)? addToCart;
-  final void Function(Product)? onTapProduct;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
-      builder: (context, state) {
-        if (state.isError) {
-          return const SliverToBoxAdapter(
-            child: Center(
-              child: Text('Error'),
-            ),
-          );
-        }
-        if (state.isInitial) {
-          return SliverToBoxAdapter(child: SkeletonListView());
-        }
-
-        /// 屏幕的宽度
-        final screenWidth = MediaQuery.of(context).size.width;
-
-        /// 最终的比例
-        final ratio =
-            (state.layout?.config.baselineScreenWidth ?? 1) / screenWidth;
-        final blocks = state.layout?.blocks ?? [];
-        final products = state.waterfallList;
-        return MultiSliver(
-            children: blocks.map((block) {
-          switch (block.type) {
-            case PageBlockType.banner:
-              final it = block as BannerPageBlock;
-              return SliverToBoxAdapter(
-                child: BannerWidget(
-                  items: it.data.map((di) => di.content).toList(),
-                  config: it.config,
-                  ratio: ratio,
-                  errorImage: errorImage,
-                  onTap: onTap,
-                ),
-              );
-            case PageBlockType.imageRow:
-              final it = block as ImageRowPageBlock;
-              return SliverToBoxAdapter(
-                child: ImageRowWidget(
-                  items: it.data.map((di) => di.content).toList(),
-                  config: it.config,
-                  ratio: ratio,
-                  errorImage: errorImage,
-                  onTap: onTap,
-                ),
-              );
-            case PageBlockType.productRow:
-              final it = block as ProductRowPageBlock;
-              return SliverToBoxAdapter(
-                child: ProductRowWidget(
-                  items: it.data.map((di) => di.content).toList(),
-                  config: it.config,
-                  ratio: ratio,
-                  errorImage: errorImage,
-                  onTap: onTapProduct,
-                  addToCart: addToCart,
-                ),
-              );
-            case PageBlockType.waterfall:
-              final it = block as WaterfallPageBlock;
-              return WaterfallWidget(
-                products: products,
-                config: it.config,
-                ratio: ratio,
-                errorImage: errorImage,
-                onTap: onTapProduct,
-                addToCart: addToCart,
-              );
-            default:
-              return SliverToBoxAdapter(
-                child: Container(),
-              );
-          }
-        }).toList());
-      },
-    );
-  }
-}
-
-class LoadMoreWidget extends StatelessWidget {
-  const LoadMoreWidget({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
-      buildWhen: (previous, current) =>
-          previous.waterfallList != current.waterfallList &&
-          !current.hasReachedMax,
-      builder: (context, state) {
-        return state.waterfallList.isEmpty
-            ? Container()
-            : const SizedBox(
-                height: 50,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-      },
-    );
-  }
-}
-
-class MySliverAppBar extends StatelessWidget {
-  const MySliverAppBar({
-    super.key,
-    required this.decoration,
-    this.onTap,
-  });
-  final BoxDecoration decoration;
-  final void Function()? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    const searchField = SearchFieldWidget();
-
-    return SliverAppBar(
-      floating: true,
-      pinned: false,
-      title: searchField,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notification_important),
-          onPressed: onTap,
-        ),
-      ],
-
-      /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
-      /// 如果使用了 SliverAppBar，那么这个属性起到的作用不仅是 AppBar 的背景，而且
-      /// 下拉的时候，会有一段距离是这个背景，这个 Flexible 就是用来控制这个距离的
-      flexibleSpace: Container(
-        decoration: decoration,
       ),
     );
   }

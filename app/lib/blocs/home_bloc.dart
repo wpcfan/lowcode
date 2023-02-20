@@ -2,7 +2,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
-import 'helpers.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
@@ -14,8 +13,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc({required this.pageRepo, required this.productRepo})
       : super(HomeState.initial()) {
     /// 首页内容加载
-    on<HomeEventFetch>(_onFetchHome,
-        transformer: throttleDroppable(throttleDuration));
+    on<HomeEventFetch>(_onFetchHome);
 
     /// 瀑布流加载更多
     on<HomeEventLoadMore>(_onLoadMore);

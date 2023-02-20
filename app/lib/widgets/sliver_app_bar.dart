@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'search_field.dart';
 
@@ -17,15 +18,17 @@ class MySliverAppBar extends StatelessWidget {
     const searchField = SearchFieldWidget();
 
     return SliverAppBar(
+      /// 是否随着滑动隐藏标题
       floating: true,
 
-      /// 是否随着滑动隐藏标题
+      /// 是否在滑动到顶部的时候显示标题
       snap: false,
 
-      /// 是否在滑动到顶部的时候显示标题
+      /// 是否固定在顶部
       pinned: false,
 
-      /// 是否固定在顶部
+      /// 状态栏的样式，这里使用的是白色
+      systemOverlayStyle: SystemUiOverlayStyle.light,
       title: searchField,
       actions: [
         IconButton(

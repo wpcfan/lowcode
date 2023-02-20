@@ -9,11 +9,13 @@ class ProductRepository {
   final String baseUrl;
   final Map<String, PageLayoutCache<SliceWrapper<Product>>> cache;
   final Dio client;
+  final bool enableCache;
 
   ProductRepository({
     Dio? client,
     Map<String, PageLayoutCache<SliceWrapper<Product>>>? cache,
     this.baseUrl = '/products/by-category',
+    this.enableCache = true,
   })  : client = client ?? AppDio.getInstance(),
         cache = cache ?? <String, PageLayoutCache<SliceWrapper<Product>>>{};
 
@@ -22,7 +24,7 @@ class ProductRepository {
     debugPrint('ProductRepository.getByCategory($categoryId, $page)');
     final url = '$baseUrl/$categoryId/page?page=$page';
     final cachedResult = cache[url];
-    if (cachedResult != null && !cachedResult.isExpired) {
+    if (enableCache && cachedResult != null && !cachedResult.isExpired) {
       debugPrint(
           'ProductRepository.getByCategory($categoryId, $page) - cache hit');
       return cachedResult.value;

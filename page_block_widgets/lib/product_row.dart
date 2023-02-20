@@ -61,7 +61,7 @@ class ProductRowWidget extends StatelessWidget {
         return items
             .map((product) => ProductCardOneRowTwoWidget(
                   product: product,
-                  itemWidth: (width - 2 * horizontalPadding) / 2,
+                  itemWidth: (width - horizontalSpacing) / 2,
                   itemHeight: height - 2 * verticalPadding,
                   verticalSpacing: verticalSpacing,
                   errorImage: errorImage,

@@ -107,6 +107,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
       width: height,
       height: height,
       errorImage: errorImage,
+      onTap: onTap != null ? (link) => onTap!(product) : null,
     ).padding(right: horizontalSpacing);
     // 商品图片和右边的名称和描述和价格形成一行
     return [productImage, right]

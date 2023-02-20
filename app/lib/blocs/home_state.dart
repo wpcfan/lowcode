@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
 class HomeState extends Equatable {
@@ -12,9 +11,8 @@ class HomeState extends Equatable {
   final int? categoryId;
   final int selectedIndex;
   final bool drawerOpen;
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  HomeState({
+  const HomeState({
     this.layout,
     required this.status,
     this.waterfallList = const [],
@@ -67,24 +65,6 @@ class HomeState extends Equatable {
         selectedIndex,
         drawerOpen,
       ];
-
-  factory HomeState.initial() {
-    return HomeState(
-      status: FetchStatus.initial,
-    );
-  }
-
-  factory HomeState.loading() {
-    return HomeState(
-      status: FetchStatus.loading,
-    );
-  }
-
-  factory HomeState.error() {
-    return HomeState(
-      status: FetchStatus.error,
-    );
-  }
 
   factory HomeState.populated(
     PageLayout layout, {

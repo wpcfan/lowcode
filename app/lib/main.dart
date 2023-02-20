@@ -1,13 +1,13 @@
 import 'package:app/blocs/home_bloc.dart';
 import 'package:app/blocs/home_event.dart';
-import 'package:app/widgets/home_error.dart';
-import 'package:app/widgets/home_initial.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 import 'package:page_repository/page_repository.dart';
+import 'package:skeletons/skeletons.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'blocs/home_state.dart';
@@ -62,17 +62,11 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeView extends StatefulWidget {
+class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
   @override
-  State<HomeView> createState() => _HomeViewState();
-}
-
-class _HomeViewState extends State<HomeView> {
-  @override
   Widget build(BuildContext context) {
-    final homeBloc = context.read<HomeBloc>();
     const decoration = BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topLeft,
@@ -83,129 +77,60 @@ class _HomeViewState extends State<HomeView> {
         ],
       ),
     );
+    final key = GlobalKey<ScaffoldState>();
+    const errorImage = '';
 
-    const searchField = SearchFieldWidget();
-
-    final endDrawerButton = IconButton(
-      icon: const Icon(Icons.notification_important),
-      onPressed: () {
-        homeBloc.add(const HomeEventOpenDrawer());
-      },
-    );
-
-    final appBar = AppBar(
-      title: searchField,
-      actions: [
-        endDrawerButton,
-      ],
-
-      /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
-      flexibleSpace: Container(
+    return Scaffold(
+      key: key,
+      body: MyCustomScrollView(
+        loadMoreWidget: const LoadMoreWidget(),
         decoration: decoration,
-      ),
-    );
-
-    return BlocBuilder<HomeBloc, HomeState>(builder: (context, state) {
-      final bottomBar = MyBottomBar(
-          selectedIndex: state.selectedIndex,
-          onTap: (index) {
-            homeBloc.add(HomeEventSwitchBottomNavigation(index));
-          });
-
-      final scaffoldKey = state.scaffoldKey;
-      if (state.isInitial) {
-        return Scaffold(
-          key: scaffoldKey,
-          appBar: appBar,
-          body: const HomeInitial(isLoading: true),
-          bottomNavigationBar: bottomBar,
-          drawer: const LeftDrawer(),
-          endDrawer: const RightDrawer(),
-        );
-      }
-
-      if (state.isError) {
-        return Scaffold(
-          key: scaffoldKey,
-          appBar: appBar,
-          body: const HomeError(),
-          bottomNavigationBar: bottomBar,
-          drawer: const LeftDrawer(),
-          endDrawer: const RightDrawer(),
-        );
-      }
-
-      return Scaffold(
-        key: scaffoldKey,
-        body: _buildBody(context, decoration, searchField, state, homeBloc),
-        bottomNavigationBar: bottomBar,
-        drawer: const LeftDrawer(),
-        endDrawer: const RightDrawer(),
-      );
-    });
-  }
-
-  Widget _buildBody(BuildContext context, BoxDecoration decoration,
-      SearchFieldWidget searchField, HomeState state, HomeBloc homeBloc) {
-    final sliverAppBar = SliverAppBar(
-      floating: true,
-      pinned: false,
-      title: searchField,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notification_important),
-          onPressed: () {
-            homeBloc.add(const HomeEventOpenDrawer());
+        sliverAppBar: MySliverAppBar(
+          decoration: decoration,
+          onTap: () {
+            context.read<HomeBloc>().add(HomeEventOpenDrawer(key));
           },
         ),
-      ],
-
-      /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
-      /// 如果使用了 SliverAppBar，那么这个属性起到的作用不仅是 AppBar 的背景，而且
-      /// 下拉的时候，会有一段距离是这个背景，这个 Flexible 就是用来控制这个距离的
-      flexibleSpace: Container(
-        decoration: decoration,
+        sliver: SliverBodyWidget(
+          errorImage: errorImage,
+          onTap: (link) => onTapImage(link, context),
+          onTapProduct: (product) => _onTapProduct(product, context),
+          addToCart: (product) => _addToCart(product, context),
+        ),
+        onRefresh: () async {
+          context.read<HomeBloc>().add(const HomeEventFetch(PageType.home));
+          await context
+              .read<HomeBloc>()
+              .stream
+              .firstWhere((element) => element.isPopulated || element.isError);
+          // 加载速度太快，容易看不到加载动画
+          await Future.delayed(const Duration(seconds: 2));
+        },
+        onLoadMore: () async {
+          context.read<HomeBloc>().add(const HomeEventLoadMore());
+          await context
+              .read<HomeBloc>()
+              .stream
+              .firstWhere((element) => element.isPopulated || element.isError);
+        },
       ),
-    );
-
-    final loadMoreWidget = Container(
-      height: 60,
-      alignment: Alignment.center,
-      child: const CircularProgressIndicator(),
-    );
-
-    const errorImage = '';
-    final layout = state.layout;
-    final blocks = layout?.blocks ?? [];
-
-    /// 屏幕的宽度
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    /// 最终的比例
-    final ratio = (layout?.config.baselineScreenWidth ?? 1) / screenWidth;
-
-    final slivers = _buildBlocks(
-        blocks, errorImage, screenWidth, layout, ratio, state.waterfallList);
-    return MyCustomScrollView(
-      hasMore: !state.isEnd,
-      loadMoreWidget: loadMoreWidget,
-      decoration: decoration,
-      sliverAppBar: sliverAppBar,
-      slivers: slivers,
-      onRefresh: () async {
-        homeBloc.add(const HomeEventFetch(PageType.home));
-        await homeBloc.stream
-            .firstWhere((element) => element.isPopulated || element.isError);
-      },
-      onLoadMore: () async {
-        homeBloc.add(const HomeEventLoadMore());
-        await homeBloc.stream
-            .firstWhere((element) => element.isPopulated || element.isError);
-      },
+      bottomNavigationBar: MyBottomBar(onTap: (index) {
+        context.read<HomeBloc>().add(HomeEventSwitchBottomNavigation(index));
+      }),
+      drawer: const LeftDrawer(),
+      endDrawer: const RightDrawer(),
     );
   }
 
-  void onTapImage(MyLink? link) {
+  void _addToCart(Product product, BuildContext context) {
+    debugPrint('Add to cart: ${product.name}');
+  }
+
+  void _onTapProduct(Product product, BuildContext context) {
+    debugPrint('Tap product: ${product.name}');
+  }
+
+  void onTapImage(MyLink? link, BuildContext context) {
     if (link == null) {
       return;
     }
@@ -220,63 +145,6 @@ class _HomeViewState extends State<HomeView> {
         );
         break;
     }
-  }
-
-  List<Widget> _buildBlocks(
-      List<PageBlock> blocks,
-      String errorImage,
-      double screenWidth,
-      PageLayout? layout,
-      double ratio,
-      List<Product> products) {
-    return blocks.map((block) {
-      switch (block.type) {
-        case PageBlockType.banner:
-          final it = block as BannerPageBlock;
-          return SliverToBoxAdapter(
-            child: BannerWidget(
-              items: it.data.map((di) => di.content).toList(),
-              config: it.config,
-              ratio: ratio,
-              errorImage: errorImage,
-              onTap: onTapImage,
-            ),
-          );
-        case PageBlockType.imageRow:
-          final it = block as ImageRowPageBlock;
-          return SliverToBoxAdapter(
-            child: ImageRowWidget(
-              items: it.data.map((di) => di.content).toList(),
-              config: it.config,
-              ratio: ratio,
-              errorImage: errorImage,
-              onTap: onTapImage,
-            ),
-          );
-        case PageBlockType.productRow:
-          final it = block as ProductRowPageBlock;
-          return SliverToBoxAdapter(
-            child: ProductRowWidget(
-              items: it.data.map((di) => di.content).toList(),
-              config: it.config,
-              ratio: ratio,
-              errorImage: errorImage,
-            ),
-          );
-        case PageBlockType.waterfall:
-          final it = block as WaterfallPageBlock;
-          return WaterfallWidget(
-            products: products,
-            config: it.config,
-            ratio: ratio,
-            errorImage: errorImage,
-          );
-        default:
-          return SliverToBoxAdapter(
-            child: Container(),
-          );
-      }
-    }).toList();
   }
 }
 
@@ -300,31 +168,35 @@ class SearchFieldWidget extends StatelessWidget {
 class MyBottomBar extends StatelessWidget {
   const MyBottomBar({
     super.key,
-    required this.selectedIndex,
     this.onTap,
   });
-  final int selectedIndex;
   final void Function(int)? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: selectedIndex,
-      onTap: onTap,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search),
-          label: 'Search',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          label: 'Person',
-        ),
-      ],
+    return BlocBuilder<HomeBloc, HomeState>(
+      buildWhen: (previous, current) =>
+          previous.selectedIndex != current.selectedIndex,
+      builder: (context, state) {
+        return BottomNavigationBar(
+          currentIndex: state.selectedIndex,
+          onTap: onTap,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search),
+              label: 'Category',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'About',
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -396,6 +268,157 @@ class RightDrawer extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class SliverBodyWidget extends StatelessWidget {
+  const SliverBodyWidget({
+    super.key,
+    required this.errorImage,
+    this.onTap,
+    this.addToCart,
+    this.onTapProduct,
+  });
+  final String errorImage;
+  final void Function(MyLink?)? onTap;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTapProduct;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        if (state.isError) {
+          return const SliverToBoxAdapter(
+            child: Center(
+              child: Text('Error'),
+            ),
+          );
+        }
+        if (state.isInitial) {
+          return SliverToBoxAdapter(child: SkeletonListView());
+        }
+
+        /// 屏幕的宽度
+        final screenWidth = MediaQuery.of(context).size.width;
+
+        /// 最终的比例
+        final ratio =
+            (state.layout?.config.baselineScreenWidth ?? 1) / screenWidth;
+        final blocks = state.layout?.blocks ?? [];
+        final products = state.waterfallList;
+        return MultiSliver(
+            children: blocks.map((block) {
+          switch (block.type) {
+            case PageBlockType.banner:
+              final it = block as BannerPageBlock;
+              return SliverToBoxAdapter(
+                child: BannerWidget(
+                  items: it.data.map((di) => di.content).toList(),
+                  config: it.config,
+                  ratio: ratio,
+                  errorImage: errorImage,
+                  onTap: onTap,
+                ),
+              );
+            case PageBlockType.imageRow:
+              final it = block as ImageRowPageBlock;
+              return SliverToBoxAdapter(
+                child: ImageRowWidget(
+                  items: it.data.map((di) => di.content).toList(),
+                  config: it.config,
+                  ratio: ratio,
+                  errorImage: errorImage,
+                  onTap: onTap,
+                ),
+              );
+            case PageBlockType.productRow:
+              final it = block as ProductRowPageBlock;
+              return SliverToBoxAdapter(
+                child: ProductRowWidget(
+                  items: it.data.map((di) => di.content).toList(),
+                  config: it.config,
+                  ratio: ratio,
+                  errorImage: errorImage,
+                  onTap: onTapProduct,
+                  addToCart: addToCart,
+                ),
+              );
+            case PageBlockType.waterfall:
+              final it = block as WaterfallPageBlock;
+              return WaterfallWidget(
+                products: products,
+                config: it.config,
+                ratio: ratio,
+                errorImage: errorImage,
+                onTap: onTapProduct,
+                addToCart: addToCart,
+              );
+            default:
+              return SliverToBoxAdapter(
+                child: Container(),
+              );
+          }
+        }).toList());
+      },
+    );
+  }
+}
+
+class LoadMoreWidget extends StatelessWidget {
+  const LoadMoreWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<HomeBloc, HomeState>(
+      buildWhen: (previous, current) =>
+          previous.waterfallList != current.waterfallList &&
+          !current.hasReachedMax,
+      builder: (context, state) {
+        return state.waterfallList.isEmpty
+            ? Container()
+            : const SizedBox(
+                height: 50,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+      },
+    );
+  }
+}
+
+class MySliverAppBar extends StatelessWidget {
+  const MySliverAppBar({
+    super.key,
+    required this.decoration,
+    this.onTap,
+  });
+  final BoxDecoration decoration;
+  final void Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const searchField = SearchFieldWidget();
+
+    return SliverAppBar(
+      floating: true,
+      pinned: false,
+      title: searchField,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.notification_important),
+          onPressed: onTap,
+        ),
+      ],
+
+      /// 如果没有使用 SliverAppBar，那么这个属性起到的作用其实相当于 AppBar 的背景
+      /// 如果使用了 SliverAppBar，那么这个属性起到的作用不仅是 AppBar 的背景，而且
+      /// 下拉的时候，会有一段距离是这个背景，这个 Flexible 就是用来控制这个距离的
+      flexibleSpace: Container(
+        decoration: decoration,
       ),
     );
   }

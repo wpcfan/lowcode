@@ -73,7 +73,7 @@ packages:
     source: hosted
     version: "1.0.5"
   custom_refresh_indicator:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: custom_refresh_indicator
       sha256: c67a9145190eae17d7b7034b6085e7446f9340d9ed0b352caf63cc84e9486ef0
@@ -289,6 +289,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  sliver_tools:
+    dependency: "direct main"
+    description:
+      name: sliver_tools
+      sha256: bfa69411ebb203cc1a115b1e8bc7935b893eb381fdcf8d453b40c0d4e1db3247
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.9"
   source_span:
     dependency: transitive
     description:

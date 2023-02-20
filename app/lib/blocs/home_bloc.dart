@@ -11,7 +11,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final PageRepository pageRepo;
   final ProductRepository productRepo;
   HomeBloc({required this.pageRepo, required this.productRepo})
-      : super(HomeState.initial()) {
+      : super(const HomeState(status: FetchStatus.initial)) {
     /// 首页内容加载
     on<HomeEventFetch>(_onFetchHome);
 
@@ -29,12 +29,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onOpenDrawer(HomeEvent event, Emitter<HomeState> emit) {
-    state.scaffoldKey.currentState?.openEndDrawer();
+    if (event is HomeEventOpenDrawer) {
+      event.scaffoldKey.currentState?.openEndDrawer();
+    }
     emit(state.copyWith(drawerOpen: true));
   }
 
   void _onCloseDrawer(HomeEvent event, Emitter<HomeState> emit) {
-    state.scaffoldKey.currentState?.closeEndDrawer();
+    if (event is HomeEventCloseDrawer) {
+      event.scaffoldKey.currentState?.closeEndDrawer();
+    }
     emit(state.copyWith(drawerOpen: false));
   }
 
@@ -44,14 +48,14 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   void _onFetchHome(HomeEvent event, Emitter<HomeState> emit) async {
-    emit(HomeState.loading());
+    emit(state.copyWith(status: FetchStatus.loading));
     try {
       /// 获取首页布局
       final layout = await pageRepo.getByPageType(event.pageType);
 
       /// 如果没有布局，返回错误
       if (layout.blocks.isEmpty) {
-        emit(HomeState.error());
+        emit(state.copyWith(status: FetchStatus.error));
         return;
       }
 
@@ -72,18 +76,27 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
             /// 按分类获取瀑布流中的产品数据
             final waterfall =
                 await productRepo.getByCategory(categoryId: categoryId);
-            emit(HomeState.populated(layout,
-                waterfallList: waterfall.data,
-                hasReachedMax: !waterfall.hasNext,
-                page: waterfall.page,
-                categoryId: categoryId));
+            emit(state.copyWith(
+              status: FetchStatus.populated,
+              layout: layout,
+              waterfallList: waterfall.data,
+              hasReachedMax: !waterfall.hasNext,
+              page: waterfall.page,
+              categoryId: categoryId,
+            ));
             return;
           }
         }
       }
-      emit(HomeState.populated(layout));
+      emit(state.copyWith(
+          status: FetchStatus.populated,
+          layout: layout,
+          hasReachedMax: true,
+          page: 0,
+          categoryId: null,
+          waterfallList: []));
     } catch (e) {
-      emit(HomeState.error());
+      emit(state.copyWith(status: FetchStatus.error));
     }
   }
 

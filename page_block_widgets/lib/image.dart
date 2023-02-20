@@ -13,6 +13,7 @@ class ImageWidget extends StatelessWidget {
     this.width,
     this.alignment = Alignment.center,
     this.onTap,
+    this.enableTap = true,
   });
   final String imageUrl;
   final String errorImage;
@@ -22,6 +23,7 @@ class ImageWidget extends StatelessWidget {
   final Alignment alignment;
   final MyLink? link;
   final void Function(MyLink?)? onTap;
+  final bool enableTap;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +51,6 @@ class ImageWidget extends StatelessWidget {
       errorBuilder: (context, error, stackTrace) {
         return Image.asset(errorImage);
       },
-    ).inkWell(onTap: () => onTap?.call(link));
+    ).inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
   }
 }

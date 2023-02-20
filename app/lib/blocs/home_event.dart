@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
 abstract class HomeEvent extends Equatable {
@@ -25,9 +26,21 @@ class HomeEventSwitchBottomNavigation extends HomeEvent {
 }
 
 class HomeEventOpenDrawer extends HomeEvent {
-  const HomeEventOpenDrawer() : super(PageType.home);
+  const HomeEventOpenDrawer(GlobalKey<ScaffoldState> scaffoldKey)
+      : _scaffoldKey = scaffoldKey,
+        super(PageType.home);
+
+  final GlobalKey<ScaffoldState> _scaffoldKey;
+
+  GlobalKey<ScaffoldState> get scaffoldKey => _scaffoldKey;
 }
 
 class HomeEventCloseDrawer extends HomeEvent {
-  const HomeEventCloseDrawer() : super(PageType.home);
+  const HomeEventCloseDrawer(GlobalKey<ScaffoldState> scaffoldKey)
+      : _scaffoldKey = scaffoldKey,
+        super(PageType.home);
+
+  final GlobalKey<ScaffoldState> _scaffoldKey;
+
+  GlobalKey<ScaffoldState> get scaffoldKey => _scaffoldKey;
 }

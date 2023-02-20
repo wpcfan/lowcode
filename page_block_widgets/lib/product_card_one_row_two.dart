@@ -81,6 +81,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       width: itemWidth,
       height: itemWidth,
       errorImage: errorImage,
+      onTap: onTap != null ? (link) => onTap!(product) : null,
     ).padding(
       bottom: verticalSpacing,
     );

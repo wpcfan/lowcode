@@ -8,12 +8,11 @@ import 'package:flutter/material.dart';
 class MyCustomScrollView extends StatelessWidget {
   const MyCustomScrollView({
     super.key,
-    required this.slivers,
+    required this.sliver,
     required this.onRefresh,
     this.onLoadMore,
     this.sliverAppBar,
     this.decoration,
-    this.hasMore = false,
     this.loadMoreWidget = const CupertinoActivityIndicator(),
 
     /// 要注意，如果我们的 CustomScrollView 的外层不是 Scaffold，那么
@@ -36,12 +35,11 @@ class MyCustomScrollView extends StatelessWidget {
       child: Text('刷新完成'),
     ),
   });
-  final List<Widget> slivers;
+  final Widget sliver;
   final Future<void> Function() onRefresh;
   final Future<void> Function()? onLoadMore;
   final Widget? sliverAppBar;
   final BoxDecoration? decoration;
-  final bool hasMore;
   final Widget loadMoreWidget;
   final Widget refreshingWidget;
   final Widget pullToRefreshWidget;
@@ -56,18 +54,16 @@ class MyCustomScrollView extends StatelessWidget {
       /// 不触发 RefreshIndicator 的下拉刷新
       notificationPredicate: (notification) => false,
       child: NotificationListener(
-        onNotification: hasMore
-            ? (scrollNotification) {
-                if (scrollNotification is ScrollEndNotification) {
-                  /// 如果滑动到了最底部，那么就触发加载更多
-                  if (scrollNotification.metrics.pixels ==
-                      scrollNotification.metrics.maxScrollExtent) {
-                    onLoadMore?.call();
-                  }
-                }
-                return true;
-              }
-            : null,
+        onNotification: (scrollNotification) {
+          if (scrollNotification is ScrollEndNotification) {
+            /// 如果滑动到了最底部，那么就触发加载更多
+            if (scrollNotification.metrics.pixels ==
+                scrollNotification.metrics.maxScrollExtent) {
+              onLoadMore?.call();
+            }
+          }
+          return true;
+        },
         child: CustomScrollView(
           /// 这个属性是用来控制下拉刷新的，如果不设置，是无法下拉出一段距离的
           physics: const BouncingScrollPhysics(
@@ -95,13 +91,12 @@ class MyCustomScrollView extends StatelessWidget {
             ),
 
             /// 把其他传入的 slivers 放在这里
-            ...slivers,
+            sliver,
 
             /// 在页面底部显示加载更多的 Widget
-            if (hasMore)
-              SliverToBoxAdapter(
-                child: loadMoreWidget,
-              ),
+            SliverToBoxAdapter(
+              child: loadMoreWidget,
+            ),
           ]
               // 用于过滤掉空的 Widget
               .whereType<Widget>()

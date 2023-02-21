@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
@@ -13,17 +15,20 @@ class BannerWidget extends StatefulWidget {
   final BlockConfig config;
   final double ratio;
   final void Function(MyLink?)? onTap;
+  final int transitionDuration;
+  final int secondsToNextPage;
 
-  const BannerWidget({
-    super.key,
-    required this.items,
-    required this.config,
-    required this.errorImage,
-    required this.ratio,
-    this.animationDuration = 500,
-    this.animationCurve = Curves.ease,
-    this.onTap,
-  });
+  const BannerWidget(
+      {super.key,
+      required this.items,
+      required this.config,
+      required this.errorImage,
+      required this.ratio,
+      this.animationDuration = 500,
+      this.animationCurve = Curves.ease,
+      this.onTap,
+      this.transitionDuration = 500,
+      this.secondsToNextPage = 5});
 
   @override
   State<BannerWidget> createState() => _BannerWidgetState();
@@ -32,17 +37,36 @@ class BannerWidget extends StatefulWidget {
 class _BannerWidgetState extends State<BannerWidget> {
   int _currentPage = 0;
   late PageController _pageController;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentPage);
+    _startTimer();
   }
 
   @override
   void dispose() {
+    _stopTimer();
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _startTimer() {
+    _timer =
+        Timer.periodic(Duration(seconds: widget.secondsToNextPage), (timer) {
+      _pageController.animateToPage(
+        (_currentPage + 1) % widget.items.length,
+        duration: Duration(milliseconds: widget.transitionDuration),
+        curve: Curves.ease,
+      );
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    _timer = null;
   }
 
   void _nextPage(int page) {
@@ -75,15 +99,15 @@ class _BannerWidgetState extends State<BannerWidget> {
               controller: _pageController,
               onPageChanged: (index) {
                 setState(() {
-                  _currentPage = index;
+                  _currentPage = index % widget.items.length;
                 });
               },
-              itemCount: widget.items.length,
               itemBuilder: (context, index) {
+                int idx = index % widget.items.length;
                 return ImageWidget(
-                  imageUrl: widget.items[index].image,
+                  imageUrl: widget.items[idx].image,
                   errorImage: widget.errorImage,
-                  link: widget.items[index].link,
+                  link: widget.items[idx].link,
                   onTap: (link) => widget.onTap?.call(link),
                 );
               },

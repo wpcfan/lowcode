@@ -57,9 +57,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
-//                .allowCredentials(true) // 是否允许发送Cookie信息，如果设置为 true，allowedOrigins 不能设置为 *，否则会报错
+                // 是否允许发送Cookie信息，如果设置为 true，allowedOrigins 不能设置为 *，否则会报错
+//                .allowCredentials(false)
                 .maxAge(3600);
     }
 }

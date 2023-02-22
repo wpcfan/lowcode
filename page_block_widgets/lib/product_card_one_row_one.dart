@@ -80,7 +80,14 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
       productOriginalPrice,
       productPrice,
       IgnorePointer(ignoring: addToCart == null, child: cartBtn)
-    ].whereType<Widget>().toList().toRow(
+    ]
+
+        /// 过滤掉null, whereType<T>()返回的是一个Iterable<T>
+        /// toList()将Iterable<T>转换为List<T>
+        /// toRow()将List<T>转换为Row
+        .whereType<Widget>()
+        .toList()
+        .toRow(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.baseline,
           textBaseline: TextBaseline.alphabetic,

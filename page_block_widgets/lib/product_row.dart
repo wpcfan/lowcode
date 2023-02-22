@@ -8,6 +8,10 @@ part 'product_card_one_row_one.dart';
 part 'product_card_one_row_two.dart';
 
 class ProductRowWidget extends StatelessWidget {
+  /// assert 关键字用于断言，当条件不满足时，抛出异常
+  /// assert(items.length <= 2 && items.length > 0);
+  /// 1. items.length <= 2 表示 items 的长度必须小于等于 2
+  /// 2. items.length > 0 表示 items 的长度必须大于 0
   const ProductRowWidget({
     super.key,
     required this.items,
@@ -38,6 +42,11 @@ class ProductRowWidget extends StatelessWidget {
     final verticalPadding = (config.verticalPadding ?? 0) / ratio;
     final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
     final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
+
+    /// 将 Widget 包裹在 Page 中
+    /// 注意到 page 其实是一个方法，接受一个 Widget 作为参数，返回一个 Widget
+    /// 通过这种方式，我们可以在 page 中对 Widget 进行一些处理，比如添加边框、背景色等
+    /// 这样我们可以专注于 Widget 的内容，而不用关心 Widget 的样式
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: width, maxHeight: height)
@@ -57,26 +66,41 @@ class ProductRowWidget extends StatelessWidget {
           onTap: onTap,
           addToCart: addToCart,
         ).parent(page);
-      case 2:
-        return items
-            .map((product) => ProductCardOneRowTwoWidget(
-                  product: product,
-                  itemWidth: (width - horizontalSpacing) / 2,
-                  itemHeight: height - 2 * verticalPadding,
-                  verticalSpacing: verticalSpacing,
-                  errorImage: errorImage,
-                  onTap: onTap,
-                  addToCart: addToCart,
-                ))
-            .toList()
-            .toRow(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              crossAxisAlignment: CrossAxisAlignment.start,
-            )
-            .parent(page);
+      // case 2:
+      //   return items
+      //       .map((product) => ProductCardOneRowTwoWidget(
+      //             product: product,
+      //             itemWidth: (width - horizontalSpacing) / 2,
+      //             itemHeight: height - 2 * verticalPadding,
+      //             verticalSpacing: verticalSpacing,
+      //             errorImage: errorImage,
+      //             onTap: onTap,
+      //             addToCart: addToCart,
+      //           ))
+      //       .toList()
+      //       .toRow(
+      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      //         mainAxisSize: MainAxisSize.max,
+      //         crossAxisAlignment: CrossAxisAlignment.start,
+      //       )
+      //       .parent(page);
       default:
-        return Container();
+        return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              final product = items[index];
+              return ProductCardOneRowTwoWidget(
+                product: product,
+                itemWidth: (width - horizontalSpacing) / 2,
+                itemHeight: height - 2 * verticalPadding,
+                verticalSpacing: verticalSpacing,
+                errorImage: errorImage,
+                onTap: onTap,
+                addToCart: addToCart,
+              ).padding(
+                  right: index == items.length - 1 ? 0 : horizontalSpacing);
+            }).parent(page);
     }
   }
 }

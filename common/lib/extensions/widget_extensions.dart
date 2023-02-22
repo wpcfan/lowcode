@@ -245,7 +245,6 @@ extension WidgetExtension on Widget {
           ? Builder(
               key: key,
               builder: (BuildContext context) {
-                // TODO: PERFORMANCE: findAncestorWidgetOfExactType vs InheritedWidget performance
                 GestureDetector? gestures =
                     context.findAncestorWidgetOfExactType<GestureDetector>();
                 return Material(

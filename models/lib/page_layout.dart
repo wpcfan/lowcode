@@ -1,8 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:models/enumerations.dart';
 
 import 'page_block.dart';
 
-class PageLayout {
+class PageLayout extends Equatable {
+  final int? id;
   final String title;
   final Platform platform;
   final PageType pageType;
@@ -12,7 +14,8 @@ class PageLayout {
   final DateTime? endTime;
   final List<PageBlock> blocks;
 
-  PageLayout({
+  const PageLayout({
+    this.id,
     required this.title,
     required this.platform,
     required this.pageType,
@@ -31,6 +34,7 @@ class PageLayout {
         .toList();
     blocks.sort((a, b) => a.sort.compareTo(b.sort));
     return PageLayout(
+      id: json['id'] as int?,
       title: json['title'] as String,
       platform: Platform.values.firstWhere(
         (e) => e.value == json['platform'],
@@ -57,6 +61,7 @@ class PageLayout {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'title': title,
       'platform': platform.value,
       'pageType': pageType.value,
@@ -76,6 +81,19 @@ class PageLayout {
 
   @override
   String toString() {
-    return 'PageLayout{title: $title, platform: $platform, pageType: $pageType, config: $config, status: $status, startTime: $startTime, endTime: $endTime}';
+    return 'PageLayout{id: $id, title: $title, platform: $platform, pageType: $pageType, config: $config, status: $status, startTime: $startTime, endTime: $endTime}';
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        title,
+        platform,
+        pageType,
+        config,
+        status,
+        startTime,
+        endTime,
+        blocks,
+      ];
 }

@@ -21,6 +21,69 @@ class PageAdminRepository {
   })  : client = client ?? AdminDio.getInstance(),
         cache = cache ?? <String, PageLayoutCache<PageWrapper<PageLayout>>>{};
 
+  /// 创建页面
+  /// [layout] 页面
+  Future<PageLayout> create(PageLayout layout) async {
+    debugPrint('PageAdminRepository.create($layout)');
+
+    final response = await client.post(
+      baseUrl,
+      data: jsonEncode(layout.toJson()),
+    );
+
+    if (response.statusCode != 201) {
+      final problem = Problem.fromJson(response.data);
+      debugPrint('PageAdminRepository.create($layout) - error: $problem');
+      throw Exception(problem.title);
+    }
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageAdminRepository.create($layout) - success');
+
+    return result;
+  }
+
+  /// 更新页面
+  /// [layout] 页面
+  /// [id] 页面ID
+  Future<PageLayout> update(int id, PageLayout layout) async {
+    debugPrint('PageAdminRepository.update($id, $layout)');
+
+    final response = await client.put(
+      '$baseUrl/$id',
+      data: jsonEncode(layout.toJson()),
+    );
+
+    if (response.statusCode != 200) {
+      final problem = Problem.fromJson(response.data);
+      debugPrint('PageAdminRepository.update($id, $layout) - error: $problem');
+      throw Exception(problem.title);
+    }
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageAdminRepository.update($id, $layout) - success');
+
+    return result;
+  }
+
+  /// 删除页面
+  /// [id] 页面ID
+  Future<void> delete(int id) async {
+    debugPrint('PageAdminRepository.delete($id)');
+
+    final response = await client.delete('$baseUrl/$id');
+
+    if (response.statusCode != 204) {
+      final problem = Problem.fromJson(response.data);
+      debugPrint('PageAdminRepository.delete($id) - error: $problem');
+      throw Exception(problem.title);
+    }
+
+    debugPrint('PageAdminRepository.delete($id) - success');
+  }
+
   /// 按条件查询页面
   /// [query] 查询条件
   Future<PageWrapper<PageLayout>> search(PageQuery query) async {
@@ -148,6 +211,109 @@ class PageQuery extends Equatable {
       endDateTo: endDateTo ?? this.endDateTo,
       page: page ?? this.page,
     );
+  }
+
+  PageQuery clear(String field) {
+    switch (field) {
+      case 'title':
+        return PageQuery(
+          title: null,
+          platform: platform,
+          pageType: pageType,
+          status: status,
+          startDateFrom: startDateFrom,
+          startDateTo: startDateTo,
+          endDateFrom: endDateFrom,
+          endDateTo: endDateTo,
+          page: page,
+        );
+      case 'platform':
+        return PageQuery(
+          title: title,
+          platform: null,
+          pageType: pageType,
+          status: status,
+          startDateFrom: startDateFrom,
+          startDateTo: startDateTo,
+          endDateFrom: endDateFrom,
+          endDateTo: endDateTo,
+          page: page,
+        );
+      case 'pageType':
+        return PageQuery(
+          title: title,
+          platform: platform,
+          pageType: null,
+          status: status,
+          startDateFrom: startDateFrom,
+          startDateTo: startDateTo,
+          endDateFrom: endDateFrom,
+          endDateTo: endDateTo,
+          page: page,
+        );
+      case 'status':
+        return PageQuery(
+          title: title,
+          platform: platform,
+          pageType: pageType,
+          status: null,
+          startDateFrom: startDateFrom,
+          startDateTo: startDateTo,
+          endDateFrom: endDateFrom,
+          endDateTo: endDateTo,
+          page: page,
+        );
+      case 'startDateFrom':
+        return PageQuery(
+          title: title,
+          platform: platform,
+          pageType: pageType,
+          status: status,
+          startDateFrom: null,
+          startDateTo: startDateTo,
+          endDateFrom: endDateFrom,
+          endDateTo: endDateTo,
+          page: page,
+        );
+      case 'startDateTo':
+        return PageQuery(
+          title: title,
+          platform: platform,
+          pageType: pageType,
+          status: status,
+          startDateFrom: startDateFrom,
+          startDateTo: null,
+          endDateFrom: endDateFrom,
+          endDateTo: endDateTo,
+          page: page,
+        );
+      case 'endDateFrom':
+        return PageQuery(
+          title: title,
+          platform: platform,
+          pageType: pageType,
+          status: status,
+          startDateFrom: startDateFrom,
+          startDateTo: startDateTo,
+          endDateFrom: null,
+          endDateTo: endDateTo,
+          page: page,
+        );
+      case 'endDateTo':
+        return PageQuery(
+          title: title,
+          platform: platform,
+          pageType: pageType,
+          status: status,
+          startDateFrom: startDateFrom,
+          startDateTo: startDateTo,
+          endDateFrom: endDateFrom,
+          endDateTo: null,
+          page: page,
+        );
+      default:
+        return this;
+    }
   }
 
   String toJsonString() {

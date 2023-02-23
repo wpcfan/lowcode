@@ -5,7 +5,6 @@ import 'package:admin/views/drag_drop_list_page.dart';
 import 'package:admin/views/drag_drop_page.dart';
 import 'package:admin/views/page/page_table_view.dart';
 import 'package:go_router/go_router.dart';
-import 'package:page_repository/page_repository.dart';
 
 import 'custom_slide_transition.dart';
 
@@ -39,14 +38,9 @@ final routes = <RouteBase>[
       ),
       GoRoute(
         path: 'pages',
-        builder: (context, state) => PageTableView(
-          api: PageAdminRepository(),
-        ),
+        builder: (context, state) => const PageTableView(),
         pageBuilder: (context, state) => CustomSlideTransition(
-            key: state.pageKey,
-            child: PageTableView(
-              api: PageAdminRepository(),
-            )),
+            key: state.pageKey, child: const PageTableView()),
       ),
     ],
     pageBuilder: (context, state) =>

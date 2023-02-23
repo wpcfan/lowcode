@@ -1,92 +1,70 @@
-import 'package:admin/blocs/page_bloc.dart';
-import 'package:admin/blocs/page_state.dart';
+import 'package:admin/blocs/layout_bloc.dart';
+import 'package:admin/blocs/layout_event.dart';
+import 'package:admin/blocs/layout_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
-import 'package:page_repository/page_repository.dart';
 
-import 'page_search_error_widget.dart';
-import 'page_search_init_widget.dart';
-import 'page_search_loading_widget.dart';
 import 'page_search_result_widget.dart';
 
-class PageTableView extends StatefulWidget {
-  final PageAdminRepository api;
-  const PageTableView({super.key, required this.api});
-
-  @override
-  State<PageTableView> createState() => _PageTableViewState();
-}
-
-class _PageTableViewState extends State<PageTableView> {
-  late final PageSearchBloc bloc;
-
-  @override
-  void initState() {
-    super.initState();
-
-    bloc = PageSearchBloc(widget.api);
-  }
-
-  @override
-  void dispose() {
-    bloc.dispose();
-    super.dispose();
-  }
+class PageTableView extends StatelessWidget {
+  const PageTableView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<PageSearchState>(
-        stream: bloc.state,
-        initialData: PageSearchInitial(),
-        builder:
-            (BuildContext context, AsyncSnapshot<PageSearchState> snapshot) {
-          final state = snapshot.requireData;
-          return _buildChild(state);
-        });
-  }
-
-  Widget _buildChild(PageSearchState state) {
-    if (state is PageSearchInitial) {
-      return const PageSearchInitWidget();
-    } else if (state is PageSearchLoading) {
-      return const PageSearchLoadingWidget();
-    } else if (state is PageSearchError) {
-      return const PageSearchErrorWidget();
-    } else if (state is PageSearchPopulated) {
-      return PageSearchResultWidget(
-        query: state.query,
-        pageSearchResult: state.result,
-        onPageChanged: (int? value) {
-          if (value != null) {
-            bloc.onPageSizeChanged.add(value);
-          }
-        },
-        onTitleChanged: (String? value) {
-          bloc.onTitleChanged.add(value);
-        },
-        onPlatformChanged: (Platform? value) {
-          bloc.onPlatformChanged.add(value);
-        },
-        onStatusChanged: (PageStatus? value) {
-          bloc.onPageStatusChanged.add(value);
-        },
-        onPageTypeChanged: (PageType? value) {
-          bloc.onPageTypeChanged.add(value);
-        },
-        onStartDateChanged: (DateTimeRange? value) {
-          bloc.onStartDateFromChanged.add(value?.start);
-          bloc.onStartDateToChanged.add(value?.end);
-        },
-        onEndDateChanged: (DateTimeRange? value) {
-          bloc.onEndDateFromChanged.add(value?.start);
-          bloc.onEndDateToChanged.add(value?.end);
-        },
-        onClearAll: () {
-          bloc.onClearAll.add(const PageQuery());
-        },
-      );
-    }
-
-    throw Exception('${state.runtimeType} is not supported');
+    return BlocBuilder<LayoutBloc, LayoutState>(
+      builder: (context, state) {
+        switch (state.status) {
+          case FetchStatus.initial:
+            return const Center(child: Text('initial'));
+          case FetchStatus.loading:
+            return const Center(child: CircularProgressIndicator());
+          case FetchStatus.error:
+            return const Center(child: Text('error'));
+          case FetchStatus.populated:
+            return PageSearchResultWidget(
+              query: state.query,
+              items: state.items,
+              page: state.page,
+              pageSize: state.pageSize,
+              total: state.total,
+              onPageChanged: (int? value) {
+                context.read<LayoutBloc>().add(LayoutEventPageChanged(value));
+              },
+              onTitleChanged: (String? value) {
+                context.read<LayoutBloc>().add(LayoutEventTitleChanged(value));
+              },
+              onPlatformChanged: (Platform? value) {
+                context
+                    .read<LayoutBloc>()
+                    .add(LayoutEventPlatformChanged(value));
+              },
+              onStatusChanged: (PageStatus? value) {
+                context
+                    .read<LayoutBloc>()
+                    .add(LayoutEventPageStatusChanged(value));
+              },
+              onPageTypeChanged: (PageType? value) {
+                context
+                    .read<LayoutBloc>()
+                    .add(LayoutEventPageTypeChanged(value));
+              },
+              onStartDateChanged: (DateTimeRange? value) {
+                context
+                    .read<LayoutBloc>()
+                    .add(LayoutEventStartDateChanged(value?.start, value?.end));
+              },
+              onEndDateChanged: (DateTimeRange? value) {
+                context
+                    .read<LayoutBloc>()
+                    .add(LayoutEventEndDateChanged(value?.start, value?.end));
+              },
+              onClearAll: () {
+                context.read<LayoutBloc>().add(LayoutEventClearAll());
+              },
+            );
+        }
+      },
+    );
   }
 }

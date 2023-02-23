@@ -1,16 +1,15 @@
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
-import 'package:page_repository/page_repository.dart';
 
 class PageSearchResultDataSource extends DataTableSource {
-  PageSearchResultDataSource(this.pageSearchResult);
+  PageSearchResultDataSource(this.items);
 
-  final PageWrapper<PageLayout> pageSearchResult;
+  final List<PageLayout> items;
 
   @override
   DataRow getRow(int index) {
-    final item = pageSearchResult.items[index];
+    final item = items[index];
 
     return DataRow.byIndex(
       index: index,
@@ -29,7 +28,7 @@ class PageSearchResultDataSource extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => pageSearchResult.items.length;
+  int get rowCount => items.length;
 
   @override
   int get selectedRowCount => 0;

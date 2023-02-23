@@ -11,7 +11,10 @@ import 'page_search_result_data_source.dart';
 class PageSearchResultWidget extends StatelessWidget {
   const PageSearchResultWidget({
     super.key,
-    required this.pageSearchResult,
+    required this.items,
+    required this.page,
+    required this.pageSize,
+    required this.total,
     this.onPageChanged,
     required this.onTitleChanged,
     required this.onPlatformChanged,
@@ -23,7 +26,10 @@ class PageSearchResultWidget extends StatelessWidget {
     required this.query,
   });
 
-  final PageWrapper<PageLayout> pageSearchResult;
+  final List<PageLayout> items;
+  final int page;
+  final int pageSize;
+  final int total;
   final void Function(int?)? onPageChanged;
   final void Function(String?) onTitleChanged;
   final void Function(Platform?) onPlatformChanged;
@@ -110,7 +116,7 @@ class PageSearchResultWidget extends StatelessWidget {
     ].map((e) => DataColumn(label: e)).toList();
 
     return CustomPaginatedTable(
-      rowPerPage: pageSearchResult.size,
+      rowPerPage: pageSize,
       dataColumns: dataColumns,
       showActions: true,
       actions: [
@@ -127,7 +133,7 @@ class PageSearchResultWidget extends StatelessWidget {
       sortColumnIndex: 0,
       sortColumnAsc: true,
       onPageChanged: onPageChanged,
-      dataTableSource: PageSearchResultDataSource(pageSearchResult),
+      dataTableSource: PageSearchResultDataSource(items),
     );
   }
 }

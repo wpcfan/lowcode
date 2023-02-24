@@ -18,9 +18,9 @@ class AdminDio with DioMixin implements Dio {
     this.options = options;
     interceptors.add(PrettyDioLogger());
     interceptors.add(InterceptorsWrapper(
-      onResponse: (e, handler) {
-        if (e.statusCode != 200 && e.data != null) {
-          final problem = Problem.fromJson(e.data);
+      onError: (e, handler) {
+        if (e.response?.data != null) {
+          final problem = Problem.fromJson(e.response?.data);
           return handler.reject(DioError(
             requestOptions: e.requestOptions,
             error: problem,

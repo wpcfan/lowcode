@@ -25,6 +25,8 @@ class PageSearchResultWidget extends StatelessWidget {
     required this.onClearAll,
     required this.onUpdate,
     required this.onDelete,
+    required this.onPublish,
+    required this.onDraft,
     required this.query,
   });
 
@@ -42,6 +44,8 @@ class PageSearchResultWidget extends StatelessWidget {
   final void Function() onClearAll;
   final void Function(PageLayout layout) onUpdate;
   final void Function(int) onDelete;
+  final void Function(int) onPublish;
+  final void Function(int) onDraft;
   final PageQuery query;
 
   @override
@@ -148,6 +152,16 @@ class PageSearchResultWidget extends StatelessWidget {
         onDelete: (index) {
           if (items[index].id != null) {
             onDelete.call(items[index].id!);
+          }
+        },
+        onPublish: (index) {
+          if (items[index].id != null) {
+            onPublish.call(items[index].id!);
+          }
+        },
+        onDraft: (index) {
+          if (items[index].id != null) {
+            onDraft.call(items[index].id!);
           }
         },
       ),

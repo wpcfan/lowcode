@@ -1,5 +1,4 @@
 import 'package:common/common.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
@@ -21,6 +20,41 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
     on<LayoutEventUpdate>(_onLayoutEventUpdate);
     on<LayoutEventDelete>(_onLayoutEventDelete);
     on<LayoutEventClearAll>(_onLayoutEventClearAll);
+    on<LayoutEventPublish>(_onLayoutEventPublish);
+    on<LayoutEventDraft>(_onLayoutEventDraft);
+  }
+
+  void _onLayoutEventPublish(
+      LayoutEventPublish event, Emitter<LayoutState> emit) async {
+    emit(state.copyWith(loading: true));
+    try {
+      final layout =
+          await adminRepo.publish(event.id, event.startTime, event.endTime);
+      final index = state.items.indexWhere((element) => element.id == event.id);
+      emit(state.copyWith(loading: false, items: [
+        ...state.items.sublist(0, index),
+        layout,
+        ...state.items.sublist(index + 1)
+      ]));
+    } catch (e) {
+      emit(state.copyWith(loading: false, error: e.toString()));
+    }
+  }
+
+  void _onLayoutEventDraft(
+      LayoutEventDraft event, Emitter<LayoutState> emit) async {
+    emit(state.copyWith(loading: true));
+    try {
+      final layout = await adminRepo.draft(event.id);
+      final index = state.items.indexWhere((element) => element.id == event.id);
+      emit(state.copyWith(loading: false, items: [
+        ...state.items.sublist(0, index),
+        layout,
+        ...state.items.sublist(index + 1)
+      ]));
+    } catch (e) {
+      emit(state.copyWith(loading: false, error: e.toString()));
+    }
   }
 
   void _onLayoutEventClearAll(
@@ -57,10 +91,6 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
         ...state.items.sublist(index + 1)
       ]));
     } catch (e) {
-      if (e is DioError) {
-        emit(state.copyWith(loading: false, error: e.message));
-        return;
-      }
       emit(state.copyWith(loading: false, error: e.toString()));
     }
   }

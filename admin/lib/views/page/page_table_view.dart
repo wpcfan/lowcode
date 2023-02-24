@@ -15,6 +15,7 @@ class PageTableView extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LayoutBloc, LayoutState>(
       builder: (context, state) {
+        final bloc = context.read<LayoutBloc>();
         switch (state.status) {
           case FetchStatus.initial:
             return const Center(child: Text('initial'));
@@ -30,41 +31,30 @@ class PageTableView extends StatelessWidget {
               pageSize: state.pageSize,
               total: state.total,
               onPageChanged: (int? value) {
-                context.read<LayoutBloc>().add(LayoutEventPageChanged(value));
+                bloc.add(LayoutEventPageChanged(value));
               },
               onTitleChanged: (String? value) {
-                context.read<LayoutBloc>().add(LayoutEventTitleChanged(value));
+                bloc.add(LayoutEventTitleChanged(value));
               },
               onPlatformChanged: (Platform? value) {
-                context
-                    .read<LayoutBloc>()
-                    .add(LayoutEventPlatformChanged(value));
+                bloc.add(LayoutEventPlatformChanged(value));
               },
               onStatusChanged: (PageStatus? value) {
-                context
-                    .read<LayoutBloc>()
-                    .add(LayoutEventPageStatusChanged(value));
+                bloc.add(LayoutEventPageStatusChanged(value));
               },
               onPageTypeChanged: (PageType? value) {
-                context
-                    .read<LayoutBloc>()
-                    .add(LayoutEventPageTypeChanged(value));
+                bloc.add(LayoutEventPageTypeChanged(value));
               },
               onStartDateChanged: (DateTimeRange? value) {
-                context
-                    .read<LayoutBloc>()
-                    .add(LayoutEventStartDateChanged(value?.start, value?.end));
+                bloc.add(LayoutEventStartDateChanged(value?.start, value?.end));
               },
               onEndDateChanged: (DateTimeRange? value) {
-                context
-                    .read<LayoutBloc>()
-                    .add(LayoutEventEndDateChanged(value?.start, value?.end));
+                bloc.add(LayoutEventEndDateChanged(value?.start, value?.end));
               },
               onClearAll: () {
-                context.read<LayoutBloc>().add(LayoutEventClearAll());
+                bloc.add(LayoutEventClearAll());
               },
               onUpdate: (PageLayout layout) async {
-                final bloc = context.read<LayoutBloc>();
                 await showDialog(
                     context: context,
                     builder: (context) {
@@ -75,7 +65,81 @@ class PageTableView extends StatelessWidget {
                     });
               },
               onDelete: (int id) {
-                context.read<LayoutBloc>().add(LayoutEventDelete(id));
+                bloc.add(LayoutEventDelete(id));
+              },
+              onPublish: (int id) async {
+                final now = DateTime.now();
+                final result = await showDateRangePicker(
+                  context: context,
+                  firstDate: now,
+                  lastDate: now.add(const Duration(days: 30)),
+                  builder: (context, child) =>
+                      BlocListener<LayoutBloc, LayoutState>(
+                    bloc: bloc,
+                    listener: (context, state) {
+                      if (state.loading) {
+                        return;
+                      }
+                      if (state.error != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(state.error ?? '未知错误'),
+                          ),
+                        );
+                      } else {
+                        Navigator.of(context).pop();
+                      }
+                    },
+                    child: child,
+                  ),
+                );
+                if (result != null) {
+                  bloc.add(LayoutEventPublish(id, result.start, result.end));
+                }
+              },
+              onDraft: (int id) async {
+                final result = await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return BlocListener<LayoutBloc, LayoutState>(
+                        bloc: bloc,
+                        listener: (context, state) {
+                          if (state.loading) {
+                            return;
+                          }
+                          if (state.error != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(state.error ?? '未知错误'),
+                              ),
+                            );
+                          } else {
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: AlertDialog(
+                          title: const Text('下架'),
+                          content: const Text('确定下架吗？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              child: const Text('取消'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(true);
+                              },
+                              child: const Text('确定'),
+                            ),
+                          ],
+                        ),
+                      );
+                    });
+                if (result) {
+                  bloc.add(LayoutEventDraft(id));
+                }
               },
             );
         }

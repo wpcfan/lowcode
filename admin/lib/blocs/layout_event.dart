@@ -87,6 +87,24 @@ class LayoutEventDelete extends LayoutEvent {
   List<Object> get props => [id];
 }
 
+class LayoutEventPublish extends LayoutEvent {
+  LayoutEventPublish(this.id, this.startTime, this.endTime) : super();
+  final int id;
+  final DateTime startTime;
+  final DateTime endTime;
+
+  @override
+  List<Object> get props => [id];
+}
+
+class LayoutEventDraft extends LayoutEvent {
+  LayoutEventDraft(this.id) : super();
+  final int id;
+
+  @override
+  List<Object> get props => [id];
+}
+
 class LayoutEventClearAll extends LayoutEvent {
   LayoutEventClearAll() : super();
 

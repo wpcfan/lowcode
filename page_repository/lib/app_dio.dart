@@ -37,6 +37,10 @@ class AppDio with DioMixin implements Dio {
       baseUrl: 'http://localhost:8080/api/v1/app',
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
+      headers: Map.from({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }),
     );
     this.options = options;
     interceptors.add(PrettyDioLogger());

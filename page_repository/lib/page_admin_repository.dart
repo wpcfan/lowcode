@@ -78,6 +78,44 @@ class PageAdminRepository {
     debugPrint('PageAdminRepository.delete($id) - success');
   }
 
+  /// 发布页面
+  /// [id] 页面ID
+  /// [startTime] 生效起始时间
+  /// [endTime] 生效结束时间
+  Future<PageLayout> publish(
+      int id, DateTime? startTime, DateTime? endTime) async {
+    debugPrint('PageAdminRepository.publish($id, $startTime, $endTime)');
+
+    final response = await client.patch(
+      '$baseUrl/$id/publish',
+      data: jsonEncode({
+        'startTime': startTime?.toIso8601String(),
+        'endTime': endTime?.toIso8601String(),
+      }),
+    );
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint(
+        'PageAdminRepository.publish($id, $startTime, $endTime) - success');
+
+    return result;
+  }
+
+  /// 取消发布页面
+  /// [id] 页面ID
+  Future<PageLayout> draft(int id) async {
+    debugPrint('PageAdminRepository.draft($id)');
+
+    final response = await client.patch('$baseUrl/$id/draft');
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageAdminRepository.draft($id) - success');
+
+    return result;
+  }
+
   /// 按条件查询页面
   /// [query] 查询条件
   Future<PageWrapper<PageLayout>> search(PageQuery query) async {

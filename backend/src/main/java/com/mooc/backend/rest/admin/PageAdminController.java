@@ -64,6 +64,8 @@ public class PageAdminController {
     @Operation(summary = "添加页面")
     @PostMapping()
     public PageDTO createPage(@Valid @RequestBody CreateOrUpdatePageDTO page) {
+        if (pageQueryService.existsByTitle(page.title()))
+            throw new CustomException("页面标题已存在", "PageAdminController#createPage", HttpStatus.BAD_REQUEST.value());
         return PageDTO.fromEntity(pageCreateService.createPage(page));
     }
 

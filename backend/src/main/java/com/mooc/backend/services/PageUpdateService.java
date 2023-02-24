@@ -18,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 
 @Slf4j
@@ -46,15 +48,19 @@ public class PageUpdateService {
     public Optional<PageEntity> publishPage(Long id, PublishPageDTO page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
-                    if (pageEntityRepository.countPublishedTimeConflict(page.startTime(), pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
+                    // 设置为当天的零点
+                    var startTime = page.startTime().with(LocalTime.MIN);
+                    // 设置为当天的23:59:59.999999999
+                    var endTime = page.endTime().with(LocalTime.MAX);
+                    if (pageEntityRepository.countPublishedTimeConflict(startTime, pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
                         throw new CustomException("开始时间和已有数据冲突", "PageUpdateService#publishPage", HttpStatus.BAD_REQUEST.value());
                     }
-                    if (pageEntityRepository.countPublishedTimeConflict(page.endTime(), pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
+                    if (pageEntityRepository.countPublishedTimeConflict(endTime, pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
                         throw new CustomException("结束时间和已有数据冲突", "PageUpdateService#publishPage", HttpStatus.BAD_REQUEST.value());
                     }
                     pageEntity.setStatus(PageStatus.Published);
-                    pageEntity.setStartTime(page.startTime());
-                    pageEntity.setEndTime(page.endTime());
+                    pageEntity.setStartTime(startTime);
+                    pageEntity.setEndTime(endTime);
                     return pageEntityRepository.save(pageEntity);
                 });
     }

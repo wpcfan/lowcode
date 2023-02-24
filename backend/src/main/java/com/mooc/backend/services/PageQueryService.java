@@ -46,4 +46,8 @@ public class PageQueryService {
             return stream.findFirst();
         }
     }
+
+    public boolean existsByTitle(String title) {
+        return pageEntityRepository.countByTitle(title) > 0L;
+    }
 }

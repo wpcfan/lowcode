@@ -1,15 +1,16 @@
-INSERT INTO MOOC_PAGES VALUES
-    (1, TIMESTAMP '2023-02-19 20:03:50.345727', TIMESTAMP '2023-02-19 20:27:09.460289', 'App', 'Home', JSON '{"horizontalPadding":0.0,"verticalPadding":0.0,"baselineScreenWidth":400.0}', U&'\9996\9875\5e03\5c40', TIMESTAMP '2023-02-19 11:33:17.799', TIMESTAMP '2023-02-28 11:33:17.799', 'Published');
+INSERT INTO MOOC_PAGES
+    (`created_at`, `updated_at`, `platform`, `page_type`, `config`, `title`, `start_time`, `end_time`, `status`) VALUES
+    (TIMESTAMP '2023-02-19 20:03:50.345727', TIMESTAMP '2023-02-19 20:27:09.460289', 'App', 'Home', JSON '{"horizontalPadding":0.0,"verticalPadding":0.0,"baselineScreenWidth":400.0}', U&'\9996\9875\5e03\5c40', TIMESTAMP '2023-02-19 11:33:17.799', TIMESTAMP '2023-02-28 11:33:17.799', 'Published');
 
-INSERT INTO MOOC_PAGE_BLOCKS VALUES
-                                            (1, U&'\8f6e\64ad\56fe\533a\5757', 'Banner', 1, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":180.0}', 1),
-                                            (2, U&'\4e00\884c\4e00\56fe\7247\533a\5757', 'ImageRow', 2, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
-                                            (3, U&'\4e00\884c\4e8c\56fe\7247\533a\5757', 'ImageRow', 3, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
-                                            (4, U&'\4e00\884c\4e09\56fe\7247\533a\5757', 'ImageRow', 4, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
-                                            (5, U&'\4e00\884c\6eda\52a8\56fe\7247\533a\5757', 'ImageRow', 5, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
-                                            (6, U&'\4e00\884c\4e00\4ea7\54c1\533a\5757', 'ProductRow', 6, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":120.0}', 1),
-                                            (7, U&'\4e00\884c\4e8c\4ea7\54c1\533a\5757', 'ProductRow', 7, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":300.0}', 1),
-                                            (8, U&'\7011\5e03\6d41\533a\5757', 'Waterfall', 8, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":null}', 1);
+INSERT INTO MOOC_PAGE_BLOCKS (`title`, `type`, `sort`, `config`, `page_id`) VALUES
+                                            (U&'\8f6e\64ad\56fe\533a\5757', 'Banner', 1, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":180.0}', 1),
+                                            (U&'\4e00\884c\4e00\56fe\7247\533a\5757', 'ImageRow', 2, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
+                                            (U&'\4e00\884c\4e8c\56fe\7247\533a\5757', 'ImageRow', 3, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
+                                            (U&'\4e00\884c\4e09\56fe\7247\533a\5757', 'ImageRow', 4, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
+                                            (U&'\4e00\884c\6eda\52a8\56fe\7247\533a\5757', 'ImageRow', 5, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
+                                            (U&'\4e00\884c\4e00\4ea7\54c1\533a\5757', 'ProductRow', 6, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":120.0}', 1),
+                                            (U&'\4e00\884c\4e8c\4ea7\54c1\533a\5757', 'ProductRow', 7, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":300.0}', 1),
+                                            (U&'\7011\5e03\6d41\533a\5757', 'Waterfall', 8, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":null}', 1);
 
 INSERT INTO MOOC_PAGE_BLOCK_DATA VALUES
 (1, 1, JSON '{"image":"https://via.placeholder.com/100x100/image1","title":"image1","link":{"type":"url","value":"https://baidu.com"},"dataType":"image"}', 1),

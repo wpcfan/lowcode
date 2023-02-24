@@ -66,4 +66,6 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
             " and p.startTime is not null and p.endTime is not null" +
             " and p.endTime < ?1")
     int updatePageStatusToArchived(LocalDateTime currentTime);
+
+    int countByTitle(String title);
 }

@@ -31,11 +31,15 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
       final layout =
           await adminRepo.publish(event.id, event.startTime, event.endTime);
       final index = state.items.indexWhere((element) => element.id == event.id);
-      emit(state.copyWith(loading: false, items: [
-        ...state.items.sublist(0, index),
-        layout,
-        ...state.items.sublist(index + 1)
-      ]));
+      emit(state.copyWith(
+        loading: false,
+        items: [
+          ...state.items.sublist(0, index),
+          layout,
+          ...state.items.sublist(index + 1)
+        ],
+        error: '',
+      ));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
@@ -47,11 +51,15 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
     try {
       final layout = await adminRepo.draft(event.id);
       final index = state.items.indexWhere((element) => element.id == event.id);
-      emit(state.copyWith(loading: false, items: [
-        ...state.items.sublist(0, index),
-        layout,
-        ...state.items.sublist(index + 1)
-      ]));
+      emit(state.copyWith(
+        loading: false,
+        items: [
+          ...state.items.sublist(0, index),
+          layout,
+          ...state.items.sublist(index + 1)
+        ],
+        error: '',
+      ));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
@@ -70,10 +78,14 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
     try {
       await adminRepo.delete(event.id);
       final index = state.items.indexWhere((element) => element.id == event.id);
-      emit(state.copyWith(loading: false, items: [
-        ...state.items.sublist(0, index),
-        ...state.items.sublist(index + 1)
-      ]));
+      emit(state.copyWith(
+        loading: false,
+        items: [
+          ...state.items.sublist(0, index),
+          ...state.items.sublist(index + 1)
+        ],
+        error: '',
+      ));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
@@ -85,11 +97,15 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
     try {
       final layout = await adminRepo.update(event.id, event.layout);
       final index = state.items.indexWhere((element) => element.id == event.id);
-      emit(state.copyWith(loading: false, items: [
-        ...state.items.sublist(0, index),
-        layout,
-        ...state.items.sublist(index + 1)
-      ]));
+      emit(state.copyWith(
+        loading: false,
+        items: [
+          ...state.items.sublist(0, index),
+          layout,
+          ...state.items.sublist(index + 1)
+        ],
+        error: '',
+      ));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
@@ -100,7 +116,11 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
     emit(state.copyWith(loading: true));
     try {
       final layout = await adminRepo.create(event.layout);
-      emit(state.copyWith(loading: false, items: [layout, ...state.items]));
+      emit(state.copyWith(
+        loading: false,
+        items: [layout, ...state.items],
+        error: '',
+      ));
     } catch (e) {
       emit(state.copyWith(loading: false, error: e.toString()));
     }
@@ -186,7 +206,6 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
 
   Future<void> _query(PageQuery pageQuery, Emitter<LayoutState> emit) async {
     emit(state.copyWith(
-      loading: true,
       status: FetchStatus.loading,
     ));
     try {
@@ -197,14 +216,12 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
         page: response.page,
         pageSize: response.size,
         query: pageQuery,
-        loading: false,
         status: FetchStatus.populated,
-        error: null,
+        error: '',
       ));
     } catch (e) {
       emit(state.copyWith(
         error: e.toString(),
-        loading: false,
         status: FetchStatus.error,
       ));
     }

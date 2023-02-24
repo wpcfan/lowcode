@@ -1,7 +1,7 @@
 import 'package:admin/blocs/layout_bloc.dart';
 import 'package:admin/blocs/layout_event.dart';
 import 'package:admin/blocs/layout_state.dart';
-import 'package:admin/views/page/page_update_dialog.dart';
+import 'package:admin/views/page/create_or_update_page_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -13,7 +13,20 @@ class PageTableView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LayoutBloc, LayoutState>(
+    return BlocConsumer<LayoutBloc, LayoutState>(
+      listenWhen: (previous, current) => previous.loading != current.loading,
+      listener: (context, state) {
+        if (state.loading) {
+          return;
+        }
+        if (state.error.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error),
+            ),
+          );
+        }
+      },
       builder: (context, state) {
         final bloc = context.read<LayoutBloc>();
         switch (state.status) {
@@ -54,96 +67,120 @@ class PageTableView extends StatelessWidget {
               onClearAll: () {
                 bloc.add(LayoutEventClearAll());
               },
+              onAdd: () async {
+                await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return CreateOrUpdatePageDialog(
+                        bloc: bloc,
+                      );
+                    });
+              },
               onUpdate: (PageLayout layout) async {
                 await showDialog(
                     context: context,
                     builder: (context) {
-                      return PageUpdateDialog(
+                      return CreateOrUpdatePageDialog(
                         bloc: bloc,
                         layout: layout,
                       );
                     });
               },
-              onDelete: (int id) {
-                bloc.add(LayoutEventDelete(id));
+              onDelete: (int id) async {
+                await _showDeleteDialog(context, bloc, id);
               },
               onPublish: (int id) async {
-                final now = DateTime.now();
-                final result = await showDateRangePicker(
-                  context: context,
-                  firstDate: now,
-                  lastDate: now.add(const Duration(days: 30)),
-                  builder: (context, child) =>
-                      BlocListener<LayoutBloc, LayoutState>(
-                    bloc: bloc,
-                    listener: (context, state) {
-                      if (state.loading) {
-                        return;
-                      }
-                      if (state.error != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(state.error ?? '未知错误'),
-                          ),
-                        );
-                      } else {
-                        Navigator.of(context).pop();
-                      }
-                    },
-                    child: child,
-                  ),
-                );
-                if (result != null) {
-                  bloc.add(LayoutEventPublish(id, result.start, result.end));
-                }
+                await _showPublishDialog(context, bloc, id);
               },
               onDraft: (int id) async {
-                final result = await showDialog(
-                    context: context,
-                    builder: (context) {
-                      return BlocListener<LayoutBloc, LayoutState>(
-                        bloc: bloc,
-                        listener: (context, state) {
-                          if (state.loading) {
-                            return;
-                          }
-                          if (state.error != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(state.error ?? '未知错误'),
-                              ),
-                            );
-                          } else {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: AlertDialog(
-                          title: const Text('下架'),
-                          content: const Text('确定下架吗？'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(false);
-                              },
-                              child: const Text('取消'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(true);
-                              },
-                              child: const Text('确定'),
-                            ),
-                          ],
-                        ),
-                      );
-                    });
-                if (result) {
-                  bloc.add(LayoutEventDraft(id));
-                }
+                await _showDraftDialog(context, bloc, id);
               },
             );
         }
       },
     );
+  }
+
+  Future<void> _showDeleteDialog(
+      BuildContext context, LayoutBloc bloc, int id) async {
+    final result = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('删除'),
+            content: const Text('确定删除吗？'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        });
+    if (result) {
+      bloc.add(LayoutEventDelete(id));
+    }
+  }
+
+  Future<void> _showPublishDialog(
+      BuildContext context, LayoutBloc bloc, int id) async {
+    final now = DateTime.now();
+    final result = await showDateRangePicker(
+      initialEntryMode: DatePickerEntryMode.input,
+      context: context,
+      firstDate: now,
+      lastDate: now.add(const Duration(days: 365)),
+      saveText: '确定',
+      cancelText: '取消',
+      confirmText: '确定',
+      fieldStartHintText: '开始时间',
+      fieldEndHintText: '结束时间',
+      fieldStartLabelText: '开始时间',
+      fieldEndLabelText: '结束时间',
+      errorFormatText: '格式错误',
+      errorInvalidText: '无效时间',
+      errorInvalidRangeText: '无效时间范围',
+      helpText: '选择时间范围',
+    );
+    if (result != null) {
+      bloc.add(LayoutEventPublish(id, result.start, result.end));
+    }
+  }
+
+  Future<void> _showDraftDialog(
+      BuildContext context, LayoutBloc bloc, int id) async {
+    final result = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('下架'),
+            content: const Text('确定下架吗？'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        });
+    if (result) {
+      bloc.add(LayoutEventDraft(id));
+    }
   }
 }

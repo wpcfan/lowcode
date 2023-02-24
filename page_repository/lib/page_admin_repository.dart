@@ -31,15 +31,13 @@ class PageAdminRepository {
       data: jsonEncode(layout.toJson()),
     );
 
-    if (response.statusCode != 201) {
-      final problem = Problem.fromJson(response.data);
-      debugPrint('PageAdminRepository.create($layout) - error: $problem');
-      throw Exception(problem.title);
-    }
-
     final result = PageLayout.fromJson(response.data);
 
     debugPrint('PageAdminRepository.create($layout) - success');
+
+    cache.clear();
+
+    debugPrint('PageAdminRepository.create($layout) - cache cleared');
 
     return result;
   }
@@ -59,6 +57,9 @@ class PageAdminRepository {
 
     debugPrint('PageAdminRepository.update($id, $layout) - success');
 
+    cache.clear();
+
+    debugPrint('PageAdminRepository.update($id, $layout) - cache cleared');
     return result;
   }
 
@@ -67,15 +68,13 @@ class PageAdminRepository {
   Future<void> delete(int id) async {
     debugPrint('PageAdminRepository.delete($id)');
 
-    final response = await client.delete('$baseUrl/$id');
-
-    if (response.statusCode != 204) {
-      final problem = Problem.fromJson(response.data);
-      debugPrint('PageAdminRepository.delete($id) - error: $problem');
-      throw Exception(problem.title);
-    }
+    await client.delete('$baseUrl/$id');
 
     debugPrint('PageAdminRepository.delete($id) - success');
+
+    cache.clear();
+
+    debugPrint('PageAdminRepository.delete($id) - cache cleared');
   }
 
   /// 发布页面
@@ -99,6 +98,10 @@ class PageAdminRepository {
     debugPrint(
         'PageAdminRepository.publish($id, $startTime, $endTime) - success');
 
+    cache.clear();
+
+    debugPrint(
+        'PageAdminRepository.publish($id, $startTime, $endTime) - cache cleared');
     return result;
   }
 
@@ -113,6 +116,9 @@ class PageAdminRepository {
 
     debugPrint('PageAdminRepository.draft($id) - success');
 
+    cache.clear();
+
+    debugPrint('PageAdminRepository.draft($id) - cache cleared');
     return result;
   }
 
@@ -122,6 +128,8 @@ class PageAdminRepository {
     debugPrint('PageAdminRepository.search($query)');
 
     final url = _buildUrl(query);
+    debugPrint('PageAdminRepository.search($query) - url: $url');
+
     final cachedResult = cache[url];
 
     if (cachedResult != null && !cachedResult.isExpired) {
@@ -132,12 +140,6 @@ class PageAdminRepository {
     debugPrint('PageAdminRepository.search($query) - cache miss');
 
     final response = await client.get(url);
-
-    if (response.statusCode != 200) {
-      final problem = Problem.fromJson(response.data);
-      debugPrint('PageAdminRepository.search($query) - error: $problem');
-      throw Exception(problem.title);
-    }
 
     final result = PageWrapper.fromJson(
       response.data,

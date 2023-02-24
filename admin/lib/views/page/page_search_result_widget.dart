@@ -23,6 +23,7 @@ class PageSearchResultWidget extends StatelessWidget {
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     required this.onClearAll,
+    required this.onAdd,
     required this.onUpdate,
     required this.onDelete,
     required this.onPublish,
@@ -42,6 +43,7 @@ class PageSearchResultWidget extends StatelessWidget {
   final void Function(DateTimeRange?) onStartDateChanged;
   final void Function(DateTimeRange?) onEndDateChanged;
   final void Function() onClearAll;
+  final void Function() onAdd;
   final void Function(PageLayout layout) onUpdate;
   final void Function(int) onDelete;
   final void Function(int) onPublish;
@@ -133,7 +135,7 @@ class PageSearchResultWidget extends StatelessWidget {
       actions: [
         IconButton(
           icon: const Icon(Icons.add),
-          onPressed: () {},
+          onPressed: onAdd,
         ),
         IconButton(
           icon: const Icon(Icons.filter_list_off_outlined),

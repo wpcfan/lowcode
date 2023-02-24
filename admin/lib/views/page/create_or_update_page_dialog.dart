@@ -6,18 +6,19 @@ import 'package:models/models.dart';
 
 import '../../blocs/layout_state.dart';
 
-class PageUpdateDialog extends StatefulWidget {
-  const PageUpdateDialog(
+class CreateOrUpdatePageDialog extends StatefulWidget {
+  const CreateOrUpdatePageDialog(
       {super.key, required this.bloc, this.layout, this.onConfirm});
   final PageLayout? layout;
   final LayoutBloc bloc;
   final void Function(PageLayout layout)? onConfirm;
 
   @override
-  State<PageUpdateDialog> createState() => _PageUpdateDialogState();
+  State<CreateOrUpdatePageDialog> createState() =>
+      _CreateOrUpdatePageDialogState();
 }
 
-class _PageUpdateDialogState extends State<PageUpdateDialog> {
+class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
   late PageLayout formValue;
   final formKey = GlobalKey<FormState>();
   @override
@@ -34,10 +35,10 @@ class _PageUpdateDialogState extends State<PageUpdateDialog> {
         if (state.loading) {
           return;
         }
-        if (state.error != null) {
+        if (state.error.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.error ?? '未知错误'),
+              content: Text(state.error),
             ),
           );
         } else {
@@ -218,11 +219,15 @@ class _PageUpdateDialogState extends State<PageUpdateDialog> {
             onPressed: () {
               if (formKey.currentState?.validate() ?? false) {
                 formKey.currentState?.save();
-                widget.bloc
-                    .add(LayoutEventUpdate(widget.layout!.id!, formValue));
+                if (widget.layout == null) {
+                  widget.bloc.add(LayoutEventCreate(formValue));
+                } else {
+                  widget.bloc
+                      .add(LayoutEventUpdate(widget.layout!.id!, formValue));
+                }
               }
             },
-            child: const Text('更新'),
+            child: const Text('确定'),
           ),
         ],
       ),

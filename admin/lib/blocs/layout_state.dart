@@ -6,7 +6,7 @@ class LayoutState extends Equatable {
   final List<PageLayout> items;
   final PageQuery query;
   final bool loading;
-  final String? error;
+  final String error;
   final int page;
   final int pageSize;
   final int total;
@@ -16,7 +16,7 @@ class LayoutState extends Equatable {
     this.items = const [],
     this.query = const PageQuery(),
     this.loading = false,
-    this.error,
+    this.error = '',
     this.page = 0,
     this.pageSize = 10,
     this.total = 0,

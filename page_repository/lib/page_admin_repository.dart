@@ -55,12 +55,6 @@ class PageAdminRepository {
       data: jsonEncode(layout.toJson()),
     );
 
-    if (response.statusCode != 200) {
-      final problem = Problem.fromJson(response.data);
-      debugPrint('PageAdminRepository.update($id, $layout) - error: $problem');
-      throw Exception(problem.title);
-    }
-
     final result = PageLayout.fromJson(response.data);
 
     debugPrint('PageAdminRepository.update($id, $layout) - success');

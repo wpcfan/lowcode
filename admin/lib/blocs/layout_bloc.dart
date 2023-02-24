@@ -1,4 +1,5 @@
 import 'package:common/common.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
@@ -26,7 +27,7 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
       LayoutEventClearAll event, Emitter<LayoutState> emit) async {
     const query = PageQuery();
     emit(state.copyWith(query: query));
-    await _onLayoutEventQuery(query, emit);
+    await _query(query, emit);
   }
 
   void _onLayoutEventDelete(
@@ -56,6 +57,10 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
         ...state.items.sublist(index + 1)
       ]));
     } catch (e) {
+      if (e is DioError) {
+        emit(state.copyWith(loading: false, error: e.message));
+        return;
+      }
       emit(state.copyWith(loading: false, error: e.toString()));
     }
   }
@@ -78,10 +83,10 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
         endDateFrom: event.endDateFrom?.formattedYYYYMMDD,
         endDateTo: event.endDateTo?.formattedYYYYMMDD,
       );
-      await _onLayoutEventQuery(pageQuery, emit);
+      await _query(pageQuery, emit);
     } else {
       final pageQuery = state.query.clear('endDateFrom').clear('endDateTo');
-      await _onLayoutEventQuery(pageQuery, emit);
+      await _query(pageQuery, emit);
     }
   }
 
@@ -92,10 +97,10 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
         startDateFrom: event.startDateFrom?.formattedYYYYMMDD,
         startDateTo: event.startDateTo?.formattedYYYYMMDD,
       );
-      await _onLayoutEventQuery(pageQuery, emit);
+      await _query(pageQuery, emit);
     } else {
       final pageQuery = state.query.clear('startDateFrom').clear('startDateTo');
-      await _onLayoutEventQuery(pageQuery, emit);
+      await _query(pageQuery, emit);
     }
   }
 
@@ -106,7 +111,7 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
             status: event.pageStatus,
           )
         : state.query.clear('status');
-    await _onLayoutEventQuery(pageQuery, emit);
+    await _query(pageQuery, emit);
   }
 
   void _onLayoutEventPageTypeChanged(
@@ -116,7 +121,7 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
             pageType: event.pageType,
           )
         : state.query.clear('pageType');
-    await _onLayoutEventQuery(pageQuery, emit);
+    await _query(pageQuery, emit);
   }
 
   void _onLayoutEventPlatformChanged(
@@ -126,7 +131,7 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
             platform: event.platform,
           )
         : state.query.clear('platform');
-    await _onLayoutEventQuery(pageQuery, emit);
+    await _query(pageQuery, emit);
   }
 
   void _onLayoutEventTitleChanged(
@@ -136,7 +141,7 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
             title: event.title,
           )
         : state.query.clear('title');
-    await _onLayoutEventQuery(pageQuery, emit);
+    await _query(pageQuery, emit);
   }
 
   void _onLayoutEventPageChanged(
@@ -146,11 +151,10 @@ class LayoutBloc extends Bloc<LayoutEvent, LayoutState> {
             page: event.page,
           )
         : state.query.clear('page');
-    await _onLayoutEventQuery(pageQuery, emit);
+    await _query(pageQuery, emit);
   }
 
-  Future<void> _onLayoutEventQuery(
-      PageQuery pageQuery, Emitter<LayoutState> emit) async {
+  Future<void> _query(PageQuery pageQuery, Emitter<LayoutState> emit) async {
     emit(state.copyWith(
       loading: true,
       status: FetchStatus.loading,

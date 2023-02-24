@@ -27,6 +27,26 @@ class PageConfig {
     };
   }
 
+  PageConfig copyWith({
+    double? horizontalPadding,
+    double? verticalPadding,
+    double? baselineScreenWidth,
+  }) {
+    return PageConfig(
+      horizontalPadding: horizontalPadding ?? this.horizontalPadding,
+      verticalPadding: verticalPadding ?? this.verticalPadding,
+      baselineScreenWidth: baselineScreenWidth ?? this.baselineScreenWidth,
+    );
+  }
+
+  factory PageConfig.empty() {
+    return const PageConfig(
+      horizontalPadding: 0,
+      verticalPadding: 0,
+      baselineScreenWidth: 0,
+    );
+  }
+
   @override
   String toString() {
     return 'PageConfig{horizontalPadding: $horizontalPadding, verticalPadding: $verticalPadding, baselineScreenWidth: $baselineScreenWidth}';

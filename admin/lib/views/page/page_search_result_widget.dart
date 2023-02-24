@@ -23,6 +23,8 @@ class PageSearchResultWidget extends StatelessWidget {
     required this.onStartDateChanged,
     required this.onEndDateChanged,
     required this.onClearAll,
+    required this.onUpdate,
+    required this.onDelete,
     required this.query,
   });
 
@@ -38,6 +40,8 @@ class PageSearchResultWidget extends StatelessWidget {
   final void Function(DateTimeRange?) onStartDateChanged;
   final void Function(DateTimeRange?) onEndDateChanged;
   final void Function() onClearAll;
+  final void Function(PageLayout layout) onUpdate;
+  final void Function(int) onDelete;
   final PageQuery query;
 
   @override
@@ -106,6 +110,8 @@ class PageSearchResultWidget extends StatelessWidget {
               )
             : null);
 
+    const actionHeader = Text('操作');
+
     final dataColumns = [
       title,
       platform,
@@ -113,6 +119,7 @@ class PageSearchResultWidget extends StatelessWidget {
       pageType,
       startDate,
       endDate,
+      actionHeader,
     ].map((e) => DataColumn(label: e)).toList();
 
     return CustomPaginatedTable(
@@ -133,7 +140,17 @@ class PageSearchResultWidget extends StatelessWidget {
       sortColumnIndex: 0,
       sortColumnAsc: true,
       onPageChanged: onPageChanged,
-      dataTableSource: PageSearchResultDataSource(items),
+      dataTableSource: PageSearchResultDataSource(
+        items: items,
+        onUpdate: (index) {
+          onUpdate.call(items[index]);
+        },
+        onDelete: (index) {
+          if (items[index].id != null) {
+            onDelete.call(items[index].id!);
+          }
+        },
+      ),
     );
   }
 }

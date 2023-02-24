@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
 class PageSearchResultDataSource extends DataTableSource {
-  PageSearchResultDataSource(this.items);
+  PageSearchResultDataSource(
+      {required this.items, required this.onUpdate, required this.onDelete});
 
   final List<PageLayout> items;
+  final void Function(int) onUpdate;
+  final void Function(int) onDelete;
 
   @override
   DataRow getRow(int index) {
@@ -20,6 +23,24 @@ class PageSearchResultDataSource extends DataTableSource {
         DataCell(Text(item.pageType.value)),
         DataCell(Text(item.startTime?.formatted ?? '')),
         DataCell(Text(item.endTime?.formatted ?? '')),
+        DataCell(
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () {
+                  onUpdate.call(index);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () {
+                  onDelete.call(index);
+                },
+              ),
+            ],
+          ),
+        )
       ],
     );
   }

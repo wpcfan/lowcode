@@ -73,6 +73,40 @@ class PageLayout extends Equatable {
     };
   }
 
+  factory PageLayout.empty() {
+    return PageLayout(
+      title: '',
+      platform: Platform.app,
+      pageType: PageType.home,
+      config: PageConfig.empty(),
+      status: PageStatus.draft,
+    );
+  }
+
+  PageLayout copyWith({
+    int? id,
+    String? title,
+    Platform? platform,
+    PageType? pageType,
+    PageConfig? config,
+    PageStatus? status,
+    DateTime? startTime,
+    DateTime? endTime,
+    List<PageBlock>? blocks,
+  }) {
+    return PageLayout(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      platform: platform ?? this.platform,
+      pageType: pageType ?? this.pageType,
+      config: config ?? this.config,
+      status: status ?? this.status,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      blocks: blocks ?? this.blocks,
+    );
+  }
+
   bool get isDraft => status == PageStatus.draft;
 
   bool get isPublished => status == PageStatus.published;

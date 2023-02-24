@@ -1,6 +1,7 @@
 import 'package:admin/blocs/layout_bloc.dart';
 import 'package:admin/blocs/layout_event.dart';
 import 'package:admin/blocs/layout_state.dart';
+import 'package:admin/views/page/page_update_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -61,6 +62,20 @@ class PageTableView extends StatelessWidget {
               },
               onClearAll: () {
                 context.read<LayoutBloc>().add(LayoutEventClearAll());
+              },
+              onUpdate: (PageLayout layout) async {
+                final bloc = context.read<LayoutBloc>();
+                await showDialog(
+                    context: context,
+                    builder: (context) {
+                      return PageUpdateDialog(
+                        bloc: bloc,
+                        layout: layout,
+                      );
+                    });
+              },
+              onDelete: (int id) {
+                context.read<LayoutBloc>().add(LayoutEventDelete(id));
               },
             );
         }

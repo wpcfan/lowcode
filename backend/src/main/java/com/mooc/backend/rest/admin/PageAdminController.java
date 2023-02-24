@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Tag(name = "页面管理", description = "添加、修改、删除、查询页面，发布页面，撤销发布页面，添加区块，删除区块，修改区块，添加区块数据，删除区块数据，修改区块数据")
 @RequiredArgsConstructor
@@ -50,10 +51,10 @@ public class PageAdminController {
                 platform,
                 pageType,
                 status,
-                startDateFrom != null ? startDateFrom.atStartOfDay() : null,
-                startDateTo != null ? startDateTo.atStartOfDay() : null,
-                endDateFrom != null ? endDateFrom.atStartOfDay() : null,
-                endDateTo != null ? endDateTo.atStartOfDay() : null);
+                startDateFrom != null ? startDateFrom.atTime(LocalTime.MIN) : null,
+                startDateTo != null ? startDateTo.atTime(LocalTime.MAX) : null,
+                endDateFrom != null ? endDateFrom.atTime(LocalTime.MIN) : null,
+                endDateTo != null ? endDateTo.atTime(LocalTime.MAX) : null);
         var result = pageQueryService.findSpec(pageFilter, pageable)
                 .map(PageDTO::fromEntity);
         return new PageWrapper<>(result.getNumber(), result.getSize(), result.getTotalPages(),

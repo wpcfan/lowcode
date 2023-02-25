@@ -28,6 +28,7 @@ class PageSearchResultWidget extends StatelessWidget {
     required this.onDelete,
     required this.onPublish,
     required this.onDraft,
+    required this.onSelect,
     required this.query,
   });
 
@@ -48,6 +49,7 @@ class PageSearchResultWidget extends StatelessWidget {
   final void Function(int) onDelete;
   final void Function(int) onPublish;
   final void Function(int) onDraft;
+  final void Function(int) onSelect;
   final PageQuery query;
 
   @override
@@ -116,6 +118,8 @@ class PageSearchResultWidget extends StatelessWidget {
               )
             : null);
 
+    const pageConfig = Text('页面配置');
+
     const actionHeader = Text('操作');
 
     final dataColumns = [
@@ -125,6 +129,7 @@ class PageSearchResultWidget extends StatelessWidget {
       pageType,
       startDate,
       endDate,
+      pageConfig,
       actionHeader,
     ].map((e) => DataColumn(label: e)).toList();
 
@@ -147,26 +152,30 @@ class PageSearchResultWidget extends StatelessWidget {
       sortColumnAsc: true,
       onPageChanged: onPageChanged,
       dataTableSource: PageSearchResultDataSource(
-        items: items,
-        onUpdate: (index) {
-          onUpdate.call(items[index]);
-        },
-        onDelete: (index) {
-          if (items[index].id != null) {
-            onDelete.call(items[index].id!);
-          }
-        },
-        onPublish: (index) {
-          if (items[index].id != null) {
-            onPublish.call(items[index].id!);
-          }
-        },
-        onDraft: (index) {
-          if (items[index].id != null) {
-            onDraft.call(items[index].id!);
-          }
-        },
-      ),
+          items: items,
+          onUpdate: (index) {
+            onUpdate.call(items[index]);
+          },
+          onDelete: (index) {
+            if (items[index].id != null) {
+              onDelete.call(items[index].id!);
+            }
+          },
+          onPublish: (index) {
+            if (items[index].id != null) {
+              onPublish.call(items[index].id!);
+            }
+          },
+          onDraft: (index) {
+            if (items[index].id != null) {
+              onDraft.call(items[index].id!);
+            }
+          },
+          onSelect: (index) {
+            if (items[index].id != null) {
+              onSelect.call(items[index].id!);
+            }
+          }),
     );
   }
 }

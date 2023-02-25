@@ -1,6 +1,6 @@
 INSERT INTO MOOC_PAGES
     (`created_at`, `updated_at`, `platform`, `page_type`, `config`, `title`, `start_time`, `end_time`, `status`) VALUES
-    (TIMESTAMP '2023-02-19 20:03:50.345727', TIMESTAMP '2023-02-19 20:27:09.460289', 'App', 'Home', JSON '{"horizontalPadding":0.0,"verticalPadding":0.0,"baselineScreenWidth":400.0}', U&'\9996\9875\5e03\5c40', TIMESTAMP '2023-02-19 11:33:17.799', TIMESTAMP '2023-02-28 11:33:17.799', 'Published');
+    (TIMESTAMP '2023-02-19 20:03:50.345727', TIMESTAMP '2023-02-19 20:27:09.460289', 'App', 'Home', JSON '{"horizontalPadding":0.0,"verticalPadding":0.0,"baselineScreenWidth":400.0}', U&'\9996\9875\5e03\5c40', TIMESTAMP '2023-02-19 00:00:00.000', TIMESTAMP '2030-02-28 23:59:59.999', 'Published');
 
 INSERT INTO MOOC_PAGE_BLOCKS (`title`, `type`, `sort`, `config`, `page_id`) VALUES
                                             (U&'\8f6e\64ad\56fe\533a\5757', 'Banner', 1, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":180.0}', 1),

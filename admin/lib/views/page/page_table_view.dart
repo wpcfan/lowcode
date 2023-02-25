@@ -4,6 +4,7 @@ import 'package:admin/blocs/layout_state.dart';
 import 'package:admin/views/page/create_or_update_page_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
 
 import 'page_search_result_widget.dart';
@@ -72,7 +73,10 @@ class PageTableView extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return CreateOrUpdatePageDialog(
+                        title: '创建页面',
                         bloc: bloc,
+                        onCreate: (layout) =>
+                            bloc.add(LayoutEventCreate(layout)),
                       );
                     });
               },
@@ -81,8 +85,11 @@ class PageTableView extends StatelessWidget {
                     context: context,
                     builder: (context) {
                       return CreateOrUpdatePageDialog(
+                        title: '更新页面',
                         bloc: bloc,
                         layout: layout,
+                        onUpdate: (layout) =>
+                            bloc.add(LayoutEventUpdate(layout.id!, layout)),
                       );
                     });
               },
@@ -94,6 +101,9 @@ class PageTableView extends StatelessWidget {
               },
               onDraft: (int id) async {
                 await _showDraftDialog(context, bloc, id);
+              },
+              onSelect: (int id) {
+                context.go('/pages/$id');
               },
             );
         }

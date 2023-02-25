@@ -3,18 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
 class PageSearchResultDataSource extends DataTableSource {
-  PageSearchResultDataSource(
-      {required this.items,
-      required this.onUpdate,
-      required this.onDelete,
-      required this.onPublish,
-      required this.onDraft});
+  PageSearchResultDataSource({
+    required this.items,
+    required this.onUpdate,
+    required this.onDelete,
+    required this.onPublish,
+    required this.onDraft,
+    required this.onSelect,
+  });
 
   final List<PageLayout> items;
   final void Function(int) onUpdate;
   final void Function(int) onDelete;
   final void Function(int) onPublish;
   final void Function(int) onDraft;
+  final void Function(int) onSelect;
 
   @override
   DataRow getRow(int index) {
@@ -24,17 +27,32 @@ class PageSearchResultDataSource extends DataTableSource {
         : item.status == PageStatus.draft
             ? const Icon(Icons.drafts, color: Colors.yellow)
             : const Icon(Icons.archive, color: Colors.grey);
+    final config = item.config;
     return DataRow.byIndex(
       index: index,
       cells: [
-        DataCell(Text(item.title)),
+        DataCell(Text(
+          item.title,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          style: const TextStyle(decoration: TextDecoration.underline),
+        ).ripple().inkWell(onTap: () {
+          onSelect.call(index);
+        })),
         DataCell(Text(item.platform.value)),
         DataCell(Row(
-          children: [Text(item.status.value), statusIcon],
+          children: [statusIcon, Text(item.status.value)],
         )),
         DataCell(Text(item.pageType.value)),
         DataCell(Text(item.startTime?.formatted ?? '')),
         DataCell(Text(item.endTime?.formatted ?? '')),
+        DataCell(Tooltip(
+          message: '''
+水平内边距: ${config.horizontalPadding ?? 0}
+垂直内边距: ${config.verticalPadding ?? 0}
+基准屏幕宽度: ${config.baselineScreenWidth ?? ''}''',
+          child: const Icon(Icons.code),
+        )),
         DataCell(
           Row(
             children: [

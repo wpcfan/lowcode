@@ -64,6 +64,14 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      sha256: aa274aa7774f8964e4f4f38cc994db7b6158dd36e9187aaceaddc994b35c6c67
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.2"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -88,6 +96,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  dio_cache_interceptor:
+    dependency: transitive
+    description:
+      name: dio_cache_interceptor
+      sha256: "24f5fb2fbffea25325e9eabc1501b6582d0928b0ef5cb9127c920e58fbf6ca62"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.4.0"
   easy_rich_text:
     dependency: "direct main"
     description:
@@ -238,6 +254,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  networking:
+    dependency: "direct main"
+    description:
+      path: "../networking"
+      relative: true
+    source: path
+    version: "0.0.1"
   page_block_widgets:
     dependency: "direct main"
     description:
@@ -433,6 +456,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      sha256: "648e103079f7c64a36dc7d39369cabb358d377078a051d6ae2ad3aa539519313"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.7"
   vector_math:
     dependency: transitive
     description:

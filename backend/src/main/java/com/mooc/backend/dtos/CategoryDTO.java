@@ -6,22 +6,24 @@ import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.projections.CategoryInfo;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 @JsonDeserialize(as = CategoryDTO.class)
-@Value
+@Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CategoryDTO implements BlockData {
 
     private Long id;
     private String name;
     private String code;
     private Long parentId;
+
     @Builder.Default
     private Set<CategoryDTO> children = new HashSet<>();
 

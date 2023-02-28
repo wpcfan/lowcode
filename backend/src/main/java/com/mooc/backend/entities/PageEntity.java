@@ -61,8 +61,9 @@ public class PageEntity extends Auditable {
      * CascadeType.REMOVE 和 orphanRemoval = true 的区别：
      * CascadeType.REMOVE 是指删除父对象的时候，同时删除子对象，但是子对象仍然存在于数据库中，只是没有了父对象的关联关系。
      * orphanRemoval = true 是指删除父对象的时候，同时删除子对象，而且子对象也会从数据库中删除。
+     * <p>
      */
-    @OneToMany(mappedBy = "page", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "page", cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
     private Set<PageBlockEntity> pageBlocks = new HashSet<>();

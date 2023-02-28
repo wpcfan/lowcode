@@ -42,13 +42,4 @@ public class PageController {
                 .orElseThrow(() -> new CustomException("Page not found", "No published page found",
                         HttpStatus.NOT_FOUND.value()));
     }
-
-    @Operation(summary = "根据 id 获取页面信息")
-    @GetMapping("/{id}")
-    public PageDTO findById(@Parameter(description = "页面 id", name = "id") @PathVariable Long id) {
-        return pageQueryService.findById(id)
-                .map(PageDTO::fromProjection)
-                .orElseThrow(() -> new CustomException("Page not found", "Page with id " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
-    }
 }

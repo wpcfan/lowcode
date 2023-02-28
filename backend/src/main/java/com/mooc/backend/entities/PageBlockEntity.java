@@ -43,7 +43,7 @@ public class PageBlockEntity {
     @JoinColumn(name = "page_id")
     private PageEntity page;
 
-    @OneToMany(mappedBy = "pageBlock", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "pageBlock", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
     private Set<PageBlockDataEntity> data = new HashSet<>();

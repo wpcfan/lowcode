@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.io.Serializable;
 
-@Schema(name = "BlockData", description = "区块数据", subTypes = {CategoryDTO.class, ProductDataDTO.class, ImageDTO.class})
+@Schema(name = "BlockData", description = "区块数据", subTypes = {ImageDTO.class, CategoryDTO.class, ProductDataDTO.class})
 @JsonDeserialize(using = BlockDataDeserializer.class)
 public interface BlockData extends Serializable {
     BlockDataType getDataType();

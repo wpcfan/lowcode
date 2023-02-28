@@ -1,12 +1,15 @@
 package com.mooc.backend.repositories;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
-import com.mooc.backend.dtos.ProductAdminDTO;
-import com.mooc.backend.entities.blocks.*;
+import com.mooc.backend.dtos.ProductDataDTO;
+import com.mooc.backend.entities.PageBlockDataEntity;
+import com.mooc.backend.entities.PageBlockEntity;
+import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.Product;
+import com.mooc.backend.entities.blocks.BlockConfig;
+import com.mooc.backend.entities.blocks.ImageDTO;
+import com.mooc.backend.entities.blocks.Link;
+import com.mooc.backend.entities.blocks.PageConfig;
+import com.mooc.backend.enumerations.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,15 +18,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.mooc.backend.entities.PageBlockDataEntity;
-import com.mooc.backend.entities.PageBlockEntity;
-import com.mooc.backend.entities.PageEntity;
-import com.mooc.backend.entities.Product;
-import com.mooc.backend.enumerations.BlockType;
-import com.mooc.backend.enumerations.LinkType;
-import com.mooc.backend.enumerations.PageStatus;
-import com.mooc.backend.enumerations.PageType;
-import com.mooc.backend.enumerations.Platform;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -80,7 +78,7 @@ public class PageEntityRepositoryTests {
         var pinnedHeader = PageBlockEntity.builder()
                 .sort(1)
                 .title("Test Pinned Header")
-                .type(BlockType.PinnedHeader)
+                .type(BlockType.Banner)
                 .config(blockConfig)
                 .build();
         pinnedHeader.addData(bannerBlockData1);
@@ -119,8 +117,8 @@ public class PageEntityRepositoryTests {
         product.setPrice(BigDecimal.valueOf(10000));
         testEntityManager.persist(product);
 
-        var productBlockData1 = ProductAdminDTO.fromEntity(product);
-        var productBlockData2 = ProductAdminDTO.fromEntity(product);;
+        var productBlockData1 = ProductDataDTO.fromEntity(product);
+        var productBlockData2 = ProductDataDTO.fromEntity(product);
         var productData1 = PageBlockDataEntity.builder()
                 .sort(1)
                 .content(productBlockData1)
@@ -215,7 +213,7 @@ public class PageEntityRepositoryTests {
         assertEquals(Platform.App, pages.get(0).getPlatform());
         assertEquals(3, pages.get(0).getPageBlocks().size());
         assertEquals(2, pages.get(0).getPageBlocks().stream()
-                .filter(block -> block.getType() == BlockType.PinnedHeader).findFirst().get().getData()
+                .filter(block -> block.getType() == BlockType.Banner).findFirst().get().getData()
                 .size());
         assertEquals(3, pages.get(0).getPageBlocks().stream()
                 .filter(block -> block.getType() == BlockType.ImageRow).findFirst().get().getData()

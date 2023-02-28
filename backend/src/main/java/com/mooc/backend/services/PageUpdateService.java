@@ -4,12 +4,10 @@ import com.mooc.backend.dtos.CreateOrUpdatePageBlockDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
 import com.mooc.backend.dtos.PublishPageDTO;
-import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.error.CustomException;
-import com.mooc.backend.repositories.PageBlockDataEntityRepository;
 import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -29,7 +26,6 @@ import java.util.Optional;
 public class PageUpdateService {
     private final PageEntityRepository pageEntityRepository;
     private final PageBlockEntityRepository pageBlockEntityRepository;
-    private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
     public Optional<PageEntity> updatePage(Long id, CreateOrUpdatePageDTO page) {
         return pageEntityRepository.findById(id)
@@ -86,12 +82,35 @@ public class PageUpdateService {
                 });
     }
 
-    public Optional<PageBlockDataEntity> updateData(Long dataId, CreateOrUpdatePageBlockDataDTO data) {
-        return pageBlockDataEntityRepository.findById(dataId)
-                .map(pageBlockDataEntity -> {
-                    pageBlockDataEntity.setSort(data.sort());
-                    pageBlockDataEntity.setContent(data.content());
-                    return pageBlockDataEntityRepository.save(pageBlockDataEntity);
+    public Optional<PageBlockEntity> updateData(Long blockId, Long dataId, CreateOrUpdatePageBlockDataDTO data) {
+        return pageBlockEntityRepository.findById(blockId)
+                .map(pageBlockEntity -> {
+                    var dataEntity =  pageBlockEntity.getData().stream()
+                            .filter(pageBlockDataEntity -> pageBlockDataEntity.getId().equals(dataId))
+                            .findFirst()
+                            .orElseThrow(() -> new CustomException("数据不存在", "PageUpdateService#updateData", HttpStatus.BAD_REQUEST.value()));
+
+                    dataEntity.setSort(data.sort());
+                    dataEntity.setContent(data.content());
+                    return pageBlockEntityRepository.save(pageBlockEntity);
+                });
+    }
+
+    public Optional<PageBlockEntity> moveBlock(Long blockId, Integer targetSort) {
+        return pageBlockEntityRepository.findById(blockId)
+                .map(pageBlockEntity -> {
+                    var pageId = pageBlockEntity.getPage().getId();
+                    var sort = pageBlockEntity.getSort();
+                    if (sort.equals(targetSort)) {
+                        return pageBlockEntity;
+                    }
+                    if (sort < targetSort) {
+                        pageBlockEntityRepository.updateSortByPageIdAndSortGreaterThanEqual(pageId, sort);
+                    } else {
+                        pageBlockEntityRepository.updateSortByPageIdAndSortLessThanEqual(pageId, sort);
+                    }
+                    pageBlockEntity.setSort(targetSort);
+                    return pageBlockEntityRepository.save(pageBlockEntity);
                 });
     }
 }

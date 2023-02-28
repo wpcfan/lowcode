@@ -6,7 +6,6 @@ import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.error.CustomException;
-import com.mooc.backend.repositories.PageBlockDataEntityRepository;
 import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
 import org.junit.jupiter.api.Test;
@@ -28,12 +27,9 @@ public class PageUpdateServiceTests {
     @MockBean
     private PageBlockEntityRepository pageBlockEntityRepository;
 
-    @MockBean
-    private PageBlockDataEntityRepository pageBlockDataEntityRepository;
-
     @Test
     void testPublishPage() {
-        var pageUpdateService = new PageUpdateService(pageEntityRepository, pageBlockEntityRepository, pageBlockDataEntityRepository);
+        var pageUpdateService = new PageUpdateService(pageEntityRepository, pageBlockEntityRepository);
         var now = LocalDateTime.now();
         var startTime = now.minusDays(1);
         var endTime = now.plusDays(1);

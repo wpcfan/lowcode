@@ -1,6 +1,5 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.repositories.PageBlockDataEntityRepository;
 import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
 import jakarta.transaction.Transactional;
@@ -14,7 +13,6 @@ public class PageDeleteService {
 
     private final PageEntityRepository pageEntityRepository;
     private final PageBlockEntityRepository pageBlockEntityRepository;
-    private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
     public void deletePage(Long pageId) {
         pageEntityRepository.deleteById(pageId);
@@ -24,7 +22,10 @@ public class PageDeleteService {
         pageBlockEntityRepository.deleteById(blockId);
     }
 
-    public void deleteData(Long dataId) {
-        pageBlockDataEntityRepository.deleteById(dataId);
+    public void deleteData(Long blockId, Long dataId) {
+        pageBlockEntityRepository.findById(blockId).ifPresent(block -> {
+            block.getData().removeIf(data -> data.getId().equals(dataId));
+            pageBlockEntityRepository.save(block);
+        });
     }
 }

@@ -9,7 +9,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:page_repository/admin_dio.dart';
+import 'package:networking/networking.dart';
 import 'package:page_repository/page_repository.dart';
 import 'package:provider/provider.dart';
 
@@ -24,11 +24,25 @@ final routerConfig = GoRouter(
       builder: (context, state, child) => MultiRepositoryProvider(
         providers: [
           RepositoryProvider<Dio>(
-            create: (context) => AdminDio.getInstance(),
+            create: (context) => AdminClient.getInstance(),
           ),
           RepositoryProvider<PageAdminRepository>(
             create: (context) =>
                 PageAdminRepository(client: context.read<Dio>()),
+          ),
+          RepositoryProvider<PageBlockRepository>(
+            create: (context) =>
+                PageBlockRepository(client: context.read<Dio>()),
+          ),
+          RepositoryProvider<PageBlockDataRepository>(
+            create: (context) =>
+                PageBlockDataRepository(client: context.read<Dio>()),
+          ),
+          RepositoryProvider<ProductRepository>(
+            create: (context) => ProductRepository(
+                client: context.read<Dio>(),
+                baseUrl:
+                    'http://localhost:8080/api/v1/app/products/by-category'),
           ),
           ChangeNotifierProvider(
             create: (context) => SideMenuController(),

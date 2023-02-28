@@ -45,9 +45,15 @@ final routes = <RouteBase>[
       ),
       GoRoute(
         path: 'pages/:id',
-        builder: (context, state) => const CanvasPage(),
-        pageBuilder: (context, state) => CustomSlideTransition(
-            key: state.pageKey, child: const CanvasPage()),
+        builder: (context, state) {
+          final id = int.parse(state.params['id']!);
+          return CanvasPage(id: id);
+        },
+        pageBuilder: (context, state) {
+          final id = int.parse(state.params['id']!);
+          return CustomSlideTransition(
+              key: state.pageKey, child: CanvasPage(id: id));
+        },
       ),
     ],
     pageBuilder: (context, state) =>

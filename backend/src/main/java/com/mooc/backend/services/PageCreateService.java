@@ -3,6 +3,7 @@ package com.mooc.backend.services;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
+import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.BlockType;
@@ -49,21 +50,6 @@ public class PageCreateService {
                 });
     }
 
-    public Optional<PageBlockEntity> addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
-        return pageBlockEntityRepository.findById(blockId)
-                .map(blockEntity -> {
-                    if (blockEntity.getPage().getStatus() != PageStatus.Draft) {
-                        throw new CustomException("只有草稿状态的页面才能添加区块数据", "PageCreateService#addDataToBlock", 400);
-                    }
-                    if (blockEntity.getType() == BlockType.Waterfall && blockEntity.getData().size() > 0) {
-                        throw new CustomException("瀑布流区块只能有一个数据", "PageCreateService#addDataToBlock", 400);
-                    }
-                    var dataEntity = data.toEntity();
-                    blockEntity.addData(dataEntity);
-                    return pageBlockEntityRepository.save(blockEntity);
-                });
-    }
-
     public Optional<PageBlockEntity> insertBlockToPage(Long id, CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
@@ -83,6 +69,22 @@ public class PageCreateService {
                     pageEntity.addPageBlock(blockEntity);
                     pageEntityRepository.save(pageEntity);
                     return blockEntity;
+                });
+    }
+
+    public Optional<PageBlockDataEntity> addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
+        return pageBlockEntityRepository.findById(blockId)
+                .map(blockEntity -> {
+                    if (blockEntity.getPage().getStatus() != PageStatus.Draft) {
+                        throw new CustomException("只有草稿状态的页面才能添加区块数据", "PageCreateService#addDataToBlock", 400);
+                    }
+                    if (blockEntity.getType() == BlockType.Waterfall && blockEntity.getData().size() > 0) {
+                        throw new CustomException("瀑布流区块只能有一个数据", "PageCreateService#addDataToBlock", 400);
+                    }
+                    var dataEntity = data.toEntity();
+                    blockEntity.addData(dataEntity);
+                    pageBlockEntityRepository.save(blockEntity);
+                    return dataEntity;
                 });
     }
 }

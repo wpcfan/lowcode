@@ -52,4 +52,9 @@ public class PageBlockEntity {
         data.add(pageBlockDataEntity);
         pageBlockDataEntity.setPageBlock(this);
     }
+
+    public void removeData(PageBlockDataEntity pageBlockDataEntity) {
+        data.remove(pageBlockDataEntity);
+        pageBlockDataEntity.setPageBlock(null);
+    }
 }

@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+@Slf4j
 @Tag(name = "页面管理", description = "添加、修改、删除、查询页面，发布页面，撤销发布页面，添加区块，删除区块，修改区块，添加区块数据，删除区块数据，修改区块数据")
 @RequiredArgsConstructor
 @RestController
@@ -141,10 +143,12 @@ public class PageAdminController {
     }
 
     @Operation(summary = "修改页面区块")
-    @PutMapping("/blocks/{blockId}")
+    @PutMapping("/{id}/blocks/{blockId}")
     public PageBlockDTO updateBlock(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @RequestBody CreateOrUpdatePageBlockDTO block) {
+        log.debug("update block: id = {}, blockId = {}, block = {}", id, blockId, block);
         return pageUpdateService.updateBlock(blockId, block)
                 .map(PageBlockDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("要修改的页面区块不存在", "PageAdminController#updateBlock",
@@ -152,18 +156,21 @@ public class PageAdminController {
     }
 
     @Operation(summary = "删除页面区块")
-    @DeleteMapping("/blocks/{blockId}")
+    @DeleteMapping("/{id}/blocks/{blockId}")
     public void deleteBlock(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId) {
-        pageDeleteService.deleteBlock(blockId);
+        pageDeleteService.deleteBlock(id, blockId);
     }
 
     @Operation(summary = "移动页面区块")
-    @PatchMapping("/blocks/{blockId}/move/{targetSort}")
+    @PatchMapping("/{id}/blocks/{blockId}/move/{targetSort}")
     public PageBlockDTO moveBlock(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @Parameter(description = "目标排序", name = "targetSort") @PathVariable Integer targetSort
     ) {
+        log.debug("move block: id = {}, blockId = {}, targetSort = {}", id, blockId, targetSort);
         return pageUpdateService.moveBlock(blockId, targetSort)
                 .map(PageBlockDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("要移动的页面区块不存在", "PageAdminController#moveBlock",
@@ -172,33 +179,39 @@ public class PageAdminController {
 
 
     @Operation(summary = "添加页面区块数据")
-    @PostMapping("/{blockId}/data")
-    public PageBlockDTO addData(
+    @PostMapping("/{id}/blocks/{blockId}/data")
+    public PageBlockDataDTO addData(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @RequestBody CreateOrUpdatePageBlockDataDTO data) {
+        log.debug("add data: id = {}, blockId = {}, data = {}", id, blockId, data);
         return pageCreateService.addDataToBlock(blockId, data)
-                .map(PageBlockDTO::fromEntity)
+                .map(PageBlockDataDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("要添加的页面区块数据不存在", "PageAdminController#addData",
                         HttpStatus.NOT_FOUND.value()));
     }
 
     @Operation(summary = "修改页面区块数据")
-    @PutMapping("/{blockId}/data/{dataId}")
-    public PageBlockDTO updateData(
+    @PutMapping("/{id}/blocks/{blockId}/data/{dataId}")
+    public PageBlockDataDTO updateData(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @Parameter(description = "页面区块数据 id", name = "dataId") @PathVariable Long dataId,
             @RequestBody CreateOrUpdatePageBlockDataDTO data) {
-        return pageUpdateService.updateData(blockId, dataId, data)
-                .map(PageBlockDTO::fromEntity)
+        log.debug("update data: id = {}, blockId = {}, dataId = {}, data = {}", id, blockId, dataId, data);
+        return pageUpdateService.updateData(dataId, data)
+                .map(PageBlockDataDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("要修改的页面区块数据不存在", "PageAdminController#updateData",
                         HttpStatus.NOT_FOUND.value()));
     }
 
     @Operation(summary = "删除页面区块数据")
-    @DeleteMapping("/{blockId}/data/{dataId}")
+    @DeleteMapping("/{id}/blocks/{blockId}/data/{dataId}")
     public void deleteData(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @Parameter(description = "页面区块数据 id", name = "dataId") @PathVariable Long dataId) {
+        log.debug("delete data: id = {}, blockId = {}, dataId = {}", id, blockId, dataId);
         pageDeleteService.deleteData(blockId, dataId);
     }
 }

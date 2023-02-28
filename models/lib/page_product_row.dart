@@ -4,7 +4,7 @@ class ProductRowPageBlock extends PageBlock {
   final List<BlockData<Product>> data;
 
   const ProductRowPageBlock({
-    required int id,
+    int? id,
     required String title,
     required int sort,
     required BlockConfig config,

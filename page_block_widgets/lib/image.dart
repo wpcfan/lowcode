@@ -49,7 +49,9 @@ class ImageWidget extends StatelessWidget {
         );
       },
       errorBuilder: (context, error, stackTrace) {
-        return Image.asset(errorImage);
+        return const Placeholder(
+          color: Colors.red,
+        );
       },
     ).inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
   }

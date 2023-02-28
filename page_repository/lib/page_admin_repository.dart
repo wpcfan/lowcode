@@ -5,21 +5,32 @@ import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:models/models.dart';
-import 'package:page_repository/page_repository.dart';
-
-import 'admin_dio.dart';
+import 'package:networking/networking.dart';
 
 class PageAdminRepository {
   final String baseUrl;
-  final Map<String, PageLayoutCache<PageWrapper<PageLayout>>> cache;
   final Dio client;
 
   PageAdminRepository({
     Dio? client,
-    Map<String, PageLayoutCache<PageWrapper<PageLayout>>>? cache,
     this.baseUrl = '/pages',
-  })  : client = client ?? AdminDio.getInstance(),
-        cache = cache ?? <String, PageLayoutCache<PageWrapper<PageLayout>>>{};
+  }) : client = client ?? AdminClient.getInstance();
+
+  /// 获取页面
+  /// [id] 页面ID
+  Future<PageLayout> get(int id) async {
+    debugPrint('PageAdminRepository.get($id)');
+
+    final url = '$baseUrl/$id';
+
+    final response = await client.get(url);
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageAdminRepository.get($id) - success');
+
+    return result;
+  }
 
   /// 创建页面
   /// [layout] 页面
@@ -34,10 +45,6 @@ class PageAdminRepository {
     final result = PageLayout.fromJson(response.data);
 
     debugPrint('PageAdminRepository.create($layout) - success');
-
-    cache.clear();
-
-    debugPrint('PageAdminRepository.create($layout) - cache cleared');
 
     return result;
   }
@@ -57,9 +64,6 @@ class PageAdminRepository {
 
     debugPrint('PageAdminRepository.update($id, $layout) - success');
 
-    cache.clear();
-
-    debugPrint('PageAdminRepository.update($id, $layout) - cache cleared');
     return result;
   }
 
@@ -71,10 +75,6 @@ class PageAdminRepository {
     await client.delete('$baseUrl/$id');
 
     debugPrint('PageAdminRepository.delete($id) - success');
-
-    cache.clear();
-
-    debugPrint('PageAdminRepository.delete($id) - cache cleared');
   }
 
   /// 发布页面
@@ -98,10 +98,6 @@ class PageAdminRepository {
     debugPrint(
         'PageAdminRepository.publish($id, $startTime, $endTime) - success');
 
-    cache.clear();
-
-    debugPrint(
-        'PageAdminRepository.publish($id, $startTime, $endTime) - cache cleared');
     return result;
   }
 
@@ -116,9 +112,6 @@ class PageAdminRepository {
 
     debugPrint('PageAdminRepository.draft($id) - success');
 
-    cache.clear();
-
-    debugPrint('PageAdminRepository.draft($id) - cache cleared');
     return result;
   }
 
@@ -130,16 +123,7 @@ class PageAdminRepository {
     final url = _buildUrl(query);
     debugPrint('PageAdminRepository.search($query) - url: $url');
 
-    final cachedResult = cache[url];
-
-    if (cachedResult != null && !cachedResult.isExpired) {
-      debugPrint('PageAdminRepository.search($query) - cache hit');
-      return cachedResult.value;
-    }
-
-    debugPrint('PageAdminRepository.search($query) - cache miss');
-
-    final response = await client.get(url);
+    final response = await client.get(url, options: cacheOptions.toOptions());
 
     final result = PageWrapper.fromJson(
       response.data,
@@ -147,12 +131,6 @@ class PageAdminRepository {
     );
 
     debugPrint('PageAdminRepository.search($query) - success');
-
-    cache[url] = PageLayoutCache(
-        value: result,
-        expires: DateTime.now().add(const Duration(minutes: 10)));
-
-    debugPrint('PageAdminRepository.search($query) - cache set');
 
     return result;
   }

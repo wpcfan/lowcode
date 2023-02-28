@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
-import 'package:page_repository/app_dio.dart';
+import 'package:networking/networking.dart';
 import 'package:page_repository/page_repository.dart';
 
 import 'blocs/home_bloc.dart';
@@ -75,7 +75,7 @@ class HomeViewWithProvider extends StatelessWidget {
       providers: [
         /// RepositoryProvider 用于管理 Repository，其实不光是 Repository，任何对象都可以通过 RepositoryProvider 来管理
         /// 它提供的是一种依赖注入的方式，可以在任何地方通过 context.read<T>() 来获取 RepositoryProvider 中的对象
-        RepositoryProvider<Dio>(create: (context) => AppDio.getInstance()),
+        RepositoryProvider<Dio>(create: (context) => AppClient.getInstance()),
         RepositoryProvider<PageRepository>(
             create: (context) => PageRepository(client: context.read<Dio>())),
         RepositoryProvider<ProductRepository>(

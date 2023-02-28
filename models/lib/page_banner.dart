@@ -4,7 +4,7 @@ class BannerPageBlock extends PageBlock {
   final List<BlockData<ImageData>> data;
 
   const BannerPageBlock({
-    required int id,
+    int? id,
     required String title,
     required int sort,
     required BlockConfig config,

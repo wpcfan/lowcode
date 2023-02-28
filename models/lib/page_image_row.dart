@@ -4,7 +4,7 @@ class ImageRowPageBlock extends PageBlock {
   final List<BlockData<ImageData>> data;
 
   const ImageRowPageBlock({
-    required int id,
+    int? id,
     required String title,
     required int sort,
     required BlockConfig config,

@@ -2325,6 +2325,35 @@ public Slice<User> getUsers(Pageable pageable) {
 
 从 UX 角度，类似微博的无尽滚动加载，就可以使用 `Slice` 分页。类似后台管理系统的分页，就可以使用 `Page` 的分页。
 
+### 级联
+
+```java
+public Optional<PageEntity> moveBlock(Long pageId, Long blockId, Integer targetSort) {
+    return pageEntityRepository.findById(pageId)
+            .map(pageEntity -> {
+                var pageBlock = pageEntity.getPageBlocks().stream()
+                        .filter(pageBlockEntity -> pageBlockEntity.getId().equals(blockId))
+                        .findFirst()
+                        .orElseThrow(() -> new CustomException("数据不存在", "PageUpdateService#moveBlock", HttpStatus.BAD_REQUEST.value()));
+                var sort = pageBlock.getSort();
+                if (sort.equals(targetSort)) {
+                    return pageEntity;
+                }
+                if (sort < targetSort) {
+                    pageEntity.getPageBlocks().stream()
+                            .filter(pageBlockEntity -> pageBlockEntity.getSort() > sort && pageBlockEntity.getSort() <= targetSort)
+                            .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() - 1));
+                } else {
+                    pageEntity.getPageBlocks().stream()
+                            .filter(pageBlockEntity -> pageBlockEntity.getSort() < sort && pageBlockEntity.getSort() >= targetSort)
+                            .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() + 1));
+                }
+                pageBlock.setSort(targetSort);
+                return pageEntityRepository.save(pageEntity);
+            });
+}
+```
+
 ### `PersistenceContext` 和 `PersistenceUnit`
 
 持久化上下文是 JPA 的核心概念，它是一个实体管理器的集合，它可以管理多个实体管理器。
@@ -2986,8 +3015,7 @@ rfc7807 以 JSON 格式返回异常信息，其标准格式如下：
   "detail": "Your current balance is 30, but that costs 50.",
   "instance": "/account/12345/msgs/abc",
   "balance": 30,
-  "accounts": ["/account/12345",
-               "/account/67890"]
+  "accounts": ["/account/12345", "/account/67890"]
 }
 ```
 

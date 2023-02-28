@@ -50,7 +50,6 @@ enum PageBlockType {
   imageRow('image_row'),
   productRow('product_row'),
   waterfall('waterfall'),
-  ranking('ranking'),
   unknown('unknown');
 
   final String value;

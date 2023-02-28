@@ -4,7 +4,7 @@ class WaterfallPageBlock extends PageBlock {
   final List<BlockData<Category>> data;
 
   const WaterfallPageBlock({
-    required int id,
+    int? id,
     required String title,
     required int sort,
     required BlockConfig config,

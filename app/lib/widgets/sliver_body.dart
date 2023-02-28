@@ -47,7 +47,7 @@ class SliverBodyWidget extends StatelessWidget {
 
         /// 最终的比例
         final ratio =
-            (state.layout?.config.baselineScreenWidth ?? 1) / screenWidth;
+            (state.layout?.config.baselineScreenWidth ?? 400) / screenWidth;
         final blocks = state.layout?.blocks ?? [];
         final products = state.waterfallList;
 

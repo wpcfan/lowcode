@@ -16,13 +16,13 @@ part 'page_waterfall.dart';
 
 abstract class PageBlock extends Equatable {
   const PageBlock({
-    required this.id,
+    this.id,
     required this.title,
     required this.type,
     required this.sort,
     required this.config,
   });
-  final int id;
+  final int? id;
   final String title;
   final PageBlockType type;
   final int sort;

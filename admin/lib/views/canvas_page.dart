@@ -193,7 +193,6 @@ class _CenterPaneState extends State<CenterPane> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CanvasBloc, CanvasState>(
-      buildWhen: (previous, current) => previous.status != current.status,
       builder: (context, state) {
         switch (state.status) {
           case FetchStatus.initial:
@@ -220,7 +219,7 @@ class _CenterPaneState extends State<CenterPane> {
 
     final blocks = state.layout?.blocks ?? [];
     final products = state.waterfallList;
-    final bloc = BlocProvider.of<CanvasBloc>(context);
+    final bloc = context.read<CanvasBloc>();
     final pageId = state.layout?.id;
     final defaultBlockConfig = BlockConfig(
       horizontalPadding: 12,
@@ -228,6 +227,7 @@ class _CenterPaneState extends State<CenterPane> {
       horizontalSpacing: 6,
       verticalSpacing: 6,
       blockWidth: itemWidth - 24,
+      blockHeight: 140,
     );
     return SizedBox(
       width: itemWidth,
@@ -258,9 +258,18 @@ class _CenterPaneState extends State<CenterPane> {
                     onWillAccept: (data) {
                       /// 如果是从侧边栏拖拽过来的，那么index为null
                       if (data is WidgetData && data.sort == null) {
+                        if (data.type == PageBlockType.waterfall) {
+                          /// 瀑布流不能插入到中间
+                          return false;
+                        }
                         return true;
                       }
                       if (data is PageBlock) {
+                        if (data.type == PageBlockType.waterfall) {
+                          /// 已经有瀑布流不能拖拽
+                          return false;
+                        }
+
                         /// 如果是从画布中拖拽过来的，需要判断拖拽的和放置的不是同一个
                         final int dragIndex =
                             blocks.indexWhere((it) => it.sort == data.sort);
@@ -280,17 +289,24 @@ class _CenterPaneState extends State<CenterPane> {
                         /// 处理从侧边栏拖拽过来的
                         /// 如果是从侧边栏拖拽过来的，在放置的位置下方插入
                         if (data.sort == null) {
+                          setState(() {
+                            moveOverIndex = -1;
+                          });
                           return _insertBlock(data, bloc, dropIndex,
                               defaultBlockConfig, pageId!);
                         }
                       }
                       if (data is PageBlock) {
                         /// 处理从画布中拖拽过来的
+
                         bloc.add(CanvasEventMoveBlock(
                           pageId!,
                           data.id!,
                           dropIndex + 1,
                         ));
+                        setState(() {
+                          moveOverIndex = -1;
+                        });
                       }
                     },
                   );
@@ -300,6 +316,13 @@ class _CenterPaneState extends State<CenterPane> {
             },
             onWillAccept: (data) {
               if (data is WidgetData && data.sort == null) {
+                if (data.type == PageBlockType.waterfall &&
+                    blocks.indexWhere(
+                            (el) => el.type == PageBlockType.waterfall) !=
+                        -1) {
+                  /// 已有瀑布流不能拖拽
+                  return false;
+                }
                 return true;
               }
               return false;
@@ -325,7 +348,6 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-          dropIndex,
         ));
       case PageBlockType.waterfall:
         return bloc.add(CanvasEventInsertBlock(
@@ -336,7 +358,6 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig,
             data: const [],
           ),
-          dropIndex,
         ));
       case PageBlockType.imageRow:
         return bloc.add(CanvasEventInsertBlock(
@@ -347,18 +368,17 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-          dropIndex,
         ));
       case PageBlockType.productRow:
         return bloc.add(CanvasEventInsertBlock(
-            pageId,
-            ProductRowPageBlock(
-              title: 'ProductRow ${dropIndex + 1}',
-              sort: dropIndex + 1,
-              config: defaultBlockConfig.copyWith(blockHeight: 100),
-              data: const [],
-            ),
-            dropIndex));
+          pageId,
+          ProductRowPageBlock(
+            title: 'ProductRow ${dropIndex + 1}',
+            sort: dropIndex + 1,
+            config: defaultBlockConfig.copyWith(blockHeight: 100),
+            data: const [],
+          ),
+        ));
       default:
         return;
     }
@@ -415,7 +435,7 @@ class _CenterPaneState extends State<CenterPane> {
   Widget _buildDraggableWidget(
       PageBlock block, List<Product> products, int index, double itemWidth) {
     page({required Widget child}) => Draggable(
-          data: child,
+          data: block,
           feedback: SizedBox(
             width: itemWidth,
             child: Opacity(
@@ -437,10 +457,18 @@ class _CenterPaneState extends State<CenterPane> {
     switch (block.type) {
       case PageBlockType.banner:
         final it = block as BannerPageBlock;
+        final data = it.data.map((di) => di.content).toList();
+        final items = data.isNotEmpty
+            ? data
+            : [
+                const ImageData(image: 'https://picsum.photos/400/100'),
+                const ImageData(image: 'https://picsum.photos/400/100'),
+                const ImageData(image: 'https://picsum.photos/400/100')
+              ];
 
         /// SliverToBoxAdapter 可以将一个 Widget 转换成 Sliver
         widget = BannerWidget(
-          items: it.data.map((di) => di.content).toList(),
+          items: items,
           config: it.config,
           ratio: 1.0,
           errorImage: errorImage,
@@ -448,8 +476,16 @@ class _CenterPaneState extends State<CenterPane> {
         break;
       case PageBlockType.imageRow:
         final it = block as ImageRowPageBlock;
+        final data = it.data.map((di) => di.content).toList();
+        final items = data.isNotEmpty
+            ? data
+            : const [
+                ImageData(image: 'https://picsum.photos/100/80'),
+                ImageData(image: 'https://picsum.photos/100/80'),
+                ImageData(image: 'https://picsum.photos/100/80')
+              ];
         widget = ImageRowWidget(
-          items: it.data.map((di) => di.content).toList(),
+          items: items,
           config: it.config,
           ratio: 1.0,
           errorImage: errorImage,
@@ -457,8 +493,19 @@ class _CenterPaneState extends State<CenterPane> {
         break;
       case PageBlockType.productRow:
         final it = block as ProductRowPageBlock;
+        final data = it.data.map((di) => di.content).toList();
+        final items = data.isNotEmpty
+            ? data
+            : [
+                const Product(
+                  id: 1,
+                  name: 'Product 1',
+                  images: ['https://picsum.photos/100/80'],
+                  price: '¥100.23',
+                )
+              ];
         widget = ProductRowWidget(
-          items: it.data.map((di) => di.content).toList(),
+          items: items,
           config: it.config,
           ratio: 1.0,
           errorImage: errorImage,
@@ -466,14 +513,41 @@ class _CenterPaneState extends State<CenterPane> {
         break;
       case PageBlockType.waterfall:
         final it = block as WaterfallPageBlock;
+        final items = products.isNotEmpty
+            ? products
+            : const [
+                Product(
+                  id: 1,
+                  name: 'Product 1',
+                  images: ['https://picsum.photos/100/80'],
+                  price: '¥100.23',
+                ),
+                Product(
+                  id: 2,
+                  name: 'Product 2',
+                  images: ['https://picsum.photos/100/80'],
+                  price: '¥200.34',
+                ),
+                Product(
+                  id: 3,
+                  name: 'Product 3',
+                  images: ['https://picsum.photos/100/80'],
+                  price: '¥300.45',
+                ),
+                Product(
+                  id: 4,
+                  name: 'Product 4',
+                  images: ['https://picsum.photos/100/80'],
+                  price: '¥400.56',
+                ),
+              ];
 
-        /// WaterfallWidget 是一个瀑布流的 Widget
-        /// 它本身就是 Sliver，所以不需要再包装一层 SliverToBoxAdapter
         widget = WaterfallWidget(
-          products: products,
+          products: items,
           config: it.config,
           ratio: 1.0,
           errorImage: errorImage,
+          isPreview: true,
         );
         break;
       default:

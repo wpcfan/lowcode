@@ -1,5 +1,4 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart' hide Category;
 
 import 'category.dart';
 import 'enumerations.dart';

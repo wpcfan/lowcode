@@ -30,13 +30,12 @@ class CanvasEventAddBlock extends CanvasEvent {
 }
 
 class CanvasEventInsertBlock extends CanvasEvent {
-  CanvasEventInsertBlock(this.pageId, this.block, this.sort) : super();
+  CanvasEventInsertBlock(this.pageId, this.block) : super();
   final PageBlock block;
-  final int sort;
   final int pageId;
 
   @override
-  List<Object?> get props => [pageId, block, sort];
+  List<Object?> get props => [pageId, block];
 }
 
 class CanvasEventUpdateBlock extends CanvasEvent {

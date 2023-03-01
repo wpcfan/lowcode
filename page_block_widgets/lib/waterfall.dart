@@ -12,6 +12,7 @@ class WaterfallWidget extends StatelessWidget {
     required this.ratio,
     this.addToCart,
     this.onTap,
+    this.isPreview = false,
   });
   final BlockConfig config;
   final List<Product> products;
@@ -19,6 +20,7 @@ class WaterfallWidget extends StatelessWidget {
   final double ratio;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTap;
+  final bool isPreview;
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +30,47 @@ class WaterfallWidget extends StatelessWidget {
     final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
     final blockWidth = (config.blockWidth ?? 0) / ratio;
     final itemWidth = (blockWidth) / 2;
+    return isPreview
+        ? _buildPreview(horizontalPadding, verticalPadding, horizontalSpacing,
+            verticalSpacing, itemWidth)
+        : _buildContent(horizontalPadding, verticalPadding, horizontalSpacing,
+            verticalSpacing, itemWidth);
+  }
+
+  Widget _buildPreview(double horizontalPadding, double verticalPadding,
+      double horizontalSpacing, double verticalSpacing, double itemWidth) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minHeight: 200.0 * products.length / 2,
+        maxHeight: 300.0 * products.length / 2,
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: horizontalPadding,
+          vertical: verticalPadding,
+        ),
+        child: MasonryGridView.count(
+          crossAxisCount: 2,
+          mainAxisSpacing: horizontalSpacing,
+          crossAxisSpacing: verticalSpacing,
+          itemBuilder: (context, index) {
+            return ProductCardOneRowTwoWidget(
+              product: products[index],
+              itemWidth: itemWidth,
+              verticalSpacing: verticalSpacing,
+              errorImage: errorImage,
+              addToCart: addToCart,
+              onTap: onTap,
+            );
+          },
+          itemCount: products.length,
+        ),
+      ),
+    );
+  }
+
+  SliverPadding _buildContent(double horizontalPadding, double verticalPadding,
+      double horizontalSpacing, double verticalSpacing, double itemWidth) {
     return SliverPadding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,

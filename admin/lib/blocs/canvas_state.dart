@@ -7,6 +7,7 @@ class CanvasState extends Equatable {
   final bool saving;
   final String error;
   final FetchStatus status;
+  final int moveOverIndex;
 
   const CanvasState({
     this.layout,
@@ -14,18 +15,20 @@ class CanvasState extends Equatable {
     this.error = '',
     this.waterfallList = const [],
     this.status = FetchStatus.initial,
+    this.moveOverIndex = -1,
   });
 
   @override
-  List<Object?> get props => [layout, saving, error, waterfallList, status];
+  List<Object?> get props =>
+      [layout, saving, error, waterfallList, status, moveOverIndex];
 
   CanvasState copyWith({
     PageLayout? layout,
-    bool? loading,
     bool? saving,
     String? error,
     List<Product>? waterfallList,
     FetchStatus? status,
+    int? moveOverIndex,
   }) {
     return CanvasState(
       layout: layout ?? this.layout,
@@ -33,6 +36,7 @@ class CanvasState extends Equatable {
       error: error ?? this.error,
       waterfallList: waterfallList ?? this.waterfallList,
       status: status ?? this.status,
+      moveOverIndex: moveOverIndex ?? this.moveOverIndex,
     );
   }
 }

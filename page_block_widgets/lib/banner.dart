@@ -54,6 +54,7 @@ class _BannerWidgetState extends State<BannerWidget> {
   }
 
   void _startTimer() {
+    if (widget.items.isEmpty) return;
     _timer =
         Timer.periodic(Duration(seconds: widget.secondsToNextPage), (timer) {
       _pageController.animateToPage(
@@ -65,6 +66,7 @@ class _BannerWidgetState extends State<BannerWidget> {
   }
 
   void _stopTimer() {
+    if (widget.items.isEmpty) return;
     _timer?.cancel();
     _timer = null;
   }
@@ -95,23 +97,25 @@ class _BannerWidgetState extends State<BannerWidget> {
         children: [
           SizedBox(
             height: blockHeight - verticalPadding * 2,
-            child: PageView.builder(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage = index % widget.items.length;
-                });
-              },
-              itemBuilder: (context, index) {
-                int idx = index % widget.items.length;
-                return ImageWidget(
-                  imageUrl: widget.items[idx].image,
-                  errorImage: widget.errorImage,
-                  link: widget.items[idx].link,
-                  onTap: (link) => widget.onTap?.call(link),
-                );
-              },
-            ),
+            child: widget.items.isEmpty
+                ? const Placeholder()
+                : PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index % widget.items.length;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      int idx = index % widget.items.length;
+                      return ImageWidget(
+                        imageUrl: widget.items[idx].image,
+                        errorImage: widget.errorImage,
+                        link: widget.items[idx].link,
+                        onTap: (link) => widget.onTap?.call(link),
+                      );
+                    },
+                  ),
           ),
           Container(
             alignment: Alignment.bottomCenter,

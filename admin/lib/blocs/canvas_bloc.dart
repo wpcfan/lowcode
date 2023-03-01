@@ -24,18 +24,8 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
 
   void _onCanvasEventInsertBlock(
       CanvasEventInsertBlock event, Emitter<CanvasState> emit) async {
-    final block = await blockRepo.createBlock(state.layout!.id!, event.block);
-    final blocks = state.layout?.blocks ?? [];
-    final index = blocks.indexWhere((element) => element.sort == event.sort);
-    if (index != -1) {
-      emit(state.copyWith(
-          layout: state.layout?.copyWith(blocks: [
-            ...blocks.sublist(0, index),
-            block,
-            ...blocks.sublist(index)
-          ]),
-          error: ''));
-    }
+    final layout = await blockRepo.insertBlock(event.pageId, event.block);
+    emit(state.copyWith(layout: layout, error: ''));
   }
 
   void _onCanvasEventUpdateBlock(
@@ -57,18 +47,17 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
 
   void _onCanvasEventMoveBlock(
       CanvasEventMoveBlock event, Emitter<CanvasState> emit) async {
-    await blockRepo.moveBlock(event.pageId, event.blockId, event.sort);
-    final layout = await adminRepo.get(event.pageId);
+    final layout =
+        await blockRepo.moveBlock(event.pageId, event.blockId, event.sort);
+
     emit(state.copyWith(layout: layout, error: ''));
   }
 
   void _onCanvasEventAddBlock(
       CanvasEventAddBlock event, Emitter<CanvasState> emit) async {
-    final block = await blockRepo.createBlock(state.layout!.id!, event.block);
-    final blocks = state.layout?.blocks ?? [];
-    blocks.add(block);
-    emit(state.copyWith(
-        layout: state.layout?.copyWith(blocks: blocks), error: ''));
+    final layout = await blockRepo.createBlock(state.layout!.id!, event.block);
+
+    emit(state.copyWith(layout: layout, error: ''));
   }
 
   void _onCanvasEventDeleteBlock(

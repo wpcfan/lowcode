@@ -12,26 +12,39 @@ class PageBlockRepository {
     this.baseUrl = '/pages',
   }) : client = client ?? AdminClient.getInstance();
 
-  Future<PageBlock> createBlock(int pageId, PageBlock block) async {
+  Future<PageLayout> createBlock(int pageId, PageBlock block) async {
     debugPrint('PageAdminRepository.createBlock($pageId, $block)');
 
     final url = '$baseUrl/$pageId/blocks';
     final response = await client.post(url, data: block.toJson());
 
-    final result = PageBlock.fromJson(response.data);
+    final result = PageLayout.fromJson(response.data);
 
     debugPrint('PageAdminRepository.createBlock($pageId, $block) - success');
 
     return result;
   }
 
-  Future<PageBlock> moveBlock(int pageId, int blockId, int sort) async {
+  Future<PageLayout> insertBlock(int pageId, PageBlock block) async {
+    debugPrint('PageAdminRepository.createBlock($pageId, $block)');
+
+    final url = '$baseUrl/$pageId/blocks/insert';
+    final response = await client.post(url, data: block.toJson());
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageAdminRepository.createBlock($pageId, $block) - success');
+
+    return result;
+  }
+
+  Future<PageLayout> moveBlock(int pageId, int blockId, int sort) async {
     debugPrint('PageAdminRepository.moveBlock($pageId, $blockId, $sort)');
 
     final url = '$baseUrl/$pageId/blocks/$blockId/move/$sort';
     final response = await client.patch(url);
 
-    final result = PageBlock.fromJson(response.data);
+    final result = PageLayout.fromJson(response.data);
 
     debugPrint(
         'PageAdminRepository.moveBlock($pageId, $blockId, $sort) - success');

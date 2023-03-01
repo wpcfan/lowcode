@@ -30,9 +30,10 @@ class ImageRowWidget extends StatelessWidget {
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: blockWidth, maxHeight: blockHeight)
-        .backgroundColor(Colors.white)
         .border(all: 1, color: Colors.grey);
     switch (items.length) {
+      case 0: // Empty
+        return page(child: const Placeholder());
       case 1:
         return _buildSingleImage(context, itemWidth, itemHeight).parent(page);
       case 2:

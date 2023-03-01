@@ -62,12 +62,12 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     final productPrice = product.price != null
         ? product.price!
             .toPriceWithDecimalSize(defaultFontSize: 16, decimalFontSize: 12)
-            .padding(bottom: verticalSpacing, right: horizontalSpacing)
+            .padding(right: horizontalSpacing)
             .alignment(Alignment.centerRight)
         : null;
 
     // 购物车图标
-    const double buttonSize = 30.0;
+    const double buttonSize = 24.0;
     final cartBtn = const Icon(Icons.add_shopping_cart, color: Colors.white)
         .rounded(size: buttonSize, color: Colors.red)
         .gestures(onTap: () {
@@ -98,14 +98,17 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
       productName,
       productDescription,
     ].toColumn(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start);
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+    );
     // 商品名称和描述和价格形成一列，价格需要沉底，所以使用Expanded
     final right = [nameAndDescColumn, priceRow]
         .toColumn(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.start)
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+        )
         .padding(right: horizontalSpacing)
         .expanded();
     // 商品图片

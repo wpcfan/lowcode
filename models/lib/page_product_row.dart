@@ -38,6 +38,7 @@ class ProductRowPageBlock extends PageBlock {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'title': title,
       'type': type.value,
       'sort': sort,
       'data': data.map((e) => e.toJson()).toList(),

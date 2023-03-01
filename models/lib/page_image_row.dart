@@ -55,7 +55,7 @@ class ImageRowPageBlock extends PageBlock {
     return {
       'id': id,
       'title': title,
-      'type': describeEnum(type),
+      'type': type.value,
       'sort': sort,
       'config': config.toJson(),
       'data': data.map((e) => e.toJson()).toList(),

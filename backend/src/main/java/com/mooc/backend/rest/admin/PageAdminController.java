@@ -122,22 +122,22 @@ public class PageAdminController {
 
     @Operation(summary = "添加页面区块")
     @PostMapping("/{id}/blocks")
-    public PageBlockDTO addBlock(
+    public PageDTO addBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @RequestBody CreateOrUpdatePageBlockDTO block) {
         return pageCreateService.addBlockToPage(id, block)
-                .map(PageBlockDTO::fromEntity)
+                .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("要添加的页面区块不存在", "PageAdminController#addBlock",
                         HttpStatus.NOT_FOUND.value()));
     }
 
     @Operation(summary = "插入页面区块")
     @PostMapping("/{id}/blocks/insert")
-    public PageBlockDTO insertBlock(
+    public PageDTO insertBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @RequestBody CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
         return pageCreateService.insertBlockToPage(id, insertPageBlockDTO)
-                .map(PageBlockDTO::fromEntity)
+                .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("要插入的页面区块不存在", "PageAdminController#insertBlock",
                         HttpStatus.NOT_FOUND.value()));
     }
@@ -165,14 +165,14 @@ public class PageAdminController {
 
     @Operation(summary = "移动页面区块")
     @PatchMapping("/{id}/blocks/{blockId}/move/{targetSort}")
-    public PageBlockDTO moveBlock(
+    public PageDTO moveBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @Parameter(description = "目标排序", name = "targetSort") @PathVariable Integer targetSort
     ) {
         log.debug("move block: id = {}, blockId = {}, targetSort = {}", id, blockId, targetSort);
-        return pageUpdateService.moveBlock(blockId, targetSort)
-                .map(PageBlockDTO::fromEntity)
+        return pageUpdateService.moveBlock(id, blockId, targetSort)
+                .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("要移动的页面区块不存在", "PageAdminController#moveBlock",
                         HttpStatus.NOT_FOUND.value()));
     }

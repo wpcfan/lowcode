@@ -3,6 +3,7 @@ package com.mooc.backend.services;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
+import com.mooc.backend.dtos.PageDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
@@ -30,7 +31,7 @@ public class PageCreateService {
         return pageEntity;
     }
 
-    public Optional<PageBlockEntity> addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
+    public Optional<PageEntity> addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
         return pageEntityRepository.findById(pageId)
                 .map(pageEntity -> {
                     if (pageEntity.getStatus() != PageStatus.Draft) {
@@ -45,12 +46,11 @@ public class PageCreateService {
                     var blockEntity = block.toEntity();
                     pageBlockEntityRepository.save(blockEntity);
                     pageEntity.addPageBlock(blockEntity);
-                    pageEntityRepository.save(pageEntity);
-                    return blockEntity;
+                    return pageEntityRepository.save(pageEntity);
                 });
     }
 
-    public Optional<PageBlockEntity> insertBlockToPage(Long id, CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
+    public Optional<PageEntity> insertBlockToPage(Long id, CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     if (pageEntity.getStatus() != PageStatus.Draft) {
@@ -67,8 +67,7 @@ public class PageCreateService {
                     pageBlockEntityRepository.updateSortByPageIdAndSortGreaterThanEqual(id, insertPageBlockDTO.sort());
                     blockEntity.setSort(insertPageBlockDTO.sort());
                     pageEntity.addPageBlock(blockEntity);
-                    pageEntityRepository.save(pageEntity);
-                    return blockEntity;
+                    return pageEntityRepository.save(pageEntity);
                 });
     }
 

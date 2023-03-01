@@ -5,10 +5,10 @@ import com.mooc.backend.enumerations.BlockType;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Type;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
@@ -18,7 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "mooc_page_blocks")
-public class PageBlockEntity {
+public class PageBlockEntity implements Comparator<PageBlockEntity>, Comparable<PageBlockEntity> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -43,10 +43,11 @@ public class PageBlockEntity {
     @JoinColumn(name = "page_id")
     private PageEntity page;
 
+    @SortComparator(PageBlockDataEntity.class)
     @OneToMany(mappedBy = "pageBlock", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private Set<PageBlockDataEntity> data = new HashSet<>();
+    private SortedSet<PageBlockDataEntity> data = new TreeSet<>();
 
     public void addData(PageBlockDataEntity pageBlockDataEntity) {
         data.add(pageBlockDataEntity);
@@ -56,5 +57,14 @@ public class PageBlockEntity {
     public void removeData(PageBlockDataEntity pageBlockDataEntity) {
         data.remove(pageBlockDataEntity);
         pageBlockDataEntity.setPageBlock(null);
+    }
+
+    public int compare(PageBlockEntity a, PageBlockEntity b) {
+        return a.getSort() - b.getSort();
+    }
+
+    @Override
+    public int compareTo(PageBlockEntity o) {
+        return this.getSort() - o.getSort();
     }
 }

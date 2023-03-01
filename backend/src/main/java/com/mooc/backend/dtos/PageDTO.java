@@ -12,6 +12,8 @@ import lombok.Value;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Value
 @Builder
@@ -22,7 +24,7 @@ public class PageDTO {
     private PageType pageType;
     private PageConfig config;
     @Builder.Default
-    private Set<PageBlockDTO> blocks = new HashSet<>();
+    private SortedSet<PageBlockDTO> blocks = new TreeSet<>();
     /**
      * 页面启用时间，只有在启用时间之后，且处于已发布状态下才会显示给用户
      */
@@ -44,7 +46,7 @@ public class PageDTO {
                 .config(page.getConfig())
                 .blocks(page.getPageBlocks().stream()
                         .map(PageBlockDTO::fromProjection)
-                        .collect(HashSet::new, Set::add, Set::addAll))
+                        .collect(TreeSet::new, Set::add, Set::addAll))
                 .startTime(page.getStartTime())
                 .endTime(page.getEndTime())
                 .status(page.getStatus())
@@ -60,7 +62,7 @@ public class PageDTO {
                 .config(page.getConfig())
                 .blocks(page.getPageBlocks().stream()
                         .map(PageBlockDTO::fromEntity)
-                        .collect(HashSet::new, Set::add, Set::addAll))
+                        .collect(TreeSet::new, Set::add, Set::addAll))
                 .startTime(page.getStartTime())
                 .endTime(page.getEndTime())
                 .status(page.getStatus())

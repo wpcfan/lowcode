@@ -1,20 +1,20 @@
 package com.mooc.backend.repositories;
 
 import com.mooc.backend.entities.PageEntity;
-import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.projections.PageEntityInfo;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, JpaSpecificationExecutor<PageEntity> {
+
+    @EntityGraph(attributePaths = {"pageBlocks", "pageBlocks.data"})
+    @Query("select p from PageEntity p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
+    Optional<PageEntity> findById();
 
     @Query("select p from PageEntity p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
     Optional<PageEntityInfo> findProjectionById(Long id);

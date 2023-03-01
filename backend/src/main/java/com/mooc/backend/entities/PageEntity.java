@@ -7,11 +7,14 @@ import com.mooc.backend.enumerations.Platform;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * 页面实体
@@ -63,10 +66,11 @@ public class PageEntity extends Auditable {
      * orphanRemoval = true 是指删除父对象的时候，同时删除子对象，而且子对象也会从数据库中删除。
      * <p>
      */
+    @SortComparator(PageBlockEntity.class)
     @OneToMany(mappedBy = "page", cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private Set<PageBlockEntity> pageBlocks = new HashSet<>();
+    private SortedSet<PageBlockEntity> pageBlocks = new TreeSet<>();
 
     @Type(JsonType.class)
     @Column(name = "config", nullable = false, columnDefinition = "json")

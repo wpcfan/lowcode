@@ -9,16 +9,18 @@ import lombok.Value;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Value
 @Builder
-public class PageBlockDTO {
+public class PageBlockDTO implements Comparable<PageBlockDTO> {
     private Long id;
     private String title;
     private BlockType type;
     private Integer sort;
     private BlockConfig config;
-    private Set<PageBlockDataDTO> data;
+    private SortedSet<PageBlockDataDTO> data;
 
     public static PageBlockDTO fromProjection(PageBlockEntityInfo block) {
         return PageBlockDTO.builder()
@@ -29,7 +31,7 @@ public class PageBlockDTO {
                 .config(block.getConfig())
                 .data(block.getData().stream()
                         .map(PageBlockDataDTO::fromProjection)
-                        .collect(HashSet::new, Set::add, Set::addAll)
+                        .collect(TreeSet::new, Set::add, Set::addAll)
                 )
                 .build();
     }
@@ -43,7 +45,7 @@ public class PageBlockDTO {
                 .config(block.getConfig())
                 .data(block.getData().stream()
                         .map(PageBlockDataDTO::fromEntity)
-                        .collect(HashSet::new, Set::add, Set::addAll)
+                        .collect(TreeSet::new, Set::add, Set::addAll)
                 )
                 .build();
     }
@@ -57,5 +59,10 @@ public class PageBlockDTO {
                 .build();
         getData().forEach(data -> pageBlockEntity.addData(data.toEntity()));
         return pageBlockEntity;
+    }
+
+    @Override
+    public int compareTo(PageBlockDTO o) {
+        return getSort().compareTo(o.getSort());
     }
 }

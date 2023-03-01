@@ -85,13 +85,12 @@ public class PageUpdateService {
                 });
     }
 
-    public Optional<PageBlockEntity> moveBlock(Long blockId, Integer targetSort) {
+    public Optional<PageEntity> moveBlock(Long pageId, Long blockId, Integer targetSort) {
         return pageBlockEntityRepository.findById(blockId)
-                .map(pageBlockEntity -> {
-                    var pageId = pageBlockEntity.getPage().getId();
+                .flatMap(pageBlockEntity -> {
                     var sort = pageBlockEntity.getSort();
                     if (sort.equals(targetSort)) {
-                        return pageBlockEntity;
+                        throw new CustomException("目标位置和当前位置相同", "PageUpdateService#moveBlock", HttpStatus.BAD_REQUEST.value());
                     }
                     if (sort < targetSort) {
                         pageBlockEntityRepository.updateSortByPageIdAndSortGreaterThanEqual(pageId, sort);
@@ -99,7 +98,8 @@ public class PageUpdateService {
                         pageBlockEntityRepository.updateSortByPageIdAndSortLessThanEqual(pageId, sort);
                     }
                     pageBlockEntity.setSort(targetSort);
-                    return pageBlockEntityRepository.save(pageBlockEntity);
+                    pageBlockEntityRepository.save(pageBlockEntity);
+                    return pageEntityRepository.findById(pageId);
                 });
     }
 

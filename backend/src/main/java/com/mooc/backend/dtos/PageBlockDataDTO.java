@@ -9,7 +9,7 @@ import lombok.Value;
 @Value
 @Builder
 
-public class PageBlockDataDTO {
+public class PageBlockDataDTO implements Comparable<PageBlockDataDTO> {
     private Long id;
     private Integer sort;
     private BlockData content;
@@ -35,5 +35,10 @@ public class PageBlockDataDTO {
                 .sort(getSort())
                 .content(getContent())
                 .build();
+    }
+
+    @Override
+    public int compareTo(PageBlockDataDTO o) {
+        return getSort().compareTo(o.getSort());
     }
 }

@@ -18,9 +18,6 @@ class ProductRowWidget extends StatelessWidget {
     required this.errorImage,
     required this.config,
     required this.ratio,
-    this.borderWidth = 1,
-    this.borderColor = Colors.grey,
-    this.backgroundColor = Colors.white,
     this.addToCart,
     this.onTap,
   }) : assert(items.length <= 2 && items.length > 0);
@@ -28,14 +25,17 @@ class ProductRowWidget extends StatelessWidget {
   final String errorImage;
   final BlockConfig config;
   final double ratio;
-  final double borderWidth;
-  final Color borderColor;
-  final Color backgroundColor;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = config.backgroundColor != null
+        ? config.backgroundColor!
+        : Colors.transparent;
+    final borderColor =
+        config.borderColor != null ? config.borderColor! : Colors.transparent;
+    final borderWidth = config.borderWidth ?? 0.0;
     final width = (config.blockWidth ?? 0) / ratio;
     final height = (config.blockHeight ?? 0) / ratio;
     final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
@@ -49,9 +49,7 @@ class ProductRowWidget extends StatelessWidget {
     /// 这样我们可以专注于 Widget 的内容，而不用关心 Widget 的样式
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
-        .constrained(maxWidth: width, maxHeight: height)
-        .backgroundColor(backgroundColor)
-        .border(all: borderWidth, color: borderColor);
+        .constrained(maxWidth: width, maxHeight: height);
 
     switch (items.length) {
       case 1:
@@ -65,6 +63,9 @@ class ProductRowWidget extends StatelessWidget {
           errorImage: errorImage,
           onTap: onTap,
           addToCart: addToCart,
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          borderWidth: borderWidth,
         ).parent(page);
       // case 2:
       //   return items
@@ -98,6 +99,9 @@ class ProductRowWidget extends StatelessWidget {
                 errorImage: errorImage,
                 onTap: onTap,
                 addToCart: addToCart,
+                backgroundColor: backgroundColor,
+                borderColor: borderColor,
+                borderWidth: borderWidth,
               ).padding(
                   right: index == items.length - 1 ? 0 : horizontalSpacing);
             }).parent(page);

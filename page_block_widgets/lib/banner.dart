@@ -18,17 +18,18 @@ class BannerWidget extends StatefulWidget {
   final int transitionDuration;
   final int secondsToNextPage;
 
-  const BannerWidget(
-      {super.key,
-      required this.items,
-      required this.config,
-      required this.errorImage,
-      required this.ratio,
-      this.animationDuration = 500,
-      this.animationCurve = Curves.ease,
-      this.onTap,
-      this.transitionDuration = 500,
-      this.secondsToNextPage = 5});
+  const BannerWidget({
+    super.key,
+    required this.items,
+    required this.config,
+    required this.errorImage,
+    required this.ratio,
+    this.animationDuration = 500,
+    this.animationCurve = Curves.ease,
+    this.onTap,
+    this.transitionDuration = 500,
+    this.secondsToNextPage = 5,
+  });
 
   @override
   State<BannerWidget> createState() => _BannerWidgetState();

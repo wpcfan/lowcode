@@ -52,6 +52,7 @@ dependencies:
   flutter_bloc: ^8.1.2
   equatable: ^2.0.5
   sliver_tools: ^0.2.9
+  hexcolor: ^3.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -9,6 +9,9 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     required this.horizontalSpacing,
     required this.verticalSpacing,
     required this.errorImage,
+    this.backgroundColor = Colors.white,
+    this.borderColor = Colors.grey,
+    this.borderWidth = 1.0,
     this.addToCart,
     this.onTap,
   });
@@ -18,6 +21,9 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
   final double horizontalSpacing;
   final double verticalSpacing;
   final String errorImage;
+  final Color backgroundColor;
+  final Color borderColor;
+  final double borderWidth;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTap;
 
@@ -25,8 +31,8 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     page({required Widget child}) => SwiftUi.widget(child: child)
         .constrained(maxWidth: width, maxHeight: height)
-        .backgroundColor(Colors.white)
-        .border(all: 1, color: Colors.grey);
+        .backgroundColor(backgroundColor)
+        .border(all: borderWidth, color: borderColor);
     // 商品名称
     final productName = Text(
       product.name ?? '',

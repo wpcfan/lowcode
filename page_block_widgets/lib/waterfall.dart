@@ -24,6 +24,12 @@ class WaterfallWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = config.backgroundColor != null
+        ? config.backgroundColor!
+        : Colors.transparent;
+    final borderColor =
+        config.borderColor != null ? config.borderColor! : Colors.transparent;
+    final borderWidth = config.borderWidth ?? 0.0;
     final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
     final verticalPadding = (config.verticalPadding ?? 0) / ratio;
     final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
@@ -31,14 +37,35 @@ class WaterfallWidget extends StatelessWidget {
     final blockWidth = (config.blockWidth ?? 0) / ratio;
     final itemWidth = (blockWidth) / 2;
     return isPreview
-        ? _buildPreview(horizontalPadding, verticalPadding, horizontalSpacing,
-            verticalSpacing, itemWidth)
-        : _buildContent(horizontalPadding, verticalPadding, horizontalSpacing,
-            verticalSpacing, itemWidth);
+        ? _buildPreview(
+            horizontalPadding,
+            verticalPadding,
+            horizontalSpacing,
+            verticalSpacing,
+            itemWidth,
+            backgroundColor,
+            borderColor,
+            borderWidth)
+        : _buildContent(
+            horizontalPadding,
+            verticalPadding,
+            horizontalSpacing,
+            verticalSpacing,
+            itemWidth,
+            backgroundColor,
+            borderColor,
+            borderWidth);
   }
 
-  Widget _buildPreview(double horizontalPadding, double verticalPadding,
-      double horizontalSpacing, double verticalSpacing, double itemWidth) {
+  Widget _buildPreview(
+      double horizontalPadding,
+      double verticalPadding,
+      double horizontalSpacing,
+      double verticalSpacing,
+      double itemWidth,
+      Color backgroundColor,
+      Color borderColor,
+      double borderWidth) {
     return ConstrainedBox(
       constraints: BoxConstraints(
         minHeight: 200.0 * products.length / 2,
@@ -61,6 +88,9 @@ class WaterfallWidget extends StatelessWidget {
               errorImage: errorImage,
               addToCart: addToCart,
               onTap: onTap,
+              backgroundColor: backgroundColor,
+              borderColor: borderColor,
+              borderWidth: borderWidth,
             );
           },
           itemCount: products.length,
@@ -69,8 +99,15 @@ class WaterfallWidget extends StatelessWidget {
     );
   }
 
-  SliverPadding _buildContent(double horizontalPadding, double verticalPadding,
-      double horizontalSpacing, double verticalSpacing, double itemWidth) {
+  SliverPadding _buildContent(
+      double horizontalPadding,
+      double verticalPadding,
+      double horizontalSpacing,
+      double verticalSpacing,
+      double itemWidth,
+      Color backgroundColor,
+      Color borderColor,
+      double borderWidth) {
     return SliverPadding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
@@ -90,6 +127,9 @@ class WaterfallWidget extends StatelessWidget {
             errorImage: errorImage,
             addToCart: addToCart,
             onTap: onTap,
+            backgroundColor: backgroundColor,
+            borderColor: borderColor,
+            borderWidth: borderWidth,
           );
         },
       ),

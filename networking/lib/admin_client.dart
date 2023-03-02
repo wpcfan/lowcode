@@ -1,12 +1,11 @@
-import 'package:dio/browser.dart';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import 'problem.dart';
 
-class AdminClient with DioMixin implements Dio {
-  AdminClient._([BaseOptions? options]) {
-    options = BaseOptions(
+class AdminClient {
+  static Dio getInstance() {
+    final options = BaseOptions(
       baseUrl: 'http://localhost:8080/api/v1/admin',
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
@@ -15,10 +14,9 @@ class AdminClient with DioMixin implements Dio {
         'Accept': 'application/json',
       }),
     );
-
-    this.options = options;
-    interceptors.add(PrettyDioLogger());
-    interceptors.add(InterceptorsWrapper(
+    final dio = Dio(options);
+    dio.interceptors.add(PrettyDioLogger());
+    dio.interceptors.add(InterceptorsWrapper(
       onError: (e, handler) {
         if (e.response?.data != null) {
           final problem = Problem.fromJson(e.response?.data);
@@ -32,8 +30,6 @@ class AdminClient with DioMixin implements Dio {
         return handler.next(e);
       },
     ));
-    httpClientAdapter = BrowserHttpClientAdapter();
+    return dio;
   }
-
-  static Dio getInstance() => AdminClient._();
 }

@@ -500,6 +500,7 @@ class _CenterPaneState extends State<CenterPane> {
                 const Product(
                   id: 1,
                   name: 'Product 1',
+                  description: 'Description 1',
                   images: ['https://picsum.photos/100/80'],
                   price: '¥100.23',
                 )
@@ -519,24 +520,28 @@ class _CenterPaneState extends State<CenterPane> {
                 Product(
                   id: 1,
                   name: 'Product 1',
+                  description: 'Description 1',
                   images: ['https://picsum.photos/100/80'],
                   price: '¥100.23',
                 ),
                 Product(
                   id: 2,
                   name: 'Product 2',
+                  description: 'Description 2',
                   images: ['https://picsum.photos/100/80'],
                   price: '¥200.34',
                 ),
                 Product(
                   id: 3,
                   name: 'Product 3',
+                  description: 'Description 3',
                   images: ['https://picsum.photos/100/80'],
                   price: '¥300.45',
                 ),
                 Product(
                   id: 4,
                   name: 'Product 4',
+                  description: 'Description 4',
                   images: ['https://picsum.photos/100/80'],
                   price: '¥400.56',
                 ),

@@ -1,10 +1,7 @@
 package com.mooc.backend.entities.blocks;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +15,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BlockConfig {
+    private static final String HEX_COLOR_PATTERN
+            = "^#(?:(?:[\\da-f]{3}){1,2}|(?:[\\da-f]{4}){1,2})$";
+
     @Schema(description = "水平内边距", example = "12.0")
     @NotNull
     @PositiveOrZero
@@ -47,4 +47,14 @@ public class BlockConfig {
     @DecimalMin("300")
     @DecimalMax("1200.00")
     private Double blockHeight;
+    @Schema(description = "区块背景颜色", example = "#ffffff")
+    @Pattern(regexp = HEX_COLOR_PATTERN)
+    private String backgroundColor;
+    @Schema(description = "区块边框颜色", example = "#000000")
+    @Pattern(regexp = HEX_COLOR_PATTERN)
+    private String borderColor;
+    @Schema(description = "区块边框宽度", example = "1.0")
+    @DecimalMin("0.0")
+    @DecimalMax("10.0")
+    private String borderWidth;
 }

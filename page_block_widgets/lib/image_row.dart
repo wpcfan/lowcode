@@ -17,10 +17,17 @@ class ImageRowWidget extends StatelessWidget {
   final BlockConfig config;
   final double ratio;
   final String errorImage;
+
   final void Function(MyLink?)? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = config.backgroundColor != null
+        ? config.backgroundColor!
+        : Colors.transparent;
+    final borderColor =
+        config.borderColor != null ? config.borderColor! : Colors.transparent;
+    final borderWidth = config.borderWidth ?? 0.0;
     final blockWidth = (config.blockWidth ?? 0) / ratio;
     final blockHeight = (config.blockHeight ?? 0) / ratio;
     final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
@@ -30,7 +37,8 @@ class ImageRowWidget extends StatelessWidget {
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .constrained(maxWidth: blockWidth, maxHeight: blockHeight)
-        .border(all: 1, color: Colors.grey);
+        .backgroundColor(backgroundColor)
+        .border(all: borderWidth, color: borderColor);
     switch (items.length) {
       case 0: // Empty
         return page(child: const Placeholder());

@@ -20,6 +20,18 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     on<CanvasEventInsertBlock>(_onCanvasEventInsertBlock);
     on<CanvasEventMoveBlock>(_onCanvasEventMoveBlock);
     on<CanvasEventDeleteBlock>(_onCanvasEventDeleteBlock);
+    on<CanvasEventSelectBlock>(_onCanvasEventSelectBlock);
+    on<CanvasEventSelectNoBlock>(_onCanvasEventSelectNoBlock);
+  }
+
+  void _onCanvasEventSelectNoBlock(
+      CanvasEventSelectNoBlock event, Emitter<CanvasState> emit) {
+    emit(state.clearSelectedBlock());
+  }
+
+  void _onCanvasEventSelectBlock(
+      CanvasEventSelectBlock event, Emitter<CanvasState> emit) {
+    emit(state.copyWith(selectedBlock: event.block));
   }
 
   void _onCanvasEventInsertBlock(

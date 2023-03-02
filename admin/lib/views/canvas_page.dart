@@ -2,6 +2,7 @@ import 'package:admin/blocs/canvas_event.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 import 'package:page_repository/page_repository.dart';
@@ -18,82 +19,224 @@ class CanvasPage extends StatefulWidget {
 }
 
 class _CanvasPageState extends State<CanvasPage> {
-  bool _showPropertiesPanel = false;
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<CanvasBloc>(
+      create: (context) => CanvasBloc(
+        context.read<PageAdminRepository>(),
+        context.read<PageBlockRepository>(),
+        context.read<PageBlockDataRepository>(),
+        context.read<ProductRepository>(),
+      )..add(CanvasEventLoad(widget.id)),
+      child: Builder(builder: (context) {
+        return Scaffold(
+          body: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 左侧组件列表面板
+              const LeftPane(widgets: [
+                WidgetData(
+                    icon: Icons.photo_library,
+                    label: '轮播图',
+                    type: PageBlockType.banner),
+                WidgetData(
+                    icon: Icons.imagesearch_roller,
+                    label: '图片行',
+                    type: PageBlockType.imageRow),
+                WidgetData(
+                    icon: Icons.production_quantity_limits,
+                    label: '产品行',
+                    type: PageBlockType.productRow),
+                WidgetData(
+                    icon: Icons.category,
+                    label: '瀑布流',
+                    type: PageBlockType.waterfall),
+              ]),
+
+              // 中间画布
+
+              CenterPane(
+                onTap: () {
+                  setState(() {
+                    context.read<CanvasBloc>().add(CanvasEventSelectNoBlock());
+                  });
+                },
+              ),
+
+              // 右侧属性面板
+              ...[const Spacer(), const RightPane()],
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class RightPane extends StatelessWidget {
+  const RightPane({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 左侧组件列表面板
-          const LeftPane(widgets: [
-            WidgetData(
-                icon: Icons.photo_library,
-                label: '轮播图',
-                type: PageBlockType.banner),
-            WidgetData(
-                icon: Icons.imagesearch_roller,
-                label: '图片行',
-                type: PageBlockType.imageRow),
-            WidgetData(
-                icon: Icons.production_quantity_limits,
-                label: '产品行',
-                type: PageBlockType.productRow),
-            WidgetData(
-                icon: Icons.category,
-                label: '瀑布流',
-                type: PageBlockType.waterfall),
-          ]),
-
-          // 中间画布
-          BlocProvider<CanvasBloc>(
-            create: (context) => CanvasBloc(
-              context.read<PageAdminRepository>(),
-              context.read<PageBlockRepository>(),
-              context.read<PageBlockDataRepository>(),
-              context.read<ProductRepository>(),
-            )..add(CanvasEventLoad(widget.id)),
-            child: CenterPane(
-              onTap: () {
-                setState(() {
-                  _showPropertiesPanel = false;
-                });
-              },
-            ),
-          ),
-
-          // 右侧属性面板
-          if (_showPropertiesPanel) ...[
-            const Spacer(),
-            SizedBox(
-              width: 300,
-              child: Container(
-                color: Colors.grey,
-                child: const Center(
-                  child: Text('Properties Panel'),
-                ),
-              ),
-            )
-          ],
-        ],
-      ),
-
-      // 按钮
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            _showPropertiesPanel = !_showPropertiesPanel;
-          });
-        },
-        backgroundColor: Colors.purple,
-        child: const Text(
-          '属性',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+    return SizedBox(
+      width: 300,
+      child: Container(
+        color: Colors.grey,
+        child: BlocBuilder<CanvasBloc, CanvasState>(
+          buildWhen: (previous, current) =>
+              current.selectedBlock != previous.selectedBlock &&
+              current.layout != null,
+          builder: (context, state) {
+            final block = state.selectedBlock;
+            final layoutConfig = state.layout?.config;
+            final fields = block != null
+                ? [
+                    const Text('区块属性'),
+                    TextFormField(
+                      initialValue: block.title,
+                      decoration: const InputDecoration(
+                        labelText: '标题',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.sort.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '排序',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.horizontalPadding.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '水平内边距',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.verticalPadding.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '垂直内边距',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.horizontalSpacing.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '水平间距',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.verticalSpacing.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '垂直间距',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.blockWidth.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '区块宽度',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.blockHeight.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '区块高度',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.backgroundColor != null
+                          ? ColorToHex(block.config.backgroundColor!).toString()
+                          : null,
+                      decoration: const InputDecoration(
+                        labelText: '背景颜色',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.borderColor != null
+                          ? ColorToHex(block.config.borderColor!).toString()
+                          : null,
+                      decoration: const InputDecoration(
+                        labelText: '边框颜色',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: block.config.borderWidth?.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '边框宽度',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    ElevatedButton(onPressed: () {}, child: const Text('保存')),
+                  ]
+                : [
+                    const Text('页面属性'),
+                    TextFormField(
+                      initialValue: layoutConfig?.horizontalPadding.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '水平内边距',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue: layoutConfig?.verticalPadding.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '垂直内边距',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    TextFormField(
+                      initialValue:
+                          layoutConfig?.baselineScreenWidth.toString(),
+                      decoration: const InputDecoration(
+                        labelText: '基准屏幕宽度',
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    ElevatedButton(onPressed: () {}, child: const Text('保存')),
+                  ];
+            return Form(
+                child: Column(
+              children: fields,
+            ));
+          },
         ),
       ),
     );
@@ -215,8 +358,7 @@ class _CenterPaneState extends State<CenterPane> {
   }
 
   Widget _buildCanvas(CanvasState state) {
-    final itemWidth = state.layout?.config.baselineScreenWidth ?? _paneWidth;
-
+    final paneWidth = state.layout?.config.baselineScreenWidth ?? _paneWidth;
     final blocks = state.layout?.blocks ?? [];
     final products = state.waterfallList;
     final bloc = context.read<CanvasBloc>();
@@ -226,11 +368,11 @@ class _CenterPaneState extends State<CenterPane> {
       verticalPadding: 12,
       horizontalSpacing: 6,
       verticalSpacing: 6,
-      blockWidth: itemWidth - 24,
+      blockWidth: paneWidth - 24,
       blockHeight: 140,
     );
     return SizedBox(
-      width: itemWidth,
+      width: paneWidth,
       child: Container(
         color: Colors.grey,
         child: GestureDetector(
@@ -243,7 +385,7 @@ class _CenterPaneState extends State<CenterPane> {
                     builder: (context, candidateData, rejectedData) {
                       final item = blocks[index];
                       return _buildDraggableWidget(
-                          item, products, index, itemWidth);
+                          item, products, index, paneWidth, bloc);
                     },
                     onMove: (details) {
                       setState(() {
@@ -432,8 +574,8 @@ class _CenterPaneState extends State<CenterPane> {
     }
   }
 
-  Widget _buildDraggableWidget(
-      PageBlock block, List<Product> products, int index, double itemWidth) {
+  Widget _buildDraggableWidget(PageBlock block, List<Product> products,
+      int index, double itemWidth, CanvasBloc bloc) {
     page({required Widget child}) => Draggable(
           data: block,
           feedback: SizedBox(
@@ -472,6 +614,9 @@ class _CenterPaneState extends State<CenterPane> {
           config: it.config,
           ratio: 1.0,
           errorImage: errorImage,
+          onTap: (_) {
+            bloc.add(CanvasEventSelectBlock(block));
+          },
         );
         break;
       case PageBlockType.imageRow:
@@ -489,6 +634,9 @@ class _CenterPaneState extends State<CenterPane> {
           config: it.config,
           ratio: 1.0,
           errorImage: errorImage,
+          onTap: (_) {
+            bloc.add(CanvasEventSelectBlock(block));
+          },
         );
         break;
       case PageBlockType.productRow:
@@ -510,6 +658,9 @@ class _CenterPaneState extends State<CenterPane> {
           config: it.config,
           ratio: 1.0,
           errorImage: errorImage,
+          onTap: (_) {
+            bloc.add(CanvasEventSelectBlock(block));
+          },
         );
         break;
       case PageBlockType.waterfall:
@@ -553,6 +704,9 @@ class _CenterPaneState extends State<CenterPane> {
           ratio: 1.0,
           errorImage: errorImage,
           isPreview: true,
+          onTap: (_) {
+            bloc.add(CanvasEventSelectBlock(block));
+          },
         );
         break;
       default:

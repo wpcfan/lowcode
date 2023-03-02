@@ -66,3 +66,18 @@ class CanvasEventDeleteBlock extends CanvasEvent {
   @override
   List<Object?> get props => [pageId, blockId];
 }
+
+class CanvasEventSelectBlock extends CanvasEvent {
+  CanvasEventSelectBlock(this.block) : super();
+  final PageBlock block;
+
+  @override
+  List<Object?> get props => [block];
+}
+
+class CanvasEventSelectNoBlock extends CanvasEvent {
+  CanvasEventSelectNoBlock() : super();
+
+  @override
+  List<Object?> get props => [];
+}

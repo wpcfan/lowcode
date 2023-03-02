@@ -8,6 +8,7 @@ class CanvasState extends Equatable {
   final String error;
   final FetchStatus status;
   final int moveOverIndex;
+  final PageBlock? selectedBlock;
 
   const CanvasState({
     this.layout,
@@ -16,11 +17,31 @@ class CanvasState extends Equatable {
     this.waterfallList = const [],
     this.status = FetchStatus.initial,
     this.moveOverIndex = -1,
+    this.selectedBlock,
   });
 
   @override
-  List<Object?> get props =>
-      [layout, saving, error, waterfallList, status, moveOverIndex];
+  List<Object?> get props => [
+        layout,
+        saving,
+        error,
+        waterfallList,
+        status,
+        moveOverIndex,
+        selectedBlock
+      ];
+
+  CanvasState clearSelectedBlock() {
+    return CanvasState(
+      layout: layout,
+      saving: saving,
+      error: error,
+      waterfallList: waterfallList,
+      status: status,
+      moveOverIndex: moveOverIndex,
+      selectedBlock: null,
+    );
+  }
 
   CanvasState copyWith({
     PageLayout? layout,
@@ -29,6 +50,7 @@ class CanvasState extends Equatable {
     List<Product>? waterfallList,
     FetchStatus? status,
     int? moveOverIndex,
+    PageBlock? selectedBlock,
   }) {
     return CanvasState(
       layout: layout ?? this.layout,
@@ -37,6 +59,7 @@ class CanvasState extends Equatable {
       waterfallList: waterfallList ?? this.waterfallList,
       status: status ?? this.status,
       moveOverIndex: moveOverIndex ?? this.moveOverIndex,
+      selectedBlock: selectedBlock ?? this.selectedBlock,
     );
   }
 }

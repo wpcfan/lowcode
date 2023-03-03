@@ -59,6 +59,8 @@ dependencies:
     path: ../page_block_widgets
   page_repository:
     path: ../page_repository
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

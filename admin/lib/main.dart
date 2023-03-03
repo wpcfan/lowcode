@@ -2,6 +2,7 @@ import 'package:admin/constants.dart';
 import 'package:admin/routes/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class SimpleBlocObserver extends BlocObserver {
   @override
@@ -36,6 +37,14 @@ class MyApp extends StatelessWidget {
           dividerThickness: 0,
         ),
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('zh'),
+      ],
       routerConfig: routerConfig,
     );
   }

@@ -56,5 +56,5 @@ public class BlockConfig {
     @Schema(description = "区块边框宽度", example = "1.0")
     @DecimalMin("0.0")
     @DecimalMax("10.0")
-    private String borderWidth;
+    private Double borderWidth;
 }

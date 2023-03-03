@@ -48,12 +48,13 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     final index = blocks.indexWhere((element) => element.id == event.blockId);
     if (index != -1) {
       emit(state.copyWith(
-          layout: state.layout?.copyWith(blocks: [
-            ...blocks.sublist(0, index),
-            block,
-            ...blocks.sublist(index + 1)
-          ]),
-          error: ''));
+        layout: state.layout?.copyWith(blocks: [
+          ...blocks.sublist(0, index),
+          block,
+          ...blocks.sublist(index + 1)
+        ]),
+        error: '',
+      ));
     }
   }
 
@@ -74,13 +75,16 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
 
   void _onCanvasEventDeleteBlock(
       CanvasEventDeleteBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
     await blockRepo.deleteBlock(event.pageId, event.blockId);
     final blocks = state.layout?.blocks ?? [];
     final index = blocks.indexWhere((element) => element.id == event.blockId);
     if (index != -1) {
       blocks.removeAt(index);
-      emit(state.copyWith(
-          layout: state.layout?.copyWith(blocks: blocks), error: ''));
+      emit(CanvasState(
+        status: FetchStatus.populated,
+        layout: state.layout?.copyWith(blocks: blocks),
+      ));
     }
   }
 
@@ -117,10 +121,11 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         }
       }
       emit(state.copyWith(
-          status: FetchStatus.populated,
-          layout: layout,
-          waterfallList: [],
-          error: ''));
+        status: FetchStatus.populated,
+        layout: layout,
+        waterfallList: [],
+        error: '',
+      ));
     } catch (e) {
       emit(state.copyWith(status: FetchStatus.error, error: e.toString()));
     }
@@ -131,7 +136,11 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     emit(state.copyWith(saving: true));
     try {
       final layout = await adminRepo.update(event.id, event.layout);
-      emit(state.copyWith(saving: false, layout: layout, error: ''));
+      emit(state.copyWith(
+        saving: false,
+        layout: layout,
+        error: '',
+      ));
     } catch (e) {
       emit(state.copyWith(saving: false, error: e.toString()));
     }

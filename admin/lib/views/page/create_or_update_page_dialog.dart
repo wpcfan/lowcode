@@ -23,12 +23,12 @@ class CreateOrUpdatePageDialog extends StatefulWidget {
 }
 
 class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
-  late PageLayout formValue;
-  final formKey = GlobalKey<FormState>();
+  late PageLayout _formValue;
+  final _formKey = GlobalKey<FormState>();
   @override
   void initState() {
     super.initState();
-    formValue = widget.layout ?? PageLayout.empty();
+    _formValue = widget.layout ?? PageLayout.empty();
   }
 
   @override
@@ -36,7 +36,7 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
     return AlertDialog(
       title: Text(widget.title),
       content: Form(
-          key: formKey,
+          key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -59,7 +59,7 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
                 },
                 onSaved: (value) {
                   setState(() {
-                    formValue = formValue.copyWith(title: value);
+                    _formValue = _formValue.copyWith(title: value);
                   });
                 },
               ),
@@ -81,7 +81,7 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
                 onChanged: (value) {},
                 onSaved: (newValue) {
                   setState(() {
-                    formValue = formValue.copyWith(platform: newValue);
+                    _formValue = _formValue.copyWith(platform: newValue);
                   });
                 },
               ),
@@ -106,7 +106,7 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
                 ],
                 onChanged: (value) {},
                 onSaved: (newValue) => setState(() {
-                  formValue = formValue.copyWith(pageType: newValue);
+                  _formValue = _formValue.copyWith(pageType: newValue);
                 }),
               ),
               TextFormField(
@@ -132,8 +132,8 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
                 },
                 onSaved: (newValue) {
                   setState(() {
-                    formValue = formValue.copyWith(
-                        config: formValue.config.copyWith(
+                    _formValue = _formValue.copyWith(
+                        config: _formValue.config.copyWith(
                             horizontalPadding: double.parse(newValue!)));
                   });
                 },
@@ -160,8 +160,8 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
                 },
                 onSaved: (newValue) {
                   setState(() {
-                    formValue = formValue.copyWith(
-                        config: formValue.config.copyWith(
+                    _formValue = _formValue.copyWith(
+                        config: _formValue.config.copyWith(
                             verticalPadding: double.parse(newValue!)));
                   });
                 },
@@ -188,8 +188,8 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
                   return null;
                 },
                 onSaved: (newValue) => setState(() {
-                  formValue = formValue.copyWith(
-                      config: formValue.config.copyWith(
+                  _formValue = _formValue.copyWith(
+                      config: _formValue.config.copyWith(
                           baselineScreenWidth: double.parse(newValue!)));
                 }),
               ),
@@ -204,12 +204,12 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
         ),
         TextButton(
           onPressed: () {
-            if (formKey.currentState?.validate() ?? false) {
-              formKey.currentState?.save();
+            if (_formKey.currentState?.validate() ?? false) {
+              _formKey.currentState?.save();
               if (widget.layout == null) {
-                widget.onCreate?.call(formValue);
+                widget.onCreate?.call(_formValue);
               } else {
-                widget.onUpdate?.call(formValue);
+                widget.onUpdate?.call(_formValue);
               }
               Navigator.of(context).pop();
             }

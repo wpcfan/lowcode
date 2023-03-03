@@ -11,15 +11,10 @@ import 'page/center_pane.dart';
 import 'page/left_pane.dart';
 import 'page/right_pane.dart';
 
-class CanvasPage extends StatefulWidget {
+class CanvasPage extends StatelessWidget {
   const CanvasPage({super.key, required this.id});
   final int id;
 
-  @override
-  State<CanvasPage> createState() => _CanvasPageState();
-}
-
-class _CanvasPageState extends State<CanvasPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<CanvasBloc>(
@@ -28,7 +23,7 @@ class _CanvasPageState extends State<CanvasPage> {
         context.read<PageBlockRepository>(),
         context.read<PageBlockDataRepository>(),
         context.read<ProductRepository>(),
-      )..add(CanvasEventLoad(widget.id)),
+      )..add(CanvasEventLoad(id)),
       child: Builder(builder: (context) {
         return Scaffold(
           body: BlocConsumer<CanvasBloc, CanvasState>(
@@ -83,6 +78,47 @@ class _CanvasPageState extends State<CanvasPage> {
                     RightPane(
                       showBlockConfig: state.selectedBlock != null,
                       state: state,
+                      onSavePageBlock: (pageBlock) {
+                        context.read<CanvasBloc>().add(
+                              CanvasEventUpdateBlock(
+                                  state.layout!.id!, pageBlock.id!, pageBlock),
+                            );
+                      },
+                      onSavePageLayout: (pageLayout) {
+                        context.read<CanvasBloc>().add(
+                              CanvasEventSave(state.layout!.id!, pageLayout),
+                            );
+                      },
+                      onDeleteBlock: (blockId) async {
+                        final bloc = context.read<CanvasBloc>();
+                        final result = await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: const Text('删除'),
+                                content: const Text('确定要删除吗？'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(false);
+                                    },
+                                    child: const Text('取消'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(true);
+                                    },
+                                    child: const Text('确定'),
+                                  ),
+                                ],
+                              );
+                            });
+                        if (result) {
+                          bloc.add(
+                            CanvasEventDeleteBlock(state.layout!.id!, blockId),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ],

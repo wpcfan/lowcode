@@ -64,9 +64,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
           .where((element) => element.type == PageBlockType.waterfall)
           .isNotEmpty) {
         /// 获取第一个瀑布流布局
-        final waterfallBlock = layout.blocks.firstWhere(
-                (element) => element.type == PageBlockType.waterfall)
-            as WaterfallPageBlock;
+        final waterfallBlock = layout.blocks
+            .firstWhere((element) => element.type == PageBlockType.waterfall);
 
         /// 如果瀑布流布局有内容，获取瀑布流数据
         if (waterfallBlock.data.isNotEmpty) {

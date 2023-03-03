@@ -57,7 +57,7 @@ class SliverBodyWidget extends StatelessWidget {
             children: blocks.map((block) {
           switch (block.type) {
             case PageBlockType.banner:
-              final it = block as BannerPageBlock;
+              final it = block as PageBlock<ImageData>;
 
               /// SliverToBoxAdapter 可以将一个 Widget 转换成 Sliver
               return SliverToBoxAdapter(
@@ -70,7 +70,7 @@ class SliverBodyWidget extends StatelessWidget {
                 ),
               );
             case PageBlockType.imageRow:
-              final it = block as ImageRowPageBlock;
+              final it = block as PageBlock<ImageData>;
               return SliverToBoxAdapter(
                 child: ImageRowWidget(
                   items: it.data.map((di) => di.content).toList(),
@@ -81,7 +81,7 @@ class SliverBodyWidget extends StatelessWidget {
                 ),
               );
             case PageBlockType.productRow:
-              final it = block as ProductRowPageBlock;
+              final it = block as PageBlock<Product>;
               return SliverToBoxAdapter(
                 child: ProductRowWidget(
                   items: it.data.map((di) => di.content).toList(),
@@ -93,7 +93,7 @@ class SliverBodyWidget extends StatelessWidget {
                 ),
               );
             case PageBlockType.waterfall:
-              final it = block as WaterfallPageBlock;
+              final it = block as PageBlock<Category>;
 
               /// WaterfallWidget 是一个瀑布流的 Widget
               /// 它本身就是 Sliver，所以不需要再包装一层 SliverToBoxAdapter

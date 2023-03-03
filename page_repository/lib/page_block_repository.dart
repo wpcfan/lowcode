@@ -59,7 +59,7 @@ class PageBlockRepository {
     final url = '$baseUrl/$pageId/blocks/$blockId';
     final response = await client.put(url, data: block.toJson());
 
-    final result = PageBlock.fromJson(response.data);
+    final result = PageBlock.mapPageBlock(response.data);
 
     debugPrint(
         'PageAdminRepository.updateBlock($pageId, $blockId, $block) - success');

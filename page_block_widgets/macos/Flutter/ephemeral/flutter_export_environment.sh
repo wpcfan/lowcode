@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Users\wpcfa\scoop\apps\flutter\3.7.5"
-export "FLUTTER_APPLICATION_PATH=C:\Users\wpcfa\workspace\lowcode-flutter-spring\page_block_widgets"
+export "FLUTTER_ROOT=/opt/homebrew/Caskroom/flutter/3.3.8/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/peng/workspace/web/low_code/page_block_widgets"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=0.0.1"

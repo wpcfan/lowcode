@@ -48,9 +48,12 @@ class BlockConfig {
       'verticalSpacing': verticalSpacing,
       'blockWidth': blockWidth,
       'blockHeight': blockHeight,
-      'backgroundColor':
-          backgroundColor != null ? ColorToHex(backgroundColor!) : null,
-      'borderColor': borderColor != null ? ColorToHex(borderColor!) : null,
+      'backgroundColor': backgroundColor != null
+          ? '#${backgroundColor!.value.toRadixString(16)}'
+          : null,
+      'borderColor': borderColor != null
+          ? '#${borderColor!.value.toRadixString(16)}'
+          : null,
       'borderWidth': borderWidth,
     };
   }

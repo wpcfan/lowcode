@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:models/models.dart';
 import 'package:networking/networking.dart';
 
@@ -18,7 +18,7 @@ class PageBlockDataRepository {
     final url = '$baseUrl/$pageId/blocks/$blockId/data';
     final response = await client.post(url, data: data.toJson());
 
-    final result = PageBlock.fromJson(response.data);
+    final result = PageBlock.mapPageBlock(response.data);
 
     debugPrint('PageAdminRepository.addData($blockId, $data) - success');
 
@@ -30,8 +30,9 @@ class PageBlockDataRepository {
 
     final url = '$baseUrl/$pageId/blocks/$blockId/data/${data.id}';
     final response = await client.put(url, data: data.toJson());
+    final json = response.data as Map<String, dynamic>;
 
-    final result = PageBlock.fromJson(response.data);
+    final result = PageBlock.mapPageBlock(json);
 
     debugPrint('PageAdminRepository.updateData($blockId, $data) - success');
 

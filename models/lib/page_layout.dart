@@ -1,7 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:models/enumerations.dart';
-
-import 'page_block.dart';
+import 'package:models/models.dart';
 
 class PageLayout extends Equatable {
   final int? id;
@@ -29,9 +27,19 @@ class PageLayout extends Equatable {
   factory PageLayout.fromJson(
     dynamic json,
   ) {
-    final blocks = (json['blocks'] as List<dynamic>)
-        .map((e) => PageBlock.fromJson(e))
-        .toList();
+    final blocks = (json['blocks'] as List<dynamic>).map((e) {
+      if (e['type'] == PageBlockType.productRow.value) {
+        return PageBlock.fromJson(e, Product.fromJson);
+      } else if (e['type'] == PageBlockType.waterfall.value) {
+        return PageBlock.fromJson(e, Category.fromJson);
+      } else if (e['type'] == PageBlockType.imageRow.value) {
+        return PageBlock.fromJson(e, ImageData.fromJson);
+      } else if (e['type'] == PageBlockType.banner.value) {
+        return PageBlock.fromJson(e, ImageData.fromJson);
+      } else {
+        return PageBlock.fromJson(e, (e) => e);
+      }
+    }).toList();
     blocks.sort((a, b) => a.sort.compareTo(b.sort));
     return PageLayout(
       id: json['id'] as int?,

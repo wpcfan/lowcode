@@ -8,6 +8,7 @@ import com.mooc.backend.repositories.PageEntityRepository;
 import com.mooc.backend.specifications.PageFilter;
 import com.mooc.backend.specifications.PageSpecs;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,11 @@ public class PageQueryService {
 
     private final PageEntityRepository pageEntityRepository;
 
+    @Cacheable(cacheNames = "pageCache", key = "{#id}")
     public Optional<PageEntityInfo> findById(Long id) {
         return pageEntityRepository.findProjectionById(id);
     }
+
 
     public Page<PageEntity> findSpec(PageFilter filter, Pageable pageable) {
         // 函数的 apply 方法，会执行函数的 body

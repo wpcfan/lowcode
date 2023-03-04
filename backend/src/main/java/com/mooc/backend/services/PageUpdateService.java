@@ -14,6 +14,8 @@ import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +32,8 @@ public class PageUpdateService {
     private final PageBlockEntityRepository pageBlockEntityRepository;
     private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
-    public Optional<PageEntity> updatePage(Long id, CreateOrUpdatePageDTO page) {
+    @CachePut(cacheNames = "pageCache", key = "#id")
+    public PageEntity updatePage(Long id, CreateOrUpdatePageDTO page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     if (pageEntity.getStatus() == PageStatus.Published) {
@@ -41,10 +44,11 @@ public class PageUpdateService {
                     pageEntity.setPageType(page.pageType());
                     pageEntity.setPlatform(page.platform());
                     return pageEntity;
-                });
+                }).orElseThrow(() -> new CustomException("页面不存在", "PageUpdateService#updatePage", HttpStatus.NOT_FOUND.value()));
     }
 
-    public Optional<PageEntity> publishPage(Long id, PublishPageDTO page) {
+    @CachePut(cacheNames = "pageCache", key = "#id")
+    public PageEntity publishPage(Long id, PublishPageDTO page) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     // 设置为当天的零点
@@ -61,19 +65,21 @@ public class PageUpdateService {
                     pageEntity.setStartTime(startTime);
                     pageEntity.setEndTime(endTime);
                     return pageEntityRepository.save(pageEntity);
-                });
+                }).orElseThrow(() -> new CustomException("页面不存在", "PageUpdateService#publishPage", HttpStatus.NOT_FOUND.value()));
     }
 
-    public Optional<PageEntity> draftPage(Long id) {
+    @CachePut(cacheNames = "pageCache", key = "#id")
+    public PageEntity draftPage(Long id) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     pageEntity.setStatus(PageStatus.Draft);
                     pageEntity.setStartTime(null);
                     pageEntity.setEndTime(null);
                     return pageEntityRepository.save(pageEntity);
-                });
+                }).orElseThrow(() -> new CustomException("页面不存在", "PageUpdateService#draftPage", HttpStatus.NOT_FOUND.value()));
     }
 
+    @CacheEvict(cacheNames = "pageCache", key = "#result.get().page.id")
     public Optional<PageBlockEntity> updateBlock(Long blockId, CreateOrUpdatePageBlockDTO block) {
         return pageBlockEntityRepository.findById(blockId)
                 .map(pageBlockEntity -> {
@@ -85,6 +91,7 @@ public class PageUpdateService {
                 });
     }
 
+    @CachePut(cacheNames = "pageCache", key = "#pageId")
     public Optional<PageEntity> moveBlock(Long pageId, Long blockId, Integer targetSort) {
         return pageEntityRepository.findById(pageId)
                 .map(pageEntity -> {
@@ -110,6 +117,7 @@ public class PageUpdateService {
                 });
     }
 
+    @CacheEvict(cacheNames = "pageCache", key = "#result.get().pageBlock.page.id")
     public Optional<PageBlockDataEntity> updateData(Long dataId, CreateOrUpdatePageBlockDataDTO data) {
         return pageBlockDataEntityRepository.findById(dataId)
                 .map(dataEntity -> {

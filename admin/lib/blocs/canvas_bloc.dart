@@ -132,6 +132,7 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
           status: FetchStatus.populated,
           layout: state.layout?.copyWith(blocks: blocks),
           saving: false,
+          error: '',
         ));
       }
     } catch (e) {

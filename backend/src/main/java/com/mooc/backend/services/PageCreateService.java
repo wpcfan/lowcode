@@ -12,6 +12,8 @@ import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -24,12 +26,14 @@ public class PageCreateService {
     private final PageEntityRepository pageEntityRepository;
     private final PageBlockEntityRepository pageBlockEntityRepository;
 
+    @CachePut(cacheNames = "pageCache", key = "#result.id")
     public PageEntity createPage(CreateOrUpdatePageDTO page) {
         var pageEntity = pageEntityRepository.save(page.toEntity());
         return pageEntity;
     }
 
-    public Optional<PageEntity> addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
+    @CacheEvict(cacheNames = "pageCache", key = "#pageId")
+    public PageEntity addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
         return pageEntityRepository.findById(pageId)
                 .map(pageEntity -> {
                     if (pageEntity.getStatus() != PageStatus.Draft) {
@@ -45,10 +49,11 @@ public class PageCreateService {
                     pageBlockEntityRepository.save(blockEntity);
                     pageEntity.addPageBlock(blockEntity);
                     return pageEntityRepository.save(pageEntity);
-                });
+                }).orElseThrow(() -> new CustomException("页面不存在", "PageCreateService#addBlockToPage", 404));
     }
 
-    public Optional<PageEntity> insertBlockToPage(Long id, CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
+    @CacheEvict(cacheNames = "pageCache", key = "#id")
+    public PageEntity insertBlockToPage(Long id, CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
         return pageEntityRepository.findById(id)
                 .map(pageEntity -> {
                     if (pageEntity.getStatus() != PageStatus.Draft) {
@@ -67,15 +72,13 @@ public class PageCreateService {
                     pageEntity.addPageBlock(blockEntity);
                     var savedPageEntity = pageEntityRepository.save(pageEntity);
                     return savedPageEntity;
-                });
+                }).orElseThrow(() -> new CustomException("页面不存在", "PageCreateService#insertBlockToPage", 404));
     }
 
-    public Optional<PageBlockDataEntity> addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
+    @CacheEvict(value = "pageCache", key = "#result.page.id")
+    public PageBlockDataEntity addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
         return pageBlockEntityRepository.findById(blockId)
                 .map(blockEntity -> {
-                    if (blockEntity.getPage().getStatus() != PageStatus.Draft) {
-                        throw new CustomException("只有草稿状态的页面才能添加区块数据", "PageCreateService#addDataToBlock", 400);
-                    }
                     if (blockEntity.getType() == BlockType.Waterfall && blockEntity.getData().size() > 0) {
                         throw new CustomException("瀑布流区块只能有一个数据", "PageCreateService#addDataToBlock", 400);
                     }
@@ -83,6 +86,6 @@ public class PageCreateService {
                     blockEntity.addData(dataEntity);
                     pageBlockEntityRepository.save(blockEntity);
                     return dataEntity;
-                });
+                }).orElseThrow(() -> new CustomException("区块不存在", "PageCreateService#addDataToBlock", 404));
     }
 }

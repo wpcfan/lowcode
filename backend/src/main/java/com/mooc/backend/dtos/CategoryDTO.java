@@ -6,7 +6,10 @@ import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.projections.CategoryInfo;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.HashSet;
 import java.util.Optional;

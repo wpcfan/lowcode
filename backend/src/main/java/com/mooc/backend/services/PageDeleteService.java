@@ -25,8 +25,8 @@ public class PageDeleteService {
                 .findById(pageId)
                 .flatMap(page -> page.getPageBlocks().stream().filter(b -> b.getId().equals(blockId)).findFirst())
                 .ifPresent(block -> {
-            pageBlockEntityRepository.deleteById(blockId);
-        });
+                    pageBlockEntityRepository.deleteById(blockId);
+                });
     }
 
     public void deleteData(Long blockId, Long dataId) {
@@ -34,7 +34,7 @@ public class PageDeleteService {
                 .findById(blockId)
                 .flatMap(block -> block.getData().stream().filter(d -> d.getId().equals(dataId)).findFirst())
                 .ifPresent(data -> {
-            pageBlockDataEntityRepository.deleteById(dataId);
-        });
+                    pageBlockDataEntityRepository.deleteById(dataId);
+                });
     }
 }

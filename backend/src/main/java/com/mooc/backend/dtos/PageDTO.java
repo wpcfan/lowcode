@@ -1,7 +1,7 @@
 package com.mooc.backend.dtos;
 
-import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;

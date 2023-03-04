@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public record ProductAdminDTO(Long id, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
                               Set<ProductImageInfo> images) implements Serializable {
     private static final long serialVersionUID = -1;
+
     public static ProductAdminDTO fromEntity(Product product) {
         return new ProductAdminDTO(
                 product.getId(),

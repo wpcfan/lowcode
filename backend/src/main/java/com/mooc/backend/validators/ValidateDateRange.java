@@ -11,7 +11,10 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {DateRangeValidator.class})
 public @interface ValidateDateRange {
     String[] value();
+
     String message() default "{validation.dateRange}";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @JsonDeserialize(as = ProductDataDTO.class)
-public record ProductDataDTO (
+public record ProductDataDTO(
         Long id,
         String name,
         String description,
@@ -19,21 +19,22 @@ public record ProductDataDTO (
         Set<CategoryDTO> categories,
         Set<String> images
 ) implements BlockData {
-        private static final long serialVersionUID = -1;
-        @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-        @Override
-        public BlockDataType getDataType() {
-                return BlockDataType.Product;
-        }
+    private static final long serialVersionUID = -1;
 
-        public static ProductDataDTO fromEntity(com.mooc.backend.entities.Product product) {
-                return new ProductDataDTO(
-                        product.getId(),
-                        product.getName(),
-                        product.getDescription(),
-                        MathUtils.formatPrice(product.getPrice()),
-                        product.getCategories().stream().map(CategoryDTO::fromEntity).collect(Collectors.toSet()),
-                        product.getImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toSet())
-                );
-        }
+    public static ProductDataDTO fromEntity(com.mooc.backend.entities.Product product) {
+        return new ProductDataDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                MathUtils.formatPrice(product.getPrice()),
+                product.getCategories().stream().map(CategoryDTO::fromEntity).collect(Collectors.toSet()),
+                product.getImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toSet())
+        );
+    }
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Override
+    public BlockDataType getDataType() {
+        return BlockDataType.Product;
+    }
 }

@@ -27,7 +27,8 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理自定义异常
-     * @param e 异常
+     *
+     * @param e       异常
      * @param request 请求
      * @return 错误信息
      */
@@ -47,7 +48,8 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理使用 jakarta.validation 注解的参数校验异常，
-     * @param e 异常
+     *
+     * @param e       异常
      * @param request 请求
      * @return 错误信息
      */
@@ -75,7 +77,8 @@ public class GlobalExceptionHandler {
 
     /**
      * 处理未捕获的异常
-     * @param e 异常
+     *
+     * @param e       异常
      * @param request 请求
      * @return 错误信息
      */

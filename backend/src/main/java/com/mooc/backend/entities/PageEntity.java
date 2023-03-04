@@ -11,6 +11,7 @@ import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -28,7 +29,6 @@ import java.util.TreeSet;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Cacheable
 @Entity
 @Table(name = "mooc_pages")
 public class PageEntity extends Auditable {
@@ -109,5 +109,27 @@ public class PageEntity extends Auditable {
     public void removePageBlock(PageBlockEntity pageBlockEntity) {
         pageBlocks.remove(pageBlockEntity);
         pageBlockEntity.setPage(null);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PageEntity other = (PageEntity) obj;
+        if (id == null) {
+            return other.id == null;
+        } else return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
     }
 }

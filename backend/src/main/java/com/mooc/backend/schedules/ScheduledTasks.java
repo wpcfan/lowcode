@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component
+//@Component
 public class ScheduledTasks {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
     private final PageEntityRepository pageEntityRepository;

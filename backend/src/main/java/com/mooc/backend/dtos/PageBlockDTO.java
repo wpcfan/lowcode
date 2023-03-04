@@ -7,6 +7,7 @@ import com.mooc.backend.projections.PageBlockEntityInfo;
 import lombok.Builder;
 import lombok.Value;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
@@ -14,7 +15,8 @@ import java.util.TreeSet;
 
 @Value
 @Builder
-public class PageBlockDTO implements Comparable<PageBlockDTO> {
+public class PageBlockDTO implements Serializable, Comparable<PageBlockDTO> {
+    private static final long serialVersionUID = -1;
     private Long id;
     private String title;
     private BlockType type;

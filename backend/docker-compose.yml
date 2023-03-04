@@ -24,6 +24,26 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: mysql
 
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+
+  redis-insight:
+    image: redislabs/redisinsight:latest
+    container_name: redis-insight
+    restart: always
+    ports:
+      - "8001:8001"
+    environment:
+      REDISINSIGHT_REDIS_HOSTS: redis:6379
+
 volumes:
     mysql:
+        driver: local
+    redis:
         driver: local

@@ -19,6 +19,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class CategoryDTO implements BlockData {
 
+    private static final long serialVersionUID = -1;
     private Long id;
     private String name;
     private String code;

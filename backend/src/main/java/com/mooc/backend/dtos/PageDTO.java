@@ -7,17 +7,18 @@ import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.projections.PageEntityInfo;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-@Value
+@Getter
 @Builder
-public class PageDTO {
+public class PageDTO implements Serializable {
+    private static final long serialVersionUID = -1;
     private Long id;
     private String title;
     private Platform platform;

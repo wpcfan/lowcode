@@ -8,7 +8,6 @@ import com.mooc.backend.repositories.PageEntityRepository;
 import com.mooc.backend.specifications.PageFilter;
 import com.mooc.backend.specifications.PageSpecs;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,9 +22,9 @@ public class PageQueryService {
 
     private final PageEntityRepository pageEntityRepository;
 
-    @Cacheable(cacheNames = "pageCache", key = "{#id}")
     public PageEntity findById(Long id) {
-        return pageEntityRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", 404));
+        var page = pageEntityRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", 404));
+        return page;
     }
 
 

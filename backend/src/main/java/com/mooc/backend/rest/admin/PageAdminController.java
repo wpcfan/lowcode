@@ -1,7 +1,6 @@
 package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.dtos.*;
-import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
@@ -137,10 +136,7 @@ public class PageAdminController {
             @RequestBody CreateOrUpdatePageBlockDTO block) {
         log.debug("update block: id = {}, blockId = {}, block = {}", id, blockId, block);
         checkPageStatus(id);
-        return pageUpdateService.updateBlock(blockId, block)
-                .map(PageBlockDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("要修改的页面区块不存在", "PageAdminController#updateBlock",
-                        HttpStatus.NOT_FOUND.value()));
+        return PageBlockDTO.fromEntity(pageUpdateService.updateBlock(blockId, block));
     }
 
     @Operation(summary = "删除页面区块")
@@ -161,10 +157,7 @@ public class PageAdminController {
     ) {
         log.debug("move block: id = {}, blockId = {}, targetSort = {}", id, blockId, targetSort);
         checkPageStatus(id);
-        return pageUpdateService.moveBlock(id, blockId, targetSort)
-                .map(PageDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("要移动的页面区块不存在", "PageAdminController#moveBlock",
-                        HttpStatus.NOT_FOUND.value()));
+        return PageDTO.fromEntity(pageUpdateService.moveBlock(id, blockId, targetSort));
     }
 
 
@@ -188,10 +181,7 @@ public class PageAdminController {
             @RequestBody CreateOrUpdatePageBlockDataDTO data) {
         log.debug("update data: id = {}, blockId = {}, dataId = {}, data = {}", id, blockId, dataId, data);
         checkPageStatus(id);
-        return pageUpdateService.updateData(dataId, data)
-                .map(PageBlockDataDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("要修改的页面区块数据不存在", "PageAdminController#updateData",
-                        HttpStatus.NOT_FOUND.value()));
+        return PageBlockDataDTO.fromEntity(pageUpdateService.updateData(dataId, data));
     }
 
     @Operation(summary = "删除页面区块数据")

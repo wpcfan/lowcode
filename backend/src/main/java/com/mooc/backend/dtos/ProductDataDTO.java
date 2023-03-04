@@ -19,6 +19,7 @@ public record ProductDataDTO (
         Set<CategoryDTO> categories,
         Set<String> images
 ) implements BlockData {
+        private static final long serialVersionUID = -1;
         @JsonProperty(access = JsonProperty.Access.READ_ONLY)
         @Override
         public BlockDataType getDataType() {

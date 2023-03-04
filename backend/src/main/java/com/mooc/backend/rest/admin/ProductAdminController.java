@@ -36,10 +36,7 @@ public class ProductAdminController {
     public ProductAdminDTO updateProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @Valid @RequestBody CreateOrUpdateProductDTO product) {
-        return productAdminService.updateProduct(id, product)
-                .map(ProductAdminDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return ProductAdminDTO.fromEntity(productAdminService.updateProduct(id, product));
     }
 
     @Operation(summary = "给商品添加类目")
@@ -47,10 +44,7 @@ public class ProductAdminController {
     public ProductAdminDTO addCategoryToProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @Parameter(description = "类目 id", name = "categoryId") @PathVariable Long categoryId) {
-        return productAdminService.addCategoryToProduct(id, categoryId)
-                .map(ProductAdminDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return ProductAdminDTO.fromEntity(productAdminService.addCategoryToProduct(id, categoryId));
     }
 
     @Operation(summary = "删除商品的类目")
@@ -58,10 +52,7 @@ public class ProductAdminController {
     public ProductAdminDTO removeCategoryFromProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @Parameter(description = "类目 id", name = "categoryId") @PathVariable("categoryId") Long categoryId) {
-        return productAdminService.removeCategoryFromProduct(id, categoryId)
-                .map(ProductAdminDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return ProductAdminDTO.fromEntity(productAdminService.removeCategoryFromProduct(id, categoryId));
     }
 
     @Operation(summary = "删除商品")
@@ -78,10 +69,7 @@ public class ProductAdminController {
             @RequestParam("file") MultipartFile file) {
         try {
             var result = qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
-            return productAdminService.addImageToProduct(id, result.url())
-                    .map(ProductAdminDTO::fromEntity)
-                    .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
-                            HttpStatus.NOT_FOUND.value()));
+            return ProductAdminDTO.fromEntity(productAdminService.addImageToProduct(id, result.url()));
         } catch (IOException e) {
             throw new CustomException("File Upload error", e.getMessage(), 500);
         }
@@ -92,9 +80,6 @@ public class ProductAdminController {
     public ProductAdminDTO removeImageFromProduct(
             @Parameter(description = "商品 id", name = "id") @PathVariable Long id,
             @Parameter(description = "图片 id", name = "imageId") @PathVariable Long imageId) {
-        return productAdminService.removeImageFromProduct(id, imageId)
-                .map(ProductAdminDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Product not found", "Product " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return ProductAdminDTO.fromEntity(productAdminService.removeImageFromProduct(id, imageId));
     }
 }

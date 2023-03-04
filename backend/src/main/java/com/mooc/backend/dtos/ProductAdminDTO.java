@@ -1,21 +1,18 @@
 package com.mooc.backend.dtos;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
-import com.mooc.backend.entities.blocks.BlockData;
-import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.projections.ProductImageInfo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 
 public record ProductAdminDTO(Long id, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
-                              Set<ProductImageInfo> images) {
-
+                              Set<ProductImageInfo> images) implements Serializable {
+    private static final long serialVersionUID = -1;
     public static ProductAdminDTO fromEntity(Product product) {
         return new ProductAdminDTO(
                 product.getId(),

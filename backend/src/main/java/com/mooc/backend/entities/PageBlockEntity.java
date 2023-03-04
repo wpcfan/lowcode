@@ -8,7 +8,9 @@ import lombok.*;
 import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Type;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 @Getter
 @Setter

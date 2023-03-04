@@ -33,9 +33,12 @@ public class PageUpdateServiceTests {
     @MockBean
     private PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
+    @MockBean
+    private PageQueryService pageQueryService;
+
     @Test
     void testPublishPage() {
-        var pageUpdateService = new PageUpdateService(pageEntityRepository, pageBlockEntityRepository, pageBlockDataEntityRepository);
+        var pageUpdateService = new PageUpdateService(pageQueryService, pageEntityRepository, pageBlockEntityRepository, pageBlockDataEntityRepository);
         var now = LocalDateTime.now();
         var startTime = now.minusDays(1).with(LocalTime.MIN);
         var endTime = now.plusDays(1).with(LocalTime.MAX);
@@ -47,7 +50,7 @@ public class PageUpdateServiceTests {
                 .pageType(PageType.Home)
                 .platform(Platform.App)
                 .build();
-        Mockito.when(pageEntityRepository.findById(any(Long.class))).thenReturn(Optional.of(entity));
+        Mockito.when(pageQueryService.findById(any(Long.class))).thenReturn(entity);
         Mockito.when(pageEntityRepository.countPublishedTimeConflict(startTime, Platform.App, PageType.Home)).thenReturn(1);
         assertThrows(CustomException.class, () -> pageUpdateService.publishPage(1L, page));
     }

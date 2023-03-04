@@ -3,13 +3,11 @@ package com.mooc.backend.rest.admin;
 import com.mooc.backend.dtos.CategoryDTO;
 import com.mooc.backend.dtos.CategoryRecord;
 import com.mooc.backend.dtos.CreateOrUpdateCategoryDTO;
-import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.CategoryAdminService;
 import com.mooc.backend.services.CategoryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -54,10 +52,7 @@ public class CategoryAdminController {
     public CategoryDTO updateCategory(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id,
             @RequestBody CreateOrUpdateCategoryDTO category) {
-        return categoryAdminService.updateCategory(id, category)
-                .map(CategoryDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Category not found", "Category " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return CategoryDTO.fromEntity(categoryAdminService.updateCategory(id, category));
     }
 
     @Operation(summary = "删除类目")
@@ -72,22 +67,14 @@ public class CategoryAdminController {
     public CategoryDTO setCategoryParent(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id,
             @Parameter(description = "父类目 id", name = "parentId") @PathVariable(value = "parentId") Long parentId) {
-        return categoryAdminService.setCategoryParent(id, parentId)
-                .map(CategoryDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Category not found",
-                        "Category " + id + " not found or parent + " + parentId + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return CategoryDTO.fromEntity(categoryAdminService.setCategoryParent(id, parentId));
     }
 
     @Operation(summary = "删除类目的父类目")
     @DeleteMapping("/{id}/parent")
     public CategoryDTO removeCategoryParent(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id) {
-        return categoryAdminService.removeCategoryParent(id)
-                .map(CategoryDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Category not found",
-                        "Category " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return CategoryDTO.fromEntity(categoryAdminService.removeCategoryParent(id));
     }
 
     @Operation(summary = "给类目添加子类目")
@@ -95,11 +82,7 @@ public class CategoryAdminController {
     public CategoryDTO addCategoryChild(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id,
             @Parameter(description = "子类目 id", name = "childId") @PathVariable(value = "childId") Long childId) {
-        return categoryAdminService.addCategoryChild(id, childId)
-                .map(CategoryDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Category not found",
-                        "Category " + id + " not found or child + " + childId + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return CategoryDTO.fromEntity(categoryAdminService.addCategoryChild(id, childId));
     }
 
     @Operation(summary = "删除类目的子类目")
@@ -107,11 +90,7 @@ public class CategoryAdminController {
     public CategoryDTO removeCategoryChild(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id,
             @Parameter(description = "子类目 id", name = "childId") @PathVariable(value = "childId") Long childId) {
-        return categoryAdminService.removeCategoryChild(id, childId)
-                .map(CategoryDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Category not found",
-                        "Category " + id + " not found or child + " + childId + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return CategoryDTO.fromEntity(categoryAdminService.removeCategoryChild(id, childId));
     }
 
     @Operation(summary = "给类目添加商品")
@@ -119,11 +98,7 @@ public class CategoryAdminController {
     public CategoryDTO addProductToCategory(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id,
             @Parameter(description = "商品 id", name = "productId") @PathVariable("productId") Long productId) {
-        return categoryAdminService.addProductToCategory(id, productId)
-                .map(CategoryDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Category not found",
-                        "Category " + id + " not found or product + " + productId + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return CategoryDTO.fromEntity(categoryAdminService.addProductToCategory(id, productId));
     }
 
     @Operation(summary = "删除类目的商品")
@@ -131,10 +106,6 @@ public class CategoryAdminController {
     public CategoryDTO removeProductFromCategory(
             @Parameter(description = "类目 id", name = "id") @PathVariable Long id,
             @Parameter(description = "商品 id", name = "productId") @PathVariable("productId") Long productId) {
-        return categoryAdminService.removeProductFromCategory(id, productId)
-                .map(CategoryDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Category not found",
-                        "Category " + id + " not found or product + " + productId + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return CategoryDTO.fromEntity(categoryAdminService.removeProductFromCategory(id, productId));
     }
 }

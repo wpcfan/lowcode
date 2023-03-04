@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.With;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,7 +25,8 @@ import java.util.stream.Collectors;
 @With
 @Value
 @Builder
-public class ProductDTO {
+public class ProductDTO implements Serializable {
+    private static final long serialVersionUID = -1;
     private Long id;
     private String name;
     private String description;

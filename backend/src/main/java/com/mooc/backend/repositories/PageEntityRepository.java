@@ -5,6 +5,7 @@ import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.projections.PageEntityInfo;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,6 @@ import java.util.stream.Stream;
 @CacheConfig(cacheNames = "pageCache")
 public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, JpaSpecificationExecutor<PageEntity> {
     @EntityGraph(attributePaths = {"pageBlocks", "pageBlocks.data"})
-    @Query("select p from PageEntity p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
     Optional<PageEntity> findById(Long id);
 
     @Query("select p from PageEntity p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")

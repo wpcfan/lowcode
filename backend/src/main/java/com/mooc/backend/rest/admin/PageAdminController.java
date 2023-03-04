@@ -68,10 +68,7 @@ public class PageAdminController {
     @Operation(summary = "根据 id 获取页面信息")
     @GetMapping("/{id}")
     public PageDTO findById(@Parameter(description = "页面 id", name = "id") @PathVariable Long id) {
-        return pageQueryService.findById(id)
-                .map(PageDTO::fromProjection)
-                .orElseThrow(() -> new CustomException("Page not found", "Page with id " + id + " not found",
-                        HttpStatus.NOT_FOUND.value()));
+        return PageDTO.fromEntity(pageQueryService.findById(id));
     }
 
     @Operation(summary = "添加页面")
@@ -209,8 +206,7 @@ public class PageAdminController {
     }
 
     private void checkPageStatus(Long pageId) {
-        var pageEntity = pageQueryService.findById(pageId).orElseThrow(() -> new CustomException("要删除的数据区块所在的页面不存在",
-                "PageAdminController#checkPageStatus", HttpStatus.NOT_FOUND.value()));
+        var pageEntity = pageQueryService.findById(pageId);
         if (pageEntity.getStatus() == PageStatus.Published) {
             throw new CustomException("页面已发布，不能对页面组成部分进行修改", "PageAdminController#checkPageStatus",
                     HttpStatus.BAD_REQUEST.value());

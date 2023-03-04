@@ -3,7 +3,7 @@ package com.mooc.backend.services;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
-import com.mooc.backend.projections.PageEntityInfo;
+import com.mooc.backend.error.CustomException;
 import com.mooc.backend.repositories.PageEntityRepository;
 import com.mooc.backend.specifications.PageFilter;
 import com.mooc.backend.specifications.PageSpecs;
@@ -24,8 +24,8 @@ public class PageQueryService {
     private final PageEntityRepository pageEntityRepository;
 
     @Cacheable(cacheNames = "pageCache", key = "{#id}")
-    public Optional<PageEntityInfo> findById(Long id) {
-        return pageEntityRepository.findProjectionById(id);
+    public PageEntity findById(Long id) {
+        return pageEntityRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", 404));
     }
 
 

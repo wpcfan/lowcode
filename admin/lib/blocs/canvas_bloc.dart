@@ -36,54 +36,108 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
 
   void _onCanvasEventInsertBlock(
       CanvasEventInsertBlock event, Emitter<CanvasState> emit) async {
-    final layout = await blockRepo.insertBlock(event.pageId, event.block);
-    emit(state.copyWith(layout: layout, error: ''));
+    emit(state.copyWith(saving: true));
+    try {
+      final layout = await blockRepo.insertBlock(event.pageId, event.block);
+      emit(state.copyWith(
+        layout: layout,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        error: e.toString(),
+        saving: false,
+      ));
+    }
   }
 
   void _onCanvasEventUpdateBlock(
       CanvasEventUpdateBlock event, Emitter<CanvasState> emit) async {
-    final block =
-        await blockRepo.updateBlock(event.pageId, event.blockId, event.block);
-    final blocks = state.layout?.blocks ?? [];
-    final index = blocks.indexWhere((element) => element.id == event.blockId);
-    if (index != -1) {
+    emit(state.copyWith(saving: true));
+    try {
+      final block =
+          await blockRepo.updateBlock(event.pageId, event.blockId, event.block);
+      final blocks = state.layout?.blocks ?? [];
+      final index = blocks.indexWhere((element) => element.id == event.blockId);
+      if (index != -1) {
+        emit(state.copyWith(
+          layout: state.layout?.copyWith(blocks: [
+            ...blocks.sublist(0, index),
+            block,
+            ...blocks.sublist(index + 1)
+          ]),
+          error: '',
+          saving: false,
+        ));
+      }
+    } catch (e) {
       emit(state.copyWith(
-        layout: state.layout?.copyWith(blocks: [
-          ...blocks.sublist(0, index),
-          block,
-          ...blocks.sublist(index + 1)
-        ]),
-        error: '',
+        error: e.toString(),
+        saving: false,
       ));
     }
   }
 
   void _onCanvasEventMoveBlock(
       CanvasEventMoveBlock event, Emitter<CanvasState> emit) async {
-    final layout =
-        await blockRepo.moveBlock(event.pageId, event.blockId, event.sort);
+    emit(state.copyWith(saving: true));
+    try {
+      final layout =
+          await blockRepo.moveBlock(event.pageId, event.blockId, event.sort);
 
-    emit(state.copyWith(layout: layout, error: ''));
+      emit(state.copyWith(
+        layout: layout,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        error: e.toString(),
+        saving: false,
+      ));
+    }
   }
 
   void _onCanvasEventAddBlock(
       CanvasEventAddBlock event, Emitter<CanvasState> emit) async {
-    final layout = await blockRepo.createBlock(state.layout!.id!, event.block);
+    emit(state.copyWith(saving: true));
+    try {
+      final layout =
+          await blockRepo.createBlock(state.layout!.id!, event.block);
 
-    emit(state.copyWith(layout: layout, error: ''));
+      emit(state.copyWith(
+        layout: layout,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        error: e.toString(),
+        saving: false,
+      ));
+    }
   }
 
   void _onCanvasEventDeleteBlock(
       CanvasEventDeleteBlock event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
-    await blockRepo.deleteBlock(event.pageId, event.blockId);
-    final blocks = state.layout?.blocks ?? [];
-    final index = blocks.indexWhere((element) => element.id == event.blockId);
-    if (index != -1) {
-      blocks.removeAt(index);
-      emit(CanvasState(
-        status: FetchStatus.populated,
-        layout: state.layout?.copyWith(blocks: blocks),
+    try {
+      await blockRepo.deleteBlock(event.pageId, event.blockId);
+      final blocks = state.layout?.blocks ?? [];
+      final index = blocks.indexWhere((element) => element.id == event.blockId);
+      if (index != -1) {
+        blocks.removeAt(index);
+        emit(CanvasState(
+          status: FetchStatus.populated,
+          layout: state.layout?.copyWith(blocks: blocks),
+          saving: false,
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        saving: false,
+        error: e.toString(),
       ));
     }
   }
@@ -127,7 +181,10 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         error: '',
       ));
     } catch (e) {
-      emit(state.copyWith(status: FetchStatus.error, error: e.toString()));
+      emit(state.copyWith(
+        status: FetchStatus.error,
+        error: e.toString(),
+      ));
     }
   }
 
@@ -142,7 +199,10 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         error: '',
       ));
     } catch (e) {
-      emit(state.copyWith(saving: false, error: e.toString()));
+      emit(state.copyWith(
+        saving: false,
+        error: e.toString(),
+      ));
     }
   }
 }

@@ -11,8 +11,6 @@ import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -67,7 +65,7 @@ public class PageEntity extends Auditable {
      * <p>
      */
     @SortComparator(PageBlockEntity.class)
-    @OneToMany(mappedBy = "page", cascade = {CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "page", cascade = {CascadeType.ALL}, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
     private SortedSet<PageBlockEntity> pageBlocks = new TreeSet<>();

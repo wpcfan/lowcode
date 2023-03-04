@@ -28,7 +28,7 @@ class CanvasPage extends StatelessWidget {
         return Scaffold(
           body: BlocConsumer<CanvasBloc, CanvasState>(
             listener: (context, state) {
-              if (state.status == FetchStatus.error) {
+              if (state.error.isNotEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.error),

@@ -86,20 +86,27 @@ public class PageUpdateService {
     }
 
     public Optional<PageEntity> moveBlock(Long pageId, Long blockId, Integer targetSort) {
-        return pageBlockEntityRepository.findById(blockId)
-                .flatMap(pageBlockEntity -> {
-                    var sort = pageBlockEntity.getSort();
+        return pageEntityRepository.findById(pageId)
+                .map(pageEntity -> {
+                    var blockEntity = pageEntity.getPageBlocks().stream()
+                            .filter(pageBlockEntity -> pageBlockEntity.getId().equals(blockId))
+                            .findFirst()
+                            .orElseThrow(() -> new CustomException("未找到对应的区块", "PageUpdateService#moveBlock", HttpStatus.BAD_REQUEST.value()));
+                    var sort = blockEntity.getSort();
                     if (sort.equals(targetSort)) {
                         throw new CustomException("目标位置和当前位置相同", "PageUpdateService#moveBlock", HttpStatus.BAD_REQUEST.value());
                     }
                     if (sort < targetSort) {
-                        pageBlockEntityRepository.updateSortByPageIdAndSortGreaterThanEqual(pageId, sort);
+                        pageEntity.getPageBlocks().stream()
+                                .filter(pageBlockEntity -> pageBlockEntity.getSort() > sort && pageBlockEntity.getSort() <= targetSort)
+                                .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() - 1));
                     } else {
-                        pageBlockEntityRepository.updateSortByPageIdAndSortLessThanEqual(pageId, sort);
+                        pageEntity.getPageBlocks().stream()
+                                .filter(pageBlockEntity -> pageBlockEntity.getSort() < sort && pageBlockEntity.getSort() >= targetSort)
+                                .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() + 1));
                     }
-                    pageBlockEntity.setSort(targetSort);
-                    pageBlockEntityRepository.save(pageBlockEntity);
-                    return pageEntityRepository.findById(pageId);
+                    blockEntity.setSort(targetSort);
+                    return pageEntityRepository.save(pageEntity);
                 });
     }
 

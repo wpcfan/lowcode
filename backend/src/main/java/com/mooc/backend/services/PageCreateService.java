@@ -3,9 +3,7 @@ package com.mooc.backend.services;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageBlockDataDTO;
 import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
-import com.mooc.backend.dtos.PageDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
-import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.BlockType;
 import com.mooc.backend.enumerations.PageStatus;
@@ -62,12 +60,13 @@ public class PageCreateService {
                     if (insertPageBlockDTO.type() == BlockType.Waterfall && pageBlockEntityRepository.countByTypeAndPageIdAndSortGreaterThanEqual(BlockType.Waterfall, id, insertPageBlockDTO.sort()) > 0) {
                         throw new CustomException("瀑布流区块必须在最后", "PageCreateService#insertBlockToPage", 400);
                     }
+                    pageEntity.getPageBlocks().stream()
+                            .filter(pageBlockEntity -> pageBlockEntity.getSort() >= insertPageBlockDTO.sort())
+                            .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() + 1));
                     var blockEntity = insertPageBlockDTO.toEntity();
-                    pageBlockEntityRepository.save(blockEntity);
-                    pageBlockEntityRepository.updateSortByPageIdAndSortGreaterThanEqual(id, insertPageBlockDTO.sort());
-                    blockEntity.setSort(insertPageBlockDTO.sort());
                     pageEntity.addPageBlock(blockEntity);
-                    return pageEntityRepository.save(pageEntity);
+                    var savedPageEntity = pageEntityRepository.save(pageEntity);
+                    return savedPageEntity;
                 });
     }
 

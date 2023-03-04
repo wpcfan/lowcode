@@ -14,7 +14,7 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
 
     @EntityGraph(attributePaths = {"pageBlocks", "pageBlocks.data"})
     @Query("select p from PageEntity p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
-    Optional<PageEntity> findById();
+    Optional<PageEntity> findById(Long id);
 
     @Query("select p from PageEntity p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
     Optional<PageEntityInfo> findProjectionById(Long id);

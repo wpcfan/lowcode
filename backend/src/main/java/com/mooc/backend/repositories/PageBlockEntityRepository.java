@@ -16,6 +16,6 @@ public interface PageBlockEntityRepository extends JpaRepository<PageBlockEntity
     int updateSortByPageIdAndSortGreaterThanEqual(Long id, Integer sort);
 
     @Modifying
-    @Query("update PageBlockEntity p set p.sort = p.sort + 1 where p.page.id = ?1 and p.sort <= ?2")
+    @Query("update PageBlockEntity p set p.sort = p.sort - 1 where p.page.id = ?1 and p.sort <= ?2")
     int updateSortByPageIdAndSortLessThanEqual(Long pageId, Integer sort);
 }

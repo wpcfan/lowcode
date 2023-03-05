@@ -17,6 +17,7 @@ ext {
     hypersistenceVersion = '3.1.1'
     testcontainersVersion = '1.17.6'
     redissonVersion = '3.20.0'
+    springbootAdminVersion = '3.0.0'
 }
 
 configurations {
@@ -40,6 +41,8 @@ dependencies {
     implementation "org.redisson:redisson-spring-boot-starter:${redissonVersion}"
     implementation "org.redisson:redisson-hibernate-6:${redissonVersion}"
     implementation "io.hypersistence:hypersistence-utils-hibernate-60:${hypersistenceVersion}"
+    implementation "de.codecentric:spring-boot-admin-starter-server:${springbootAdminVersion}"
+    implementation "de.codecentric:spring-boot-admin-starter-client:${springbootAdminVersion}"
     implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'

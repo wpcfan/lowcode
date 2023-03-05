@@ -11,7 +11,6 @@ import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -29,6 +28,7 @@ import java.util.TreeSet;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Cacheable
 @Entity
 @Table(name = "mooc_pages")
 public class PageEntity extends Auditable {

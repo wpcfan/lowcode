@@ -25,7 +25,7 @@ public class PageSpecs {
         // builder: 构造查询条件的工具
         List<Predicate> predicates = new ArrayList<>();
         if (filter.title() != null) {
-            predicates.add(builder.like(root.get("title"), "%" + filter.title().toLowerCase() + "%"));
+            predicates.add(builder.like(builder.lower(root.get("title")), "%" + filter.title().toLowerCase() + "%"));
         }
         if (filter.platform() != null) {
             predicates.add(builder.equal(root.get("platform"), filter.platform()));

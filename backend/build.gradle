@@ -34,22 +34,22 @@ repositories {
 // 项目依赖
 dependencies {
     implementation "com.github.ua-parser:uap-java:${uaParserVersion}"
-    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation "org.redisson:redisson-spring-boot-starter:${redissonVersion}"
-    implementation "org.redisson:redisson-hibernate-6:${redissonVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "io.hypersistence:hypersistence-utils-hibernate-60:${hypersistenceVersion}"
+    implementation "org.redisson:redisson-hibernate-6:${redissonVersion}"
+    implementation "org.redisson:redisson-spring-boot-starter:${redissonVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
     implementation "de.codecentric:spring-boot-admin-starter-server:${springbootAdminVersion}"
     implementation "de.codecentric:spring-boot-admin-starter-client:${springbootAdminVersion}"
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.mysql:mysql-connector-j'
     implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
     implementation 'org.flywaydb:flyway-core'
     implementation 'org.flywaydb:flyway-mysql'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.h2database:h2'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

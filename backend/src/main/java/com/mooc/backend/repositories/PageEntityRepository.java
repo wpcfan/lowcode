@@ -4,14 +4,12 @@ import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.projections.PageEntityInfo;
-import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@CacheConfig(cacheNames = "pageCache")
 public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, JpaSpecificationExecutor<PageEntity> {
     @EntityGraph(attributePaths = {"pageBlocks", "pageBlocks.data"})
     Optional<PageEntity> findById(Long id);
@@ -35,20 +33,24 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      * @param pageType    页面类型
      * @return 页面列表
      */
-    @Query("select p from PageEntity p" +
-            " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
-            " and p.startTime is not null and p.endTime is not null" +
-            " and p.startTime < ?1 and p.endTime > ?1" +
-            " and p.platform = ?2" +
-            " and p.pageType = ?3")
+    @Query("""
+select p from PageEntity p
+where p.status = com.mooc.backend.enumerations.PageStatus.Published
+and p.startTime is not null and p.endTime is not null
+and p.startTime < ?1 and p.endTime > ?1
+and p.platform = ?2
+and p.pageType = ?3
+""")
     Stream<PageEntity> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
 
-    @Query("select count(p) from PageEntity p" +
-            " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
-            " and p.startTime is not null and p.endTime is not null" +
-            " and p.startTime < ?1 and p.endTime > ?1" +
-            " and p.platform = ?2" +
-            " and p.pageType = ?3")
+    @Query("""
+ select count(p) from PageEntity p
+ where p.status = com.mooc.backend.enumerations.PageStatus.Published
+ and p.startTime is not null and p.endTime is not null
+ and p.startTime < ?1 and p.endTime > ?1
+ and p.platform = ?2
+ and p.pageType = ?3
+ """)
     int countPublishedTimeConflict(LocalDateTime time, Platform platform, PageType pageType);
 
     /**
@@ -60,11 +62,13 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      * @return 修改的记录数
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("update PageEntity p" +
-            " set p.status = com.mooc.backend.enumerations.PageStatus.Archived" +
-            " where p.status = com.mooc.backend.enumerations.PageStatus.Published" +
-            " and p.startTime is not null and p.endTime is not null" +
-            " and p.endTime < ?1")
+    @Query("""
+update PageEntity p
+set p.status = com.mooc.backend.enumerations.PageStatus.Archived
+where p.status = com.mooc.backend.enumerations.PageStatus.Published
+and p.startTime is not null and p.endTime is not null
+and p.endTime < ?1
+""")
     int updatePageStatusToArchived(LocalDateTime currentTime);
 
     int countByTitle(String title);

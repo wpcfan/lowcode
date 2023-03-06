@@ -2,24 +2,30 @@ package com.mooc.backend.domain;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import com.mooc.backend.entities.blocks.PageConfig;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 /**
  * @TableName mooc_pages
  */
 @Data
-public class Pages implements Serializable {
+public class Page implements Serializable {
     private Long id;
 
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     private LocalDateTime updatedAt;
 
     private String platform;
 
     private String pageType;
 
-    private Object config;
+    private PageConfig config;
 
     private String title;
 
@@ -42,7 +48,7 @@ public class Pages implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        Pages other = (Pages) that;
+        Page other = (Page) that;
         return (this.getId() == null ? other.getId() == null : this.getId().equals(other.getId()))
             && (this.getCreatedAt() == null ? other.getCreatedAt() == null : this.getCreatedAt().equals(other.getCreatedAt()))
             && (this.getUpdatedAt() == null ? other.getUpdatedAt() == null : this.getUpdatedAt().equals(other.getUpdatedAt()))

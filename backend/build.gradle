@@ -18,6 +18,7 @@ ext {
     testcontainersVersion = '1.17.6'
     redissonVersion = '3.20.0'
     springbootAdminVersion = '3.0.0'
+    myBatisVersion = '3.0.1'
 }
 
 configurations {
@@ -43,6 +44,7 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
     implementation "de.codecentric:spring-boot-admin-starter-server:${springbootAdminVersion}"
     implementation "de.codecentric:spring-boot-admin-starter-client:${springbootAdminVersion}"
+    implementation "org.mybatis.spring.boot:mybatis-spring-boot-starter:${myBatisVersion}"
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
@@ -56,6 +58,7 @@ dependencies {
     testImplementation 'org.hamcrest:hamcrest-library'
     testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
     testImplementation "org.testcontainers:mysql:${testcontainersVersion}"
+    testImplementation "org.mybatis.spring.boot:mybatis-spring-boot-starter-test:${myBatisVersion}"
 }
 
 tasks.named('test') {

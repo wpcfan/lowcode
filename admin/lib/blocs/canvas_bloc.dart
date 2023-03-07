@@ -67,6 +67,7 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
             block,
             ...blocks.sublist(index + 1)
           ]),
+          selectedBlock: block,
           error: '',
           saving: false,
         ));

@@ -75,50 +75,54 @@ class CanvasPage extends StatelessWidget {
                   // 右侧属性面板
                   ...[
                     const Spacer(),
-                    RightPane(
-                      showBlockConfig: state.selectedBlock != null,
-                      state: state,
-                      onSavePageBlock: (pageBlock) {
-                        context.read<CanvasBloc>().add(
-                              CanvasEventUpdateBlock(
-                                  state.layout!.id!, pageBlock.id!, pageBlock),
-                            );
-                      },
-                      onSavePageLayout: (pageLayout) {
-                        context.read<CanvasBloc>().add(
-                              CanvasEventSave(state.layout!.id!, pageLayout),
-                            );
-                      },
-                      onDeleteBlock: (blockId) async {
-                        final bloc = context.read<CanvasBloc>();
-                        final result = await showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('删除'),
-                                content: const Text('确定要删除吗？'),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(false);
-                                    },
-                                    child: const Text('取消'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.of(context).pop(true);
-                                    },
-                                    child: const Text('确定'),
-                                  ),
-                                ],
+                    Expanded(
+                      flex: 1,
+                      child: RighePane(
+                        showBlockConfig: state.selectedBlock != null,
+                        state: state,
+                        onSavePageBlock: (pageBlock) {
+                          context.read<CanvasBloc>().add(
+                                CanvasEventUpdateBlock(state.layout!.id!,
+                                    pageBlock.id!, pageBlock),
                               );
-                            });
-                        if (result) {
-                          bloc.add(
-                            CanvasEventDeleteBlock(state.layout!.id!, blockId),
-                          );
-                        }
-                      },
+                        },
+                        onSavePageLayout: (pageLayout) {
+                          context.read<CanvasBloc>().add(
+                                CanvasEventSave(state.layout!.id!, pageLayout),
+                              );
+                        },
+                        onDeleteBlock: (blockId) async {
+                          final bloc = context.read<CanvasBloc>();
+                          final result = await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: const Text('删除'),
+                                  content: const Text('确定要删除吗？'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false);
+                                      },
+                                      child: const Text('取消'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(true);
+                                      },
+                                      child: const Text('确定'),
+                                    ),
+                                  ],
+                                );
+                              });
+                          if (result) {
+                            bloc.add(
+                              CanvasEventDeleteBlock(
+                                  state.layout!.id!, blockId),
+                            );
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ],

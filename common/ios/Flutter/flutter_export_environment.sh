@@ -1,9 +1,9 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=/opt/homebrew/Caskroom/flutter/3.3.8/flutter"
-export "FLUTTER_APPLICATION_PATH=/Users/peng/workspace/web/low_code/common"
+export "FLUTTER_ROOT=C:\Users\wpcfa\scoop\apps\flutter\3.7.5"
+export "FLUTTER_APPLICATION_PATH=C:\Users\wpcfa\workspace\lowcode-flutter-spring\common"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
-export "FLUTTER_TARGET=lib/main.dart"
+export "FLUTTER_TARGET=lib\main.dart"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=0.0.1"
 export "FLUTTER_BUILD_NUMBER=0.0.1"

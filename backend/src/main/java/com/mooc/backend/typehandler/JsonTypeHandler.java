@@ -15,7 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-@Component
+//@Component
 @MappedTypes({ PageConfig.class, BlockConfig.class, BlockData.class })
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
 

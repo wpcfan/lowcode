@@ -28,25 +28,22 @@ class PageBlock<T> extends Equatable {
   final BlockConfig config;
   final List<BlockData<T>> data;
 
-  static PageBlock<dynamic> mapPageBlock(Map<String, dynamic> json) {
-    PageBlock result;
+  static PageBlock mapPageBlock(Map<String, dynamic> json) {
     if (json['type'] == PageBlockType.banner.value) {
-      result = PageBlock.fromJson(json, ImageData.fromJson);
+      return PageBlock<ImageData>.fromJson(json, ImageData.fromJson);
     } else if (json['type'] == PageBlockType.imageRow.value) {
-      result = PageBlock.fromJson(json, ImageData.fromJson);
+      return PageBlock<ImageData>.fromJson(json, ImageData.fromJson);
     } else if (json['type'] == PageBlockType.productRow.value) {
-      result = PageBlock.fromJson(json, Product.fromJson);
+      return PageBlock<Product>.fromJson(json, Product.fromJson);
     } else if (json['type'] == PageBlockType.waterfall.value) {
-      result = PageBlock.fromJson(json, Category.fromJson);
-    } else {
-      result = PageBlock.fromJson(json, (e) => e);
+      return PageBlock<Category>.fromJson(json, Category.fromJson);
     }
-    return result;
+    throw Exception('Unknown PageBlockType');
   }
 
   factory PageBlock.fromJson(
       Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
-    return PageBlock(
+    return PageBlock<T>(
       id: json['id'],
       title: json['title'],
       type: PageBlockType.values.firstWhere((e) => e.value == json['type'],

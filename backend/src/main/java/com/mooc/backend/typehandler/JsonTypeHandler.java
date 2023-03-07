@@ -3,6 +3,7 @@ package com.mooc.backend.typehandler;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mooc.backend.entities.blocks.BlockConfig;
+import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.entities.blocks.PageConfig;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
@@ -15,7 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component
-@MappedTypes({ PageConfig.class, BlockConfig.class })
+@MappedTypes({ PageConfig.class, BlockConfig.class, BlockData.class })
 public class JsonTypeHandler<T> extends BaseTypeHandler<T> {
 
     {

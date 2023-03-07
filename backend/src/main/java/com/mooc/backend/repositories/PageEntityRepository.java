@@ -34,23 +34,23 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      * @return 页面列表
      */
     @Query("""
-select p from PageEntity p
-where p.status = com.mooc.backend.enumerations.PageStatus.Published
-and p.startTime is not null and p.endTime is not null
-and p.startTime < ?1 and p.endTime > ?1
-and p.platform = ?2
-and p.pageType = ?3
-""")
+    select p from PageEntity p
+    where p.status = com.mooc.backend.enumerations.PageStatus.Published
+    and p.startTime is not null and p.endTime is not null
+    and p.startTime < ?1 and p.endTime > ?1
+    and p.platform = ?2
+    and p.pageType = ?3
+    """)
     Stream<PageEntity> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
 
     @Query("""
- select count(p) from PageEntity p
- where p.status = com.mooc.backend.enumerations.PageStatus.Published
- and p.startTime is not null and p.endTime is not null
- and p.startTime < ?1 and p.endTime > ?1
- and p.platform = ?2
- and p.pageType = ?3
- """)
+    select count(p) from PageEntity p
+    where p.status = com.mooc.backend.enumerations.PageStatus.Published
+    and p.startTime is not null and p.endTime is not null
+    and p.startTime < ?1 and p.endTime > ?1
+    and p.platform = ?2
+    and p.pageType = ?3
+    """)
     int countPublishedTimeConflict(LocalDateTime time, Platform platform, PageType pageType);
 
     /**
@@ -63,12 +63,12 @@ and p.pageType = ?3
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
-update PageEntity p
-set p.status = com.mooc.backend.enumerations.PageStatus.Archived
-where p.status = com.mooc.backend.enumerations.PageStatus.Published
-and p.startTime is not null and p.endTime is not null
-and p.endTime < ?1
-""")
+    update PageEntity p
+    set p.status = com.mooc.backend.enumerations.PageStatus.Archived
+    where p.status = com.mooc.backend.enumerations.PageStatus.Published
+    and p.startTime is not null and p.endTime is not null
+    and p.endTime < ?1
+    """)
     int updatePageStatusToArchived(LocalDateTime currentTime);
 
     int countByTitle(String title);

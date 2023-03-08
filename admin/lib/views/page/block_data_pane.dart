@@ -6,8 +6,10 @@ import 'image_data_form.dart';
 import 'product_data_form.dart';
 
 class BlockDataPane extends StatelessWidget {
-  const BlockDataPane({super.key, required this.block});
+  const BlockDataPane(
+      {super.key, required this.block, required this.onCategoryChanged});
   final PageBlock block;
+  final void Function(List<Category> selectedCategories) onCategoryChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,9 @@ class BlockDataPane extends StatelessWidget {
       case PageBlockType.productRow:
         return const ProductDataForm();
       case PageBlockType.waterfall:
-        return const CategoryDataForm();
+        return CategoryDataForm(
+          onSelectionChanged: onCategoryChanged,
+        );
       default:
         return const SizedBox();
     }

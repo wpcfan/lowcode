@@ -5,7 +5,7 @@ import 'search_field.dart';
 
 class CategoryTree extends StatefulWidget {
   final List<Category> categories;
-  final Function(List<Category> selectedCategories) onSelectionChanged;
+  final void Function(List<Category> selectedCategories) onSelectionChanged;
 
   const CategoryTree(
       {super.key, required this.categories, required this.onSelectionChanged});

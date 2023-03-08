@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Tag(name = "页面管理", description = "添加、修改、删除、查询页面，发布页面，撤销发布页面，添加区块，删除区块，修改区块，添加区块数据，删除区块数据，修改区块数据")
@@ -158,6 +160,19 @@ public class PageAdminController {
         log.debug("move block: id = {}, blockId = {}, targetSort = {}", id, blockId, targetSort);
         checkPageStatus(id);
         return PageDTO.fromEntity(pageUpdateService.moveBlock(id, blockId, targetSort));
+    }
+
+    @Operation(summary = "批量添加页面区块数据")
+    @PostMapping("/{id}/blocks/{blockId}/data/batch")
+    public List<PageBlockDataDTO> addDataBatch(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
+            @RequestBody List<CreateOrUpdatePageBlockDataDTO> data) {
+        log.debug("add data: id = {}, blockId = {}, data = {}", id, blockId, data);
+        checkPageStatus(id);
+        return pageCreateService.addDataToBlockBatch(blockId, data).stream()
+                .map(PageBlockDataDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
 

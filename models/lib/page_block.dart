@@ -90,11 +90,11 @@ class PageBlock<T> extends Equatable {
 }
 
 class BlockData<T> {
-  final int id;
+  final int? id;
   final int sort;
   final T content;
 
-  BlockData({required this.id, required this.sort, required this.content});
+  BlockData({this.id, required this.sort, required this.content});
 
   factory BlockData.fromJson(
       Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {

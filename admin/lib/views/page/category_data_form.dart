@@ -5,7 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 
 class CategoryDataForm extends StatelessWidget {
-  const CategoryDataForm({super.key});
+  const CategoryDataForm({super.key, required this.onSelectionChanged});
+  final void Function(List<Category>) onSelectionChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +35,9 @@ class CategoryDataForm extends StatelessWidget {
                 .map((e) => Category.fromJson(e as Map<String, dynamic>)));
 
             return CategoryTree(
-                categories: categories,
-                onSelectionChanged: (categories) {
-                  for (var category in categories) {
-                    debugPrint(category.name ?? '');
-                  }
-                });
+              categories: categories,
+              onSelectionChanged: onSelectionChanged,
+            );
           }),
     );
   }

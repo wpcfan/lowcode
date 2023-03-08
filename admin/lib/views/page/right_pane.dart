@@ -14,12 +14,14 @@ class RighePane extends StatelessWidget {
     this.onSavePageLayout,
     this.onSavePageBlock,
     this.onDeleteBlock,
+    this.onBlockDataChanged,
   });
   final CanvasState state;
   final bool showBlockConfig;
   final void Function(PageBlock)? onSavePageBlock;
   final void Function(PageLayout)? onSavePageLayout;
   final void Function(int)? onDeleteBlock;
+  final void Function(List<BlockData>)? onBlockDataChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +43,15 @@ class RighePane extends StatelessWidget {
                     onSave: onSavePageBlock,
                     onDelete: onDeleteBlock,
                   ),
-                  BlockDataPane(block: state.selectedBlock!),
+                  BlockDataPane(
+                    block: state.selectedBlock!,
+                    onCategoryChanged: (categories) {
+                      final data = categories
+                          .map((e) => BlockData<Category>(sort: 0, content: e))
+                          .toList();
+                      onBlockDataChanged?.call(data);
+                    },
+                  ),
                 ],
               ),
             ),

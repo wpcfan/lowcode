@@ -14,6 +14,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
+
 @Transactional
 @RequiredArgsConstructor
 @Service
@@ -76,5 +79,19 @@ public class PageCreateService {
                     pageBlockEntityRepository.save(blockEntity);
                     return dataEntity;
                 }).orElseThrow(() -> new CustomException("区块不存在", "PageCreateService#addDataToBlock", 404));
+    }
+
+    public List<PageBlockDataEntity> addDataToBlockBatch(Long blockId, List<CreateOrUpdatePageBlockDataDTO> data) {
+        return pageBlockEntityRepository.findById(blockId)
+                .map(blockEntity -> {
+                    if (blockEntity.getType() == BlockType.Waterfall && blockEntity.getData().size() > 0) {
+                        throw new CustomException("瀑布流区块只能有一个数据", "PageCreateService#addDataToBlockBatch", 400);
+                    }
+                    var dataEntities = data.stream().map(CreateOrUpdatePageBlockDataDTO::toEntity).toList();
+                    blockEntity.getData().clear();
+                    blockEntity.getData().addAll(dataEntities);
+                    pageBlockEntityRepository.save(blockEntity);
+                    return dataEntities;
+                }).orElseThrow(() -> new CustomException("区块不存在", "PageCreateService#addDataToBlockBatch", 404));
     }
 }

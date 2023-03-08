@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
+import 'search_field.dart';
+
 class CategoryTree extends StatefulWidget {
   final List<Category> categories;
   final Function(List<Category> selectedCategories) onSelectionChanged;
@@ -14,10 +16,54 @@ class CategoryTree extends StatefulWidget {
 
 class _CategoryTreeState extends State<CategoryTree> {
   final List<Category> _selectedCategories = [];
-
+  final List<Category> _matchedCategories = [];
   @override
   Widget build(BuildContext context) {
-    return _buildCategoryTree(widget.categories);
+    final List<Category> flattenedCategories =
+        widget.categories.expand((element) {
+      final children = element.children ?? [];
+      return [element, ...children];
+    }).toList();
+    return Column(
+      children: [
+        SearchField(
+          placeholder: '搜索',
+          optionsBuilder: (text) {
+            final matched = flattenedCategories
+                .where((element) =>
+                    element.name!.toLowerCase().contains(text.toLowerCase()))
+                .toList();
+            setState(() {
+              _matchedCategories.clear();
+              _matchedCategories.addAll(matched);
+            });
+            return _matchedCategories
+                .map((e) => SearchOption(name: e.name, value: e))
+                .toList();
+          },
+          itemBuilder: (context, index, onSelected) {
+            final category = _matchedCategories[index];
+            return ListTile(
+              title: Text(category.name ?? ''),
+              onTap: () {
+                onSelected(SearchOption(name: category.name!, value: category));
+              },
+            );
+          },
+          onSelected: (option) {
+            setState(() {
+              if (_selectedCategories.contains(option.value)) {
+                _selectedCategories.remove(option.value);
+              } else {
+                _selectedCategories.add(option.value);
+              }
+              widget.onSelectionChanged(_selectedCategories);
+            });
+          },
+        ),
+        _buildCategoryTree(widget.categories),
+      ],
+    );
   }
 
   Widget _buildCategoryTree(List<Category> categories) {

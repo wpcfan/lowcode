@@ -23,6 +23,9 @@ public class Product extends Auditable {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "sku", nullable = false, unique = true)
+    private String sku;
+
     @Column(name = "name", nullable = false, length = 100)
     private String name;
 

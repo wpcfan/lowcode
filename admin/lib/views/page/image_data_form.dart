@@ -6,6 +6,16 @@ class ImageDataForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const ImageUploader();
+    return ImageUploader(
+      onImagesSubmitted: (images) {
+        for (var image in images) {
+          debugPrint(image.toString());
+        }
+      },
+      onError: (error) {
+        debugPrint(error);
+      },
+      maxImages: 9,
+    );
   }
 }

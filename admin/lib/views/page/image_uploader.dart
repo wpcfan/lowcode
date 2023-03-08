@@ -1,10 +1,17 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageUploader extends StatefulWidget {
-  const ImageUploader({super.key});
+  const ImageUploader({
+    super.key,
+    required this.onImagesSubmitted,
+    required this.onError,
+    this.maxImages = 9,
+  });
+  final void Function(List<Uint8List> images) onImagesSubmitted;
+  final void Function(String) onError;
+  final int maxImages;
 
   @override
   State<ImageUploader> createState() => _ImageUploaderState();
@@ -16,11 +23,16 @@ class _ImageUploaderState extends State<ImageUploader> {
   Future<void> _pickImages() async {
     final picker = ImagePicker();
     final pickedImages = await picker.pickMultiImage();
+    if (pickedImages.length > widget.maxImages) {
+      widget.onError('你最多只能一次选取 ${widget.maxImages} 张图片');
+      return;
+    }
     if (pickedImages.isNotEmpty) {
       setState(() {
         _images.addAll(
           pickedImages.map((pickedImage) => {
-                'file': File(pickedImage.path),
+                'path': pickedImage.path,
+                'file': pickedImage,
                 'isSelected': false,
               }),
         );
@@ -38,6 +50,11 @@ class _ImageUploaderState extends State<ImageUploader> {
     setState(() {
       _images.removeWhere((image) => image['isSelected']);
     });
+  }
+
+  Future<Uint8List> fileToFile(XFile file) async {
+    final bytes = await file.readAsBytes();
+    return bytes;
   }
 
   @override
@@ -60,8 +77,8 @@ class _ImageUploaderState extends State<ImageUploader> {
               final image = _images[index];
               return Stack(
                 children: [
-                  Image.file(
-                    image['file'],
+                  Image.network(
+                    image['path'],
                     fit: BoxFit.cover,
                   ),
                   Positioned(
@@ -81,10 +98,26 @@ class _ImageUploaderState extends State<ImageUploader> {
             },
           ),
         ),
-        ElevatedButton(
-          onPressed: _deleteSelectedImages,
-          child: const Text('Delete selected images'),
-        ),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: _deleteSelectedImages,
+              child: const Text('Delete selected images'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final List<Uint8List> selectedImages = [];
+                for (final image in _images) {
+                  if (image['isSelected']) {
+                    selectedImages.add(await fileToFile(image['file']));
+                  }
+                }
+                widget.onImagesSubmitted(selectedImages);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        )
       ],
     );
   }

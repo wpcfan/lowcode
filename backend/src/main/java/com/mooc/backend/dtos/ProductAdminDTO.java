@@ -10,13 +10,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-public record ProductAdminDTO(Long id, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
+public record ProductAdminDTO(Long id, String sku, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
                               Set<ProductImageInfo> images) implements Serializable {
     private static final long serialVersionUID = -1;
 
     public static ProductAdminDTO fromEntity(Product product) {
         return new ProductAdminDTO(
                 product.getId(),
+                product.getSku(),
                 product.getName(),
                 product.getDescription(),
                 product.getPrice(),
@@ -41,6 +42,7 @@ public record ProductAdminDTO(Long id, String name, String description, BigDecim
 
     public Product toEntity() {
         var product = Product.builder()
+                .sku(sku())
                 .name(name())
                 .description(description())
                 .price(price())

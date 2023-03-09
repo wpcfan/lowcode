@@ -106,11 +106,17 @@ public class Product extends Auditable {
     }
 
     public static class ProductBuilder {
+        private String sku;
         private String name;
         private String description;
         private BigDecimal price;
         private Set<Category> categories = new HashSet<>();
         private Set<ProductImage> images = new HashSet<>();
+
+        public ProductBuilder sku(String sku) {
+            this.sku = sku;
+            return this;
+        }
 
         public ProductBuilder name(String name) {
             this.name = name;
@@ -139,6 +145,7 @@ public class Product extends Auditable {
 
         public Product build() {
             Product product = new Product();
+            product.setSku(sku);
             product.setName(name);
             product.setDescription(description);
             product.setPrice(price);

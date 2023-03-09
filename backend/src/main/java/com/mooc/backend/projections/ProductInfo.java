@@ -8,6 +8,7 @@ import java.util.Set;
  */
 public interface ProductInfo {
     Long getId();
+    String getSku();
 
     String getName();
 

@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class ProductDTO implements Serializable {
     private static final long serialVersionUID = -1;
     private Long id;
+    private String sku;
     private String name;
     private String description;
     @JsonSerialize(using = BigDecimalSerializer.class)
@@ -38,6 +39,7 @@ public class ProductDTO implements Serializable {
     public static ProductDTO fromProjection(ProductInfo product) {
         return ProductDTO.builder()
                 .id(product.getId())
+                .sku(product.getSku())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
@@ -53,6 +55,7 @@ public class ProductDTO implements Serializable {
     public static ProductDTO fromEntity(Product product) {
         return ProductDTO.builder()
                 .id(product.getId())
+                .sku(product.getSku())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())

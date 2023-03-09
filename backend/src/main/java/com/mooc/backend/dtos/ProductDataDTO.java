@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 @JsonDeserialize(as = ProductDataDTO.class)
 public record ProductDataDTO(
         Long id,
+        String sku,
         String name,
         String description,
         String price,
@@ -24,6 +25,7 @@ public record ProductDataDTO(
     public static ProductDataDTO fromEntity(com.mooc.backend.entities.Product product) {
         return new ProductDataDTO(
                 product.getId(),
+                product.getSku(),
                 product.getName(),
                 product.getDescription(),
                 MathUtils.formatPrice(product.getPrice()),

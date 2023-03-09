@@ -9,7 +9,7 @@ class ImageUploader extends StatefulWidget {
     required this.onError,
     this.maxImages = 9,
   });
-  final void Function(List<Uint8List> images) onImagesSubmitted;
+  final void Function(List<Map<String, dynamic>> images) onImagesSubmitted;
   final void Function(String) onError;
   final int maxImages;
 
@@ -33,6 +33,7 @@ class _ImageUploaderState extends State<ImageUploader> {
           pickedImages.map((pickedImage) => {
                 'path': pickedImage.path,
                 'file': pickedImage,
+                'name': pickedImage.name,
                 'isSelected': false,
               }),
         );
@@ -65,38 +66,37 @@ class _ImageUploaderState extends State<ImageUploader> {
           onPressed: _pickImages,
           child: const Text('Pick images'),
         ),
-        Expanded(
-          child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: _images.length,
-            itemBuilder: (context, index) {
-              final image = _images[index];
-              return Stack(
-                children: [
-                  Image.network(
-                    image['path'],
-                    fit: BoxFit.cover,
-                  ),
-                  Positioned(
-                    top: 0,
-                    right: 0,
-                    child: IconButton(
-                      onPressed: () => _toggleImageSelection(index),
-                      icon: Icon(
-                        image['isSelected']
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
-                      ),
+        GridView.builder(
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: _images.length,
+          itemBuilder: (context, index) {
+            final image = _images[index];
+            return Stack(
+              children: [
+                Image.network(
+                  image['path'],
+                  fit: BoxFit.cover,
+                ),
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconButton(
+                    onPressed: () => _toggleImageSelection(index),
+                    icon: Icon(
+                      image['isSelected']
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
                     ),
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            );
+          },
         ),
         Row(
           children: [
@@ -106,10 +106,14 @@ class _ImageUploaderState extends State<ImageUploader> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final List<Uint8List> selectedImages = [];
+                final List<Map<String, dynamic>> selectedImages = [];
                 for (final image in _images) {
                   if (image['isSelected']) {
-                    selectedImages.add(await fileToFile(image['file']));
+                    selectedImages.add({
+                      'path': image['path'],
+                      'file': await fileToFile(image['file']),
+                      'name': image['name'],
+                    });
                   }
                 }
                 widget.onImagesSubmitted(selectedImages);

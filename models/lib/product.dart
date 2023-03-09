@@ -5,6 +5,7 @@ import 'category.dart';
 class Product extends Equatable {
   const Product({
     this.id,
+    this.sku,
     this.name,
     this.description,
     this.price,
@@ -14,6 +15,7 @@ class Product extends Equatable {
   });
 
   final int? id;
+  final String? sku;
   final String? name;
   final String? description;
   final String? price;
@@ -34,6 +36,7 @@ class Product extends Equatable {
 
   Product copyWith({
     int? id,
+    String? sku,
     String? name,
     String? description,
     String? price,
@@ -43,6 +46,7 @@ class Product extends Equatable {
   }) {
     return Product(
       id: id ?? this.id,
+      sku: sku ?? this.sku,
       name: name ?? this.name,
       description: description ?? this.description,
       price: price ?? this.price,
@@ -54,11 +58,12 @@ class Product extends Equatable {
 
   @override
   String toString() {
-    return 'Product(id: $id, name: $name, description: $description, price: $price, originalPrice: $originalPrice, images: $images, categories: $categories)';
+    return 'Product(id: $id, sku: $sku, name: $name, description: $description, price: $price, originalPrice: $originalPrice, images: $images, categories: $categories)';
   }
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         id: json['id'] as int?,
+        sku: json['sku'] as String?,
         name: json['name'] as String?,
         description: json['description'] as String?,
         price: json['price'] as String?,
@@ -74,6 +79,7 @@ class Product extends Equatable {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'sku': sku,
         'name': name,
         'description': description,
         'price': price,

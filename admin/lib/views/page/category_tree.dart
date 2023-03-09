@@ -5,10 +5,15 @@ import 'search_field.dart';
 
 class CategoryTree extends StatefulWidget {
   final List<Category> categories;
-  final void Function(List<Category> selectedCategories) onSelectionChanged;
+  final void Function(Category) onCategoryAdded;
+  final void Function(Category) onCategoryRemoved;
 
-  const CategoryTree(
-      {super.key, required this.categories, required this.onSelectionChanged});
+  const CategoryTree({
+    super.key,
+    required this.categories,
+    required this.onCategoryAdded,
+    required this.onCategoryRemoved,
+  });
 
   @override
   State<CategoryTree> createState() => _CategoryTreeState();
@@ -54,10 +59,11 @@ class _CategoryTreeState extends State<CategoryTree> {
             setState(() {
               if (_selectedCategories.contains(option.value)) {
                 _selectedCategories.remove(option.value);
+                widget.onCategoryRemoved(option.value);
               } else {
                 _selectedCategories.add(option.value);
+                widget.onCategoryAdded(option.value);
               }
-              widget.onSelectionChanged(_selectedCategories);
             });
           },
         ),
@@ -91,10 +97,11 @@ class _CategoryTreeState extends State<CategoryTree> {
             setState(() {
               if (value!) {
                 _selectedCategories.add(category);
+                widget.onCategoryAdded(category);
               } else {
                 _selectedCategories.remove(category);
+                widget.onCategoryRemoved(category);
               }
-              widget.onSelectionChanged(_selectedCategories);
             });
           },
         ),

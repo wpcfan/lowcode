@@ -76,7 +76,7 @@ class CanvasPage extends StatelessWidget {
                   ...[
                     const Spacer(),
                     Expanded(
-                      flex: 1,
+                      flex: 2,
                       child: RighePane(
                         showBlockConfig: state.selectedBlock != null,
                         state: state,
@@ -121,6 +121,18 @@ class CanvasPage extends StatelessWidget {
                                   state.layout!.id!, blockId),
                             );
                           }
+                        },
+                        onCategoryAdded: (data) {
+                          debugPrint('onCategoryAdded: $data');
+                        },
+                        onCategoryRemoved: (data) {
+                          debugPrint('onCategoryRemoved: $data');
+                        },
+                        onProductAdded: (data) {
+                          debugPrint('onProductAdded: $data');
+                        },
+                        onProductRemoved: (data) {
+                          debugPrint('onProductRemoved: $data');
                         },
                       ),
                     ),

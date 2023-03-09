@@ -5,8 +5,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 
 class CategoryDataForm extends StatelessWidget {
-  const CategoryDataForm({super.key, required this.onSelectionChanged});
-  final void Function(List<Category>) onSelectionChanged;
+  const CategoryDataForm({
+    super.key,
+    required this.onCategoryAdded,
+    required this.onCategoryRemoved,
+    required this.data,
+  });
+  final void Function(Category) onCategoryAdded;
+  final void Function(Category) onCategoryRemoved;
+  final List<BlockData<Category>> data;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,8 @@ class CategoryDataForm extends StatelessWidget {
 
             return CategoryTree(
               categories: categories,
-              onSelectionChanged: onSelectionChanged,
+              onCategoryAdded: onCategoryAdded,
+              onCategoryRemoved: onCategoryRemoved,
             );
           }),
     );

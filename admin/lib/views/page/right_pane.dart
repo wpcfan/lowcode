@@ -14,14 +14,20 @@ class RighePane extends StatelessWidget {
     this.onSavePageLayout,
     this.onSavePageBlock,
     this.onDeleteBlock,
-    this.onBlockDataChanged,
+    required this.onCategoryAdded,
+    required this.onCategoryRemoved,
+    required this.onProductAdded,
+    required this.onProductRemoved,
   });
   final CanvasState state;
   final bool showBlockConfig;
   final void Function(PageBlock)? onSavePageBlock;
   final void Function(PageLayout)? onSavePageLayout;
   final void Function(int)? onDeleteBlock;
-  final void Function(List<BlockData>)? onBlockDataChanged;
+  final void Function(BlockData<Product>) onProductAdded;
+  final void Function(int) onProductRemoved;
+  final void Function(BlockData<Category>) onCategoryAdded;
+  final void Function(int) onCategoryRemoved;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +51,31 @@ class RighePane extends StatelessWidget {
                   ),
                   BlockDataPane(
                     block: state.selectedBlock!,
-                    onCategoryChanged: (categories) {
-                      final data = categories
-                          .map((e) => BlockData<Category>(sort: 0, content: e))
-                          .toList();
-                      onBlockDataChanged?.call(data);
+                    onCategoryAdded: (category) {
+                      final data = BlockData<Category>(
+                          sort: state.selectedBlock!.data.length,
+                          content: category);
+                      onCategoryAdded.call(data);
                     },
+                    onCategoryRemoved: (category) {
+                      final index = state.selectedBlock!.data.indexWhere(
+                          (element) => element.content.id == category.id);
+                      if (index == -1) return;
+                      onCategoryRemoved.call(index);
+                    },
+                    onProductAdded: (product) {
+                      final data = BlockData<Product>(
+                          sort: state.selectedBlock!.data.length,
+                          content: product);
+                      onProductAdded.call(data);
+                    },
+                    onProductRemoved: (product) {
+                      final index = state.selectedBlock!.data.indexWhere(
+                          (element) => element.content.id == product.id);
+                      if (index == -1) return;
+                      onProductRemoved.call(index);
+                    },
+                    onImagesSubmitted: (images) {},
                   ),
                 ],
               ),

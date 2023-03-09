@@ -27,27 +27,6 @@ public class ProductController {
         this.productService = productQueryService;
     }
 
-    @GetMapping("/by-example")
-    public PageWrapper<ProductDTO> findPageableByExample(
-            @RequestParam(required = false) String keyword,
-            @ParameterObject Pageable pageable) {
-        Product productQuery = new Product();
-        productQuery.setName(keyword);
-        productQuery.setDescription(keyword);
-        Category categoryQuery = new Category();
-        categoryQuery.setName(keyword);
-        productQuery.getCategories().add(categoryQuery);
-        ExampleMatcher matcher = ExampleMatcher.matching()
-                .withIgnoreCase("name", "description", "categories.name")
-                .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains())
-                .withMatcher("description", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains())
-                .withMatcher("categories.name", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains());
-        Example<Product> example = Example.of(productQuery, matcher);
-        var result = productService.findPageableByExample(example, pageable).map(ProductDTO::fromEntity);
-        return new PageWrapper<>(pageable.getPageNumber(), pageable.getPageSize(), result.getTotalPages(),
-                result.getTotalElements(), result.getContent());
-    }
-
     /**
      * 根据商品 ID 查询商品
      *

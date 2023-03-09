@@ -28,4 +28,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, CustomP
 
     @EntityGraph(attributePaths = {"categories", "images"})
     Slice<ProductInfo> findPageableByCategoriesId(Long id, Pageable pageable);
+
+    Stream<Product> findByIdIn(Iterable<Long> ids);
 }

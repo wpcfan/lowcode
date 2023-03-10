@@ -175,7 +175,6 @@ public class PageAdminController {
                 .collect(Collectors.toList());
     }
 
-
     @Operation(summary = "添加页面区块数据")
     @PostMapping("/{id}/blocks/{blockId}/data")
     public PageBlockDataDTO addData(

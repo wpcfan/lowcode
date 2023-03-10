@@ -1,4 +1,4 @@
 package com.mooc.backend.dtos;
 
-public record FileDTO(String url, String hash) {
+public record FileDTO(String url, String key) {
 }

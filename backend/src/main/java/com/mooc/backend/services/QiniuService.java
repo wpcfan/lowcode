@@ -43,7 +43,7 @@ public class QiniuService {
             var mapper = new ObjectMapper();
             var response = uploadManager.put(byteInputStream, key, upToken, null, null);
             var putRet = mapper.readValue(response.bodyString(), com.qiniu.storage.model.DefaultPutRet.class);
-            return new FileDTO(domain + "/" + putRet.key, putRet.hash);
+            return new FileDTO(domain + "/" + putRet.key, putRet.key);
         } catch (QiniuException | JsonProcessingException e) {
             e.printStackTrace();
             throw new CustomException("File Upload error", e.getMessage(), 500);
@@ -55,7 +55,7 @@ public class QiniuService {
      *
      * @return 文件列表
      */
-    public List<FileInfo> listFiles() {
+    public List<FileDTO> listFiles() {
         //文件名前缀
         String prefix = "";
         //每次迭代的长度限制，最大1000，推荐值 1000
@@ -64,7 +64,7 @@ public class QiniuService {
         String delimiter = "";
         //列举空间文件列表
         BucketManager.FileListIterator fileListIterator = bucketManager.createFileListIterator(bucket, prefix, limit, delimiter);
-        List<FileInfo> list = new ArrayList<>();
+        List<FileDTO> list = new ArrayList<>();
         while (fileListIterator.hasNext()) {
             //处理获取的file list结果
             FileInfo[] items = fileListIterator.next();
@@ -72,7 +72,7 @@ public class QiniuService {
                 if (!item.mimeType.startsWith("image")) {
                     continue;
                 }
-                list.add(item);
+                list.add(new FileDTO(domain + "/" + item.key, item.key));
             }
         }
         return list;

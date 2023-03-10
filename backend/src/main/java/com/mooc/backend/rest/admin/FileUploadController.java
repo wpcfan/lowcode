@@ -46,7 +46,7 @@ public class FileUploadController {
 
     @Operation(summary = "文件列表")
     @GetMapping("/files")
-    public List<FileInfo> listFiles() {
+    public List<FileDTO> listFiles() {
         return qiniuService.listFiles();
     }
 

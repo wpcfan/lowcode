@@ -44,6 +44,13 @@ final routerConfig = GoRouter(
                 baseUrl:
                     'http://localhost:8080/api/v1/app/products/by-category'),
           ),
+          RepositoryProvider<FileAdminRepository>(
+            create: (context) =>
+                FileAdminRepository(client: context.read<Dio>()),
+          ),
+          RepositoryProvider<FileUploadRepository>(
+            create: (context) => FileUploadRepository(),
+          ),
           ChangeNotifierProvider(
             create: (context) => SideMenuController(),
           ),

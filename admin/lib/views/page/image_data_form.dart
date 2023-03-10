@@ -1,9 +1,9 @@
 import 'package:admin/views/page/image_uploader.dart';
 import 'package:common/common.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
-import 'package:networking/networking.dart';
+import 'package:page_repository/page_repository.dart';
 
 class ImageDataForm extends StatefulWidget {
   const ImageDataForm({
@@ -21,9 +21,10 @@ class _ImageDataFormState extends State<ImageDataForm> {
 
   @override
   Widget build(BuildContext context) {
+    final repo = context.read<FileUploadRepository>();
     final columns = [
       ImageUploader(
-        onImagesSubmitted: (images) => _uploadImages(images),
+        onImagesSubmitted: (images) => _uploadImages(repo, images),
         onError: (error) {
           debugPrint(error);
         },
@@ -50,28 +51,12 @@ class _ImageDataFormState extends State<ImageDataForm> {
     );
   }
 
-  Future<void> _uploadImages(List<Map<String, dynamic>> images) async {
-    final client = FileClient.getInstance();
-    if (images.isEmpty) {
-      return;
-    }
-    FormData formData = FormData();
-    for (var i = 0; i < images.length; i++) {
-      formData.files.add(MapEntry(
-          "files",
-          MultipartFile.fromBytes(
-            images[i]['file'],
-            filename: images[i]['name'],
-          )));
-    }
-    final res = await client.post('/files', data: formData);
-    if (res.data is List) {
-      final json = res.data as List;
-      final urls = json.map((e) => e['url'] as String).toList();
-      setState(() {
-        _urls.clear();
-        _urls.addAll(urls);
-      });
-    }
+  Future<void> _uploadImages(
+      FileUploadRepository repo, List<UploadFile> images) async {
+    final urls = await repo.uploadFiles(images);
+    setState(() {
+      _urls.clear();
+      _urls.addAll(urls);
+    });
   }
 }

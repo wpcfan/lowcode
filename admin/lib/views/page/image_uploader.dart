@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:page_repository/page_repository.dart';
 
 class ImageUploader extends StatefulWidget {
   const ImageUploader({
@@ -9,7 +10,7 @@ class ImageUploader extends StatefulWidget {
     required this.onError,
     this.maxImages = 9,
   });
-  final void Function(List<Map<String, dynamic>> images) onImagesSubmitted;
+  final void Function(List<UploadFile> images) onImagesSubmitted;
   final void Function(String) onError;
   final int maxImages;
 
@@ -106,14 +107,12 @@ class _ImageUploaderState extends State<ImageUploader> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final List<Map<String, dynamic>> selectedImages = [];
+                final List<UploadFile> selectedImages = [];
                 for (final image in _images) {
                   if (image['isSelected']) {
-                    selectedImages.add({
-                      'path': image['path'],
-                      'file': await fileToFile(image['file']),
-                      'name': image['name'],
-                    });
+                    selectedImages.add(UploadFile(
+                        name: image['name'],
+                        file: await fileToFile(image['file'])));
                   }
                 }
                 widget.onImagesSubmitted(selectedImages);

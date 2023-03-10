@@ -26,7 +26,7 @@ public class RedissonConfig {
 
     @Bean
     CacheManager cacheManager(RedissonClient redissonClient) {
-        Map<String, CacheConfig> config = new HashMap<String, CacheConfig>();
+        Map<String, CacheConfig> config = new HashMap<>();
 
         // create "page" cache with ttl = 24 minutes and maxIdleTime = 12 minutes
         config.put("page", new CacheConfig(24*60*1000, 12*60*1000));

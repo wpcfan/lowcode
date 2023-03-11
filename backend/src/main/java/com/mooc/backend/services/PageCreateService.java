@@ -8,13 +8,13 @@ import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.enumerations.BlockType;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.error.CustomException;
+import com.mooc.backend.repositories.PageBlockDataEntityRepository;
 import com.mooc.backend.repositories.PageBlockEntityRepository;
 import com.mooc.backend.repositories.PageEntityRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 
 @Transactional
@@ -25,6 +25,7 @@ public class PageCreateService {
     private final PageQueryService pageQueryService;
     private final PageEntityRepository pageEntityRepository;
     private final PageBlockEntityRepository pageBlockEntityRepository;
+    private final PageBlockDataEntityRepository pageBlockDataEntityRepository;
 
     public PageEntity createPage(CreateOrUpdatePageDTO page) {
         var pageEntity = pageEntityRepository.save(page.toEntity());
@@ -75,9 +76,9 @@ public class PageCreateService {
                         throw new CustomException("瀑布流区块只能有一个数据", "PageCreateService#addDataToBlock", 400);
                     }
                     var dataEntity = data.toEntity();
-                    blockEntity.addData(dataEntity);
-                    pageBlockEntityRepository.save(blockEntity);
-                    return dataEntity;
+                    dataEntity.setSort(blockEntity.getData().size() + 1);
+                    dataEntity.setPageBlock(blockEntity);
+                    return pageBlockDataEntityRepository.save(dataEntity);
                 }).orElseThrow(() -> new CustomException("区块不存在", "PageCreateService#addDataToBlock", 404));
     }
 

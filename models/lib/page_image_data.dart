@@ -29,4 +29,16 @@ class ImageData extends Equatable {
 
   @override
   List<Object?> get props => [image, link, title];
+
+  ImageData copyWith({
+    String? image,
+    MyLink? link,
+    String? title,
+  }) {
+    return ImageData(
+      image: image ?? this.image,
+      link: link ?? this.link,
+      title: title ?? this.title,
+    );
+  }
 }

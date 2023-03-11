@@ -73,7 +73,8 @@ class RighePane extends StatelessWidget {
                       final index = state.selectedBlock!.data.indexWhere(
                           (element) => element.content.id == product.id);
                       if (index == -1) return;
-                      onProductRemoved.call(index);
+                      onProductRemoved
+                          .call(state.selectedBlock!.data[index].id!);
                     },
                     onImagesSubmitted: (images) {},
                   ),

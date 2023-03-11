@@ -1,127 +1,99 @@
-import 'package:flutter/foundation.dart';
+import 'package:admin/blocs/flie_event.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_repository/page_repository.dart';
 
-class ImageUploader extends StatefulWidget {
+import '../../blocs/file_bloc.dart';
+import '../../blocs/file_state.dart';
+
+class ImageUploader extends StatelessWidget {
   const ImageUploader({
     super.key,
-    required this.onImagesSubmitted,
     required this.onError,
+    required this.bloc,
     this.maxImages = 9,
   });
-  final void Function(List<UploadFile> images) onImagesSubmitted;
   final void Function(String) onError;
   final int maxImages;
+  final FileBloc bloc;
 
-  @override
-  State<ImageUploader> createState() => _ImageUploaderState();
-}
-
-class _ImageUploaderState extends State<ImageUploader> {
-  final List<Map<String, dynamic>> _images = [];
-
-  Future<void> _pickImages() async {
+  Future<void> _pickImages(FileBloc bloc) async {
     final picker = ImagePicker();
     final pickedImages = await picker.pickMultiImage();
-    if (pickedImages.length > widget.maxImages) {
-      widget.onError('你最多只能一次选取 ${widget.maxImages} 张图片');
+    if (pickedImages.length > maxImages) {
+      onError('你最多只能一次选取 $maxImages 张图片');
       return;
     }
-    if (pickedImages.isNotEmpty) {
-      setState(() {
-        _images.addAll(
-          pickedImages.map((pickedImage) => {
-                'path': pickedImage.path,
-                'file': pickedImage,
-                'name': pickedImage.name,
-                'isSelected': false,
-              }),
-        );
-      });
+    final List<UploadFile> images = [];
+    for (var image in pickedImages) {
+      final bytes = await image.readAsBytes();
+      images.add(UploadFile(
+        name: image.name,
+        file: bytes,
+      ));
     }
-  }
 
-  void _toggleImageSelection(int index) {
-    setState(() {
-      _images[index]['isSelected'] = !_images[index]['isSelected'];
-    });
-  }
-
-  void _deleteSelectedImages() {
-    setState(() {
-      _images.removeWhere((image) => image['isSelected']);
-    });
-  }
-
-  Future<Uint8List> fileToFile(XFile file) async {
-    final bytes = await file.readAsBytes();
-    return bytes;
+    if (images.isNotEmpty) {
+      bloc.add(FileEventUploadMultiple(images));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: _pickImages,
-          child: const Text('Pick images'),
-        ),
-        GridView.builder(
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: _images.length,
-          itemBuilder: (context, index) {
-            final image = _images[index];
-            return Stack(
-              children: [
-                Image.network(
-                  image['path'],
-                  fit: BoxFit.cover,
-                ),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    onPressed: () => _toggleImageSelection(index),
-                    icon: Icon(
-                      image['isSelected']
-                          ? Icons.check_circle
-                          : Icons.radio_button_unchecked,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        Row(
+    return BlocBuilder<FileBloc, FileState>(
+      bloc: bloc,
+      builder: (context, state) {
+        if (state.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state.error.isNotEmpty) {
+          return Text(state.error);
+        }
+        return Column(
           children: [
             ElevatedButton(
-              onPressed: _deleteSelectedImages,
-              child: const Text('Delete selected images'),
+              onPressed: state.uploading
+                  ? null
+                  : () async {
+                      await _pickImages(bloc);
+                    },
+              child:
+                  state.uploading ? const Text('上传中...') : const Text('上传图片'),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final List<UploadFile> selectedImages = [];
-                for (final image in _images) {
-                  if (image['isSelected']) {
-                    selectedImages.add(UploadFile(
-                        name: image['name'],
-                        file: await fileToFile(image['file'])));
-                  }
-                }
-                widget.onImagesSubmitted(selectedImages);
+            GridView.builder(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: state.files.length,
+              itemBuilder: (context, index) {
+                final image = state.files[index];
+                return Stack(
+                  children: [
+                    Image.network(
+                      image.url,
+                      fit: BoxFit.cover,
+                    ),
+                    Positioned(
+                      top: 0,
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () {
+                          bloc.add(FileEventDelete(image.key));
+                        },
+                      ),
+                    ),
+                  ],
+                );
               },
-              child: const Text('Save'),
             ),
           ],
-        )
-      ],
+        );
+      },
     );
   }
 }

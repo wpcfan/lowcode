@@ -1,11 +1,9 @@
-import 'dart:async';
-
 import 'package:admin/views/page/product_table.dart';
 import 'package:admin/views/page/search_field.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
+import 'package:page_repository/page_repository.dart';
 
 class ProductDataForm extends StatefulWidget {
   const ProductDataForm({
@@ -37,16 +35,9 @@ class _ProductDataFormState extends State<ProductDataForm> {
         mainAxisSize: MainAxisSize.min,
         children: [
           SearchField(
-            optionsBuilder: (text) async {
-              /// 从服务器获取匹配的商品列表
-              final matchedProducts = await _searchProducts(text);
-              setState(() {
-                _matchedProducts.clear();
-                _matchedProducts.addAll(matchedProducts);
-              });
-
+            optionsBuilder: (text) {
               /// 将匹配的商品列表转换为 SearchFieldOption 列表
-              return matchedProducts
+              return _matchedProducts
                   .map((e) => SearchOption(name: e.name, value: e))
                   .toList();
             },
@@ -81,6 +72,14 @@ class _ProductDataFormState extends State<ProductDataForm> {
                 }
               });
             },
+            onTextChanged: (text) async {
+              /// 从服务器获取匹配的商品列表
+              final matchedProducts = await _searchProducts(text);
+              setState(() {
+                _matchedProducts.clear();
+                _matchedProducts.addAll(matchedProducts);
+              });
+            },
           ),
           const SizedBox(height: 16),
           ProductTable(
@@ -93,13 +92,8 @@ class _ProductDataFormState extends State<ProductDataForm> {
   }
 
   Future<List<Product>> _searchProducts(String text) async {
-    final client = context.read<Dio>();
-    final res = await client.get('/products/by-example', queryParameters: {
-      'keyword': text,
-    });
-    final result = PageWrapper<Product>.fromJson(
-        res.data, (json) => Product.fromJson(json));
-
-    return result.items;
+    final client = context.read<ProductRepository>();
+    final res = await client.searchByKeyword(text);
+    return res;
   }
 }

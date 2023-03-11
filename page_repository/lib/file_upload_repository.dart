@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:networking/networking.dart';
+import 'package:page_repository/file_admin_repository.dart';
 
 class FileUploadRepository {
   final String baseUrl;
@@ -10,10 +11,30 @@ class FileUploadRepository {
 
   FileUploadRepository({
     Dio? client,
-    this.baseUrl = '/files',
+    this.baseUrl = '',
   }) : client = client ?? FileClient.getInstance();
 
-  Future<List<String>> uploadFiles(List<UploadFile> files) async {
+  Future<FileDto> uploadFile(UploadFile file) async {
+    debugPrint('FileUploadRepository.upload($file)');
+
+    final res = await client.post('/file', data: {
+      'file': MultipartFile.fromBytes(
+        file.file,
+        filename: file.name,
+      ),
+    });
+    if (res.data is! Map) {
+      throw Exception(
+          'FileUploadRepository.upload($file) - failed, res.data is not Map');
+    }
+
+    debugPrint('FileUploadRepository.upload($file) - success');
+    final json = res.data as Map<String, dynamic>;
+    final fileDto = FileDto.fromJson(json);
+    return fileDto;
+  }
+
+  Future<List<FileDto>> uploadFiles(List<UploadFile> files) async {
     debugPrint('FileUploadRepository.upload($files)');
 
     FormData formData = FormData();
@@ -31,10 +52,10 @@ class FileUploadRepository {
           'FileUploadRepository.upload($files) - failed, res.data is not List');
     }
 
-    final json = res.data as List;
-    final urls = json.map((e) => e['url'] as String).toList();
     debugPrint('FileUploadRepository.upload($files) - success');
-    return urls;
+    final json = res.data as List<dynamic>;
+    final fileDtos = json.map((e) => FileDto.fromJson(e)).toList();
+    return fileDtos;
   }
 }
 

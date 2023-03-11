@@ -70,7 +70,7 @@ class PageBlock<T> extends Equatable {
   @override
   List<Object?> get props => [id, title, type, sort, config, data];
 
-  PageBlock copyWith({
+  PageBlock<T> copyWith({
     int? id,
     String? title,
     PageBlockType? type,
@@ -96,6 +96,17 @@ class BlockData<T> {
 
   BlockData({this.id, required this.sort, required this.content});
 
+  static BlockData mapBlockData(Map<String, dynamic> json) {
+    if (json['content']['image'] != null) {
+      return BlockData<ImageData>.fromJson(json, ImageData.fromJson);
+    } else if (json['content']['price'] != null) {
+      return BlockData<Product>.fromJson(json, Product.fromJson);
+    } else if (json['content']['parentId'] != null) {
+      return BlockData<Category>.fromJson(json, Category.fromJson);
+    }
+    throw Exception('Unknown BlockDataType');
+  }
+
   factory BlockData.fromJson(
       Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
     return BlockData(
@@ -109,7 +120,19 @@ class BlockData<T> {
     return {
       'id': id,
       'sort': sort,
-      'data': content,
+      'content': content,
     };
+  }
+
+  BlockData<T> copyWith({
+    int? id,
+    int? sort,
+    T? content,
+  }) {
+    return BlockData(
+      id: id ?? this.id,
+      sort: sort ?? this.sort,
+      content: content ?? this.content,
+    );
   }
 }

@@ -1,8 +1,11 @@
 import 'package:admin/views/page/category_tree.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
+
+import '../../blocs/category_bloc.dart';
+import '../../blocs/category_event.dart';
+import '../../blocs/category_state.dart';
 
 class CategoryDataForm extends StatelessWidget {
   const CategoryDataForm({
@@ -17,36 +20,33 @@ class CategoryDataForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final client = context.read<Dio>();
+    context.read<CategoryBloc>().add(const CategoryEventLoad());
     return SingleChildScrollView(
-      child: FutureBuilder(
-          future: client.get('/categories'),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError) {
-              return Text(snapshot.error.toString());
-            }
-            final res = snapshot.data;
-            if (res == null || res.data == null || res.data is! List) {
-              return const Text('没有分类数据');
-            }
+        child: BlocBuilder<CategoryBloc, CategoryState>(
+      builder: (context, state) {
+        if (state.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-            /// 从响应数据中解析出分类列表
-            /// 由于响应数据中的分类数据是 Map<String, dynamic> 类型的
-            /// 所以需要将其转换为 Category 类型
-            /// 注意 List<dynamic> 不能直接转换为 List<Category>
-            /// 所以需要使用 List.from() 方法
-            final categories = List<Category>.from(res.data
-                .map((e) => Category.fromJson(e as Map<String, dynamic>)));
+        if (state.categories.isEmpty) {
+          return const Center(child: Text('暂无分类'));
+        }
 
-            return CategoryTree(
-              categories: categories,
-              onCategoryAdded: onCategoryAdded,
-              onCategoryRemoved: onCategoryRemoved,
-            );
-          }),
-    );
+        if (state.error.isNotEmpty) {
+          return Center(child: Text(state.error));
+        }
+
+        return CategoryTree(
+          categories: state.categories,
+          matchedCategories: state.matchedCategories,
+          selectedCategories: data.map((e) => e.content).toList(),
+          onCategoryAdded: onCategoryAdded,
+          onCategoryRemoved: onCategoryRemoved,
+          onTextChanged: (keyword) {
+            context.read<CategoryBloc>().add(CategoryEventSearch(keyword));
+          },
+        );
+      },
+    ));
   }
 }

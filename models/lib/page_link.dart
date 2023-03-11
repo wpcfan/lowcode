@@ -25,4 +25,14 @@ class MyLink extends Equatable {
       'value': value,
     };
   }
+
+  MyLink copyWith({
+    LinkType? type,
+    String? value,
+  }) {
+    return MyLink(
+      type: type ?? this.type,
+      value: value ?? this.value,
+    );
+  }
 }

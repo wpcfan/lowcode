@@ -22,6 +22,77 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     on<CanvasEventDeleteBlock>(_onCanvasEventDeleteBlock);
     on<CanvasEventSelectBlock>(_onCanvasEventSelectBlock);
     on<CanvasEventSelectNoBlock>(_onCanvasEventSelectNoBlock);
+    on<CanvasEventAddBlockData>(_onCanvasEventAddBlockData);
+    on<CanvasEventDeleteBlockData>(_onCanvasEventDeleteBlockData);
+  }
+
+  void _onCanvasEventDeleteBlockData(
+      CanvasEventDeleteBlockData event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      await blockDataRepo.deleteData(
+          state.layout!.id!, state.selectedBlock!.id!, event.dataId);
+      final dataList = state.selectedBlock!.data;
+      final dataIndex =
+          dataList.indexWhere((element) => element.id == event.dataId);
+      if (dataIndex != -1) {
+        dataList.removeAt(dataIndex);
+      }
+      final newBlock = state.selectedBlock!.copyWith(data: dataList);
+      final blocks = state.layout?.blocks ?? [];
+      final blockIndex = blocks
+          .indexWhere((element) => element.id == state.selectedBlock!.id!);
+      if (blockIndex != -1) {
+        emit(state.copyWith(
+          layout: state.layout?.copyWith(blocks: [
+            ...blocks.sublist(0, blockIndex),
+            newBlock,
+            ...blocks.sublist(blockIndex + 1)
+          ]),
+          selectedBlock: newBlock,
+          error: '',
+          saving: false,
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        error: e.toString(),
+        saving: false,
+      ));
+    }
+  }
+
+  void _onCanvasEventAddBlockData(
+      CanvasEventAddBlockData event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final blockData = await blockDataRepo.addData(
+          state.layout!.id!, state.selectedBlock!.id!, event.data);
+      final dataList = state.selectedBlock!.data;
+      dataList.add(blockData);
+
+      final newBlock = state.selectedBlock!.copyWith(data: dataList);
+      final blocks = state.layout?.blocks ?? [];
+      final blockIndex = blocks
+          .indexWhere((element) => element.id == state.selectedBlock!.id!);
+      if (blockIndex != -1) {
+        emit(state.copyWith(
+          layout: state.layout?.copyWith(blocks: [
+            ...blocks.sublist(0, blockIndex),
+            newBlock,
+            ...blocks.sublist(blockIndex + 1)
+          ]),
+          selectedBlock: newBlock,
+          error: '',
+          saving: false,
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        error: e.toString(),
+        saving: false,
+      ));
+    }
   }
 
   void _onCanvasEventSelectNoBlock(

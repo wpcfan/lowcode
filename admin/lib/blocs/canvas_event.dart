@@ -81,3 +81,19 @@ class CanvasEventSelectNoBlock extends CanvasEvent {
   @override
   List<Object?> get props => [];
 }
+
+class CanvasEventAddBlockData extends CanvasEvent {
+  CanvasEventAddBlockData(this.data) : super();
+  final BlockData data;
+
+  @override
+  List<Object> get props => [data];
+}
+
+class CanvasEventDeleteBlockData extends CanvasEvent {
+  CanvasEventDeleteBlockData(this.dataId) : super();
+  final int dataId;
+
+  @override
+  List<Object> get props => [dataId];
+}

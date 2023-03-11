@@ -92,10 +92,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: "9fdbf71baeb250fc9da847f6cb2052196f62c19906a3657adfc18631a667d316"
+      sha256: "2644a9e0965a7aa3deb09cb8ce4081db4450c178f472818c8cd34216a3070d7b"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0"
+    version: "5.0.2"
   dio_cache_interceptor:
     dependency: transitive
     description:

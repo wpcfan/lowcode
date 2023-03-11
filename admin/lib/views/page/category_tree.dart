@@ -3,51 +3,37 @@ import 'package:models/models.dart';
 
 import 'search_field.dart';
 
-class CategoryTree extends StatefulWidget {
+class CategoryTree extends StatelessWidget {
   final List<Category> categories;
+  final List<Category> matchedCategories;
+  final List<Category> selectedCategories;
   final void Function(Category) onCategoryAdded;
   final void Function(Category) onCategoryRemoved;
+  final void Function(String) onTextChanged;
 
   const CategoryTree({
     super.key,
     required this.categories,
+    required this.matchedCategories,
+    required this.selectedCategories,
     required this.onCategoryAdded,
     required this.onCategoryRemoved,
+    required this.onTextChanged,
   });
 
   @override
-  State<CategoryTree> createState() => _CategoryTreeState();
-}
-
-class _CategoryTreeState extends State<CategoryTree> {
-  final List<Category> _selectedCategories = [];
-  final List<Category> _matchedCategories = [];
-  @override
   Widget build(BuildContext context) {
-    final List<Category> flattenedCategories =
-        widget.categories.expand((element) {
-      final children = element.children ?? [];
-      return [element, ...children];
-    }).toList();
     return Column(
       children: [
         SearchField(
           placeholder: '搜索',
           optionsBuilder: (text) {
-            final matched = flattenedCategories
-                .where((element) =>
-                    element.name!.toLowerCase().contains(text.toLowerCase()))
-                .toList();
-            setState(() {
-              _matchedCategories.clear();
-              _matchedCategories.addAll(matched);
-            });
-            return _matchedCategories
+            return matchedCategories
                 .map((e) => SearchOption(name: e.name, value: e))
                 .toList();
           },
           itemBuilder: (context, index, onSelected) {
-            final category = _matchedCategories[index];
+            final category = matchedCategories[index];
             return ListTile(
               title: Text(category.name ?? ''),
               onTap: () {
@@ -56,18 +42,15 @@ class _CategoryTreeState extends State<CategoryTree> {
             );
           },
           onSelected: (option) {
-            setState(() {
-              if (_selectedCategories.contains(option.value)) {
-                _selectedCategories.remove(option.value);
-                widget.onCategoryRemoved(option.value);
-              } else {
-                _selectedCategories.add(option.value);
-                widget.onCategoryAdded(option.value);
-              }
-            });
+            if (selectedCategories.contains(option.value)) {
+              onCategoryRemoved(option.value);
+            } else {
+              onCategoryAdded(option.value);
+            }
           },
+          onTextChanged: onTextChanged,
         ),
-        _buildCategoryTree(widget.categories),
+        _buildCategoryTree(categories),
       ],
     );
   }
@@ -85,7 +68,7 @@ class _CategoryTreeState extends State<CategoryTree> {
   }
 
   Widget _buildCategoryItem(Category category) {
-    final selected = _selectedCategories.contains(category);
+    final selected = selectedCategories.contains(category);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -94,15 +77,11 @@ class _CategoryTreeState extends State<CategoryTree> {
           title: Text(category.name ?? ''),
           value: selected,
           onChanged: (value) {
-            setState(() {
-              if (value!) {
-                _selectedCategories.add(category);
-                widget.onCategoryAdded(category);
-              } else {
-                _selectedCategories.remove(category);
-                widget.onCategoryRemoved(category);
-              }
-            });
+            if (value!) {
+              onCategoryAdded(category);
+            } else {
+              onCategoryRemoved(category);
+            }
           },
         ),
         if (category.children != null)

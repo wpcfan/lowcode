@@ -1,5 +1,8 @@
+import 'package:admin/blocs/category_bloc.dart';
+import 'package:admin/blocs/file_bloc.dart';
 import 'package:admin/blocs/layout_bloc.dart';
 import 'package:admin/blocs/layout_event.dart';
+import 'package:admin/blocs/product_bloc.dart';
 import 'package:admin/components/header.dart';
 import 'package:admin/components/side_menu.dart';
 import 'package:admin/constants.dart';
@@ -39,10 +42,11 @@ final routerConfig = GoRouter(
                 PageBlockDataRepository(client: context.read<Dio>()),
           ),
           RepositoryProvider<ProductRepository>(
-            create: (context) => ProductRepository(
-                client: context.read<Dio>(),
-                baseUrl:
-                    'http://localhost:8080/api/v1/app/products/by-category'),
+            create: (context) => ProductRepository(client: context.read<Dio>()),
+          ),
+          RepositoryProvider<CategoryRepository>(
+            create: (context) =>
+                CategoryRepository(client: context.read<Dio>()),
           ),
           RepositoryProvider<FileAdminRepository>(
             create: (context) =>
@@ -61,6 +65,22 @@ final routerConfig = GoRouter(
               create: (context) => LayoutBloc(
                 context.read<PageAdminRepository>(),
               )..add(LayoutEventClearAll()),
+            ),
+            BlocProvider<FileBloc>(
+              create: (context) => FileBloc(
+                fileRepo: context.read<FileUploadRepository>(),
+                fileAdminRepo: context.read<FileAdminRepository>(),
+              ),
+            ),
+            BlocProvider<ProductBloc>(
+              create: (context) => ProductBloc(
+                context.read<ProductRepository>(),
+              ),
+            ),
+            BlocProvider<CategoryBloc>(
+              create: (context) => CategoryBloc(
+                context.read<CategoryRepository>(),
+              ),
             ),
           ],
           child: Builder(builder: (context) {

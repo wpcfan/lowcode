@@ -21,19 +21,19 @@ class SearchField extends StatelessWidget {
       size: 24,
     ),
     this.fillColor = Colors.grey,
-    this.matchedOptions = const [],
     required this.optionsBuilder,
     required this.itemBuilder,
     required this.onSelected,
+    required this.onTextChanged,
   });
   final String placeholder;
   final Widget? suffixIcon;
   final Color fillColor;
-  final List<SearchOption> matchedOptions;
   final FutureOr<Iterable<SearchOption>> Function(String) optionsBuilder;
   final Widget Function(
       BuildContext, int, void Function(SearchOption) onSelected) itemBuilder;
   final void Function(SearchOption) onSelected;
+  final void Function(String) onTextChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +59,7 @@ class SearchField extends StatelessWidget {
         if (textEditingValue.text == '') {
           return const Iterable<SearchOption>.empty();
         }
+        onTextChanged(textEditingValue.text);
         return optionsBuilder(textEditingValue.text);
       },
       optionsViewBuilder: (context, onSelected, options) =>

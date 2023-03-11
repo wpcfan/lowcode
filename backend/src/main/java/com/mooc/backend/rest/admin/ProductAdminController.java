@@ -136,4 +136,5 @@ public class ProductAdminController {
     public Stream<ProductDTO> findByIds(@RequestBody Set<Long> ids) {
         return productQueryService.findByIds(ids).map(ProductDTO::fromEntity);
     }
+
 }

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:models/models.dart';
 import 'package:networking/networking.dart';
 
+export 'category_repository.dart';
 export 'file_admin_repository.dart';
 export 'file_upload_repository.dart';
 export 'page_admin_repository.dart';

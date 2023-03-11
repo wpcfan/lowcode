@@ -1,19 +1,17 @@
 package com.mooc.backend.rest.app;
 
-import com.mooc.backend.dtos.PageWrapper;
 import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.dtos.SliceWrapper;
-import com.mooc.backend.entities.Category;
-import com.mooc.backend.entities.Product;
 import com.mooc.backend.services.ProductQueryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -37,7 +35,7 @@ public class ProductController {
     public List<ProductDTO> findAllByCategory(@PathVariable Long id) {
         return productService.findPageableByCategory(id)
                 .stream()
-                .map(ProductDTO::fromEntity)// 为每个商品设置 Locale
+                .map(ProductDTO::fromEntity)
                 .toList();
     }
 

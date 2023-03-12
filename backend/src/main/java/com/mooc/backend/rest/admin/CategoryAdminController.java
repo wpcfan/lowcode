@@ -1,12 +1,13 @@
 package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.dtos.CategoryDTO;
-import com.mooc.backend.dtos.CategoryRecord;
 import com.mooc.backend.dtos.CreateOrUpdateCategoryDTO;
+import com.mooc.backend.enumerations.CategoryRepresentation;
 import com.mooc.backend.services.CategoryAdminService;
 import com.mooc.backend.services.CategoryQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,19 +26,34 @@ public class CategoryAdminController {
         this.categoryAdminService = categoryAdminService;
     }
 
-    @Operation(summary = "获取所有类目 - DTO 形式")
+    @Operation(summary = "获取所有类目")
     @GetMapping()
-    public List<CategoryDTO> findAll() {
-        return categoryQueryService.findAll()
-                .stream()
-                .map(CategoryDTO::fromProjection)
+    public List<CategoryDTO> findAll(
+           @Schema(description = "类目的展示形式, \nBASIC - 所有类目平铺，不含子类目嵌套\nWITH_CHILDREN - 所有类目都返回，且每个类目嵌套子类目信息\nROOT_ONLY - 只返回根节点列表，但每个节点都嵌套子类目信息",
+                   allowableValues = {"BASIC", "WITH_CHILDREN", "ROOT_ONLY"},
+                   defaultValue = "BASIC"
+           )
+           @RequestParam(required = false, defaultValue = "BASIC") CategoryRepresentation categoryRepresentation) {
+        if (categoryRepresentation == CategoryRepresentation.WITH_CHILDREN) {
+            return categoryQueryService.findAll()
+                    .stream()
+                    .map(CategoryDTO::fromProjection)
+                    .toList();
+        } else if (categoryRepresentation == CategoryRepresentation.ROOT_ONLY) {
+            return categoryQueryService.findAll()
+                    .stream()
+                    .filter(category -> category.getParent() == null)
+                    .map(CategoryDTO::fromProjection)
+                    .toList();
+        }
+        return categoryQueryService.findAllDTOs()
+                .stream().map(record -> CategoryDTO.builder()
+                        .id(record.id())
+                        .code(record.code())
+                        .name(record.name())
+                        .parentId(record.parentId())
+                        .build())
                 .toList();
-    }
-
-    @Operation(summary = "获取所有类目 - Record 形式")
-    @GetMapping("/dto")
-    public List<CategoryRecord> findAllDTOs() {
-        return categoryQueryService.findAllDTOs();
     }
 
     @Operation(summary = "添加类目")

@@ -3,9 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
-import '../../blocs/category_bloc.dart';
-import '../../blocs/category_event.dart';
-
 class CategoryDataForm extends StatefulWidget {
   const CategoryDataForm({
     super.key,
@@ -28,7 +25,6 @@ class _CategoryDataFormState extends State<CategoryDataForm> {
   @override
   Widget build(BuildContext context) {
     final categoryRepository = context.read<CategoryRepository>();
-    context.read<CategoryBloc>().add(const CategoryEventLoad());
 
     return SingleChildScrollView(
         child: FutureBuilder(

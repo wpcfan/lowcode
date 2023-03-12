@@ -97,11 +97,11 @@ class BlockData<T> {
   BlockData({this.id, required this.sort, required this.content});
 
   static BlockData mapBlockData(Map<String, dynamic> json) {
-    if (json['content']['image'] != null) {
+    if (json['content']['dataType'] == 'image') {
       return BlockData<ImageData>.fromJson(json, ImageData.fromJson);
-    } else if (json['content']['price'] != null) {
+    } else if (json['content']['dataType'] == 'product') {
       return BlockData<Product>.fromJson(json, Product.fromJson);
-    } else if (json['content']['parentId'] != null) {
+    } else if (json['content']['dataType'] == 'category') {
       return BlockData<Category>.fromJson(json, Category.fromJson);
     }
     throw Exception('Unknown BlockDataType');

@@ -76,7 +76,7 @@ class CanvasPage extends StatelessWidget {
                   ...[
                     const Spacer(),
                     Expanded(
-                      flex: 3,
+                      flex: 4,
                       child: RighePane(
                         showBlockConfig: state.selectedBlock != null,
                         state: state,

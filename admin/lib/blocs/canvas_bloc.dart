@@ -43,16 +43,47 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
       final blockIndex = blocks
           .indexWhere((element) => element.id == state.selectedBlock!.id!);
       if (blockIndex != -1) {
-        emit(state.copyWith(
-          layout: state.layout?.copyWith(blocks: [
-            ...blocks.sublist(0, blockIndex),
-            newBlock,
-            ...blocks.sublist(blockIndex + 1)
-          ]),
-          selectedBlock: newBlock,
-          error: '',
-          saving: false,
-        ));
+        if (blocks
+            .where((element) => element.type == PageBlockType.waterfall)
+            .isNotEmpty) {
+          final waterfallBlock = blocks
+              .firstWhere((element) => element.type == PageBlockType.waterfall);
+
+          /// 如果瀑布流布局有内容，获取瀑布流数据
+          if (waterfallBlock.data.isNotEmpty) {
+            /// 获取瀑布流数据的分类ID
+            final categoryId = waterfallBlock.data.first.content.id;
+            if (categoryId != null) {
+              /// 按分类获取瀑布流中的产品数据
+              final waterfall =
+                  await productRepo.getByCategory(categoryId: categoryId);
+
+              /// 更新瀑布流数据
+              emit(state.copyWith(
+                layout: state.layout?.copyWith(blocks: [
+                  ...blocks.sublist(0, blockIndex),
+                  newBlock,
+                  ...blocks.sublist(blockIndex + 1)
+                ]),
+                waterfallList: waterfall.data,
+                selectedBlock: newBlock,
+                error: '',
+                saving: false,
+              ));
+            }
+          }
+        } else {
+          emit(state.copyWith(
+            layout: state.layout?.copyWith(blocks: [
+              ...blocks.sublist(0, blockIndex),
+              newBlock,
+              ...blocks.sublist(blockIndex + 1)
+            ]),
+            selectedBlock: newBlock,
+            error: '',
+            saving: false,
+          ));
+        }
       }
     } catch (e) {
       emit(state.copyWith(

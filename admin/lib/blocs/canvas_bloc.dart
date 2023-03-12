@@ -43,51 +43,57 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
       final blockIndex = blocks
           .indexWhere((element) => element.id == state.selectedBlock!.id!);
       if (blockIndex != -1) {
-        if (blocks
-            .where((element) => element.type == PageBlockType.waterfall)
-            .isNotEmpty) {
-          final waterfallBlock = blocks
-              .firstWhere((element) => element.type == PageBlockType.waterfall);
+        await _handleWaterfall(blocks, emit, blockIndex, newBlock);
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        error: e.toString(),
+        saving: false,
+      ));
+    }
+  }
 
-          /// 如果瀑布流布局有内容，获取瀑布流数据
-          if (waterfallBlock.data.isNotEmpty) {
-            /// 获取瀑布流数据的分类ID
-            final categoryId = waterfallBlock.data.first.content.id;
-            if (categoryId != null) {
-              /// 按分类获取瀑布流中的产品数据
-              final waterfall =
-                  await productRepo.getByCategory(categoryId: categoryId);
+  Future<void> _handleWaterfall(
+      List<PageBlock<dynamic>> blocks,
+      Emitter<CanvasState> emit,
+      int blockIndex,
+      PageBlock<dynamic> newBlock) async {
+    if (state.selectedBlock!.type == PageBlockType.waterfall) {
+      final waterfallBlock = state.selectedBlock!;
 
-              /// 更新瀑布流数据
-              emit(state.copyWith(
-                layout: state.layout?.copyWith(blocks: [
-                  ...blocks.sublist(0, blockIndex),
-                  newBlock,
-                  ...blocks.sublist(blockIndex + 1)
-                ]),
-                waterfallList: waterfall.data,
-                selectedBlock: newBlock,
-                error: '',
-                saving: false,
-              ));
-            }
-          }
-        } else {
+      /// 如果瀑布流布局有内容，获取瀑布流数据
+      if (waterfallBlock.data.isNotEmpty) {
+        /// 获取瀑布流数据的分类ID
+        final categoryId = waterfallBlock.data.first.content.id;
+        if (categoryId != null) {
+          /// 按分类获取瀑布流中的产品数据
+          final waterfall =
+              await productRepo.getByCategory(categoryId: categoryId);
+
+          /// 更新瀑布流数据
           emit(state.copyWith(
             layout: state.layout?.copyWith(blocks: [
               ...blocks.sublist(0, blockIndex),
               newBlock,
               ...blocks.sublist(blockIndex + 1)
             ]),
+            waterfallList: waterfall.data,
             selectedBlock: newBlock,
             error: '',
             saving: false,
           ));
         }
       }
-    } catch (e) {
+    } else {
       emit(state.copyWith(
-        error: e.toString(),
+        layout: state.layout?.copyWith(blocks: [
+          ...blocks.sublist(0, blockIndex),
+          newBlock,
+          ...blocks.sublist(blockIndex + 1)
+        ]),
+        waterfallList: [],
+        selectedBlock: newBlock,
+        error: '',
         saving: false,
       ));
     }
@@ -120,6 +126,9 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
           error: '',
           saving: false,
         ));
+        if (state.selectedBlock!.type == PageBlockType.waterfall) {
+          emit(state.copyWith(waterfallList: []));
+        }
       }
     } catch (e) {
       emit(state.copyWith(
@@ -143,16 +152,7 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
       final blockIndex = blocks
           .indexWhere((element) => element.id == state.selectedBlock!.id!);
       if (blockIndex != -1) {
-        emit(state.copyWith(
-          layout: state.layout?.copyWith(blocks: [
-            ...blocks.sublist(0, blockIndex),
-            newBlock,
-            ...blocks.sublist(blockIndex + 1)
-          ]),
-          selectedBlock: newBlock,
-          error: '',
-          saving: false,
-        ));
+        await _handleWaterfall(blocks, emit, blockIndex, newBlock);
       }
     } catch (e) {
       emit(state.copyWith(

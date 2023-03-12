@@ -11,6 +11,7 @@ class BlockDataPane extends StatelessWidget {
     super.key,
     required this.block,
     required this.onCategoryAdded,
+    required this.onCategoryUpdated,
     required this.onCategoryRemoved,
     required this.onProductAdded,
     required this.onProductRemoved,
@@ -18,6 +19,7 @@ class BlockDataPane extends StatelessWidget {
   });
   final PageBlock block;
   final void Function(Category) onCategoryAdded;
+  final void Function(Category) onCategoryUpdated;
   final void Function(Category) onCategoryRemoved;
   final void Function(Product) onProductAdded;
   final void Function(Product) onProductRemoved;
@@ -41,6 +43,7 @@ class BlockDataPane extends StatelessWidget {
         return CategoryDataForm(
           data: block.data.map((e) => e as BlockData<Category>).toList(),
           onCategoryAdded: onCategoryAdded,
+          onCategoryUpdated: onCategoryUpdated,
           onCategoryRemoved: onCategoryRemoved,
         );
       default:

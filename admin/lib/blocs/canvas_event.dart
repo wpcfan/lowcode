@@ -97,3 +97,11 @@ class CanvasEventDeleteBlockData extends CanvasEvent {
   @override
   List<Object> get props => [dataId];
 }
+
+class CanvasEventUpdateBlockData extends CanvasEvent {
+  CanvasEventUpdateBlockData(this.data) : super();
+  final BlockData data;
+
+  @override
+  List<Object> get props => [data];
+}

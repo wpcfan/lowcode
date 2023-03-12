@@ -15,6 +15,7 @@ class RighePane extends StatelessWidget {
     this.onSavePageBlock,
     this.onDeleteBlock,
     required this.onCategoryAdded,
+    required this.onCategoryUpdated,
     required this.onCategoryRemoved,
     required this.onProductAdded,
     required this.onProductRemoved,
@@ -27,6 +28,7 @@ class RighePane extends StatelessWidget {
   final void Function(BlockData<Product>) onProductAdded;
   final void Function(int) onProductRemoved;
   final void Function(BlockData<Category>) onCategoryAdded;
+  final void Function(BlockData<Category>) onCategoryUpdated;
   final void Function(int) onCategoryRemoved;
 
   @override
@@ -53,9 +55,19 @@ class RighePane extends StatelessWidget {
                     block: state.selectedBlock!,
                     onCategoryAdded: (category) {
                       final data = BlockData<Category>(
-                          sort: state.selectedBlock!.data.length,
-                          content: category);
+                        sort: state.selectedBlock!.data.length,
+                        content: category,
+                      );
                       onCategoryAdded.call(data);
+                    },
+                    onCategoryUpdated: (category) {
+                      final matchedData = state.selectedBlock!.data.first;
+                      final data = BlockData<Category>(
+                        id: matchedData.id,
+                        sort: matchedData.sort,
+                        content: category,
+                      );
+                      onCategoryUpdated.call(data);
                     },
                     onCategoryRemoved: (category) {
                       final index = state.selectedBlock!.data.indexWhere(
@@ -65,8 +77,9 @@ class RighePane extends StatelessWidget {
                     },
                     onProductAdded: (product) {
                       final data = BlockData<Product>(
-                          sort: state.selectedBlock!.data.length,
-                          content: product);
+                        sort: state.selectedBlock!.data.length,
+                        content: product,
+                      );
                       onProductAdded.call(data);
                     },
                     onProductRemoved: (product) {

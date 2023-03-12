@@ -24,6 +24,42 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     on<CanvasEventSelectNoBlock>(_onCanvasEventSelectNoBlock);
     on<CanvasEventAddBlockData>(_onCanvasEventAddBlockData);
     on<CanvasEventDeleteBlockData>(_onCanvasEventDeleteBlockData);
+    on<CanvasEventUpdateBlockData>(_onCanvasEventUpdateBlockData);
+  }
+
+  void _onCanvasEventUpdateBlockData(
+      CanvasEventUpdateBlockData event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final data = await blockDataRepo.updateData(
+          state.layout!.id!, state.selectedBlock!.id!, event.data);
+      final dataList = state.selectedBlock!.data;
+      final dataIndex = dataList.indexWhere((element) => element.id == data.id);
+      if (dataIndex != -1) {
+        dataList[dataIndex] = data;
+      }
+      final newBlock = state.selectedBlock!.copyWith(data: dataList);
+      final blocks = state.layout?.blocks ?? [];
+      final blockIndex = blocks
+          .indexWhere((element) => element.id == state.selectedBlock!.id!);
+      if (blockIndex != -1) {
+        emit(state.copyWith(
+          layout: state.layout?.copyWith(blocks: [
+            ...blocks.sublist(0, blockIndex),
+            newBlock,
+            ...blocks.sublist(blockIndex + 1)
+          ]),
+          selectedBlock: newBlock,
+          error: '',
+          saving: false,
+        ));
+      }
+    } catch (e) {
+      emit(state.copyWith(
+        error: e.toString(),
+        saving: false,
+      ));
+    }
   }
 
   void _onCanvasEventDeleteBlockData(

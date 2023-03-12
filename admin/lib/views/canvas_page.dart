@@ -127,6 +127,11 @@ class CanvasPage extends StatelessWidget {
                               .read<CanvasBloc>()
                               .add(CanvasEventAddBlockData(data));
                         },
+                        onCategoryUpdated: (data) {
+                          context
+                              .read<CanvasBloc>()
+                              .add(CanvasEventUpdateBlockData(data));
+                        },
                         onCategoryRemoved: (dataId) {
                           context
                               .read<CanvasBloc>()

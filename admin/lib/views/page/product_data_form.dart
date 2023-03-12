@@ -1,5 +1,4 @@
 import 'package:admin/views/page/product_table.dart';
-import 'package:admin/views/page/search_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -34,52 +33,50 @@ class _ProductDataFormState extends State<ProductDataForm> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SearchField(
-            optionsBuilder: (text) {
-              /// 将匹配的商品列表转换为 SearchFieldOption 列表
-              return _matchedProducts
-                  .map((e) => SearchOption(name: e.name, value: e))
-                  .toList();
-            },
-            itemBuilder: (context, index, onSelected) {
-              final product = _matchedProducts[index];
-
-              /// 构建商品列表项
-              return ListTile(
-                dense: false,
-                title: Text(product.name ?? ''),
-                leading: Image.network(
-                  product.images.first,
-                  fit: BoxFit.cover,
-                  width: 40,
-                  height: 40,
-                ),
-                trailing: Text(product.price.toString()),
-                onTap: () {
-                  onSelected(SearchOption(name: product.name!, value: product));
-                },
-              );
-            },
-            onSelected: (option) {
-              /// 将选中的商品添加到已选商品列表中
-              setState(() {
-                final product = option.value as Product;
-                if (!_selectedProducts
-                    .where((element) => element.id == product.id)
-                    .isNotEmpty) {
-                  _selectedProducts.add(product);
-                  widget.onAdd?.call(product);
-                }
-              });
-            },
-            onTextChanged: (text) async {
+          Autocomplete<Product>(
+            optionsBuilder: (textValue) async {
               /// 从服务器获取匹配的商品列表
-              final matchedProducts = await _searchProducts(text);
+              final matchedProducts = await _searchProducts(textValue.text);
               setState(() {
                 _matchedProducts.clear();
                 _matchedProducts.addAll(matchedProducts);
               });
+              return _matchedProducts;
             },
+            optionsViewBuilder: (context, onSelected, options) => Material(
+              child: ListView(
+                shrinkWrap: true,
+                children: options
+                    .map((e) => ListTile(
+                          title: Text(e.name ?? ''),
+                          leading: Image.network(
+                            e.images.first,
+                            fit: BoxFit.cover,
+                            width: 40,
+                            height: 40,
+                          ),
+                          onTap: () {
+                            onSelected(e);
+                          },
+                        ))
+                    .toList(),
+              ),
+            ),
+            onSelected: (option) {
+              setState(() {
+                if (!_selectedProducts
+                    .where((element) => element.id == option.id)
+                    .isNotEmpty) {
+                  _selectedProducts.add(option);
+                  widget.onAdd?.call(option);
+                } else {
+                  _selectedProducts
+                      .removeWhere((element) => element.id == option.id);
+                  widget.onRemove?.call(option);
+                }
+              });
+            },
+            displayStringForOption: (option) => option.sku ?? '',
           ),
           const SizedBox(height: 16),
           ProductTable(

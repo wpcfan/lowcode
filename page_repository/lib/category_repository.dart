@@ -24,13 +24,18 @@ class CategoryRepository {
     this.refreshCache = false,
   }) : client = client ?? AdminClient.getInstance();
 
-  Future<List<Category>> getCategories() async {
+  Future<List<Category>> getCategories(
+      {CategoryRepresenation categoryRepresenation =
+          CategoryRepresenation.rootOnly}) async {
     debugPrint('CategoryRepository.getCategories()');
 
     final url = baseUrl;
 
     final response = await client.get(
       url,
+      queryParameters: Map.fromEntries([
+        MapEntry('categoryRepresentation', categoryRepresenation.value),
+      ]),
       options: enableCache
           ? refreshCache
               ? cacheOptions
@@ -47,4 +52,20 @@ class CategoryRepository {
 
     return result;
   }
+}
+
+enum CategoryRepresenation {
+  basic('BASIC'),
+
+  withChildren('WITH_CHILDREN'),
+
+  rootOnly('ROOT_ONLY'),
+  ;
+
+  final String value;
+
+  const CategoryRepresenation(this.value);
+
+  @override
+  String toString() => value;
 }

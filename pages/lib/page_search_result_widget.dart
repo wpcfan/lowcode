@@ -1,12 +1,12 @@
-import 'package:admin/views/page/date_range_filter_widget.dart';
-import 'package:admin/views/page/selection_filter_widget.dart';
-import 'package:admin/views/page/text_filter_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
-import 'custom_paginated_table.dart';
+import 'filters/date_range_filter_widget.dart';
+import 'filters/selection_filter_widget.dart';
+import 'filters/text_filter_widget.dart';
 import 'page_search_result_data_source.dart';
+import 'widgets/custom_paginated_table.dart';
 
 class PageSearchResultWidget extends StatelessWidget {
   const PageSearchResultWidget({

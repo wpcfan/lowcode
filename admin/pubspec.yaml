@@ -66,6 +66,8 @@ dependencies:
     path: ../files
   canvas:
     path: ../canvas
+  pages:
+    path: ../pages
   flutter_localizations:
     sdk: flutter
 

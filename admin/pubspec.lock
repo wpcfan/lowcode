@@ -374,6 +374,13 @@ packages:
       relative: true
     source: path
     version: "0.0.1"
+  pages:
+    dependency: "direct main"
+    description:
+      path: "../pages"
+      relative: true
+    source: path
+    version: "0.0.1"
   path:
     dependency: transitive
     description:

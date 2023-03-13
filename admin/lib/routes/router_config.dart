@@ -30,21 +30,6 @@ final routerConfig = GoRouter(
             create: (context) =>
                 PageAdminRepository(client: context.read<Dio>()),
           ),
-          RepositoryProvider<PageBlockRepository>(
-            create: (context) =>
-                PageBlockRepository(client: context.read<Dio>()),
-          ),
-          RepositoryProvider<PageBlockDataRepository>(
-            create: (context) =>
-                PageBlockDataRepository(client: context.read<Dio>()),
-          ),
-          RepositoryProvider<ProductRepository>(
-            create: (context) => ProductRepository(client: context.read<Dio>()),
-          ),
-          RepositoryProvider<CategoryRepository>(
-            create: (context) =>
-                CategoryRepository(client: context.read<Dio>()),
-          ),
           ChangeNotifierProvider(
             create: (context) => SideMenuController(),
           ),

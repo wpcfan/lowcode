@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -50,6 +51,10 @@ class ImageExplorer extends StatelessWidget {
                 child: Text('没有图片资源'),
               );
             }
+
+            /// 由于在异步操作中，往往上下文会发生变化，所以需要在这里先把 bloc 拿出来
+            /// 在下面的回调中使用，这样就不用关心上下文是否发生变化，如果每次都使用 context.read<FileBloc>()
+            /// 那么在异步操作中，就会报错
             final bloc = context.read<FileBloc>();
             final images = state.files;
             final title = FileDialogTitle(
@@ -84,7 +89,7 @@ class ImageExplorer extends StatelessWidget {
               editable: state.editable,
               selectedKeys: state.selectedKeys,
               onSelected: (key) {
-                context.read<FileBloc>().add(FileEventToggleSelected(key));
+                bloc.add(FileEventToggleSelected(key));
               },
             );
             final actions = [
@@ -124,56 +129,55 @@ class FileDialogTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Text('图片资源'),
-        const Spacer(),
-        IconButton(
-          icon: Icon(editable ? Icons.lock : Icons.lock_open),
-          onPressed: () {
-            onEditableChanged(!editable);
-          },
-        ),
-        if (editable)
-          IconButton(
-            icon: const Icon(Icons.upload_file),
-            onPressed: onUpload,
-          ),
-        if (editable && selectedKeys.isNotEmpty)
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              if (selectedKeys.isEmpty) {
-                return;
-              }
-              final result = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('删除图片'),
-                  content: const Text('确定要删除这些图片吗？'),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                      child: const Text('取消'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                      child: const Text('确定'),
-                    ),
-                  ],
-                ),
-              );
-              if (result == true) {
-                onDelete();
-              }
-            },
-          ),
-      ],
+    /// 编辑按钮
+    final editableIcon = Icon(editable ? Icons.lock : Icons.lock_open).inkWell(
+      onTap: () => onEditableChanged(!editable),
     );
+
+    /// 上传按钮
+    final uploadIcon = const Icon(Icons.upload_file).inkWell(
+      onTap: onUpload,
+    );
+
+    /// 删除按钮
+    final deleteIcon = const Icon(Icons.delete).inkWell(
+      onTap: () async {
+        if (selectedKeys.isEmpty) {
+          return;
+        }
+        final result = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('删除图片'),
+            content: const Text('确定要删除这些图片吗？'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          ),
+        );
+        if (result == true) {
+          onDelete();
+        }
+      },
+    );
+    return [
+      const Text('图片资源'),
+      const Spacer(),
+      editableIcon,
+      if (editable) uploadIcon,
+      if (editable && selectedKeys.isNotEmpty) deleteIcon,
+    ].toRow();
   }
 }
 
@@ -192,47 +196,41 @@ class FileDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 400,
-      width: 600,
-      child: GridView.builder(
-        shrinkWrap: true,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-        ),
-        itemCount: images.length,
-        itemBuilder: (context, index) {
-          final image = images[index];
-          if (editable) {
-            return Stack(
-              children: [
-                Image.network(image.url),
-                Positioned(
-                  top: 0,
-                  right: 0,
-                  child: IconButton(
-                    icon: Icon(selectedKeys.contains(image.key)
-                        ? Icons.check_box
-                        : Icons.check_box_outline_blank),
-                    onPressed: () {
-                      onSelected(image.key);
-                    },
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return InkWell(
-              onTap: () {
-                Navigator.of(context).pop(image);
-              },
-              child: Image.network(image.url),
-            );
-          }
-        },
+    return GridView.builder(
+      shrinkWrap: true,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
       ),
+      itemCount: images.length,
+      itemBuilder: (context, index) {
+        final image = images[index];
+
+        /// 非编辑模式下的图片
+        final selectableItem = Image.network(image.url).inkWell(
+          onTap: () => Navigator.of(context).pop(image),
+        );
+
+        /// 编辑模式下的图片
+        final editableItem = [
+          Image.network(image.url),
+          Icon(selectedKeys.contains(image.key)
+                  ? Icons.check_box
+                  : Icons.check_box_outline_blank)
+              .inkWell(
+                onTap: () => onSelected(image.key),
+              )
+              .positioned(
+                top: 0,
+                right: 0,
+              ),
+        ].toStack();
+        return editable ? editableItem : selectableItem;
+      },
+    ).constrained(
+      width: 400,
+      height: 600,
     );
   }
 }

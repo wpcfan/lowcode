@@ -321,9 +321,12 @@ class _CenterPaneState extends State<CenterPane> {
         final items = data.isNotEmpty
             ? data
             : const [
-                ImageData(image: 'https://picsum.photos/100/80'),
-                ImageData(image: 'https://picsum.photos/100/80'),
-                ImageData(image: 'https://picsum.photos/100/80')
+                ImageData(
+                    image: 'http://localhost:8080/api/v1/image/100/80/First'),
+                ImageData(
+                    image: 'http://localhost:8080/api/v1/image/100/80/Second'),
+                ImageData(
+                    image: 'http://localhost:8080/api/v1/image/100/80/Third')
               ];
         widget = ImageRowWidget(
           items: items,

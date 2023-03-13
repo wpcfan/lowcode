@@ -11,7 +11,8 @@ class FileAdminRepository {
   }) : client = client ?? AdminClient.getInstance();
 
   Future<List<FileDto>> getFiles() async {
-    final res = await client.get('/files');
+    final url = baseUrl;
+    final res = await client.get(url);
     if (res.data is! List) {
       throw Exception(
           'FileAdminRepository.getFiles() - failed, res.data is not List');
@@ -23,7 +24,13 @@ class FileAdminRepository {
   }
 
   Future<void> deleteFile(String key) async {
-    await client.delete('/files/$key');
+    final url = '$baseUrl/$key';
+    await client.delete(url);
+  }
+
+  Future<void> deleteFiles(List<String> keys) async {
+    final url = baseUrl;
+    await client.put(url, data: keys);
   }
 }
 

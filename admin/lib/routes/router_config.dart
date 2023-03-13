@@ -1,4 +1,3 @@
-import 'package:admin/blocs/file_bloc.dart';
 import 'package:admin/blocs/layout_bloc.dart';
 import 'package:admin/blocs/layout_event.dart';
 import 'package:admin/components/header.dart';
@@ -46,13 +45,6 @@ final routerConfig = GoRouter(
             create: (context) =>
                 CategoryRepository(client: context.read<Dio>()),
           ),
-          RepositoryProvider<FileAdminRepository>(
-            create: (context) =>
-                FileAdminRepository(client: context.read<Dio>()),
-          ),
-          RepositoryProvider<FileUploadRepository>(
-            create: (context) => FileUploadRepository(),
-          ),
           ChangeNotifierProvider(
             create: (context) => SideMenuController(),
           ),
@@ -63,12 +55,6 @@ final routerConfig = GoRouter(
               create: (context) => LayoutBloc(
                 context.read<PageAdminRepository>(),
               )..add(LayoutEventClearAll()),
-            ),
-            BlocProvider<FileBloc>(
-              create: (context) => FileBloc(
-                fileRepo: context.read<FileUploadRepository>(),
-                fileAdminRepo: context.read<FileAdminRepository>(),
-              ),
             ),
           ],
           child: Builder(builder: (context) {

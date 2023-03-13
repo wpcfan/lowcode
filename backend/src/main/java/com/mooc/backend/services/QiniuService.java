@@ -47,7 +47,7 @@ public class QiniuService {
             return new FileDTO(domain + "/" + putRet.key, putRet.key);
         } catch (QiniuException | JsonProcessingException e) {
             e.printStackTrace();
-            throw new CustomException("File Upload error", e.getMessage(), Errors.FileUploadException.code());
+            throw new CustomException("文件上传错误", e.getMessage(), Errors.FileUploadException.code());
         }
     }
 
@@ -89,7 +89,11 @@ public class QiniuService {
             bucketManager.delete(bucket, key);
         } catch (QiniuException e) {
             e.printStackTrace();
-            throw new CustomException("File Delete error", e.getMessage(), Errors.ConstraintViolationException.code());
+            throw new CustomException("文件删除错误", e.getMessage(), Errors.FileDeleteException.code());
         }
+    }
+
+    public void deleteFiles(List<String> keys) {
+        keys.forEach(this::deleteFile);
     }
 }

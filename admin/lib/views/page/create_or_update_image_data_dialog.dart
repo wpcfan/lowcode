@@ -1,7 +1,7 @@
+import 'package:admin/views/page/image_explorer.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
-
-import '../../blocs/file_bloc.dart';
+import 'package:page_repository/page_repository.dart';
 
 class CreateOrUpdateImageDataDialog extends StatefulWidget {
   const CreateOrUpdateImageDataDialog({
@@ -10,13 +10,11 @@ class CreateOrUpdateImageDataDialog extends StatefulWidget {
     this.onCreate,
     this.data,
     required this.title,
-    required this.fileBloc,
   });
   final void Function(BlockData<ImageData> data)? onUpdate;
   final void Function(BlockData<ImageData> data)? onCreate;
   final BlockData<ImageData>? data;
   final String title;
-  final FileBloc fileBloc;
 
   @override
   State<CreateOrUpdateImageDataDialog> createState() =>
@@ -27,6 +25,7 @@ class _CreateOrUpdateImageDataDialogState
     extends State<CreateOrUpdateImageDataDialog> {
   late BlockData<ImageData> _formValue;
   final _formKey = GlobalKey<FormState>();
+  String _selectedImage = '';
   @override
   void initState() {
     super.initState();
@@ -41,6 +40,11 @@ class _CreateOrUpdateImageDataDialogState
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(widget.title),
@@ -50,9 +54,26 @@ class _CreateOrUpdateImageDataDialogState
           mainAxisSize: MainAxisSize.min,
           children: [
             TextFormField(
-              initialValue: widget.data?.content.image,
-              decoration: const InputDecoration(
+              controller: TextEditingController(
+                  text: _selectedImage.isEmpty
+                      ? widget.data?.content.image
+                      : _selectedImage),
+              decoration: InputDecoration(
                 labelText: '图片地址',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.image),
+                  onPressed: () async {
+                    final FileDto? result = await showDialog<FileDto?>(
+                      context: context,
+                      builder: (context) => const ImageExplorer(),
+                    );
+                    if (result != null) {
+                      setState(() {
+                        _selectedImage = result.url;
+                      });
+                    }
+                  },
+                ),
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {

@@ -27,7 +27,21 @@ class FileEventUploadMultiple extends FileEvent {
 }
 
 class FileEventDelete extends FileEvent {
-  FileEventDelete(this.key) : super();
+  FileEventDelete() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class FileEventToggleEditable extends FileEvent {
+  FileEventToggleEditable() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class FileEventToggleSelected extends FileEvent {
+  FileEventToggleSelected(this.key) : super();
   final String key;
 
   @override

@@ -4,7 +4,6 @@ import com.mooc.backend.dtos.FileDTO;
 import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.QiniuService;
-import com.qiniu.storage.model.FileInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/admin")
-public class FileUploadController {
+public class FileController {
 
     private final QiniuService qiniuService;
 
@@ -55,5 +54,11 @@ public class FileUploadController {
     @DeleteMapping("/files/{key}")
     public void deleteFile(@PathVariable String key) {
         qiniuService.deleteFile(key);
+    }
+
+    @Operation(summary = "删除多个文件")
+    @PutMapping("/files")
+    public void deleteFiles(@RequestBody List<String> keys) {
+        qiniuService.deleteFiles(keys);
     }
 }

@@ -6,7 +6,6 @@ import 'package:models/models.dart';
 
 import '../../blocs/canvas_bloc.dart';
 import '../../blocs/canvas_event.dart';
-import '../../blocs/file_bloc.dart';
 
 class ImageDataForm extends StatelessWidget {
   const ImageDataForm({
@@ -18,7 +17,6 @@ class ImageDataForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bloc = context.read<CanvasBloc>();
-    final fileBloc = context.read<FileBloc>();
 
     /// 表格列头：图片、链接类型、链接地址、操作
     const dataColumns = [
@@ -58,7 +56,6 @@ class ImageDataForm extends StatelessWidget {
             context: context,
             builder: (context) => CreateOrUpdateImageDataDialog(
               title: '添加图片',
-              fileBloc: fileBloc,
               onCreate: (data) {
                 bloc.add(CanvasEventAddBlockData(data));
               },

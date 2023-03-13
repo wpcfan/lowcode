@@ -66,35 +66,31 @@ class WaterfallWidget extends StatelessWidget {
       Color backgroundColor,
       Color borderColor,
       double borderWidth) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minHeight: 200.0 * products.length / 2,
-        maxHeight: 300.0 * products.length / 2,
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: verticalPadding,
       ),
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: horizontalPadding,
-          vertical: verticalPadding,
-        ),
-        child: MasonryGridView.count(
-          crossAxisCount: 2,
-          mainAxisSpacing: horizontalSpacing,
-          crossAxisSpacing: verticalSpacing,
-          itemBuilder: (context, index) {
-            return ProductCardOneRowTwoWidget(
-              product: products[index],
-              itemWidth: itemWidth,
-              verticalSpacing: verticalSpacing,
-              errorImage: errorImage,
-              addToCart: addToCart,
-              onTap: onTap,
-              backgroundColor: backgroundColor,
-              borderColor: borderColor,
-              borderWidth: borderWidth,
-            );
-          },
-          itemCount: products.length,
-        ),
+      child: MasonryGridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 2,
+        mainAxisSpacing: horizontalSpacing,
+        crossAxisSpacing: verticalSpacing,
+        itemBuilder: (context, index) {
+          return ProductCardOneRowTwoWidget(
+            product: products[index],
+            itemWidth: itemWidth,
+            verticalSpacing: verticalSpacing,
+            errorImage: errorImage,
+            addToCart: addToCart,
+            onTap: onTap,
+            backgroundColor: backgroundColor,
+            borderColor: borderColor,
+            borderWidth: borderWidth,
+          );
+        },
+        itemCount: products.length,
       ),
     );
   }

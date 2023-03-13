@@ -296,9 +296,12 @@ class _CenterPaneState extends State<CenterPane> {
         final items = data.isNotEmpty
             ? data
             : [
-                const ImageData(image: 'https://picsum.photos/400/100'),
-                const ImageData(image: 'https://picsum.photos/400/100'),
-                const ImageData(image: 'https://picsum.photos/400/100')
+                const ImageData(
+                    image: 'http://localhost:8080/api/v1/image/400/100/First'),
+                const ImageData(
+                    image: 'http://localhost:8080/api/v1/image/400/100/Second'),
+                const ImageData(
+                    image: 'http://localhost:8080/api/v1/image/400/100/Third')
               ];
 
         /// SliverToBoxAdapter 可以将一个 Widget 转换成 Sliver
@@ -342,7 +345,9 @@ class _CenterPaneState extends State<CenterPane> {
                   id: 1,
                   name: 'Product 1',
                   description: 'Description 1',
-                  images: ['https://picsum.photos/100/80'],
+                  images: [
+                    'http://localhost:8080/api/v1/image/100/80/Product1'
+                  ],
                   price: '¥100.23',
                 )
               ];
@@ -365,28 +370,36 @@ class _CenterPaneState extends State<CenterPane> {
                   id: 1,
                   name: 'Product 1',
                   description: 'Description 1',
-                  images: ['https://picsum.photos/100/80'],
+                  images: [
+                    'http://localhost:8080/api/v1/image/100/80/Product1'
+                  ],
                   price: '¥100.23',
                 ),
                 Product(
                   id: 2,
                   name: 'Product 2',
                   description: 'Description 2',
-                  images: ['https://picsum.photos/100/80'],
+                  images: [
+                    'http://localhost:8080/api/v1/image/100/80/Product2'
+                  ],
                   price: '¥200.34',
                 ),
                 Product(
                   id: 3,
                   name: 'Product 3',
                   description: 'Description 3',
-                  images: ['https://picsum.photos/100/80'],
+                  images: [
+                    'http://localhost:8080/api/v1/image/100/80/Product3'
+                  ],
                   price: '¥300.45',
                 ),
                 Product(
                   id: 4,
                   name: 'Product 4',
                   description: 'Description 4',
-                  images: ['https://picsum.photos/100/80'],
+                  images: [
+                    'http://localhost:8080/api/v1/image/100/80/Product4'
+                  ],
                   price: '¥400.56',
                 ),
               ];

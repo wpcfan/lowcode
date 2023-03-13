@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
 import '../../blocs/canvas_state.dart';
-import 'block_config_form.dart';
-import 'block_data_pane.dart';
-import 'page_config_form.dart';
+import 'widgets/block_config_form.dart';
+import 'widgets/block_data_pane.dart';
+import 'widgets/page_config_form.dart';
 
 class RighePane extends StatelessWidget {
   const RighePane({

@@ -1,4 +1,3 @@
-import 'package:admin/views/page/create_or_update_image_data_dialog.dart';
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +5,7 @@ import 'package:models/models.dart';
 
 import '../../blocs/canvas_bloc.dart';
 import '../../blocs/canvas_event.dart';
+import 'create_or_update_image_data_dialog.dart';
 
 class ImageDataForm extends StatelessWidget {
   const ImageDataForm({

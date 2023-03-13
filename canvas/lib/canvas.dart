@@ -1,15 +1,17 @@
-import 'package:admin/blocs/canvas_event.dart';
+library canvas;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
-import '../blocs/canvas_bloc.dart';
-import '../blocs/canvas_state.dart';
-import '../models/widget_data.dart';
-import 'page/center_pane.dart';
-import 'page/left_pane.dart';
-import 'page/right_pane.dart';
+import 'blocs/canvas_bloc.dart';
+import 'blocs/canvas_event.dart';
+import 'blocs/canvas_state.dart';
+import 'center_pane.dart';
+import 'left_pane.dart';
+import 'models/widget_data.dart';
+import 'right_pane.dart';
 
 class CanvasPage extends StatelessWidget {
   const CanvasPage({super.key, required this.id});

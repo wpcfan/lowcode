@@ -11,16 +11,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @JsonDeserialize(as = CategoryDTO.class)
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO implements BlockData {
+public class CategoryDTO implements BlockData, Comparable<CategoryDTO> {
 
     private static final long serialVersionUID = -1;
     private Long id;
@@ -29,7 +27,7 @@ public class CategoryDTO implements BlockData {
     private Long parentId;
 
     @Builder.Default
-    private Set<CategoryDTO> children = new HashSet<>();
+    private SortedSet<CategoryDTO> children = new TreeSet<>();
 
     public static CategoryDTO fromProjection(CategoryInfo category) {
         return CategoryDTO.builder()
@@ -39,7 +37,7 @@ public class CategoryDTO implements BlockData {
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .children(category.getChildren().stream()
                         .map(CategoryDTO::fromProjection)
-                        .collect(HashSet::new, Set::add, Set::addAll))
+                        .collect(TreeSet::new, Set::add, Set::addAll))
                 .build();
     }
 
@@ -51,7 +49,7 @@ public class CategoryDTO implements BlockData {
                 .parentId(category.getParent() != null ? category.getParent().getId() : null)
                 .children(category.getChildren().stream()
                         .map(CategoryDTO::fromEntity)
-                        .collect(HashSet::new, Set::add, Set::addAll))
+                        .collect(TreeSet::new, Set::add, Set::addAll))
                 .build();
     }
 
@@ -60,7 +58,7 @@ public class CategoryDTO implements BlockData {
                 .name(getName())
                 .code(getCode())
                 .build();
-        Optional.ofNullable(getChildren()).orElse(new HashSet<>()).forEach(child -> category.addChild(child.toEntity()));
+        Optional.ofNullable(getChildren()).orElse(new TreeSet<>()).forEach(child -> category.addChild(child.toEntity()));
         return category;
     }
 
@@ -68,5 +66,10 @@ public class CategoryDTO implements BlockData {
     @Override
     public BlockDataType getDataType() {
         return BlockDataType.Category;
+    }
+
+    @Override
+    public int compareTo(CategoryDTO o) {
+        return this.getName().compareTo(o.getName());
     }
 }

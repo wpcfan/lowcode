@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
-class CategoryDataForm extends StatefulWidget {
+class CategoryDataForm extends StatelessWidget {
   const CategoryDataForm({
     super.key,
     required this.onCategoryAdded,
@@ -17,18 +17,13 @@ class CategoryDataForm extends StatefulWidget {
   final List<BlockData<Category>> data;
 
   @override
-  State<CategoryDataForm> createState() => _CategoryDataFormState();
-}
-
-class _CategoryDataFormState extends State<CategoryDataForm> {
-  Category? _selectedCategory;
-  @override
   Widget build(BuildContext context) {
     final categoryRepository = context.read<CategoryRepository>();
 
     return SingleChildScrollView(
         child: FutureBuilder(
       future: _getCategories(categoryRepository),
+      initialData: const [],
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
@@ -37,8 +32,9 @@ class _CategoryDataFormState extends State<CategoryDataForm> {
         if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         }
-        if (widget.data.isNotEmpty) {
-          _selectedCategory = widget.data.first.content;
+
+        if (snapshot.data == null || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No data'));
         }
 
         final categories = snapshot.data as List<Category>;
@@ -55,25 +51,16 @@ class _CategoryDataFormState extends State<CategoryDataForm> {
             return _buildCategoryTree(options);
           },
           onSelected: (option) {
-            if (widget.data
+            if (data
                 .where((element) => element.content.id == option.id)
                 .isNotEmpty) {
-              setState(() {
-                _selectedCategory = null;
-              });
-              widget.onCategoryRemoved(option);
+              onCategoryRemoved(option);
             } else {
-              if (_selectedCategory == null) {
-                setState(() {
-                  _selectedCategory = option;
-                });
-                widget.onCategoryAdded(option);
+              if (data.isEmpty) {
+                onCategoryAdded(option);
                 return;
               }
-              setState(() {
-                _selectedCategory = option;
-              });
-              widget.onCategoryUpdated(option);
+              onCategoryUpdated(option);
             }
           },
           displayStringForOption: (option) => option.name ?? '',
@@ -109,29 +96,21 @@ class _CategoryDataFormState extends State<CategoryDataForm> {
         RadioListTile(
           title: Text(category.name ?? ''),
           value: category,
-          groupValue: _selectedCategory,
+          selected: data.isEmpty ? false : data.first.content.id == category.id,
+          groupValue: data.isEmpty ? null : data.first.content,
           onChanged: (value) {
             if (value != null) {
-              if (_selectedCategory != null) {
-                setState(() {
-                  _selectedCategory = value;
-                });
-                widget.onCategoryUpdated(value);
+              if (data.isNotEmpty) {
+                onCategoryUpdated(value);
                 return;
               }
-              setState(() {
-                _selectedCategory = value;
-              });
-              widget.onCategoryAdded(category);
+              onCategoryAdded(category);
             } else {
-              setState(() {
-                _selectedCategory = null;
-              });
-              widget.onCategoryRemoved(category);
+              onCategoryRemoved(category);
             }
           },
         ),
-        if (category.children != null)
+        if (category.children != null && category.children!.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 16),
             child: _buildCategoryTree(category.children!),

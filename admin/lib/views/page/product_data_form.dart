@@ -63,6 +63,14 @@ class _ProductDataFormState extends State<ProductDataForm> {
               ),
             ),
             onSelected: (option) {
+              if (_selectedProducts.length > 1) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('最多只能选择两个商品'),
+                  ),
+                );
+                return;
+              }
               setState(() {
                 if (!_selectedProducts
                     .where((element) => element.id == option.id)

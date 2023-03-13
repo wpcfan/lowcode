@@ -7,6 +7,7 @@ import com.mooc.backend.dtos.PublishPageDTO;
 import com.mooc.backend.entities.PageBlockDataEntity;
 import com.mooc.backend.entities.PageBlockEntity;
 import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.repositories.PageBlockDataEntityRepository;
@@ -33,7 +34,7 @@ public class PageUpdateService {
     public PageEntity updatePage(Long id, CreateOrUpdatePageDTO page) {
         var pageEntity = pageQueryService.findById(id);
         if (pageEntity.getStatus() == PageStatus.Published) {
-            throw new CustomException("已发布的页面不允许修改", "PageUpdateService#updatePage", HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("已发布的页面不允许修改", "PageUpdateService#updatePage", Errors.ConstraintViolationException.code());
         }
         pageEntity.setTitle(page.title());
         pageEntity.setConfig(page.config());
@@ -49,10 +50,10 @@ public class PageUpdateService {
         // 设置为当天的23:59:59.999999999
         var endTime = page.endTime().with(LocalTime.MAX);
         if (pageEntityRepository.countPublishedTimeConflict(startTime, pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
-            throw new CustomException("开始时间和已有数据冲突", "PageUpdateService#publishPage", HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("开始时间和已有数据冲突", "PageUpdateService#publishPage", Errors.ConstraintViolationException.code());
         }
         if (pageEntityRepository.countPublishedTimeConflict(endTime, pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
-            throw new CustomException("结束时间和已有数据冲突", "PageUpdateService#publishPage", HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("结束时间和已有数据冲突", "PageUpdateService#publishPage", Errors.ConstraintViolationException.code());
         }
         pageEntity.setStatus(PageStatus.Published);
         pageEntity.setStartTime(startTime);
@@ -76,7 +77,7 @@ public class PageUpdateService {
                     pageBlockEntity.setTitle(block.title());
                     pageBlockEntity.setType(block.type());
                     return pageBlockEntityRepository.save(pageBlockEntity);
-                }).orElseThrow(() -> new CustomException("未找到对应的区块", "PageUpdateService#updateBlock", HttpStatus.BAD_REQUEST.value()));
+                }).orElseThrow(() -> new CustomException("未找到对应的区块", "PageUpdateService#updateBlock", Errors.DataNotFoundException.code()));
     }
 
     public PageEntity moveBlock(Long pageId, Long blockId, Integer targetSort) {
@@ -84,10 +85,10 @@ public class PageUpdateService {
         var blockEntity = pageEntity.getPageBlocks().stream()
                 .filter(pageBlockEntity -> pageBlockEntity.getId().equals(blockId))
                 .findFirst()
-                .orElseThrow(() -> new CustomException("未找到对应的区块", "PageUpdateService#moveBlock", HttpStatus.BAD_REQUEST.value()));
+                .orElseThrow(() -> new CustomException("未找到对应的区块", "PageUpdateService#moveBlock", Errors.DataNotFoundException.code()));
         var sort = blockEntity.getSort();
         if (sort.equals(targetSort)) {
-            throw new CustomException("目标位置和当前位置相同", "PageUpdateService#moveBlock", HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("目标位置和当前位置相同", "PageUpdateService#moveBlock", Errors.ConstraintViolationException.code());
         }
         if (sort < targetSort) {
             pageEntity.getPageBlocks().stream()
@@ -108,6 +109,6 @@ public class PageUpdateService {
                     dataEntity.setSort(data.sort());
                     dataEntity.setContent(data.content());
                     return pageBlockDataEntityRepository.save(dataEntity);
-                }).orElseThrow(() -> new CustomException("未找到对应的数据", "PageUpdateService#updateData", HttpStatus.BAD_REQUEST.value()));
+                }).orElseThrow(() -> new CustomException("未找到对应的数据", "PageUpdateService#updateData", Errors.FileDeleteException.code()));
     }
 }

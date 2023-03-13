@@ -1,6 +1,7 @@
 package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.dtos.*;
+import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
@@ -19,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -76,7 +76,7 @@ public class PageAdminController {
     @PostMapping()
     public PageDTO createPage(@Valid @RequestBody CreateOrUpdatePageDTO page) {
         if (pageQueryService.existsByTitle(page.title()))
-            throw new CustomException("页面标题已存在", "PageAdminController#createPage", HttpStatus.BAD_REQUEST.value());
+            throw new CustomException("页面标题已存在", "PageAdminController#createPage", Errors.DataAlreadyExistsException.code());
         return PageDTO.fromEntity(pageCreateService.createPage(page));
     }
 
@@ -213,7 +213,7 @@ public class PageAdminController {
         var pageEntity = pageQueryService.findById(pageId);
         if (pageEntity.getStatus() == PageStatus.Published) {
             throw new CustomException("页面已发布，不能对页面组成部分进行修改", "PageAdminController#checkPageStatus",
-                    HttpStatus.BAD_REQUEST.value());
+                    Errors.ConstraintViolationException.code());
         }
     }
 }

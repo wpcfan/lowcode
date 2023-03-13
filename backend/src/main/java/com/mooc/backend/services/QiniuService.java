@@ -3,6 +3,7 @@ package com.mooc.backend.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mooc.backend.dtos.FileDTO;
+import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.error.CustomException;
 import com.qiniu.common.QiniuException;
 import com.qiniu.storage.BucketManager;
@@ -46,7 +47,7 @@ public class QiniuService {
             return new FileDTO(domain + "/" + putRet.key, putRet.key);
         } catch (QiniuException | JsonProcessingException e) {
             e.printStackTrace();
-            throw new CustomException("File Upload error", e.getMessage(), 500);
+            throw new CustomException("File Upload error", e.getMessage(), Errors.FileUploadException.code());
         }
     }
 
@@ -88,7 +89,7 @@ public class QiniuService {
             bucketManager.delete(bucket, key);
         } catch (QiniuException e) {
             e.printStackTrace();
-            throw new CustomException("File Delete error", e.getMessage(), 500);
+            throw new CustomException("File Delete error", e.getMessage(), Errors.ConstraintViolationException.code());
         }
     }
 }

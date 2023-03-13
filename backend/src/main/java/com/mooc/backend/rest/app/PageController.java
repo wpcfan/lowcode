@@ -2,6 +2,7 @@ package com.mooc.backend.rest.app;
 
 import com.mooc.backend.config.PageProperties;
 import com.mooc.backend.dtos.PageDTO;
+import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.error.CustomException;
@@ -39,7 +40,7 @@ public class PageController {
         var platform = os.equals("Android") || os.equals("iOS") ? Platform.App : Platform.Web;
         return pageQueryService.findPublished(platform, pageType)
                 .map(PageDTO::fromEntity)
-                .orElseThrow(() -> new CustomException("Page not found", "No published page found",
-                        HttpStatus.NOT_FOUND.value()));
+                .orElseThrow(() -> new CustomException("Page not found", "PageController#findPublished",
+                        Errors.DataNotFoundException.code()));
     }
 }

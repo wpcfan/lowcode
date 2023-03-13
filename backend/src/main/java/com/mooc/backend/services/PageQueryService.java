@@ -1,6 +1,7 @@
 package com.mooc.backend.services;
 
 import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.error.CustomException;
@@ -23,7 +24,7 @@ public class PageQueryService {
     private final PageEntityRepository pageEntityRepository;
 
     public PageEntity findById(Long id) {
-        var page = pageEntityRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", 404));
+        var page = pageEntityRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", Errors.DataNotFoundException.code()));
         return page;
     }
 

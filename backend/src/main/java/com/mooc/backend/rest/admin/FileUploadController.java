@@ -1,6 +1,7 @@
 package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.dtos.FileDTO;
+import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.QiniuService;
 import com.qiniu.storage.model.FileInfo;
@@ -28,7 +29,7 @@ public class FileUploadController {
         try {
             return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
         } catch (IOException e) {
-            throw new CustomException("File Upload error", e.getMessage(), 500);
+            throw new CustomException("File Upload error", e.getMessage(), Errors.FileUploadException.code());
         }
     }
 
@@ -39,7 +40,7 @@ public class FileUploadController {
             try {
                 return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
             } catch (IOException e) {
-                throw new CustomException("File Upload error", e.getMessage(), 500);
+                throw new CustomException("File Upload error", e.getMessage(), Errors.FileUploadException.code());
             }
         }).toList();
     }

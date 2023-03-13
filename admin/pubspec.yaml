@@ -62,6 +62,8 @@ dependencies:
     path: ../page_block_widgets
   page_repository:
     path: ../page_repository
+  files:
+    path: ../files
   flutter_localizations:
     sdk: flutter
 

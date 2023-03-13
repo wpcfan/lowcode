@@ -1,9 +1,10 @@
+library files;
+
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_repository/page_repository.dart';
-import 'package:provider/provider.dart';
 
 import '../../blocs/file_bloc.dart';
 import '../../blocs/file_state.dart';
@@ -23,7 +24,7 @@ class ImageExplorer extends StatelessWidget {
           create: (context) => FileAdminRepository(),
         ),
       ],
-      child: MultiProvider(
+      child: MultiBlocProvider(
         providers: [
           BlocProvider<FileBloc>(
             create: (context) => FileBloc(

@@ -6,11 +6,11 @@ import 'package:models/models.dart';
 import 'package:networking/networking.dart';
 import 'package:page_repository/page_repository.dart';
 
-import 'blocs/layout_bloc.dart';
-import 'blocs/layout_event.dart';
-import 'blocs/layout_state.dart';
+import 'blocs/page_bloc.dart';
+import 'blocs/page_event.dart';
+import 'blocs/page_state.dart';
 import 'create_or_update_page_dialog.dart';
-import 'page_search_result_widget.dart';
+import 'page_table_widget.dart';
 
 class PageTableView extends StatelessWidget {
   const PageTableView({super.key});
@@ -28,13 +28,13 @@ class PageTableView extends StatelessWidget {
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider<LayoutBloc>(
-            create: (context) => LayoutBloc(
+          BlocProvider<PageBloc>(
+            create: (context) => PageBloc(
               context.read<PageAdminRepository>(),
-            )..add(LayoutEventClearAll()),
+            )..add(PageEventClearAll()),
           ),
         ],
-        child: BlocConsumer<LayoutBloc, LayoutState>(
+        child: BlocConsumer<PageBloc, PageState>(
           listenWhen: (previous, current) =>
               previous.loading != current.loading,
           listener: (context, state) {
@@ -50,7 +50,7 @@ class PageTableView extends StatelessWidget {
             }
           },
           builder: (context, state) {
-            final bloc = context.read<LayoutBloc>();
+            final bloc = context.read<PageBloc>();
             switch (state.status) {
               case FetchStatus.initial:
                 return const Center(child: Text('initial'));
@@ -59,37 +59,36 @@ class PageTableView extends StatelessWidget {
               case FetchStatus.error:
                 return const Center(child: Text('error'));
               case FetchStatus.populated:
-                return PageSearchResultWidget(
+                return PageTableWidget(
                   query: state.query,
                   items: state.items,
                   page: state.page,
                   pageSize: state.pageSize,
                   total: state.total,
                   onPageChanged: (int? value) {
-                    bloc.add(LayoutEventPageChanged(value));
+                    bloc.add(PageEventPageChanged(value));
                   },
                   onTitleChanged: (String? value) {
-                    bloc.add(LayoutEventTitleChanged(value));
+                    bloc.add(PageEventTitleChanged(value));
                   },
                   onPlatformChanged: (Platform? value) {
-                    bloc.add(LayoutEventPlatformChanged(value));
+                    bloc.add(PageEventPlatformChanged(value));
                   },
                   onStatusChanged: (PageStatus? value) {
-                    bloc.add(LayoutEventPageStatusChanged(value));
+                    bloc.add(PageEventPageStatusChanged(value));
                   },
                   onPageTypeChanged: (PageType? value) {
-                    bloc.add(LayoutEventPageTypeChanged(value));
+                    bloc.add(PageEventPageTypeChanged(value));
                   },
                   onStartDateChanged: (DateTimeRange? value) {
                     bloc.add(
-                        LayoutEventStartDateChanged(value?.start, value?.end));
+                        PageEventStartDateChanged(value?.start, value?.end));
                   },
                   onEndDateChanged: (DateTimeRange? value) {
-                    bloc.add(
-                        LayoutEventEndDateChanged(value?.start, value?.end));
+                    bloc.add(PageEventEndDateChanged(value?.start, value?.end));
                   },
                   onClearAll: () {
-                    bloc.add(LayoutEventClearAll());
+                    bloc.add(PageEventClearAll());
                   },
                   onAdd: () async {
                     await showDialog(
@@ -99,7 +98,7 @@ class PageTableView extends StatelessWidget {
                             title: '创建页面',
                             bloc: bloc,
                             onCreate: (layout) =>
-                                bloc.add(LayoutEventCreate(layout)),
+                                bloc.add(PageEventCreate(layout)),
                           );
                         });
                   },
@@ -112,7 +111,7 @@ class PageTableView extends StatelessWidget {
                             bloc: bloc,
                             layout: layout,
                             onUpdate: (layout) =>
-                                bloc.add(LayoutEventUpdate(layout.id!, layout)),
+                                bloc.add(PageEventUpdate(layout.id!, layout)),
                           );
                         });
                   },
@@ -137,7 +136,7 @@ class PageTableView extends StatelessWidget {
   }
 
   Future<void> _showDeleteDialog(
-      BuildContext context, LayoutBloc bloc, int id) async {
+      BuildContext context, PageBloc bloc, int id) async {
     final result = await showDialog(
         context: context,
         builder: (context) {
@@ -161,12 +160,12 @@ class PageTableView extends StatelessWidget {
           );
         });
     if (result) {
-      bloc.add(LayoutEventDelete(id));
+      bloc.add(PageEventDelete(id));
     }
   }
 
   Future<void> _showPublishDialog(
-      BuildContext context, LayoutBloc bloc, int id) async {
+      BuildContext context, PageBloc bloc, int id) async {
     final now = DateTime.now();
     final result = await showDateRangePicker(
       initialEntryMode: DatePickerEntryMode.input,
@@ -186,12 +185,12 @@ class PageTableView extends StatelessWidget {
       helpText: '选择时间范围',
     );
     if (result != null) {
-      bloc.add(LayoutEventPublish(id, result.start, result.end));
+      bloc.add(PageEventPublish(id, result.start, result.end));
     }
   }
 
   Future<void> _showDraftDialog(
-      BuildContext context, LayoutBloc bloc, int id) async {
+      BuildContext context, PageBloc bloc, int id) async {
     final result = await showDialog(
         context: context,
         builder: (context) {
@@ -215,7 +214,7 @@ class PageTableView extends StatelessWidget {
           );
         });
     if (result) {
-      bloc.add(LayoutEventDraft(id));
+      bloc.add(PageEventDraft(id));
     }
   }
 }

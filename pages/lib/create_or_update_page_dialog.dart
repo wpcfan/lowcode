@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
-import 'blocs/layout_bloc.dart';
+import 'blocs/page_bloc.dart';
 
 class CreateOrUpdatePageDialog extends StatefulWidget {
   const CreateOrUpdatePageDialog({
@@ -13,7 +13,7 @@ class CreateOrUpdatePageDialog extends StatefulWidget {
     this.onCreate,
   });
   final PageLayout? layout;
-  final LayoutBloc bloc;
+  final PageBloc bloc;
   final void Function(PageLayout layout)? onUpdate;
   final void Function(PageLayout layout)? onCreate;
   final String title;

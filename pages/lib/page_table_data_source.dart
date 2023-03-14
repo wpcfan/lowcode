@@ -2,8 +2,8 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
-class PageSearchResultDataSource extends DataTableSource {
-  PageSearchResultDataSource({
+class PageTableDataSource extends DataTableSource {
+  PageTableDataSource({
     required this.items,
     required this.onUpdate,
     required this.onDelete,

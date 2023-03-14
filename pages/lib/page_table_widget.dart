@@ -5,11 +5,11 @@ import 'package:page_repository/page_repository.dart';
 import 'filters/date_range_filter_widget.dart';
 import 'filters/selection_filter_widget.dart';
 import 'filters/text_filter_widget.dart';
-import 'page_search_result_data_source.dart';
+import 'page_table_data_source.dart';
 import 'widgets/custom_paginated_table.dart';
 
-class PageSearchResultWidget extends StatelessWidget {
-  const PageSearchResultWidget({
+class PageTableWidget extends StatelessWidget {
+  const PageTableWidget({
     super.key,
     required this.items,
     required this.page,
@@ -151,7 +151,7 @@ class PageSearchResultWidget extends StatelessWidget {
       sortColumnIndex: 0,
       sortColumnAsc: true,
       onPageChanged: onPageChanged,
-      dataTableSource: PageSearchResultDataSource(
+      dataTableSource: PageTableDataSource(
           items: items,
           onUpdate: (index) {
             onUpdate.call(items[index]);

@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
-class LayoutState extends Equatable {
+class PageState extends Equatable {
   final List<PageLayout> items;
   final PageQuery query;
   final bool loading;
@@ -12,7 +12,7 @@ class LayoutState extends Equatable {
   final int total;
   final FetchStatus status;
 
-  const LayoutState({
+  const PageState({
     this.items = const [],
     this.query = const PageQuery(),
     this.loading = false,
@@ -23,7 +23,7 @@ class LayoutState extends Equatable {
     this.status = FetchStatus.initial,
   });
 
-  LayoutState copyWith({
+  PageState copyWith({
     List<PageLayout>? items,
     PageQuery? query,
     bool? loading,
@@ -33,7 +33,7 @@ class LayoutState extends Equatable {
     int? total,
     FetchStatus? status,
   }) {
-    return LayoutState(
+    return PageState(
       items: items ?? this.items,
       query: query ?? this.query,
       loading: loading ?? this.loading,
@@ -62,7 +62,7 @@ class LayoutState extends Equatable {
     return 'LayoutState(items: $items, query: $query, loading: $loading, error: $error, page: $page, pageSize: $pageSize, total: $total, status: $status)';
   }
 
-  factory LayoutState.initial() {
-    return const LayoutState();
+  factory PageState.initial() {
+    return const PageState();
   }
 }

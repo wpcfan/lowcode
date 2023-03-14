@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
@@ -99,10 +100,6 @@ class RightPane extends StatelessWidget {
             state: state,
             onSave: onSavePageLayout,
           );
-    return Container(
-      color: Colors.grey,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: child,
-    );
+    return child.padding(horizontal: 12);
   }
 }

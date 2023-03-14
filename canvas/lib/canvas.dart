@@ -72,175 +72,90 @@ class CanvasPage extends StatelessWidget {
               }
             },
             builder: (context, state) {
+              final rightPane = RightPane(
+                showBlockConfig: state.selectedBlock != null,
+                state: state,
+                onSavePageBlock: (pageBlock) {
+                  context.read<CanvasBloc>().add(
+                        CanvasEventUpdateBlock(
+                            state.layout!.id!, pageBlock.id!, pageBlock),
+                      );
+                },
+                onSavePageLayout: (pageLayout) {
+                  context.read<CanvasBloc>().add(
+                        CanvasEventSave(state.layout!.id!, pageLayout),
+                      );
+                },
+                onDeleteBlock: (blockId) async {
+                  final bloc = context.read<CanvasBloc>();
+                  final result = await showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('删除'),
+                          content: const Text('确定要删除吗？'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              child: const Text('取消'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(true);
+                              },
+                              child: const Text('确定'),
+                            ),
+                          ],
+                        );
+                      });
+                  if (result) {
+                    bloc.add(
+                      CanvasEventDeleteBlock(state.layout!.id!, blockId),
+                    );
+                  }
+                },
+                onCategoryAdded: (data) {
+                  context.read<CanvasBloc>().add(CanvasEventAddBlockData(data));
+                },
+                onCategoryUpdated: (data) {
+                  context
+                      .read<CanvasBloc>()
+                      .add(CanvasEventUpdateBlockData(data));
+                },
+                onCategoryRemoved: (dataId) {
+                  context
+                      .read<CanvasBloc>()
+                      .add(CanvasEventDeleteBlockData(dataId));
+                },
+                onProductAdded: (data) {
+                  context.read<CanvasBloc>().add(CanvasEventAddBlockData(data));
+                },
+                onProductRemoved: (dataId) {
+                  context
+                      .read<CanvasBloc>()
+                      .add(CanvasEventDeleteBlockData(dataId));
+                },
+              );
+              final centerPane = CenterPane(
+                state: state,
+                onTap: () {
+                  context.read<CanvasBloc>().add(CanvasEventSelectNoBlock());
+                },
+              );
+              final rows = Responsive.isDesktop(context)
+                  ? [centerPane, const Spacer(), rightPane.expanded(flex: 4)]
+                  : [centerPane];
               return Scaffold(
                 key: scaffoldKey,
-                body: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                body: rows.toRow(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 中间画布
-
-                    CenterPane(
-                      state: state,
-                      onTap: () {
-                        context
-                            .read<CanvasBloc>()
-                            .add(CanvasEventSelectNoBlock());
-                      },
-                    ),
-
-                    // 右侧属性面板
-                    if (Responsive.isDesktop(context)) ...[
-                      const Spacer(),
-                      Expanded(
-                        flex: 4,
-                        child: RightPane(
-                          showBlockConfig: state.selectedBlock != null,
-                          state: state,
-                          onSavePageBlock: (pageBlock) {
-                            context.read<CanvasBloc>().add(
-                                  CanvasEventUpdateBlock(state.layout!.id!,
-                                      pageBlock.id!, pageBlock),
-                                );
-                          },
-                          onSavePageLayout: (pageLayout) {
-                            context.read<CanvasBloc>().add(
-                                  CanvasEventSave(
-                                      state.layout!.id!, pageLayout),
-                                );
-                          },
-                          onDeleteBlock: (blockId) async {
-                            final bloc = context.read<CanvasBloc>();
-                            final result = await showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AlertDialog(
-                                    title: const Text('删除'),
-                                    content: const Text('确定要删除吗？'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop(false);
-                                        },
-                                        child: const Text('取消'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop(true);
-                                        },
-                                        child: const Text('确定'),
-                                      ),
-                                    ],
-                                  );
-                                });
-                            if (result) {
-                              bloc.add(
-                                CanvasEventDeleteBlock(
-                                    state.layout!.id!, blockId),
-                              );
-                            }
-                          },
-                          onCategoryAdded: (data) {
-                            context
-                                .read<CanvasBloc>()
-                                .add(CanvasEventAddBlockData(data));
-                          },
-                          onCategoryUpdated: (data) {
-                            context
-                                .read<CanvasBloc>()
-                                .add(CanvasEventUpdateBlockData(data));
-                          },
-                          onCategoryRemoved: (dataId) {
-                            context
-                                .read<CanvasBloc>()
-                                .add(CanvasEventDeleteBlockData(dataId));
-                          },
-                          onProductAdded: (data) {
-                            context
-                                .read<CanvasBloc>()
-                                .add(CanvasEventAddBlockData(data));
-                          },
-                          onProductRemoved: (dataId) {
-                            context
-                                .read<CanvasBloc>()
-                                .add(CanvasEventDeleteBlockData(dataId));
-                          },
-                        ),
-                      ),
-                    ],
-                  ],
+                  mainAxisAlignment: MainAxisAlignment.start,
                 ),
                 endDrawer: Drawer(
-                    child: RightPane(
-                  showBlockConfig: state.selectedBlock != null,
-                  state: state,
-                  onSavePageBlock: (pageBlock) {
-                    context.read<CanvasBloc>().add(
-                          CanvasEventUpdateBlock(
-                              state.layout!.id!, pageBlock.id!, pageBlock),
-                        );
-                  },
-                  onSavePageLayout: (pageLayout) {
-                    context.read<CanvasBloc>().add(
-                          CanvasEventSave(state.layout!.id!, pageLayout),
-                        );
-                  },
-                  onDeleteBlock: (blockId) async {
-                    final bloc = context.read<CanvasBloc>();
-                    final result = await showDialog(
-                        context: context,
-                        builder: (context) {
-                          return AlertDialog(
-                            title: const Text('删除'),
-                            content: const Text('确定要删除吗？'),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(false);
-                                },
-                                child: const Text('取消'),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop(true);
-                                },
-                                child: const Text('确定'),
-                              ),
-                            ],
-                          );
-                        });
-                    if (result) {
-                      bloc.add(
-                        CanvasEventDeleteBlock(state.layout!.id!, blockId),
-                      );
-                    }
-                  },
-                  onCategoryAdded: (data) {
-                    context
-                        .read<CanvasBloc>()
-                        .add(CanvasEventAddBlockData(data));
-                  },
-                  onCategoryUpdated: (data) {
-                    context
-                        .read<CanvasBloc>()
-                        .add(CanvasEventUpdateBlockData(data));
-                  },
-                  onCategoryRemoved: (dataId) {
-                    context
-                        .read<CanvasBloc>()
-                        .add(CanvasEventDeleteBlockData(dataId));
-                  },
-                  onProductAdded: (data) {
-                    context
-                        .read<CanvasBloc>()
-                        .add(CanvasEventAddBlockData(data));
-                  },
-                  onProductRemoved: (dataId) {
-                    context
-                        .read<CanvasBloc>()
-                        .add(CanvasEventDeleteBlockData(dataId));
-                  },
-                )),
+                  child: rightPane,
+                ),
               );
             },
           );

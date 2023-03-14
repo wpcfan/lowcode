@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:pages/pages.dart';
 
 import '../components/side_menu.dart';
-import 'custom_slide_transition.dart';
 import 'router_config.dart';
 
 final routes = <RouteBase>[
@@ -40,15 +39,6 @@ final routes = <RouteBase>[
                 id: id,
                 scaffoldKey: innerScaffoldKey,
               );
-            },
-            pageBuilder: (context, state) {
-              final id = int.parse(state.params['id']!);
-              return CustomSlideTransition(
-                  key: state.pageKey,
-                  child: CanvasPage(
-                    id: id,
-                    scaffoldKey: innerScaffoldKey,
-                  ));
             },
           ),
         ],

@@ -7,15 +7,12 @@ class LeftPane extends StatelessWidget {
   final List<WidgetData> widgets;
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 300,
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            for (var i = 0; i < widgets.length; i++)
-              _buildDraggableWidget(widgets[i], i),
-          ],
-        ),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          for (var i = 0; i < widgets.length; i++)
+            _buildDraggableWidget(widgets[i], i),
+        ],
       ),
     );
   }
@@ -25,7 +22,7 @@ class LeftPane extends StatelessWidget {
       data: data,
       feedback: SizedBox(
         width: 400,
-        height: 50,
+        height: 80,
         child: Opacity(
           opacity: 0.5,
           child: Card(
@@ -38,11 +35,17 @@ class LeftPane extends StatelessWidget {
       ),
       child: SizedBox(
         width: 400,
-        height: 50,
+        height: 80,
         child: Card(
           child: ListTile(
-            leading: Icon(data.icon),
-            title: Text(data.label),
+            leading: Icon(
+              data.icon,
+              color: Colors.white54,
+            ),
+            title: Text(
+              data.label,
+              style: const TextStyle(color: Colors.white54),
+            ),
           ),
         ),
       ),

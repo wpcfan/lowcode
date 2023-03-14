@@ -1,11 +1,9 @@
 import 'package:admin/constants.dart';
-import 'package:admin/controllers/side_menu_controller.dart';
 import 'package:admin/responsive.dart';
+import 'package:admin/routes/router_config.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'profile_card.dart';
-import 'search_field.dart';
 
 class Header extends StatelessWidget {
   const Header({
@@ -19,18 +17,34 @@ class Header extends StatelessWidget {
         if (!Responsive.isDesktop(context))
           IconButton(
             icon: const Icon(Icons.menu),
-            onPressed: context.read<SideMenuController>().controlMenu,
+            onPressed: () {
+              if (scaffoldKey.currentState!.isDrawerOpen) {
+                scaffoldKey.currentState!.closeDrawer();
+              } else {
+                scaffoldKey.currentState!.openDrawer();
+              }
+            },
           ),
         if (!Responsive.isMobile(context)) ...[
           Text(
-            "Dashboard",
+            "动态页面配置平台",
             style: Theme.of(context).textTheme.titleLarge,
           ),
-          Spacer(flex: Responsive.isDesktop(context) ? 2 : 1)
         ],
-        const Expanded(child: SearchField()),
+        Spacer(flex: Responsive.isDesktop(context) ? 2 : 1),
         const SizedBox(width: defaultPadding),
-        const ProfileCard()
+        const ProfileCard(),
+        if (!Responsive.isDesktop(context))
+          IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () {
+              if (scaffoldKey.currentState!.isEndDrawerOpen) {
+                scaffoldKey.currentState!.closeEndDrawer();
+              } else {
+                scaffoldKey.currentState!.openEndDrawer();
+              }
+            },
+          ),
       ],
     );
   }

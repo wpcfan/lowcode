@@ -1,7 +1,8 @@
-import 'package:admin/components/side_menu.dart';
-import 'package:admin/responsive.dart';
-import 'package:admin/views/dashboard_page.dart';
 import 'package:flutter/material.dart';
+import 'package:pages/pages.dart';
+
+import '../components/side_menu.dart';
+import '../responsive.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -24,7 +25,7 @@ class HomePage extends StatelessWidget {
             const Expanded(
               // It takes 5/6 part of the screen
               flex: 5,
-              child: DashboardPage(),
+              child: PageTableView(),
             ),
           ],
         ),

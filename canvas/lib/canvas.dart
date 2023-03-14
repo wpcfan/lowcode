@@ -3,7 +3,6 @@ library canvas;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:models/models.dart';
 import 'package:networking/networking.dart';
 import 'package:page_repository/page_repository.dart';
 
@@ -11,9 +10,10 @@ import 'blocs/canvas_bloc.dart';
 import 'blocs/canvas_event.dart';
 import 'blocs/canvas_state.dart';
 import 'center_pane.dart';
-import 'left_pane.dart';
-import 'models/widget_data.dart';
 import 'right_pane.dart';
+
+export 'left_pane.dart';
+export 'models/widget_data.dart';
 
 class CanvasPage extends StatelessWidget {
   const CanvasPage({super.key, required this.id});
@@ -71,26 +71,6 @@ class CanvasPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 左侧组件列表面板
-                    const LeftPane(widgets: [
-                      WidgetData(
-                          icon: Icons.photo_library,
-                          label: '轮播图',
-                          type: PageBlockType.banner),
-                      WidgetData(
-                          icon: Icons.imagesearch_roller,
-                          label: '图片行',
-                          type: PageBlockType.imageRow),
-                      WidgetData(
-                          icon: Icons.production_quantity_limits,
-                          label: '产品行',
-                          type: PageBlockType.productRow),
-                      WidgetData(
-                          icon: Icons.category,
-                          label: '瀑布流',
-                          type: PageBlockType.waterfall),
-                    ]),
-
                     // 中间画布
 
                     CenterPane(

@@ -125,7 +125,7 @@ class PageTableView extends StatelessWidget {
                     await _showDraftDialog(context, bloc, id);
                   },
                   onSelect: (int id) {
-                    context.go('/pages/$id');
+                    context.go('/$id');
                   },
                 );
             }

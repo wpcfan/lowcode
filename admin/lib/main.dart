@@ -1,8 +1,9 @@
-import 'package:admin/constants.dart';
-import 'package:admin/routes/router_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'constants.dart';
+import 'routes/router_config.dart';
 
 class SimpleBlocObserver extends BlocObserver {
   @override

@@ -1,8 +1,7 @@
 import 'package:admin/constants.dart';
+import 'package:canvas/canvas.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
-import 'drawer_list_tile.dart';
+import 'package:models/models.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({
@@ -11,65 +10,32 @@ class SideMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
+    return const Drawer(
       backgroundColor: bgColor,
-      child: ListView(
-        children: [
-          DrawerHeader(
-            child: Image.asset("assets/images/logo.png"),
-          ),
-          DrawerListTile(
-            title: "Dashboard",
-            icon: Icons.dashboard,
-            press: () {
-              context.go('/');
-            },
-          ),
-          DrawerListTile(
-            title: "Transaction",
-            icon: Icons.track_changes,
-            press: () {
-              context.go('/search');
-            },
-          ),
-          DrawerListTile(
-            title: "Draggable",
-            icon: Icons.drag_handle,
-            press: () {
-              context.go('/draggable');
-            },
-          ),
-          DrawerListTile(
-            title: "DragDrop",
-            icon: Icons.drag_indicator,
-            press: () {
-              context.go('/dragdrop');
-            },
-          ),
-          DrawerListTile(
-            title: "Pages",
-            icon: Icons.draw_outlined,
-            press: () {
-              context.go('/pages');
-            },
-          ),
-          DrawerListTile(
-            title: "Notification",
-            icon: Icons.notifications,
-            press: () {},
-          ),
-          DrawerListTile(
-            title: "Profile",
-            icon: Icons.person,
-            press: () {},
-          ),
-          DrawerListTile(
-            title: "Settings",
-            icon: Icons.settings,
-            press: () {},
-          ),
-        ],
-      ),
+      child:
+          // 左侧组件列表面板
+          LeftPane(widgets: [
+        WidgetData(
+          icon: Icons.photo_library,
+          label: '轮播图',
+          type: PageBlockType.banner,
+        ),
+        WidgetData(
+          icon: Icons.imagesearch_roller,
+          label: '图片行',
+          type: PageBlockType.imageRow,
+        ),
+        WidgetData(
+          icon: Icons.production_quantity_limits,
+          label: '产品行',
+          type: PageBlockType.productRow,
+        ),
+        WidgetData(
+          icon: Icons.category,
+          label: '瀑布流',
+          type: PageBlockType.waterfall,
+        ),
+      ]),
     );
   }
 }

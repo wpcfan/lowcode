@@ -6,8 +6,8 @@ import 'widgets/block_config_form.dart';
 import 'widgets/block_data_pane.dart';
 import 'widgets/page_config_form.dart';
 
-class RighePane extends StatelessWidget {
-  const RighePane({
+class RightPane extends StatelessWidget {
+  const RightPane({
     super.key,
     required this.state,
     required this.showBlockConfig,

@@ -1,6 +1,6 @@
 import 'package:admin/constants.dart';
-import 'package:admin/responsive.dart';
 import 'package:admin/routes/router_config.dart';
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 
 import 'profile_card.dart';
@@ -38,10 +38,10 @@ class Header extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.menu),
             onPressed: () {
-              if (scaffoldKey.currentState!.isEndDrawerOpen) {
-                scaffoldKey.currentState!.closeEndDrawer();
+              if (innerScaffoldKey.currentState!.isEndDrawerOpen) {
+                innerScaffoldKey.currentState!.closeEndDrawer();
               } else {
-                scaffoldKey.currentState!.openEndDrawer();
+                innerScaffoldKey.currentState!.openEndDrawer();
               }
             },
           ),

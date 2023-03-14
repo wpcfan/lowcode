@@ -1,11 +1,12 @@
 import 'package:canvas/canvas.dart';
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pages/pages.dart';
 
 import '../components/side_menu.dart';
-import '../responsive.dart';
 import 'custom_slide_transition.dart';
+import 'router_config.dart';
 
 final routes = <RouteBase>[
   GoRoute(
@@ -35,12 +36,19 @@ final routes = <RouteBase>[
             path: ':id',
             builder: (context, state) {
               final id = int.parse(state.params['id']!);
-              return CanvasPage(id: id);
+              return CanvasPage(
+                id: id,
+                scaffoldKey: innerScaffoldKey,
+              );
             },
             pageBuilder: (context, state) {
               final id = int.parse(state.params['id']!);
               return CustomSlideTransition(
-                  key: state.pageKey, child: CanvasPage(id: id));
+                  key: state.pageKey,
+                  child: CanvasPage(
+                    id: id,
+                    scaffoldKey: innerScaffoldKey,
+                  ));
             },
           ),
         ],

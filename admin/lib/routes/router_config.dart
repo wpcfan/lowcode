@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'routes.dart';
 
 final scaffoldKey = GlobalKey<ScaffoldState>();
+final innerScaffoldKey = GlobalKey<ScaffoldState>();
 
 final routerConfig = GoRouter(
   initialLocation: '/',

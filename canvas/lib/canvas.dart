@@ -1,5 +1,6 @@
 library canvas;
 
+import 'package:common/common.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,8 +17,13 @@ export 'left_pane.dart';
 export 'models/widget_data.dart';
 
 class CanvasPage extends StatelessWidget {
-  const CanvasPage({super.key, required this.id});
+  const CanvasPage({
+    super.key,
+    required this.id,
+    required this.scaffoldKey,
+  });
   final int id;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -55,19 +61,20 @@ class CanvasPage extends StatelessWidget {
           ),
         ],
         child: Builder(builder: (context) {
-          return Scaffold(
-            body: BlocConsumer<CanvasBloc, CanvasState>(
-              listener: (context, state) {
-                if (state.error.isNotEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.error),
-                    ),
-                  );
-                }
-              },
-              builder: (context, state) {
-                return Row(
+          return BlocConsumer<CanvasBloc, CanvasState>(
+            listener: (context, state) {
+              if (state.error.isNotEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.error),
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return Scaffold(
+                key: scaffoldKey,
+                body: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -83,11 +90,11 @@ class CanvasPage extends StatelessWidget {
                     ),
 
                     // 右侧属性面板
-                    ...[
+                    if (Responsive.isDesktop(context)) ...[
                       const Spacer(),
                       Expanded(
                         flex: 4,
-                        child: RighePane(
+                        child: RightPane(
                           showBlockConfig: state.selectedBlock != null,
                           state: state,
                           onSavePageBlock: (pageBlock) {
@@ -162,9 +169,80 @@ class CanvasPage extends StatelessWidget {
                       ),
                     ],
                   ],
-                );
-              },
-            ),
+                ),
+                endDrawer: Drawer(
+                    child: RightPane(
+                  showBlockConfig: state.selectedBlock != null,
+                  state: state,
+                  onSavePageBlock: (pageBlock) {
+                    context.read<CanvasBloc>().add(
+                          CanvasEventUpdateBlock(
+                              state.layout!.id!, pageBlock.id!, pageBlock),
+                        );
+                  },
+                  onSavePageLayout: (pageLayout) {
+                    context.read<CanvasBloc>().add(
+                          CanvasEventSave(state.layout!.id!, pageLayout),
+                        );
+                  },
+                  onDeleteBlock: (blockId) async {
+                    final bloc = context.read<CanvasBloc>();
+                    final result = await showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: const Text('删除'),
+                            content: const Text('确定要删除吗？'),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(false);
+                                },
+                                child: const Text('取消'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop(true);
+                                },
+                                child: const Text('确定'),
+                              ),
+                            ],
+                          );
+                        });
+                    if (result) {
+                      bloc.add(
+                        CanvasEventDeleteBlock(state.layout!.id!, blockId),
+                      );
+                    }
+                  },
+                  onCategoryAdded: (data) {
+                    context
+                        .read<CanvasBloc>()
+                        .add(CanvasEventAddBlockData(data));
+                  },
+                  onCategoryUpdated: (data) {
+                    context
+                        .read<CanvasBloc>()
+                        .add(CanvasEventUpdateBlockData(data));
+                  },
+                  onCategoryRemoved: (dataId) {
+                    context
+                        .read<CanvasBloc>()
+                        .add(CanvasEventDeleteBlockData(dataId));
+                  },
+                  onProductAdded: (data) {
+                    context
+                        .read<CanvasBloc>()
+                        .add(CanvasEventAddBlockData(data));
+                  },
+                  onProductRemoved: (dataId) {
+                    context
+                        .read<CanvasBloc>()
+                        .add(CanvasEventDeleteBlockData(dataId));
+                  },
+                )),
+              );
+            },
           );
         }),
       ),

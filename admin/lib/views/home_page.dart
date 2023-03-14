@@ -1,8 +1,8 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:pages/pages.dart';
 
 import '../components/side_menu.dart';
-import '../responsive.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

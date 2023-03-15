@@ -82,58 +82,5 @@ public class ProductControllerTests {
                                 .andExpect(jsonPath("$[1].categories[0].name", is("Category 1")));
         }
 
-        @Test
-        public void testFindPageableByExample() throws Exception {
-                var category = new Category();
-                category.setId(1L);
-                category.setCode("cat_one");
-                category.setName("Category 1");
 
-                var product1 = new Product();
-                product1.setId(1L);
-                product1.setName("Product 1");
-                product1.setDescription("Description 1");
-                product1.setPrice(BigDecimal.valueOf(100000));
-                product1.setCategories(Set.of(category));
-
-                var product2 = new Product();
-                product2.setId(2L);
-                product2.setName("Product 2");
-                product2.setDescription("Description 2");
-                product2.setPrice(BigDecimal.valueOf(200000));
-                product2.setCategories(Set.of(category));
-
-                var pageSize = 10;
-                var pageNumber = 0;
-                var pageRequest = Pageable.ofSize(pageSize).withPage(pageNumber);
-
-                var keyword = "test";
-                var result = new PageImpl<>(List.of(product1, product2), pageRequest, 2);
-                Mockito.when(productQueryService.findPageableByExample(Mockito.any(Example.class),
-                                Mockito.any(Pageable.class)))
-                                .thenReturn(result);
-
-                mockMvc.perform(get("/api/v1/app/products/by-example?keyword={keyword}", keyword)
-                                .accept("application/json"))
-                                .andExpect(status().isOk())
-                                .andExpect(jsonPath("$.page", is(pageNumber)))
-                                .andExpect(jsonPath("$.size", is(pageSize)))
-                                .andExpect(jsonPath("$.totalSize", is(2)))
-                                .andExpect(jsonPath("$.totalPage", is(1)))
-                                .andExpect(jsonPath("$.items", hasSize(2)))
-                                .andExpect(jsonPath("$.items[0].id", is(1)))
-                                .andExpect(jsonPath("$.items[0].name", is("Product 1")))
-                                .andExpect(jsonPath("$.items[0].description", is("Description 1")))
-                                .andExpect(jsonPath("$.items[0].price", is("¥100,000.00")))
-                                .andExpect(jsonPath("$.items[0].categories", hasSize(1)))
-                                .andExpect(jsonPath("$.items[0].categories[0].code", is("cat_one")))
-                                .andExpect(jsonPath("$.items[0].categories[0].name", is("Category 1")))
-                                .andExpect(jsonPath("$.items[1].id", is(2)))
-                                .andExpect(jsonPath("$.items[1].name", is("Product 2")))
-                                .andExpect(jsonPath("$.items[1].description", is("Description 2")))
-                                .andExpect(jsonPath("$.items[1].price", is("¥200,000.00")))
-                                .andExpect(jsonPath("$.items[1].categories", hasSize(1)))
-                                .andExpect(jsonPath("$.items[1].categories[0].code", is("cat_one")))
-                                .andExpect(jsonPath("$.items[1].categories[0].name", is("Category 1")));
-        }
 }

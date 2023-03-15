@@ -2,6 +2,7 @@ package com.mooc.backend.controllers.app;
 
 import com.mooc.backend.config.PageProperties;
 import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.rest.app.PageController;
@@ -74,7 +75,7 @@ public class PageControllerTests {
                 )
                 .andDo(result -> System.out.println(result.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$.type").exists())
-                .andExpect(jsonPath("$.code").value(404))
+                .andExpect(jsonPath("$.code").value(Errors.DataNotFoundException.code()))
                 .andExpect(jsonPath("$.title").value("Page not found"));
     }
 }

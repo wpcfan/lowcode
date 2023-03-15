@@ -31,6 +31,7 @@ public class ProductRepositoryTests {
     @Test
     public void testFindAll() {
         var product = new Product();
+        product.setSku("test_sku");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
@@ -45,6 +46,7 @@ public class ProductRepositoryTests {
         assertEquals(BigDecimal.valueOf(10000), products.get(0).getPrice());
 
         var product2 = new Product();
+        product2.setSku("test_sku_2");
         product2.setName("Test Product 2");
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
@@ -70,6 +72,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(category);
 
         var product = new Product();
+        product.setSku("test_sku");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
@@ -93,6 +96,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(category);
 
         var product = new Product();
+        product.setSku("test_sku");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
@@ -100,6 +104,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(product);
 
         var product2 = new Product();
+        product2.setSku("test_sku_2");
         product2.setName("Test Product 2");
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
@@ -136,18 +141,21 @@ public class ProductRepositoryTests {
     @Test
     public void testFindByNameLikeOrderByIdDesc() throws Exception {
         var product = new Product();
+        product.setSku("test_sku");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
         testEntityManager.persist(product);
 
         var product2 = new Product();
+        product2.setSku("test_sku_2");
         product2.setName("Test Product 2");
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
         testEntityManager.persist(product2);
 
         var product3 = new Product();
+        product3.setSku("test_sku_3");
         product3.setName("Another Product 3");
         product3.setDescription("Test Description 3");
         product3.setPrice(BigDecimal.valueOf(10200));
@@ -174,6 +182,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(category);
 
         var product = new Product();
+        product.setSku("test_sku");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
@@ -181,6 +190,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(product);
 
         var product2 = new Product();
+        product2.setSku("test_sku_2");
         product2.setName("Test Product 2");
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
@@ -188,6 +198,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(product2);
 
         var product3 = new Product();
+        product3.setSku("test_sku_3");
         product3.setName("Another Product 3");
         product3.setDescription("Test Description 3");
         product3.setPrice(BigDecimal.valueOf(10200));
@@ -218,6 +229,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(category);
 
         var product = new Product();
+        product.setSku("test_sku");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
@@ -225,6 +237,7 @@ public class ProductRepositoryTests {
         testEntityManager.persist(product);
 
         var product2 = new Product();
+        product2.setSku("test_sku_2");
         product2.setName("Test Product 2");
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
@@ -259,6 +272,7 @@ public class ProductRepositoryTests {
         productImage.setImageUrl(imageUrl);
 
         var product = new Product();
+        product.setSku("test_sku");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));

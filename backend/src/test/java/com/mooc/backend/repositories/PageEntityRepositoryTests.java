@@ -112,6 +112,7 @@ public class PageEntityRepositoryTests {
         testEntityManager.persist(imageRow);
 
         var product = new Product();
+        product.setSku("Test SKU");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));

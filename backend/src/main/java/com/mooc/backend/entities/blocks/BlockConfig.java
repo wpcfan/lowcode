@@ -3,6 +3,9 @@ package com.mooc.backend.entities.blocks;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import lombok.extern.jackson.Jacksonized;
+
+import java.io.Serializable;
 
 @Schema(description = "区块配置")
 @Getter
@@ -10,7 +13,9 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BlockConfig {
+@Jacksonized
+public class BlockConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final String HEX_COLOR_PATTERN
             = "^#(?:(?:[\\da-f]{3}){1,2}|(?:[\\da-f]{4}){1,2})$";
 

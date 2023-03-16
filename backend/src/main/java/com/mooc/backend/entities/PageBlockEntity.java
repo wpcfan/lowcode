@@ -5,10 +5,8 @@ import com.mooc.backend.enumerations.BlockType;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.SortComparator;
 import org.hibernate.annotations.Type;
 
-import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -20,7 +18,7 @@ import java.util.TreeSet;
 @AllArgsConstructor
 @Entity
 @Table(name = "mooc_page_blocks")
-public class PageBlockEntity implements Comparator<PageBlockEntity>, Comparable<PageBlockEntity> {
+public class PageBlockEntity implements Comparable<PageBlockEntity> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -45,7 +43,6 @@ public class PageBlockEntity implements Comparator<PageBlockEntity>, Comparable<
     @JoinColumn(name = "page_id")
     private PageEntity page;
 
-    @SortComparator(PageBlockDataEntity.class)
     @OneToMany(mappedBy = "pageBlock", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
@@ -59,10 +56,6 @@ public class PageBlockEntity implements Comparator<PageBlockEntity>, Comparable<
     public void removeData(PageBlockDataEntity pageBlockDataEntity) {
         data.remove(pageBlockDataEntity);
         pageBlockDataEntity.setPageBlock(null);
-    }
-
-    public int compare(PageBlockEntity a, PageBlockEntity b) {
-        return a.getSort() - b.getSort();
     }
 
     @Override

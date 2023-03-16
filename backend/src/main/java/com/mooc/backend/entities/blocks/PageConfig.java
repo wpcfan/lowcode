@@ -5,6 +5,9 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
+import lombok.extern.jackson.Jacksonized;
+
+import java.io.Serializable;
 
 /**
  * 页面配置
@@ -16,7 +19,9 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PageConfig {
+@Jacksonized
+public class PageConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
     // 水平内边距
     @Schema(description = "水平内边距", example = "0.0")
     @NotNull

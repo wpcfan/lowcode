@@ -6,8 +6,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Type;
 
-import java.util.Comparator;
-
 @Getter
 @Setter
 @ToString
@@ -16,7 +14,7 @@ import java.util.Comparator;
 @AllArgsConstructor
 @Entity
 @Table(name = "mooc_page_block_data")
-public class PageBlockDataEntity implements Comparator<PageBlockDataEntity>, Comparable<PageBlockDataEntity> {
+public class PageBlockDataEntity implements Comparable<PageBlockDataEntity> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -32,11 +30,6 @@ public class PageBlockDataEntity implements Comparator<PageBlockDataEntity>, Com
     @ManyToOne
     @JoinColumn(name = "page_block_id")
     private PageBlockEntity pageBlock;
-
-    @Override
-    public int compare(PageBlockDataEntity o1, PageBlockDataEntity o2) {
-        return o1.getSort() - o2.getSort();
-    }
 
     @Override
     public int compareTo(PageBlockDataEntity o) {

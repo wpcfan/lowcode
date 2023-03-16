@@ -2,12 +2,19 @@ package com.mooc.backend.entities.blocks;
 
 import com.mooc.backend.enumerations.LinkType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Data
+import java.io.Serializable;
+
+@Getter
 @Builder
-public class Link {
+@AllArgsConstructor
+@NoArgsConstructor
+public class Link implements Serializable {
+    private static final long serialVersionUID = 1L;
     @Schema(description = "链接类型")
     private LinkType type;
     @Schema(description = "链接值", example = "https://www.baidu.com")

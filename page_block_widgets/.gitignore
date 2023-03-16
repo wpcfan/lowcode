@@ -104,6 +104,11 @@ unlinked_spec.ds
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral/flutter_export_environment.sh
+
+# Linux
+**/linux/flutter/GeneratedPluginRegistrant.cc
+**/linux/flutter/ephemeral/
 
 # Coverage
 coverage/

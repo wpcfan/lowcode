@@ -104,6 +104,11 @@ unlinked_spec.ds
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/ephemeral/flutter_export_environment.sh
+
+# Linux
+**/linux/flutter/GeneratedPluginRegistrant.cc
+**/linux/flutter/ephemeral/
 
 # Coverage
 coverage/
@@ -130,6 +135,7 @@ android/app/google-services.json
 google_maps_api.xml
 
 # Web related
+lib/generated_plugin_registrant.dart
 
 # Obfuscation related
 app.*.map.json

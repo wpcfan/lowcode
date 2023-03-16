@@ -30,4 +30,6 @@ class AdminClient {
     ));
     return dio;
   }
+
+  AdminClient._();
 }

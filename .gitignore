@@ -3,3 +3,5 @@
 **/.flutter-plugins-dependencies
 **/macos/Flutter/ephemeral/Flutter-Generated.xcconfig
 **/android/local.properties
+*.cc
+*.cmake

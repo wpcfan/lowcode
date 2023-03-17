@@ -167,7 +167,7 @@ class FileDialogTitle extends StatelessWidget {
             ],
           ),
         );
-        if (result == true) {
+        if (result ?? false) {
           onDelete();
         }
       },

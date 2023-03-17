@@ -5,7 +5,6 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
-import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serializable;
 
@@ -19,7 +18,7 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Jacksonized
+@EqualsAndHashCode(callSuper = false)
 public class PageConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     // 水平内边距

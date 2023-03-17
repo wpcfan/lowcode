@@ -21,21 +21,20 @@ import java.util.TreeSet;
 public class PageBlockEntity implements Comparable<PageBlockEntity> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(nullable = false)
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false)
+    @Column(nullable = false)
     private BlockType type;
 
-    @Column(name = "sort", nullable = false)
+    @Column(nullable = false)
     private Integer sort;
 
     @Type(JsonType.class)
-    @Column(name = "config", nullable = false, columnDefinition = "json")
+    @Column(nullable = false, columnDefinition = "json")
     @ToString.Exclude
     private BlockConfig config;
 

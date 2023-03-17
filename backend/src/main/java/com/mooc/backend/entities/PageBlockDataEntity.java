@@ -17,14 +17,13 @@ import org.hibernate.annotations.Type;
 public class PageBlockDataEntity implements Comparable<PageBlockDataEntity> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "sort", nullable = false)
+    @Column(nullable = false)
     private Integer sort;
 
     @Type(JsonType.class)
-    @Column(name = "content", nullable = false, columnDefinition = "json")
+    @Column(nullable = false, columnDefinition = "json")
     private BlockData content;
 
     @ManyToOne

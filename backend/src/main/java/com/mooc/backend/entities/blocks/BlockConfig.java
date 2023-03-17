@@ -8,12 +8,12 @@ import lombok.extern.jackson.Jacksonized;
 import java.io.Serializable;
 
 @Schema(description = "区块配置")
-@Getter
-@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Jacksonized
+@Getter
+@EqualsAndHashCode(callSuper = false)
 public class BlockConfig implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final String HEX_COLOR_PATTERN

@@ -33,14 +33,13 @@ import java.util.TreeSet;
 public class PageEntity extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false, unique = true, length = 100)
+    @Column(nullable = false, unique = true, length = 100)
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "platform", nullable = false)
+    @Column(nullable = false)
     private Platform platform;
 
     @Enumerated(EnumType.STRING)
@@ -71,8 +70,7 @@ public class PageEntity extends Auditable {
     private SortedSet<PageBlockEntity> pageBlocks = new TreeSet<>();
 
     @Type(JsonType.class)
-    @Column(name = "config", nullable = false, columnDefinition = "json")
-    @ToString.Exclude
+    @Column(nullable = false, columnDefinition = "json")
     private PageConfig config;
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -84,7 +82,7 @@ public class PageEntity extends Auditable {
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(nullable = false)
     @Builder.Default
     private PageStatus status = PageStatus.Draft;
 

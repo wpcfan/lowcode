@@ -15,7 +15,6 @@ import lombok.ToString;
 public class ProductImage extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "image_url", nullable = false)

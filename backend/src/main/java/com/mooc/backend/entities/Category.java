@@ -18,13 +18,12 @@ import java.util.Set;
 public class Category extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "code", nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String code;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne

@@ -5,6 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('swiftui', () {
     final widget = SwiftUi.widget(child: const Text('hello'));
-    expect(widget.runtimeType, const Text('hello'));
+    expect(widget.runtimeType, Text);
   });
 }

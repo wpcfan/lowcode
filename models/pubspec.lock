@@ -199,4 +199,4 @@ packages:
     version: "2.1.4"
 sdks:
   dart: ">=2.19.4 <3.0.0"
-  flutter: ">=2.0.1"
+  flutter: ">=3.7.0"

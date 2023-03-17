@@ -1,8 +1,10 @@
+import 'package:canvas/forms/form_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:models/models.dart';
 
 import '../../blocs/canvas_state.dart';
+import '../forms/validators.dart';
 
 class BlockConfigForm extends StatefulWidget {
   const BlockConfigForm({
@@ -56,6 +58,149 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
     _borderWidthController.text = _formValue.config.borderWidth != null
         ? _formValue.config.borderWidth!.toString()
         : '0';
+    const labels = [
+      '标题',
+      '排序',
+      '水平内边距',
+      '垂直内边距',
+      '水平间距',
+      '垂直间距',
+      '区块宽度',
+      '区块高度',
+      '背景颜色',
+      '边框颜色',
+      '边框宽度',
+    ];
+
+    final fields = labels.map((label) {
+      switch (label) {
+        case '标题':
+          return FormTextInput(
+            label: label,
+            hint: '请输入标题',
+            validators: [
+              Validators.required(label: label),
+              Validators.maxLength(label: label, maxLength: 100),
+              Validators.minLength(label: label, minLength: 2),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(title: value!);
+            },
+          );
+        case '排序':
+          return FormTextInput(
+            label: label,
+            hint: '请输入排序',
+            validators: [
+              Validators.required(label: label),
+              Validators.isInteger(label: label),
+              Validators.min(label: label, min: 0),
+              Validators.max(label: label, max: 1000),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(sort: int.parse(value!));
+            },
+          );
+        case '水平内边距':
+          return FormTextInput(
+            label: label,
+            hint: '请输入水平内边距',
+            validators: [
+              Validators.required(label: label),
+              Validators.isDouble(label: label),
+              Validators.min(label: label, min: 0),
+              Validators.max(label: label, max: 100),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(
+                  config: _formValue.config.copyWith(
+                      horizontalPadding: double.parse(value!)));
+            },
+          );
+        case '垂直内边距':
+          return FormTextInput(
+            label: label,
+            hint: '请输入垂直内边距',
+            validators: [
+              Validators.required(label: label),
+              Validators.isDouble(label: label),
+              Validators.min(label: label, min: 0),
+              Validators.max(label: label, max: 100),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(
+                  config: _formValue.config.copyWith(
+                      verticalPadding: double.parse(value!)));
+            },
+          );
+        case '水平间距':
+          return FormTextInput(
+            label: label,
+            hint: '请输入水平间距',
+            validators: [
+              Validators.required(label: label),
+              Validators.isDouble(label: label),
+              Validators.min(label: label, min: 0),
+              Validators.max(label: label, max: 100),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(
+                  config: _formValue.config.copyWith(
+                      horizontalSpacing: double.parse(value!)));
+            },
+          );
+        case '垂直间距':
+          return FormTextInput(
+            label: label,
+            hint: '请输入垂直间距',
+            validators: [
+              Validators.required(label: label),
+              Validators.isDouble(label: label),
+              Validators.min(label: label, min: 0),
+              Validators.max(label: label, max: 100),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(
+                  config: _formValue.config.copyWith(
+                      verticalSpacing: double.parse(value!)));
+            },
+          );
+        case '区块宽度':
+          return FormTextInput(
+            label: label,
+            hint: '请输入区块宽度',
+            validators: [
+              Validators.required(label: label),
+              Validators.isDouble(label: label),
+              Validators.min(label: label, min: 0),
+              Validators.max(label: label, max: 100),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(
+                  config: _formValue.config.copyWith(
+                      blockWidth: double.parse(value!)));
+            },
+          );
+        case '区块高度':
+          return FormTextInput(
+            label: label,
+            hint: '请输入区块高度',
+            validators: [
+              Validators.required(label: label),
+              Validators.isDouble(label: label),
+              Validators.min(label: label, min: 0),
+              Validators.max(label: label, max: 100),
+            ],
+            onChanged: (value) {
+              _formValue = _formValue.copyWith(
+                  config: _formValue.config.copyWith(
+                      blockHeight: double.parse(value!)));
+            },
+          );
+        
+      }
+    })
+
     return SingleChildScrollView(
       child: Form(
         key: _formKey,

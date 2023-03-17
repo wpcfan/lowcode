@@ -29,43 +29,76 @@ class FormModel {
   }
 }
 
-enum FormItemDisplayMode { column, row }
-
 class FormItemModel {
   final Widget formField;
   final Widget? label;
-  final String? placeholder;
-  final FormItemDisplayMode displayMode;
 
   FormItemModel({
     required this.formField,
     this.label,
-    this.placeholder,
-    this.displayMode = FormItemDisplayMode.row,
   });
 
   Widget build() {
-    if (displayMode == FormItemDisplayMode.column) {
-      return [
-        if (label != null) label!,
-        formField,
-      ].toColumn();
-    } else {
-      return [
-        if (label != null) ...[
-          label!,
-          const SizedBox(width: 8),
-        ] else ...[
-          const SizedBox(width: 8),
-          Text(
-            placeholder ?? '',
-            style: const TextStyle(
-              color: Colors.grey,
-            ),
-          ).expanded(),
-        ],
-        formField.expanded(),
-      ].toRow();
-    }
+    return [
+      if (label != null) label!,
+      formField,
+    ].toColumn();
+  }
+}
+
+abstract class BaseFormFieldModel {
+  final String? label;
+  final String? hint;
+  final List<String? Function(String?)> validators;
+  final void Function(String?)? onChanged;
+
+  BaseFormFieldModel({
+    this.label,
+    this.hint,
+    this.validators = const [],
+    this.onChanged,
+  });
+
+  Widget build(BuildContext context);
+}
+
+class FormTextInput extends BaseFormFieldModel {
+  final IconData? icon;
+  final TextInputType? keyboardType;
+
+  FormTextInput({
+    String? label,
+    String? hint,
+    List<String? Function(String?)> validators = const [],
+    void Function(String?)? onChanged,
+    this.icon,
+    this.keyboardType = TextInputType.text,
+  }) : super(
+          label: label,
+          hint: hint,
+          validators: validators,
+          onChanged: onChanged,
+        );
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: icon != null ? Icon(icon) : null,
+        hintText: hint,
+      ),
+      keyboardType: keyboardType,
+      validator: (value) {
+        for (var validator in validators) {
+          var error = validator(value);
+          if (error != null) {
+            return error;
+          }
+        }
+        return null;
+      },
+      onChanged: onChanged,
+    );
   }
 }

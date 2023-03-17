@@ -58,7 +58,7 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
       Emitter<CanvasState> emit,
       int blockIndex,
       PageBlock<dynamic> newBlock) async {
-    if (state.selectedBlock!.type == PageBlockType.waterfall) {
+    if (state.selectedBlock?.type == PageBlockType.waterfall) {
       final waterfallBlock = state.selectedBlock!;
 
       /// 如果瀑布流布局有内容，获取瀑布流数据
@@ -224,9 +224,12 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     try {
       final layout =
           await blockRepo.moveBlock(event.pageId, event.blockId, event.sort);
-
       emit(state.copyWith(
         layout: layout,
+        selectedBlock: event.blockId == state.selectedBlock?.id
+            ? state.selectedBlock?.copyWith(sort: event.sort)
+            : layout.blocks
+                .firstWhere((element) => element.id == event.blockId),
         error: '',
         saving: false,
       ));

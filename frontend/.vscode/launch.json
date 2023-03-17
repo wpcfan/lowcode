@@ -1,0 +1,208 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "admin",
+            "cwd": "admin",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "admin (profile mode)",
+            "cwd": "admin",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "admin (release mode)",
+            "cwd": "admin",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "app",
+            "cwd": "app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "app (profile mode)",
+            "cwd": "app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "app (release mode)",
+            "cwd": "app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "canvas",
+            "cwd": "canvas",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "canvas (profile mode)",
+            "cwd": "canvas",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "canvas (release mode)",
+            "cwd": "canvas",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "common",
+            "cwd": "common",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "common (profile mode)",
+            "cwd": "common",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "common (release mode)",
+            "cwd": "common",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "files",
+            "cwd": "files",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "files (profile mode)",
+            "cwd": "files",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "files (release mode)",
+            "cwd": "files",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "models",
+            "cwd": "models",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "models (profile mode)",
+            "cwd": "models",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "models (release mode)",
+            "cwd": "models",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "networking",
+            "cwd": "networking",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "networking (profile mode)",
+            "cwd": "networking",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "networking (release mode)",
+            "cwd": "networking",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "page_block_widgets",
+            "cwd": "page_block_widgets",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "page_block_widgets (profile mode)",
+            "cwd": "page_block_widgets",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "page_block_widgets (release mode)",
+            "cwd": "page_block_widgets",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "page_repository",
+            "cwd": "page_repository",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "page_repository (profile mode)",
+            "cwd": "page_repository",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "page_repository (release mode)",
+            "cwd": "page_repository",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "pages",
+            "cwd": "pages",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "pages (profile mode)",
+            "cwd": "pages",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "pages (release mode)",
+            "cwd": "pages",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

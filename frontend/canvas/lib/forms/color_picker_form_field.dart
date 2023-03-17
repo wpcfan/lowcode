@@ -1,75 +1,90 @@
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 
-Color _selectedColor = Colors.white;
+class ColorPickerFormField extends StatefulWidget {
+  final Color initialColor;
+  final void Function(Color)? onChanged;
 
-FormField<Color> colorPickerFormField(BuildContext context) {
-  return FormField<Color>(
-    initialValue: _selectedColor,
-    builder: (FormFieldState<Color> state) {
-      return InkWell(
-        onTap: () async {
-          final Color color = await showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: const Text('Select a color'),
-                content: SingleChildScrollView(
-                  child: ColorPicker(
-                    color: state.value!,
-                    onColorChanged: (Color color) => state.didChange(color),
-                    pickersEnabled: const <ColorPickerType, bool>{
-                      ColorPickerType.accent: false,
-                      ColorPickerType.bw: false,
-                      ColorPickerType.wheel: true,
-                      ColorPickerType.primary: true,
-                    },
-                  ),
-                ),
-                actions: <Widget>[
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, _selectedColor),
-                    child: const Text('CANCEL'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, state.value),
-                    child: const Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
-          _selectedColor = color;
-          state.didChange(color);
-        },
-        child: InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'Color',
-            border: const OutlineInputBorder(),
-            errorText: state.hasError ? state.errorText : null,
-          ),
-          child: SizedBox(
-            height: 50,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: state.value,
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(
-                        color: state.value!,
-                        width: 2,
-                      ),
-                    ),
-                    margin: const EdgeInsets.symmetric(horizontal: 10),
-                  ),
-                ),
-              ],
+  const ColorPickerFormField({
+    super.key,
+    required this.initialColor,
+    this.onChanged,
+  });
+
+  @override
+  State<ColorPickerFormField> createState() => _ColorPickerFormFieldState();
+}
+
+class _ColorPickerFormFieldState extends State<ColorPickerFormField> {
+  late Color _selectedColor;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedColor = widget.initialColor;
+  }
+
+  void _openColorPicker() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Pick a color'),
+          content: SingleChildScrollView(
+            child: ColorPicker(
+              color: _selectedColor,
+              onColorChanged: (Color color) {
+                setState(() => _selectedColor = color);
+                widget.onChanged?.call(color);
+              },
+              pickersEnabled: const <ColorPickerType, bool>{
+                ColorPickerType.both: false,
+                ColorPickerType.primary: true,
+                ColorPickerType.accent: true,
+                ColorPickerType.bw: true,
+                ColorPickerType.custom: true,
+                ColorPickerType.wheel: true,
+              },
+              enableShadesSelection: false,
+              enableOpacity: false,
+              showColorCode: true,
+              colorCodeHasColor: true,
             ),
           ),
-        ),
-      );
-    },
-  );
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Got it'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _openColorPicker,
+      child: Row(
+        children: [
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: _selectedColor,
+              border: Border.all(width: 1, color: Colors.black),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            '#${_selectedColor.value.toRadixString(16).toUpperCase()}',
+            style: const TextStyle(fontSize: 18),
+          ),
+        ],
+      ),
+    );
+  }
 }

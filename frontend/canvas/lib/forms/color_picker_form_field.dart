@@ -30,6 +30,9 @@ class ColorPickerFormField extends FormField<Color> {
             return ValueListenableBuilder(
               valueListenable: colorNotifier,
               builder: (BuildContext context, Color value, Widget? child) {
+                // 这里我们需要手动设置表单字段的值，否则表单字段的值不会变化。
+                // ignore: invalid_use_of_protected_member
+                state.setValue(value);
                 final item = [
                   Text(label),
                   const SizedBox(width: 8),
@@ -37,7 +40,7 @@ class ColorPickerFormField extends FormField<Color> {
                     width: 50,
                     height: 50,
                   ).decorated(
-                    color: value,
+                    color: state.value,
                     border: Border.all(
                       color: state.hasError ? Colors.red : Colors.grey,
                       width: 1,
@@ -50,17 +53,71 @@ class ColorPickerFormField extends FormField<Color> {
                       return AlertDialog(
                         content: ColorPicker(
                           color: state.value!,
+                          enableOpacity: true,
+                          pickersEnabled: const {
+                            ColorPickerType.primary: true,
+                            ColorPickerType.accent: true,
+                            ColorPickerType.bw: false,
+                            ColorPickerType.custom: false,
+                            ColorPickerType.wheel: true,
+                          },
+                          pickerTypeLabels: const {
+                            ColorPickerType.primary: '主色',
+                            ColorPickerType.accent: '强调色',
+                            ColorPickerType.bw: '黑白',
+                            ColorPickerType.custom: '自定义',
+                            ColorPickerType.wheel: '色轮',
+                          },
+                          pickerTypeTextStyle:
+                              Theme.of(context).textTheme.titleSmall,
+                          width: 40,
+                          height: 40,
+                          borderRadius: 4,
+                          spacing: 5,
+                          runSpacing: 5,
+                          wheelDiameter: 155,
+                          heading: Text(
+                            '选择颜色',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          subheading: Text(
+                            '选择颜色的亮度',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          wheelSubheading: Text(
+                            '选择颜色的饱和度',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          showMaterialName: true,
+                          showColorName: true,
+                          showColorCode: true,
+                          copyPasteBehavior: const ColorPickerCopyPasteBehavior(
+                            editFieldCopyButton: true,
+                          ),
                           onColorChanged: (Color color) {
-                            Navigator.of(context).pop(color);
+                            _changeColor(state, color, colorNotifier);
                           },
                         ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop<Color?>(null);
+                            },
+                            child: const Text('取消'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop<Color?>(state.value);
+                            },
+                            child: const Text('确定'),
+                          ),
+                        ],
                       );
                     },
                   );
 
                   if (newColor != null) {
-                    state.didChange(newColor);
-                    colorNotifier.value = newColor;
+                    _changeColor(state, newColor, colorNotifier);
                   }
                 });
                 return item;
@@ -68,4 +125,10 @@ class ColorPickerFormField extends FormField<Color> {
             );
           },
         );
+
+  static void _changeColor(FormFieldState<Color> state, Color color,
+      ValueNotifier<Color> colorNotifier) {
+    state.didChange(color);
+    colorNotifier.value = color;
+  }
 }

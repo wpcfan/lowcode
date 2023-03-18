@@ -36,9 +36,14 @@ class ImageRowWidget extends StatelessWidget {
     final itemHeight = blockHeight - verticalPadding * 2;
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
-        .constrained(maxWidth: blockWidth, maxHeight: blockHeight)
-        .border(all: borderWidth, color: borderColor)
-        .backgroundColor(backgroundColor);
+        .decorated(
+          color: backgroundColor,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
+        )
+        .constrained(maxWidth: blockWidth, maxHeight: blockHeight);
     switch (items.length) {
       case 0: // Empty
         return page(child: const Placeholder());
@@ -56,41 +61,40 @@ class ImageRowWidget extends StatelessWidget {
   Widget _buildSingleImage(
       BuildContext context, double blockWidth, double blockHeight) {
     final item = items.first;
-    return SizedBox(
-      width: blockWidth,
-      height: blockHeight,
-      child: ImageWidget(
-        imageUrl: item.image,
-        errorImage: errorImage,
-        link: item.link,
-        onTap: onTap,
-      ),
+    return ImageWidget(
+      imageUrl: item.image,
+      errorImage: errorImage,
+      link: item.link,
+      onTap: onTap,
+    ).constrained(
+      maxWidth: blockWidth,
+      maxHeight: blockHeight,
     );
   }
 
   Widget _buildImages(BuildContext context, double width) {
     final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      mainAxisSize: MainAxisSize.max,
-      children: items
-          .mapWithIndex(
-            (item, index) => Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: index == items.length - 1 ? 0 : spaceBetweenItems,
-                ),
-                child: ImageWidget(
-                  imageUrl: item.image,
-                  errorImage: errorImage,
-                  link: item.link,
-                  onTap: onTap,
-                ),
+    return items
+        .mapWithIndex(
+          (item, index) => Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(
+                right: index == items.length - 1 ? 0 : spaceBetweenItems,
+              ),
+              child: ImageWidget(
+                imageUrl: item.image,
+                errorImage: errorImage,
+                link: item.link,
+                onTap: onTap,
               ),
             ),
-          )
-          .toList(),
-    );
+          ),
+        )
+        .toList()
+        .toRow(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+        );
   }
 
   Widget _buildScrollableImages(

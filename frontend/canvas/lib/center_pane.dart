@@ -60,6 +60,9 @@ class _CenterPaneState extends State<CenterPane> {
       width: paneWidth,
       child: Container(
         color: Colors.grey,
+        padding: EdgeInsets.symmetric(
+            horizontal: state.layout?.config.horizontalPadding ?? 0.0,
+            vertical: state.layout?.config.verticalPadding ?? 0.0),
         child: GestureDetector(
           onTap: widget.onTap,
           child: DragTarget(

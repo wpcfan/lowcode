@@ -53,7 +53,6 @@ class ImageWidget extends StatelessWidget {
       },
     )
         .constrained(width: width, height: height)
-        .center()
         .inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
   }
 }

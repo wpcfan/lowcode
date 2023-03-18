@@ -96,7 +96,6 @@ class HomeView extends StatelessWidget {
       case LinkType.route:
         Navigator.of(context).pushNamed(link.value);
         break;
-      case LinkType.deepLink:
       case LinkType.url:
         launchUrl(
           Uri.parse(link.value),

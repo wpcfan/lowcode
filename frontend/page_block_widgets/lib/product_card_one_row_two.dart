@@ -27,27 +27,17 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    page({required Widget child}) => itemHeight == null
-        ? SwiftUi.widget(child: child)
-            .decorated(
-              color: backgroundColor,
-              border: Border.all(
-                color: borderColor,
-                width: borderWidth,
-                strokeAlign: BorderSide.strokeAlignOutside,
-              ),
-            )
-            .constrained(maxWidth: itemWidth)
-        : SwiftUi.widget(child: child)
-            .decorated(
-              color: backgroundColor,
-              border: Border.all(
-                color: borderColor,
-                width: borderWidth,
-                strokeAlign: BorderSide.strokeAlignOutside,
-              ),
-            )
-            .constrained(maxWidth: itemWidth, maxHeight: itemHeight!);
+    page({required Widget child}) => SwiftUi.widget(child: child)
+        .padding(all: 6)
+        .decorated(
+          color: backgroundColor,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+            strokeAlign: BorderSide.strokeAlignOutside,
+          ),
+        )
+        .constrained(maxWidth: itemWidth);
     // 商品名称
     final productName = Text(
       product.name ?? '',
@@ -130,7 +120,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     );
     final nameDescAndPrice = [imageNameAndDesc, priceRow].toColumn(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: itemHeight == null ? MainAxisSize.min : MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start);
 
     return nameDescAndPrice.parent(page).gestures(onTap: () {

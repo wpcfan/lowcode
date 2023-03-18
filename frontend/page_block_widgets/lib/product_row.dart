@@ -49,6 +49,13 @@ class ProductRowWidget extends StatelessWidget {
     /// 这样我们可以专注于 Widget 的内容，而不用关心 Widget 的样式
     page({required Widget child}) => SwiftUi.widget(child: child)
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
+        .decorated(
+          color: backgroundColor,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
+        )
         .constrained(maxWidth: width, maxHeight: height);
 
     switch (items.length) {
@@ -81,9 +88,9 @@ class ProductRowWidget extends StatelessWidget {
                 errorImage: errorImage,
                 onTap: onTap,
                 addToCart: addToCart,
-                backgroundColor: backgroundColor,
-                borderColor: borderColor,
-                borderWidth: borderWidth,
+                backgroundColor: Colors.white,
+                borderColor: Colors.grey,
+                borderWidth: 1,
               ).padding(
                   right: index == items.length - 1 ? 0 : horizontalSpacing);
             }).parent(page);

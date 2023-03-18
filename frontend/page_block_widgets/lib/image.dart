@@ -30,8 +30,6 @@ class ImageWidget extends StatelessWidget {
     return Image.network(
       imageUrl,
       fit: fit,
-      height: height,
-      width: width,
       alignment: alignment,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
@@ -53,6 +51,9 @@ class ImageWidget extends StatelessWidget {
           color: Colors.red,
         );
       },
-    ).inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
+    )
+        .constrained(width: width, height: height)
+        .center()
+        .inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
   }
 }

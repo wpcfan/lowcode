@@ -67,24 +67,6 @@ class ProductRowWidget extends StatelessWidget {
           borderColor: borderColor,
           borderWidth: borderWidth,
         ).parent(page);
-      // case 2:
-      //   return items
-      //       .map((product) => ProductCardOneRowTwoWidget(
-      //             product: product,
-      //             itemWidth: (width - horizontalSpacing) / 2,
-      //             itemHeight: height - 2 * verticalPadding,
-      //             verticalSpacing: verticalSpacing,
-      //             errorImage: errorImage,
-      //             onTap: onTap,
-      //             addToCart: addToCart,
-      //           ))
-      //       .toList()
-      //       .toRow(
-      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //         mainAxisSize: MainAxisSize.max,
-      //         crossAxisAlignment: CrossAxisAlignment.start,
-      //       )
-      //       .parent(page);
       default:
         return ListView.builder(
             scrollDirection: Axis.horizontal,

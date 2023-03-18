@@ -30,9 +30,15 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     page({required Widget child}) => SwiftUi.widget(child: child)
-        .constrained(maxWidth: width, maxHeight: height)
-        .backgroundColor(backgroundColor)
-        .border(all: borderWidth, color: borderColor);
+        .decorated(
+          color: backgroundColor,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+            strokeAlign: BorderSide.strokeAlignOutside,
+          ),
+        )
+        .constrained(maxWidth: width, maxHeight: height);
     // 商品名称
     final productName = Text(
       product.name ?? '',
@@ -120,8 +126,8 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     // 商品图片
     final productImage = ImageWidget(
       imageUrl: product.images.first,
-      width: height,
-      height: height,
+      width: height - 2 * borderWidth,
+      height: height - 2 * borderWidth,
       errorImage: errorImage,
       onTap: onTap != null ? (link) => onTap!(product) : null,
     ).padding(right: horizontalSpacing);

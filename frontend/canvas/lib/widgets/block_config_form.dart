@@ -211,8 +211,12 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
         },
       ),
       ColorPickerFormField(
-        initialColor: _formValue.config.backgroundColor ?? Colors.white,
-        onChanged: (value) {
+        label: '背景颜色',
+        colorNotifier: ValueNotifier(
+            widget.state.selectedBlock!.config.backgroundColor ??
+                Colors.transparent),
+        validator: (value) => null,
+        onSaved: (value) {
           setState(() {
             _formValue = _formValue.copyWith(
                 config: _formValue.config.copyWith(backgroundColor: value));
@@ -220,8 +224,12 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
         },
       ),
       ColorPickerFormField(
-        initialColor: _formValue.config.borderColor ?? Colors.white,
-        onChanged: (value) {
+        label: '边框颜色',
+        colorNotifier: ValueNotifier(
+            widget.state.selectedBlock!.config.borderColor ??
+                Colors.transparent),
+        validator: (value) => null,
+        onSaved: (value) {
           setState(() {
             _formValue = _formValue.copyWith(
                 config: _formValue.config.copyWith(borderColor: value));

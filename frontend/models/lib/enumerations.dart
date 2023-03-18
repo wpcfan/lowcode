@@ -62,7 +62,6 @@ enum PageBlockType {
 enum LinkType {
   url('url'),
   route('route'),
-  deepLink('deep_link'),
   ;
 
   final String value;

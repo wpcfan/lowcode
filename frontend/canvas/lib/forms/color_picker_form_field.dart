@@ -1,90 +1,71 @@
+import 'package:common/common.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 
-class ColorPickerFormField extends StatefulWidget {
-  final Color initialColor;
-  final void Function(Color)? onChanged;
+/// 自定义表单字段，用于选择颜色
+/// Flutter 中的表单字段是一个抽象类，它的子类必须实现 [FormField] 类。
+/// 我们在这里实现了一个自定义的表单字段，用于选择颜色。
+/// 该表单字段的初始值是一个 [Color] 对象，它的值是用户选择的颜色。
+/// 该表单字段的验证器是一个 [FormFieldValidator<Color>] 函数，它的参数是用户选择的颜色。
+/// 该表单字段的保存器是一个 [FormFieldSetter<Color>] 函数，它的参数是用户选择的颜色。
+/// 该表单字段的构建器是一个 [FormFieldBuilder<Color>] 函数，它的参数是一个 [FormFieldState<Color>] 对象。
+class ColorPickerFormField extends FormField<Color> {
+  final String label;
 
-  const ColorPickerFormField({
+  /// Stateful widgets 的初始值变化时是不会重绘的，所以我们需要一个 [ValueNotifier] 来通知表单字段重绘。
+  /// 这里我们使用了一个 [ValueNotifier]，它的值是用户选择的颜色或初始值。
+  /// 值变化后，我们通过 [ValueListenableBuilder] 来重绘表单字段。
+  final ValueNotifier<Color> colorNotifier;
+  ColorPickerFormField({
     super.key,
-    required this.initialColor,
-    this.onChanged,
-  });
+    required this.label,
+    required this.colorNotifier,
+    required FormFieldSetter<Color> onSaved,
+    required FormFieldValidator<Color> validator,
+  }) : super(
+          initialValue: colorNotifier.value,
+          onSaved: onSaved,
+          validator: validator,
+          builder: (FormFieldState<Color> state) {
+            return ValueListenableBuilder(
+              valueListenable: colorNotifier,
+              builder: (BuildContext context, Color value, Widget? child) {
+                final item = [
+                  Text(label),
+                  const SizedBox(width: 8),
+                  const SizedBox(
+                    width: 50,
+                    height: 50,
+                  ).decorated(
+                    color: value,
+                    border: Border.all(
+                      color: state.hasError ? Colors.red : Colors.grey,
+                      width: 1,
+                    ),
+                  ),
+                ].toRow().gestures(onTap: () async {
+                  Color? newColor = await showDialog<Color>(
+                    context: state.context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        content: ColorPicker(
+                          color: state.value!,
+                          onColorChanged: (Color color) {
+                            Navigator.of(context).pop(color);
+                          },
+                        ),
+                      );
+                    },
+                  );
 
-  @override
-  State<ColorPickerFormField> createState() => _ColorPickerFormFieldState();
-}
-
-class _ColorPickerFormFieldState extends State<ColorPickerFormField> {
-  late Color _selectedColor;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedColor = widget.initialColor;
-  }
-
-  void _openColorPicker() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Pick a color'),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              color: _selectedColor,
-              onColorChanged: (Color color) {
-                setState(() => _selectedColor = color);
-                widget.onChanged?.call(color);
+                  if (newColor != null) {
+                    state.didChange(newColor);
+                    colorNotifier.value = newColor;
+                  }
+                });
+                return item;
               },
-              pickersEnabled: const <ColorPickerType, bool>{
-                ColorPickerType.both: false,
-                ColorPickerType.primary: true,
-                ColorPickerType.accent: true,
-                ColorPickerType.bw: true,
-                ColorPickerType.custom: true,
-                ColorPickerType.wheel: true,
-              },
-              enableShadesSelection: false,
-              enableOpacity: false,
-              showColorCode: true,
-              colorCodeHasColor: true,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Got it'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+            );
+          },
         );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _openColorPicker,
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: _selectedColor,
-              border: Border.all(width: 1, color: Colors.black),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Text(
-            '#${_selectedColor.value.toRadixString(16).toUpperCase()}',
-            style: const TextStyle(fontSize: 18),
-          ),
-        ],
-      ),
-    );
-  }
 }

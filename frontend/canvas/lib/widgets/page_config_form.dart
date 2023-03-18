@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
 import '../blocs/canvas_state.dart';
+import '../forms/my_text_form_field.dart';
+import '../forms/validators.dart';
 
 class PageConfigForm extends StatefulWidget {
   const PageConfigForm({super.key, required this.state, this.onSave});
@@ -13,144 +15,17 @@ class PageConfigForm extends StatefulWidget {
 
 class _PageConfigFormState extends State<PageConfigForm> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _horizontalPaddingController = TextEditingController();
-  final _verticalPaddingController = TextEditingController();
-  final _baselineScreenWidthController = TextEditingController();
   late PageLayout? _formValue;
 
   @override
   Widget build(BuildContext context) {
     _formValue = widget.state.layout;
-    _titleController.text = _formValue?.title ?? '';
-    _horizontalPaddingController.text =
-        '${_formValue?.config.horizontalPadding ?? 0}';
-    _verticalPaddingController.text =
-        '${_formValue?.config.verticalPadding ?? 0}';
-    _baselineScreenWidthController.text =
-        '${_formValue?.config.baselineScreenWidth ?? 0}';
     return Form(
       key: _formKey,
       child: Column(
         children: [
           const Text('页面属性'),
-          TextFormField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: '页面标题',
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '标题不能为空';
-              }
-              if (value.length > 100) {
-                return '标题不能超过100个字符';
-              }
-              if (value.length < 2) {
-                return '标题不能少于2个字符';
-              }
-              return null;
-            },
-            onSaved: (value) {
-              _formValue = _formValue?.copyWith(title: value!);
-            },
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          TextFormField(
-            /// 需要注意，如果设置 initialValue，那么这个 widget 在切换的时候不会更新
-            /// 因为在 widget 树中，这个 widget 的位置没有变化，所以不会重新 build
-            /// 所以需要使用 controller 来控制
-            controller: _horizontalPaddingController,
-            decoration: const InputDecoration(
-              labelText: '水平内边距',
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '水平内边距不能为空';
-              }
-              if (double.tryParse(value) == null) {
-                return '水平内边距必须是数字';
-              }
-              if (double.parse(value) < 0) {
-                return '水平内边距不能小于0';
-              }
-              if (double.parse(value) > 100) {
-                return '水平内边距不能大于100';
-              }
-              return null;
-            },
-            onSaved: (newValue) {
-              setState(() {
-                _formValue = _formValue?.copyWith(
-                    config: _formValue?.config
-                        .copyWith(horizontalPadding: double.parse(newValue!)));
-              });
-            },
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          TextFormField(
-            controller: _verticalPaddingController,
-            decoration: const InputDecoration(
-              labelText: '垂直内边距',
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '垂直内边距不能为空';
-              }
-              if (double.tryParse(value) == null) {
-                return '垂直内边距必须是数字';
-              }
-              if (double.parse(value) < 0) {
-                return '垂直内边距不能小于0';
-              }
-              if (double.parse(value) > 100) {
-                return '垂直内边距不能大于100';
-              }
-              return null;
-            },
-            onSaved: (newValue) {
-              setState(() {
-                _formValue = _formValue?.copyWith(
-                    config: _formValue?.config
-                        .copyWith(verticalPadding: double.parse(newValue!)));
-              });
-            },
-          ),
-          const SizedBox(
-            height: 16,
-          ),
-          TextFormField(
-            controller: _baselineScreenWidthController,
-            decoration: const InputDecoration(
-              labelText: '基准屏幕宽度',
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '基准屏幕宽度不能为空';
-              }
-              if (double.tryParse(value) == null) {
-                return '基准屏幕宽度必须是数字';
-              }
-              if (double.parse(value) < 0) {
-                return '基准屏幕宽度不能小于0';
-              }
-              if (double.parse(value) > 1000) {
-                return '基准屏幕宽度不能大于1000';
-              }
-              return null;
-            },
-            onSaved: (newValue) {
-              setState(() {
-                _formValue = _formValue?.copyWith(
-                    config: _formValue?.config.copyWith(
-                        baselineScreenWidth: double.parse(newValue!)));
-              });
-            },
-          ),
+          ..._createFormItems(),
           const SizedBox(
             height: 16,
           ),
@@ -166,5 +41,79 @@ class _PageConfigFormState extends State<PageConfigForm> {
         ],
       ),
     );
+  }
+
+  List<Widget> _createFormItems() {
+    return [
+      MyTextFormField(
+        label: '标题',
+        hint: '请输入标题',
+        validators: [
+          Validators.required(label: '标题'),
+          Validators.maxLength(label: '标题', maxLength: 100),
+          Validators.minLength(label: '标题', minLength: 2),
+        ],
+        initialValue: _formValue?.title,
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(title: value);
+          });
+        },
+      ),
+      MyTextFormField(
+        label: '水平内边距',
+        hint: '请输入水平内边距',
+        validators: [
+          Validators.required(label: '水平内边距'),
+          Validators.isInteger(label: '水平内边距'),
+          Validators.min(label: '水平内边距', min: 0),
+          Validators.max(label: '水平内边距', max: 1000),
+        ],
+        initialValue: _formValue?.config.horizontalPadding.toString(),
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(
+                config: _formValue?.config
+                    .copyWith(horizontalPadding: double.parse(value ?? '0')));
+          });
+        },
+      ),
+      MyTextFormField(
+        label: '垂直内边距',
+        hint: '请输入垂直内边距',
+        validators: [
+          Validators.required(label: '垂直内边距'),
+          Validators.isInteger(label: '垂直内边距'),
+          Validators.min(label: '垂直内边距', min: 0),
+          Validators.max(label: '垂直内边距', max: 1000),
+        ],
+        initialValue: _formValue?.config.verticalPadding.toString(),
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(
+                config: _formValue?.config
+                    .copyWith(verticalPadding: double.parse(value ?? '0')));
+          });
+        },
+      ),
+      MyTextFormField(
+        label: '基准屏幕宽度',
+        hint: '请输入基准屏幕宽度',
+        validators: [
+          Validators.required(label: '基准屏幕宽度'),
+          Validators.isInteger(label: '基准屏幕宽度'),
+          Validators.min(label: '基准屏幕宽度', min: 0),
+          Validators.max(label: '基准屏幕宽度', max: 1000),
+        ],
+        initialValue: _formValue?.config.baselineScreenWidth.toString(),
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(
+                config: _formValue?.config
+                    .copyWith(baselineScreenWidth: double.parse(value ?? '0')));
+          });
+        },
+      ),
+    ];
   }
 }

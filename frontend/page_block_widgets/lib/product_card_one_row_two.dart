@@ -29,13 +29,25 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     page({required Widget child}) => itemHeight == null
         ? SwiftUi.widget(child: child)
+            .decorated(
+              color: backgroundColor,
+              border: Border.all(
+                color: borderColor,
+                width: borderWidth,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+            )
             .constrained(maxWidth: itemWidth)
-            .backgroundColor(backgroundColor)
-            .border(all: borderWidth, color: borderColor)
         : SwiftUi.widget(child: child)
-            .constrained(maxWidth: itemWidth, maxHeight: itemHeight!)
-            .backgroundColor(backgroundColor)
-            .border(all: borderWidth, color: borderColor);
+            .decorated(
+              color: backgroundColor,
+              border: Border.all(
+                color: borderColor,
+                width: borderWidth,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              ),
+            )
+            .constrained(maxWidth: itemWidth, maxHeight: itemHeight!);
     // 商品名称
     final productName = Text(
       product.name ?? '',
@@ -84,8 +96,8 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     // 商品图片
     final productImage = ImageWidget(
       imageUrl: product.images.first,
-      width: itemWidth,
-      height: itemWidth,
+      width: itemWidth - 2 * borderWidth,
+      height: itemWidth - 2 * borderWidth,
       errorImage: errorImage,
       onTap: onTap != null ? (link) => onTap!(product) : null,
     ).padding(

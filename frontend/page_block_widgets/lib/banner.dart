@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
@@ -82,70 +83,57 @@ class _BannerWidgetState extends State<BannerWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final borderWidth = widget.config.borderWidth ?? 0;
+    final borderColor = widget.config.borderColor ?? Colors.transparent;
+    final backgroundColor = widget.config.backgroundColor ?? Colors.transparent;
     final blockWidth = (widget.config.blockWidth ?? 0) / widget.ratio;
     final blockHeight = (widget.config.blockHeight ?? 0) / widget.ratio;
     final horizontalPadding =
         (widget.config.horizontalPadding ?? 0) / widget.ratio;
     final verticalPadding = (widget.config.verticalPadding ?? 0) / widget.ratio;
-    return Container(
-      width: blockWidth,
-      height: blockHeight,
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: verticalPadding,
-      ),
-      child: Stack(
-        children: [
-          SizedBox(
-            height: blockHeight - verticalPadding * 2,
-            child: widget.items.isEmpty
-                ? const Placeholder()
-                : PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentPage = index % widget.items.length;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      int idx = index % widget.items.length;
-                      return ImageWidget(
-                        imageUrl: widget.items[idx].image,
-                        errorImage: widget.errorImage,
-                        link: widget.items[idx].link,
-                        onTap: (link) => widget.onTap?.call(link),
-                      );
-                    },
-                  ),
-          ),
-          Container(
-            alignment: Alignment.bottomCenter,
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                widget.items.length,
-                (index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                  child: InkWell(
-                    onTap: () => _nextPage(index),
-                    child: Container(
-                      width: 8.0,
-                      height: 8.0,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _currentPage == index
-                            ? Colors.white
-                            : Colors.grey[500],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    final pagedItem = widget.items.isEmpty
+        ? const Placeholder()
+        : PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index % widget.items.length;
+              });
+            },
+            itemBuilder: (context, index) {
+              int idx = index % widget.items.length;
+              return ImageWidget(
+                imageUrl: widget.items[idx].image,
+                errorImage: widget.errorImage,
+                width: blockWidth,
+                height: blockHeight,
+                link: widget.items[idx].link,
+                onTap: (link) => widget.onTap?.call(link),
+              );
+            },
+          );
+    final indicators = List.generate(
+      widget.items.length,
+      (index) => const SizedBox(width: 8.0, height: 8.0)
+          .decorated(
+            shape: BoxShape.circle,
+            color: _currentPage == index ? Colors.white : Colors.grey[500],
+          )
+          .inkWell(onTap: () => _nextPage(index))
+          .padding(horizontal: 4.0),
+    )
+        .toRow(mainAxisAlignment: MainAxisAlignment.center)
+        .padding(bottom: 8.0)
+        .alignment(Alignment.bottomCenter);
+    return [
+      pagedItem.constrained(width: blockWidth, height: blockHeight),
+      indicators,
+    ]
+        .toStack()
+        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
+        .decorated(
+            border: Border.all(width: borderWidth, color: borderColor),
+            color: backgroundColor)
+        .constrained(width: blockWidth, height: blockHeight);
   }
 }

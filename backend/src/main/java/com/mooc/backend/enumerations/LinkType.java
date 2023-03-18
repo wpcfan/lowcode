@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum LinkType {
     Url("url"),
-    DeepLink("deep_link");
+    Route("route");
 
     private final String value;
 

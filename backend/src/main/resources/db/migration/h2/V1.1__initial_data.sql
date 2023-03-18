@@ -73,7 +73,7 @@ values ('Test Prep 20', 'Learn how to use data to make better decisions', 200);
 insert into mooc_products (`name`, `description`, `price`)
 values ('None 21', 'Learn how to use data to make better decisions', 210);
 insert into mooc_products (`name`, `description`, `price`)
-values ('None 22', 'Learn how to use data to make better decisions', 220);
+values ('None 22 very long name that needs to be wrapped in the next line', 'Learn how to use data to make better decisions', 220);
 insert into mooc_products (`name`, `description`, `price`)
 values ('None 23', 'Learn how to use data to make better decisions', 230);
 insert into mooc_products (`name`, `description`, `price`)

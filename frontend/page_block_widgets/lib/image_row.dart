@@ -63,7 +63,7 @@ class ImageRowWidget extends StatelessWidget {
         return _buildSingleImage(context, itemWidth, itemHeight).parent(page);
       case 2:
       case 3:
-        return _buildImages(context, itemWidth).parent(page);
+        return _buildImages(context, itemWidth, itemHeight).parent(page);
       default:
         return _buildScrollableImages(context, itemWidth, itemHeight)
             .parent(page);
@@ -78,13 +78,15 @@ class ImageRowWidget extends StatelessWidget {
       errorImage: errorImage,
       link: item.link,
       onTap: onTap,
+      width: blockWidth,
+      height: blockHeight,
     ).constrained(
       maxWidth: blockWidth,
       maxHeight: blockHeight,
     );
   }
 
-  Widget _buildImages(BuildContext context, double width) {
+  Widget _buildImages(BuildContext context, double width, double itemHeight) {
     final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
     return items
         .mapWithIndex(
@@ -96,6 +98,8 @@ class ImageRowWidget extends StatelessWidget {
               child: ImageWidget(
                 imageUrl: item.image,
                 errorImage: errorImage,
+                width: width / items.length,
+                height: itemHeight,
                 link: item.link,
                 onTap: onTap,
               ),

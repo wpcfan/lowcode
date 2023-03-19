@@ -29,16 +29,8 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    page({required Widget child}) => child
-        .decorated(
-          color: backgroundColor,
-          border: Border.all(
-            color: borderColor,
-            width: borderWidth,
-            strokeAlign: BorderSide.strokeAlignOutside,
-          ),
-        )
-        .constrained(maxWidth: width, maxHeight: height);
+    page({required Widget child}) =>
+        child.constrained(maxWidth: width, maxHeight: height);
     // 商品名称
     final productName = Text(
       product.name ?? '',

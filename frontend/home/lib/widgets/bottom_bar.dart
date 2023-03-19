@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../blocs/home_bloc.dart';
-import '../blocs/home_state.dart';
+import '../blocs/blocs.dart';
 
 /// 底部导航栏
 class MyBottomBar extends StatelessWidget {

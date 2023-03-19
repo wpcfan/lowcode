@@ -6,19 +6,9 @@ import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../blocs/home_bloc.dart';
-import '../blocs/home_event.dart';
-import '../widgets/bottom_bar.dart';
-import '../widgets/left_drawer.dart';
-import '../widgets/load_more.dart';
-import '../widgets/product_dialog.dart';
-import '../widgets/right_drawer.dart';
-import '../widgets/sliver_app_bar.dart';
-import '../widgets/sliver_body.dart';
-
-export 'blocs/home_bloc.dart';
-export 'blocs/home_event.dart';
-export 'blocs/home_state.dart';
+import 'blocs/blocs.dart';
+import 'popups/popups.dart';
+import 'widgets/widgets.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});

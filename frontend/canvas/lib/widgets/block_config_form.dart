@@ -2,20 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:forms/forms.dart';
 import 'package:models/models.dart';
 
-import '../blocs/blocs.dart';
-
 /// 用于区块配置的表单
 /// [onSave] 保存回调
 /// [onDelete] 删除回调
-/// [state] 画布状态
+/// [block] 区块
 class BlockConfigForm extends StatefulWidget {
   const BlockConfigForm({
     super.key,
-    required this.state,
+    required this.block,
     this.onSave,
     this.onDelete,
   });
-  final CanvasState state;
+  final PageBlock block;
   final void Function(PageBlock)? onSave;
   final void Function(int)? onDelete;
 
@@ -34,7 +32,7 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
   Widget build(BuildContext context) {
     /// 初始化表单值
     setState(() {
-      _formValue = widget.state.selectedBlock!;
+      _formValue = widget.block;
     });
 
     return SingleChildScrollView(
@@ -225,8 +223,7 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
       ColorPickerFormField(
         label: '背景颜色',
         colorNotifier: ValueNotifier(
-            widget.state.selectedBlock!.config.backgroundColor ??
-                Colors.transparent),
+            widget.block.config.backgroundColor ?? Colors.transparent),
         validator: (value) => null,
         onSaved: (value) {
           setState(() {
@@ -238,8 +235,7 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
       ColorPickerFormField(
         label: '边框颜色',
         colorNotifier: ValueNotifier(
-            widget.state.selectedBlock!.config.borderColor ??
-                Colors.transparent),
+            widget.block.config.borderColor ?? Colors.transparent),
         validator: (value) => null,
         onSaved: (value) {
           setState(() {

@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:forms/forms.dart';
 import 'package:models/models.dart';
 
-import '../blocs/canvas_state.dart';
-
 /// 页面配置表单组件
-/// [state] 画布状态
+/// [layout] 画布布局
 /// [onSave] 保存回调
 class PageConfigForm extends StatefulWidget {
-  const PageConfigForm({super.key, required this.state, this.onSave});
-  final CanvasState state;
+  const PageConfigForm({super.key, required this.layout, this.onSave});
+  final PageLayout layout;
   final void Function(PageLayout)? onSave;
   @override
   State<PageConfigForm> createState() => _PageConfigFormState();
@@ -22,7 +20,7 @@ class _PageConfigFormState extends State<PageConfigForm> {
   @override
   Widget build(BuildContext context) {
     /// 初始化表单值
-    _formValue = widget.state.layout;
+    _formValue = widget.layout;
     return Form(
       key: _formKey,
       child: Column(

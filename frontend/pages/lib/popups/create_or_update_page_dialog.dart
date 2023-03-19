@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
-import '../blocs/blocs.dart';
-
 class CreateOrUpdatePageDialog extends StatefulWidget {
   const CreateOrUpdatePageDialog({
     super.key,
-    required this.bloc,
     required this.title,
     this.layout,
     this.onUpdate,
     this.onCreate,
   });
   final PageLayout? layout;
-  final PageBloc bloc;
   final void Function(PageLayout layout)? onUpdate;
   final void Function(PageLayout layout)? onCreate;
   final String title;

@@ -94,7 +94,6 @@ class PageTableView extends StatelessWidget {
                         builder: (context) {
                           return CreateOrUpdatePageDialog(
                             title: '创建页面',
-                            bloc: bloc,
                             onCreate: (layout) =>
                                 bloc.add(PageEventCreate(layout)),
                           );
@@ -106,7 +105,6 @@ class PageTableView extends StatelessWidget {
                         builder: (context) {
                           return CreateOrUpdatePageDialog(
                             title: '更新页面',
-                            bloc: bloc,
                             layout: layout,
                             onUpdate: (layout) =>
                                 bloc.add(PageEventUpdate(layout.id!, layout)),

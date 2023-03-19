@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:repositories/repositories.dart';
 
@@ -15,10 +14,12 @@ class ProductDataForm extends StatefulWidget {
     this.onAdd,
     this.onRemove,
     required this.data,
+    required this.productRepository,
   });
   final void Function(Product)? onRemove;
   final void Function(Product)? onAdd;
   final List<BlockData<Product>> data;
+  final ProductRepository productRepository;
 
   @override
   State<ProductDataForm> createState() => _ProductDataFormState();
@@ -108,8 +109,7 @@ class _ProductDataFormState extends State<ProductDataForm> {
   /// 从服务器获取匹配的商品列表
   /// [text] 搜索关键字
   Future<List<Product>> _searchProducts(String text) async {
-    final client = context.read<ProductRepository>();
-    final res = await client.searchByKeyword(text);
+    final res = await widget.productRepository.searchByKeyword(text);
     return res;
   }
 }

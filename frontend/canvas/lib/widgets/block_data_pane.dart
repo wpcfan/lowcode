@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
 
 import 'category_data_form.dart';
 import 'image_data_form.dart';
@@ -18,6 +19,7 @@ class BlockDataPane extends StatelessWidget {
   const BlockDataPane({
     super.key,
     required this.block,
+    required this.productRepository,
     required this.onCategoryAdded,
     required this.onCategoryUpdated,
     required this.onCategoryRemoved,
@@ -27,6 +29,7 @@ class BlockDataPane extends StatelessWidget {
     required this.onImageRemoved,
   });
   final PageBlock block;
+  final ProductRepository productRepository;
   final void Function(Category) onCategoryAdded;
   final void Function(Category) onCategoryUpdated;
   final void Function(Category) onCategoryRemoved;
@@ -54,6 +57,7 @@ class BlockDataPane extends StatelessWidget {
       case PageBlockType.productRow:
         return ProductDataForm(
           data: block.data.map((e) => e as BlockData<Product>).toList(),
+          productRepository: productRepository,
           onAdd: onProductAdded,
           onRemove: onProductRemoved,
         );

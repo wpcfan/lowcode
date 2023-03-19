@@ -1,6 +1,7 @@
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
 
 import 'blocs/blocs.dart';
 import 'widgets/widgets.dart';
@@ -22,6 +23,7 @@ class RightPane extends StatelessWidget {
     super.key,
     required this.state,
     required this.showBlockConfig,
+    required this.productRepository,
     this.onSavePageLayout,
     this.onSavePageBlock,
     this.onDeleteBlock,
@@ -35,6 +37,7 @@ class RightPane extends StatelessWidget {
   });
   final CanvasState state;
   final bool showBlockConfig;
+  final ProductRepository productRepository;
   final void Function(PageBlock)? onSavePageBlock;
   final void Function(PageLayout)? onSavePageLayout;
   final void Function(int)? onDeleteBlock;
@@ -62,12 +65,13 @@ class RightPane extends StatelessWidget {
               body: TabBarView(
                 children: [
                   BlockConfigForm(
-                    state: state,
+                    block: state.selectedBlock!,
                     onSave: onSavePageBlock,
                     onDelete: onDeleteBlock,
                   ),
                   BlockDataPane(
                     block: state.selectedBlock!,
+                    productRepository: productRepository,
                     onCategoryAdded: (category) {
                       final data = BlockData<Category>(
                         sort: state.selectedBlock!.data.length,
@@ -120,7 +124,7 @@ class RightPane extends StatelessWidget {
             ),
           )
         : PageConfigForm(
-            state: state,
+            layout: state.layout!,
             onSave: onSavePageLayout,
           );
     return child.padding(horizontal: 12);

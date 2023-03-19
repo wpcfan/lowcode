@@ -4,6 +4,7 @@ import 'package:common/common.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:models/models.dart';
 import 'package:networking/networking.dart';
 import 'package:repositories/repositories.dart';
 
@@ -59,6 +60,7 @@ class CanvasPage extends StatelessWidget {
           ),
         ],
         child: Builder(builder: (context) {
+          final productRepository = context.read<ProductRepository>();
           return BlocConsumer<CanvasBloc, CanvasState>(
             listener: (context, state) {
               if (state.error.isNotEmpty) {
@@ -70,9 +72,19 @@ class CanvasPage extends StatelessWidget {
               }
             },
             builder: (context, state) {
+              if (state.status == FetchStatus.initial) {
+                return const Center(child: Text('initial'));
+              }
+              if (state.status == FetchStatus.loading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state.status == FetchStatus.error) {
+                return const Center(child: Text('error'));
+              }
               final rightPane = RightPane(
                 showBlockConfig: state.selectedBlock != null,
                 state: state,
+                productRepository: productRepository,
                 onSavePageBlock: (pageBlock) {
                   context.read<CanvasBloc>().add(
                         CanvasEventUpdateBlock(

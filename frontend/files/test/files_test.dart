@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:page_repository/page_repository.dart';
+import 'package:repositories/repositories.dart';
 
 class MockFileUploadRepository extends Mock implements FileUploadRepository {}
 

@@ -3,7 +3,8 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:networking/networking.dart';
-import 'package:page_repository/file_admin_repository.dart';
+
+import 'file_admin_repository.dart';
 
 class FileUploadRepository {
   final String baseUrl;

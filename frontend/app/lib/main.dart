@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:networking/networking.dart';
-import 'package:page_repository/page_repository.dart';
+import 'package:repositories/repositories.dart';
 
 import 'blocs/home_bloc.dart';
 import 'blocs/home_event.dart';

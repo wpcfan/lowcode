@@ -1,4 +1,4 @@
-library page_repository;
+library repositories;
 
 import 'dart:async';
 

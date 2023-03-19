@@ -60,8 +60,8 @@ dependencies:
     path: ../networking
   page_block_widgets:
     path: ../page_block_widgets
-  page_repository:
-    path: ../page_repository
+  repositories:
+    path: ../repositories
   files:
     path: ../files
   canvas:

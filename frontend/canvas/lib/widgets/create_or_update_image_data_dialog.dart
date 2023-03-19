@@ -1,7 +1,7 @@
 import 'package:files/files.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
-import 'package:page_repository/page_repository.dart';
+import 'package:repositories/repositories.dart';
 
 import '../forms/my_text_form_field.dart';
 import '../forms/validators.dart';

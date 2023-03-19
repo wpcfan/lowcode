@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
-import 'package:page_repository/page_repository.dart';
+import 'package:repositories/repositories.dart';
 
 import 'filters/date_range_filter_widget.dart';
 import 'filters/selection_filter_widget.dart';

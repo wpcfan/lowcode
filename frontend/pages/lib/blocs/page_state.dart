@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:models/models.dart';
-import 'package:page_repository/page_repository.dart';
+import 'package:repositories/repositories.dart';
 
 class PageState extends Equatable {
   final List<PageLayout> items;

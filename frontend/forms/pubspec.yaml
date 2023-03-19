@@ -1,26 +1,15 @@
-name: page_repository
+name: forms
 description: A new Flutter package project.
 version: 0.0.1
-homepage: https://imooc.com
-publish_to: "none"
+homepage:
 
 environment:
-  sdk: ">=2.19.4 <3.0.0"
-  flutter: ">=3.7.0"
+  sdk: '>=2.19.4 <3.0.0'
+  flutter: ">=1.17.0"
 
 dependencies:
-  equatable: ^2.0.5
   flutter:
     sdk: flutter
-  ua_client_hints: ^1.1.3
-  dio: ^5.0.2
-  pretty_dio_logger: ^1.3.1
-  dio_cache_interceptor: ^3.4.0
-  hexcolor: ^3.0.1
-  models:
-    path: ../models
-  networking:
-    path: ../networking
 
 dev_dependencies:
   flutter_test:

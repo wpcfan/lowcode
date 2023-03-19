@@ -55,6 +55,9 @@ class _CenterPaneState extends State<CenterPane> {
       verticalSpacing: 6,
       blockWidth: paneWidth - 24,
       blockHeight: 140,
+      backgroundColor: Colors.white,
+      borderColor: Colors.transparent,
+      borderWidth: 0,
     );
     return SizedBox(
       width: paneWidth,
@@ -209,7 +212,7 @@ class _CenterPaneState extends State<CenterPane> {
             type: PageBlockType.productRow,
             title: 'ProductRow ${dropIndex + 1}',
             sort: dropIndex + 1,
-            config: defaultBlockConfig.copyWith(blockHeight: 100),
+            config: defaultBlockConfig.copyWith(blockHeight: 110),
             data: const [],
           ),
         ));

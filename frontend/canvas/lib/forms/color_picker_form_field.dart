@@ -15,6 +15,7 @@ class ColorPickerFormField extends FormField<Color> {
   /// Stateful widgets 的初始值变化时是不会重绘的，所以我们需要一个 [ValueNotifier] 来通知表单字段重绘。
   /// 这里我们使用了一个 [ValueNotifier]，它的值是用户选择的颜色或初始值。
   /// 值变化后，我们通过 [ValueListenableBuilder] 来重绘表单字段。
+  /// 只有在点击弹出框的确定按钮时，我们才会调用 [FormFieldState.didChange] 方法来更新表单字段的值。
   final ValueNotifier<Color> colorNotifier;
   ColorPickerFormField({
     super.key,
@@ -54,7 +55,7 @@ class ColorPickerFormField extends FormField<Color> {
                           pickersEnabled: const {
                             ColorPickerType.primary: true,
                             ColorPickerType.accent: true,
-                            ColorPickerType.bw: false,
+                            ColorPickerType.bw: true,
                             ColorPickerType.custom: false,
                             ColorPickerType.wheel: true,
                           },
@@ -115,7 +116,11 @@ class ColorPickerFormField extends FormField<Color> {
                   );
 
                   if (newColor != null) {
-                    _changeColor(state, newColor, colorNotifier);
+                    /// 调用 [FormFieldState.didChange] 方法来更新表单字段的值。
+                    state.didChange(newColor);
+                  } else {
+                    /// 如果用户没有选择颜色，我们就把表单字段的值重置为初始值。
+                    colorNotifier.value = state.value!;
                   }
                 });
                 return item;
@@ -123,9 +128,4 @@ class ColorPickerFormField extends FormField<Color> {
             );
           },
         );
-
-  static void _changeColor(FormFieldState<Color> state, Color color,
-      ValueNotifier<Color> colorNotifier) {
-    state.didChange(color);
-  }
 }

@@ -23,8 +23,8 @@ dependencies:
     path: ../models
   networking:
     path: ../networking
-  page_repository:
-    path: ../page_repository
+  repositories:
+    path: ../repositories
   page_block_widgets:
     path: ../page_block_widgets
   files:

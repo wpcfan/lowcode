@@ -20,8 +20,8 @@ dependencies:
     path: ../common
   networking:
     path: ../networking
-  page_repository:
-    path: ../page_repository
+  repositories:
+    path: ../repositories
 
 dev_dependencies:
   flutter_test:

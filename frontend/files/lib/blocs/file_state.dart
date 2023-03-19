@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:page_repository/page_repository.dart';
+import 'package:repositories/repositories.dart';
 
 class FileState extends Equatable {
   final List<FileDto> files;

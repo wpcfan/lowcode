@@ -91,6 +91,14 @@ class _BannerWidgetState extends State<BannerWidget> {
     final horizontalPadding =
         (widget.config.horizontalPadding ?? 0) / widget.ratio;
     final verticalPadding = (widget.config.verticalPadding ?? 0) / widget.ratio;
+
+    page({required Widget child}) => child
+        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
+        .decorated(
+            border: Border.all(width: borderWidth, color: borderColor),
+            color: backgroundColor)
+        .constrained(width: blockWidth, height: blockHeight);
+
     final pagedItem = widget.items.isEmpty
         ? const Placeholder()
         : PageView.builder(
@@ -128,12 +136,6 @@ class _BannerWidgetState extends State<BannerWidget> {
     return [
       pagedItem.constrained(width: blockWidth, height: blockHeight),
       indicators,
-    ]
-        .toStack()
-        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
-        .decorated(
-            border: Border.all(width: borderWidth, color: borderColor),
-            color: backgroundColor)
-        .constrained(width: blockWidth, height: blockHeight);
+    ].toStack().parent(page);
   }
 }

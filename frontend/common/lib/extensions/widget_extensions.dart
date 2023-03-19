@@ -2,10 +2,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 typedef GestureOnTapChangeCallback = void Function(bool tapState);
+typedef ParentCallback = Widget Function({required Widget child});
 
 extension WidgetExtension on Widget {
-  Widget parent(Widget Function({required Widget child}) parent) =>
-      parent(child: this);
+  Widget parent(ParentCallback outer) => outer(child: this);
 
   Widget padding({
     Key? key,

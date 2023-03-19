@@ -30,9 +30,6 @@ class ColorPickerFormField extends FormField<Color> {
             return ValueListenableBuilder(
               valueListenable: colorNotifier,
               builder: (BuildContext context, Color value, Widget? child) {
-                // 这里我们需要手动设置表单字段的值，否则表单字段的值不会变化。
-                // ignore: invalid_use_of_protected_member
-                state.setValue(value);
                 final item = [
                   Text(label),
                   const SizedBox(width: 8),
@@ -40,7 +37,7 @@ class ColorPickerFormField extends FormField<Color> {
                     width: 50,
                     height: 50,
                   ).decorated(
-                    color: state.value,
+                    color: value,
                     border: Border.all(
                       color: state.hasError ? Colors.red : Colors.grey,
                       width: 1,
@@ -95,7 +92,7 @@ class ColorPickerFormField extends FormField<Color> {
                             editFieldCopyButton: true,
                           ),
                           onColorChanged: (Color color) {
-                            _changeColor(state, color, colorNotifier);
+                            colorNotifier.value = color;
                           },
                         ),
                         actions: [
@@ -107,7 +104,8 @@ class ColorPickerFormField extends FormField<Color> {
                           ),
                           TextButton(
                             onPressed: () {
-                              Navigator.of(context).pop<Color?>(state.value);
+                              Navigator.of(context)
+                                  .pop<Color?>(colorNotifier.value);
                             },
                             child: const Text('确定'),
                           ),
@@ -129,6 +127,5 @@ class ColorPickerFormField extends FormField<Color> {
   static void _changeColor(FormFieldState<Color> state, Color color,
       ValueNotifier<Color> colorNotifier) {
     state.didChange(color);
-    colorNotifier.value = color;
   }
 }

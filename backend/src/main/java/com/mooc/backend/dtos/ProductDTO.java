@@ -32,6 +32,8 @@ public class ProductDTO implements Serializable {
     private String name;
     private String description;
     @JsonSerialize(using = BigDecimalSerializer.class)
+    private BigDecimal originalPrice;
+    @JsonSerialize(using = BigDecimalSerializer.class)
     private BigDecimal price;
     private Set<CategoryDTO> categories;
     private Set<String> images;
@@ -42,6 +44,7 @@ public class ProductDTO implements Serializable {
                 .sku(product.getSku())
                 .name(product.getName())
                 .description(product.getDescription())
+                .originalPrice(product.getOriginalPrice())
                 .price(product.getPrice())
                 .categories(product.getCategories().stream()
                         .map(CategoryDTO::fromProjection)
@@ -58,6 +61,7 @@ public class ProductDTO implements Serializable {
                 .sku(product.getSku())
                 .name(product.getName())
                 .description(product.getDescription())
+                .originalPrice(product.getOriginalPrice())
                 .price(product.getPrice())
                 .categories(product.getCategories().stream()
                         .map(CategoryDTO::fromEntity)
@@ -70,8 +74,10 @@ public class ProductDTO implements Serializable {
 
     public Product toEntity() {
         var product = Product.builder()
+                .sku(getSku())
                 .name(getName())
                 .description(getDescription())
+                .originalPrice(getOriginalPrice())
                 .price(getPrice())
                 .build();
         getImages().forEach(image -> {

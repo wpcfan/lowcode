@@ -16,6 +16,7 @@ public record ProductDataDTO(
         String sku,
         String name,
         String description,
+        String originalPrice,
         String price,
         Set<CategoryDTO> categories,
         Set<String> images
@@ -28,6 +29,7 @@ public record ProductDataDTO(
                 product.getSku(),
                 product.getName(),
                 product.getDescription(),
+                MathUtils.formatPrice(product.getOriginalPrice()),
                 MathUtils.formatPrice(product.getPrice()),
                 product.getCategories().stream().map(CategoryDTO::fromEntity).collect(Collectors.toSet()),
                 product.getImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toSet())

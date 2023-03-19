@@ -13,6 +13,7 @@ public interface ProductInfo {
     String getName();
 
     String getDescription();
+    BigDecimal getOriginalPrice();
 
     BigDecimal getPrice();
 

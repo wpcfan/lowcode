@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-public record ProductAdminDTO(Long id, String sku, String name, String description, BigDecimal price, Set<CategoryDTO> categories,
+public record ProductAdminDTO(Long id, String sku, String name, String description, BigDecimal originalPrice, BigDecimal price, Set<CategoryDTO> categories,
                               Set<ProductImageInfo> images) implements Serializable {
     private static final long serialVersionUID = -1;
 
@@ -20,6 +20,7 @@ public record ProductAdminDTO(Long id, String sku, String name, String descripti
                 product.getSku(),
                 product.getName(),
                 product.getDescription(),
+                product.getOriginalPrice(),
                 product.getPrice(),
                 product.getCategories().stream()
                         .map(CategoryDTO::fromEntity)
@@ -45,6 +46,7 @@ public record ProductAdminDTO(Long id, String sku, String name, String descripti
                 .sku(sku())
                 .name(name())
                 .description(description())
+                .originalPrice(originalPrice())
                 .price(price())
                 .build();
         images().forEach(image -> {

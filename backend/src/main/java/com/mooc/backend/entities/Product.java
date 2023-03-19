@@ -31,6 +31,9 @@ public class Product extends Auditable {
     @Column(nullable = false)
     private String description;
 
+    @Column(name = "original_price", nullable = false, precision = 10, scale = 2)
+    private BigDecimal originalPrice;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
@@ -108,6 +111,7 @@ public class Product extends Auditable {
         private String sku;
         private String name;
         private String description;
+        private BigDecimal originalPrice;
         private BigDecimal price;
         private Set<Category> categories = new HashSet<>();
         private Set<ProductImage> images = new HashSet<>();
@@ -124,6 +128,11 @@ public class Product extends Auditable {
 
         public ProductBuilder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public ProductBuilder originalPrice(BigDecimal originalPrice) {
+            this.originalPrice = originalPrice;
             return this;
         }
 
@@ -147,6 +156,7 @@ public class Product extends Auditable {
             product.setSku(sku);
             product.setName(name);
             product.setDescription(description);
+            product.setOriginalPrice(originalPrice);
             product.setPrice(price);
             product.setCategories(categories);
             product.setImages(images);

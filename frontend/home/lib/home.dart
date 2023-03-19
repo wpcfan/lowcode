@@ -10,6 +10,8 @@ import 'blocs/blocs.dart';
 import 'popups/popups.dart';
 import 'widgets/widgets.dart';
 
+export 'blocs/blocs.dart';
+
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 

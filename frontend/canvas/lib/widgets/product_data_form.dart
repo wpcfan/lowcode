@@ -5,6 +5,10 @@ import 'package:page_repository/page_repository.dart';
 
 import 'product_table.dart';
 
+/// 商品数据表单组件
+/// [data] 数据
+/// [onAdd] 添加商品回调
+/// [onRemove] 删除商品回调
 class ProductDataForm extends StatefulWidget {
   const ProductDataForm({
     super.key,
@@ -21,11 +25,15 @@ class ProductDataForm extends StatefulWidget {
 }
 
 class _ProductDataFormState extends State<ProductDataForm> {
+  /// 选中的商品
   final List<Product> _selectedProducts = [];
+
+  /// 匹配的商品
   final List<Product> _matchedProducts = [];
 
   @override
   Widget build(BuildContext context) {
+    /// 初始化选中的商品
     setState(() {
       _selectedProducts.clear();
       _selectedProducts.addAll(widget.data.map((e) => e.content));
@@ -97,6 +105,8 @@ class _ProductDataFormState extends State<ProductDataForm> {
     );
   }
 
+  /// 从服务器获取匹配的商品列表
+  /// [text] 搜索关键字
   Future<List<Product>> _searchProducts(String text) async {
     final client = context.read<ProductRepository>();
     final res = await client.searchByKeyword(text);

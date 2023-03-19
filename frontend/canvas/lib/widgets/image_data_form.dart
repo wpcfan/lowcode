@@ -1,23 +1,23 @@
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 
-import '../../blocs/canvas_bloc.dart';
-import '../../blocs/canvas_event.dart';
 import 'create_or_update_image_data_dialog.dart';
 
+/// 图片数据表单组件
+/// [data] 数据
 class ImageDataForm extends StatelessWidget {
   const ImageDataForm({
     super.key,
     required this.data,
+    required this.onImageRemoved,
+    required this.onImageAdded,
   });
   final List<BlockData<ImageData>> data;
-
+  final void Function(int) onImageRemoved;
+  final void Function(ImageData) onImageAdded;
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<CanvasBloc>();
-
     /// 表格列头：图片、链接类型、链接地址、操作
     const dataColumns = [
       DataColumn(label: Text('图片')),
@@ -37,9 +37,7 @@ class ImageDataForm extends StatelessWidget {
             DataCell(Text(item.link?.value ?? '')),
             DataCell(
               IconButton(
-                onPressed: () {
-                  bloc.add(CanvasEventDeleteBlockData(e.id!));
-                },
+                onPressed: () => onImageRemoved(e.id!),
                 icon: const Icon(Icons.delete),
               ),
             ),
@@ -56,9 +54,7 @@ class ImageDataForm extends StatelessWidget {
             context: context,
             builder: (context) => CreateOrUpdateImageDataDialog(
               title: '添加图片',
-              onCreate: (data) {
-                bloc.add(CanvasEventAddBlockData(data));
-              },
+              onCreate: onImageAdded,
             ),
           );
         },

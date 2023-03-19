@@ -3,6 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
 
+/// 用于类目数据的表单
+/// [onCategoryAdded] 类目添加回调
+/// [onCategoryUpdated] 类目更新回调
+/// [onCategoryRemoved] 类目移除回调
+/// [data] 类目数据
 class CategoryDataForm extends StatelessWidget {
   const CategoryDataForm({
     super.key,
@@ -18,6 +23,7 @@ class CategoryDataForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// 类目仓库
     final categoryRepository = context.read<CategoryRepository>();
 
     return SingleChildScrollView(
@@ -25,21 +31,26 @@ class CategoryDataForm extends StatelessWidget {
       future: _getCategories(categoryRepository),
       initialData: const [],
       builder: (context, snapshot) {
+        /// 加载中
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(child: CircularProgressIndicator());
         }
 
+        /// 错误
         if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
+          return Text('错误: ${snapshot.error}');
         }
 
+        /// 没有数据
         if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No data'));
+          return const Center(child: Text('没有数据'));
         }
 
+        /// 类目
         final categories = snapshot.data as List<Category>;
 
         return Autocomplete<Category>(
+          /// 构建选项
           optionsBuilder: (text) {
             return categories
                 .where((element) => element.name!
@@ -47,9 +58,13 @@ class CategoryDataForm extends StatelessWidget {
                     .contains(text.text.toLowerCase()))
                 .toList();
           },
+
+          /// 构建选项视图
           optionsViewBuilder: (context, onSelected, options) {
             return _buildCategoryTree(options);
           },
+
+          /// 选中回调
           onSelected: (option) {
             if (data
                 .where((element) => element.content.id == option.id)
@@ -63,21 +78,26 @@ class CategoryDataForm extends StatelessWidget {
               onCategoryUpdated(option);
             }
           },
+
+          /// 选中值在输入框中的显示
           displayStringForOption: (option) => option.name ?? '',
         );
       },
     ));
   }
 
+  /// 获取类目
   Future<List<Category>> _getCategories(
       CategoryRepository categoryRepository) async {
     final categories = await categoryRepository.getCategories();
     return categories;
   }
 
+  /// 构建类目树
   Widget _buildCategoryTree(Iterable<Category> categories) {
     return Material(
       child: ListView.builder(
+        /// 不可滚动
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
@@ -89,10 +109,12 @@ class CategoryDataForm extends StatelessWidget {
     );
   }
 
+  /// 构建类目项
   Widget _buildCategoryItem(Category category) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        /// 类目
         RadioListTile(
           title: Text(category.name ?? ''),
           value: category,
@@ -110,6 +132,8 @@ class CategoryDataForm extends StatelessWidget {
             }
           },
         ),
+
+        /// 子类目
         if (category.children != null && category.children!.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 16),

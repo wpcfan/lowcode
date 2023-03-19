@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_repository/page_repository.dart';
@@ -14,7 +15,7 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
       this.adminRepo, this.blockRepo, this.blockDataRepo, this.productRepo)
       : super(const CanvasInitial()) {
     on<CanvasEventLoad>(_onCanvasEventLoad);
-    on<CanvasEventSave>(_onCanvasEventSave);
+    on<CanvasEventUpdate>(_onCanvasEventUpdate);
     on<CanvasEventAddBlock>(_onCanvasEventAddBlock);
     on<CanvasEventUpdateBlock>(_onCanvasEventUpdateBlock);
     on<CanvasEventInsertBlock>(_onCanvasEventInsertBlock);
@@ -27,6 +28,49 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     on<CanvasEventUpdateBlockData>(_onCanvasEventUpdateBlockData);
   }
 
+  /// 错误处理
+  void _handleError(Emitter<CanvasState> emit, dynamic error) {
+    emit(state.copyWith(
+      error: error.toString(),
+      saving: false,
+      status: FetchStatus.error,
+    ));
+  }
+
+  /// 加载瀑布流
+  Future<List<Product>> _loadWaterfallData(PageLayout layout) async {
+    try {
+      final waterfallBlock = layout.blocks
+          .firstWhere((element) => element.type == PageBlockType.waterfall);
+
+      if (waterfallBlock.data.isNotEmpty) {
+        final categoryId = waterfallBlock.data.first.content.id;
+        if (categoryId != null) {
+          final waterfall =
+              await productRepo.getByCategory(categoryId: categoryId);
+          return waterfall.data;
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return [];
+  }
+
+  PageLayout? _buildNewLayoutWhenBlockChanges(PageBlock<dynamic> newBlock) {
+    final blocks = state.layout?.blocks ?? [];
+    final blockIndex =
+        blocks.indexWhere((element) => element.id == state.selectedBlock!.id!);
+
+    final newLayout = state.layout?.copyWith(blocks: [
+      ...blocks.sublist(0, blockIndex),
+      newBlock,
+      ...blocks.sublist(blockIndex + 1)
+    ]);
+    return newLayout;
+  }
+
+  /// 更新区块数据
   void _onCanvasEventUpdateBlockData(
       CanvasEventUpdateBlockData event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -39,66 +83,21 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         dataList[dataIndex] = data;
       }
       final newBlock = state.selectedBlock!.copyWith(data: dataList);
-      final blocks = state.layout?.blocks ?? [];
-      final blockIndex = blocks
-          .indexWhere((element) => element.id == state.selectedBlock!.id!);
-      if (blockIndex != -1) {
-        await _handleWaterfall(blocks, emit, blockIndex, newBlock);
-      }
-    } catch (e) {
+      final newLayout = _buildNewLayoutWhenBlockChanges(newBlock);
+      final waterfallList = await _loadWaterfallData(state.layout!);
       emit(state.copyWith(
-        error: e.toString(),
-        saving: false,
-      ));
-    }
-  }
-
-  Future<void> _handleWaterfall(
-      List<PageBlock<dynamic>> blocks,
-      Emitter<CanvasState> emit,
-      int blockIndex,
-      PageBlock<dynamic> newBlock) async {
-    if (state.selectedBlock?.type == PageBlockType.waterfall) {
-      final waterfallBlock = state.selectedBlock!;
-
-      /// 如果瀑布流布局有内容，获取瀑布流数据
-      if (waterfallBlock.data.isNotEmpty) {
-        /// 获取瀑布流数据的分类ID
-        final categoryId = waterfallBlock.data.first.content.id;
-        if (categoryId != null) {
-          /// 按分类获取瀑布流中的产品数据
-          final waterfall =
-              await productRepo.getByCategory(categoryId: categoryId);
-
-          /// 更新瀑布流数据
-          emit(state.copyWith(
-            layout: state.layout?.copyWith(blocks: [
-              ...blocks.sublist(0, blockIndex),
-              newBlock,
-              ...blocks.sublist(blockIndex + 1)
-            ]),
-            waterfallList: waterfall.data,
-            selectedBlock: newBlock,
-            error: '',
-            saving: false,
-          ));
-        }
-      }
-    } else {
-      emit(state.copyWith(
-        layout: state.layout?.copyWith(blocks: [
-          ...blocks.sublist(0, blockIndex),
-          newBlock,
-          ...blocks.sublist(blockIndex + 1)
-        ]),
-        waterfallList: [],
+        layout: newLayout,
+        waterfallList: waterfallList,
         selectedBlock: newBlock,
         error: '',
         saving: false,
       ));
+    } catch (e) {
+      _handleError(emit, e);
     }
   }
 
+  /// 删除区块数据
   void _onCanvasEventDeleteBlockData(
       CanvasEventDeleteBlockData event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -112,32 +111,24 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         dataList.removeAt(dataIndex);
       }
       final newBlock = state.selectedBlock!.copyWith(data: dataList);
-      final blocks = state.layout?.blocks ?? [];
-      final blockIndex = blocks
-          .indexWhere((element) => element.id == state.selectedBlock!.id!);
-      if (blockIndex != -1) {
-        emit(state.copyWith(
-          layout: state.layout?.copyWith(blocks: [
-            ...blocks.sublist(0, blockIndex),
-            newBlock,
-            ...blocks.sublist(blockIndex + 1)
-          ]),
-          selectedBlock: newBlock,
-          error: '',
-          saving: false,
-        ));
-        if (state.selectedBlock!.type == PageBlockType.waterfall) {
-          emit(state.copyWith(waterfallList: []));
-        }
-      }
-    } catch (e) {
+      final newLayout = _buildNewLayoutWhenBlockChanges(newBlock);
       emit(state.copyWith(
-        error: e.toString(),
+        layout: newLayout,
+        selectedBlock: newBlock,
+        error: '',
         saving: false,
       ));
+
+      /// 如果选中的区块是瀑布流，清空瀑布流数据
+      if (state.selectedBlock!.type == PageBlockType.waterfall) {
+        emit(state.copyWith(waterfallList: []));
+      }
+    } catch (e) {
+      _handleError(emit, e);
     }
   }
 
+  /// 添加区块数据
   void _onCanvasEventAddBlockData(
       CanvasEventAddBlockData event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -148,30 +139,33 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
       dataList.add(blockData);
 
       final newBlock = state.selectedBlock!.copyWith(data: dataList);
-      final blocks = state.layout?.blocks ?? [];
-      final blockIndex = blocks
-          .indexWhere((element) => element.id == state.selectedBlock!.id!);
-      if (blockIndex != -1) {
-        await _handleWaterfall(blocks, emit, blockIndex, newBlock);
-      }
-    } catch (e) {
+      final newLayout = _buildNewLayoutWhenBlockChanges(newBlock);
+      final waterfallList = await _loadWaterfallData(state.layout!);
       emit(state.copyWith(
-        error: e.toString(),
+        layout: newLayout,
+        waterfallList: waterfallList,
+        selectedBlock: newBlock,
+        error: '',
         saving: false,
       ));
+    } catch (e) {
+      _handleError(emit, e);
     }
   }
 
+  /// 点击页面时，清除选中的区块
   void _onCanvasEventSelectNoBlock(
       CanvasEventSelectNoBlock event, Emitter<CanvasState> emit) {
     emit(state.clearSelectedBlock());
   }
 
+  /// 选中区块
   void _onCanvasEventSelectBlock(
       CanvasEventSelectBlock event, Emitter<CanvasState> emit) {
     emit(state.copyWith(selectedBlock: event.block));
   }
 
+  /// 插入区块
   void _onCanvasEventInsertBlock(
       CanvasEventInsertBlock event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -183,13 +177,11 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         saving: false,
       ));
     } catch (e) {
-      emit(state.copyWith(
-        error: e.toString(),
-        saving: false,
-      ));
+      _handleError(emit, e);
     }
   }
 
+  /// 更新区块
   void _onCanvasEventUpdateBlock(
       CanvasEventUpdateBlock event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -198,26 +190,25 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
           await blockRepo.updateBlock(event.pageId, event.blockId, event.block);
       final blocks = state.layout?.blocks ?? [];
       final index = blocks.indexWhere((element) => element.id == event.blockId);
-      if (index != -1) {
-        emit(state.copyWith(
-          layout: state.layout?.copyWith(blocks: [
-            ...blocks.sublist(0, index),
-            block,
-            ...blocks.sublist(index + 1)
-          ]),
-          selectedBlock: block,
-          error: '',
-          saving: false,
-        ));
+      if (index == -1) {
+        return;
       }
-    } catch (e) {
       emit(state.copyWith(
-        error: e.toString(),
+        layout: state.layout?.copyWith(blocks: [
+          ...blocks.sublist(0, index),
+          block,
+          ...blocks.sublist(index + 1)
+        ]),
+        selectedBlock: block,
+        error: '',
         saving: false,
       ));
+    } catch (e) {
+      _handleError(emit, e);
     }
   }
 
+  /// 移动区块
   void _onCanvasEventMoveBlock(
       CanvasEventMoveBlock event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -234,13 +225,11 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         saving: false,
       ));
     } catch (e) {
-      emit(state.copyWith(
-        error: e.toString(),
-        saving: false,
-      ));
+      _handleError(emit, e);
     }
   }
 
+  /// 添加区块
   void _onCanvasEventAddBlock(
       CanvasEventAddBlock event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -254,13 +243,11 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         saving: false,
       ));
     } catch (e) {
-      emit(state.copyWith(
-        error: e.toString(),
-        saving: false,
-      ));
+      _handleError(emit, e);
     }
   }
 
+  /// 删除区块
   void _onCanvasEventDeleteBlock(
       CanvasEventDeleteBlock event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
@@ -268,71 +255,43 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
       await blockRepo.deleteBlock(event.pageId, event.blockId);
       final blocks = state.layout?.blocks ?? [];
       final index = blocks.indexWhere((element) => element.id == event.blockId);
-      if (index != -1) {
-        blocks.removeAt(index);
-        emit(CanvasState(
-          status: FetchStatus.populated,
-          layout: state.layout?.copyWith(blocks: blocks),
-          saving: false,
-          error: '',
-        ));
+      if (index == -1) {
+        return;
       }
-    } catch (e) {
-      emit(state.copyWith(
+      blocks.removeAt(index);
+      emit(CanvasState(
+        status: FetchStatus.populated,
+        layout: state.layout?.copyWith(blocks: blocks),
         saving: false,
-        error: e.toString(),
+        error: '',
       ));
+    } catch (e) {
+      _handleError(emit, e);
     }
   }
 
+  /// 加载页面
   void _onCanvasEventLoad(
       CanvasEventLoad event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(status: FetchStatus.loading));
     try {
       final layout = await adminRepo.get(event.id);
+      final waterfallList = await _loadWaterfallData(layout);
 
-      /// 如果有瀑布流布局，获取瀑布流数据
-      if (layout.blocks
-          .where((element) => element.type == PageBlockType.waterfall)
-          .isNotEmpty) {
-        /// 获取第一个瀑布流布局
-        final waterfallBlock = layout.blocks
-            .firstWhere((element) => element.type == PageBlockType.waterfall);
-
-        /// 如果瀑布流布局有内容，获取瀑布流数据
-        if (waterfallBlock.data.isNotEmpty) {
-          /// 获取瀑布流数据的分类ID
-          final categoryId = waterfallBlock.data.first.content.id;
-          if (categoryId != null) {
-            /// 按分类获取瀑布流中的产品数据
-            final waterfall =
-                await productRepo.getByCategory(categoryId: categoryId);
-            emit(state.copyWith(
-              status: FetchStatus.populated,
-              layout: layout,
-              waterfallList: waterfall.data,
-              error: '',
-            ));
-            return;
-          }
-        }
-      }
       emit(state.copyWith(
         status: FetchStatus.populated,
         layout: layout,
-        waterfallList: [],
+        waterfallList: waterfallList,
         error: '',
       ));
     } catch (e) {
-      emit(state.copyWith(
-        status: FetchStatus.error,
-        error: e.toString(),
-      ));
+      _handleError(emit, e);
     }
   }
 
-  void _onCanvasEventSave(
-      CanvasEventSave event, Emitter<CanvasState> emit) async {
+  /// 保存页面
+  void _onCanvasEventUpdate(
+      CanvasEventUpdate event, Emitter<CanvasState> emit) async {
     emit(state.copyWith(saving: true));
     try {
       final layout = await adminRepo.update(event.id, event.layout);
@@ -342,10 +301,7 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
         error: '',
       ));
     } catch (e) {
-      emit(state.copyWith(
-        saving: false,
-        error: e.toString(),
-      ));
+      _handleError(emit, e);
     }
   }
 }

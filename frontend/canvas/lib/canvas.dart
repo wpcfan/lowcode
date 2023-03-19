@@ -83,7 +83,7 @@ class CanvasPage extends StatelessWidget {
                 },
                 onSavePageLayout: (pageLayout) {
                   context.read<CanvasBloc>().add(
-                        CanvasEventSave(state.layout!.id!, pageLayout),
+                        CanvasEventUpdate(state.layout!.id!, pageLayout),
                       );
                 },
                 onDeleteBlock: (blockId) async {
@@ -133,6 +133,16 @@ class CanvasPage extends StatelessWidget {
                   context.read<CanvasBloc>().add(CanvasEventAddBlockData(data));
                 },
                 onProductRemoved: (dataId) {
+                  context
+                      .read<CanvasBloc>()
+                      .add(CanvasEventDeleteBlockData(dataId));
+                },
+                onImageAdded: (imageData) {
+                  context.read<CanvasBloc>().add(CanvasEventAddBlockData(
+                        imageData,
+                      ));
+                },
+                onImageRemoved: (dataId) {
                   context
                       .read<CanvasBloc>()
                       .add(CanvasEventDeleteBlockData(dataId));

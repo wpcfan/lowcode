@@ -6,6 +6,10 @@ import 'package:models/models.dart';
 import '../../blocs/canvas_state.dart';
 import '../forms/validators.dart';
 
+/// 用于区块配置的表单
+/// [onSave] 保存回调
+/// [onDelete] 删除回调
+/// [state] 画布状态
 class BlockConfigForm extends StatefulWidget {
   const BlockConfigForm({
     super.key,
@@ -22,17 +26,22 @@ class BlockConfigForm extends StatefulWidget {
 }
 
 class _BlockConfigFormState extends State<BlockConfigForm> {
+  /// 表单key
   final _formKey = GlobalKey<FormState>();
+
+  /// 表单值
   late PageBlock _formValue;
 
   @override
   Widget build(BuildContext context) {
+    /// 初始化表单值
     setState(() {
       _formValue = widget.state.selectedBlock!;
     });
 
     return SingleChildScrollView(
       child: Form(
+        /// 在此处设置表单key，然后可以通过_formKey.currentState来获取表单状态
         key: _formKey,
         child: Column(
           children: [
@@ -44,8 +53,12 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
               children: [
                 ElevatedButton(
                   onPressed: () {
+                    /// 验证表单
                     if (_formKey.currentState?.validate() ?? false) {
+                      /// 保存表单
                       _formKey.currentState?.save();
+
+                      /// 回调
                       widget.onSave?.call(_formValue);
                     }
                   },
@@ -67,6 +80,7 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
     );
   }
 
+  /// 创建表单项
   List<Widget> _createFormItems() {
     return [
       MyTextFormField(

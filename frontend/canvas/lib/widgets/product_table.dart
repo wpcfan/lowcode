@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
+/// 商品表格组件
+/// [products] 商品列表
+/// [onRemove] 删除回调
 class ProductTable extends StatelessWidget {
   const ProductTable({
     super.key,

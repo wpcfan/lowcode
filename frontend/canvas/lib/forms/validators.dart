@@ -1,5 +1,14 @@
 typedef Validator = String? Function(String?);
 
+/// 表单验证器
+/// [required] 必填
+/// [minLength] 最小长度
+/// [maxLength] 最大长度
+/// [isInteger] 是否是整数
+/// [isDouble] 是否是浮点数
+/// [min] 最小值
+/// [max] 最大值
+/// [regexp] 正则表达式
 class Validators {
   static Validator required({String? label, String? message}) {
     return (value) {

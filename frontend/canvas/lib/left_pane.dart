@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 
 import '../../models/widget_data.dart';
 
+/// 左侧面板组件
+/// [widgets] 组件列表
 class LeftPane extends StatelessWidget {
   const LeftPane({super.key, required this.widgets});
   final List<WidgetData> widgets;
+
   @override
   Widget build(BuildContext context) {
     return widgets
@@ -28,6 +31,8 @@ class LeftPane extends StatelessWidget {
     );
     return Draggable(
       data: data,
+
+      /// 拖拽时的组件展现，这里使用了透明度和宽度限制
       feedback: listTile.card().opacity(0.5).constrained(
             width: 400,
             height: 80,

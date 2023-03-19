@@ -5,6 +5,9 @@ import '../blocs/canvas_state.dart';
 import '../forms/my_text_form_field.dart';
 import '../forms/validators.dart';
 
+/// 页面配置表单组件
+/// [state] 画布状态
+/// [onSave] 保存回调
 class PageConfigForm extends StatefulWidget {
   const PageConfigForm({super.key, required this.state, this.onSave});
   final CanvasState state;
@@ -19,6 +22,7 @@ class _PageConfigFormState extends State<PageConfigForm> {
 
   @override
   Widget build(BuildContext context) {
+    /// 初始化表单值
     _formValue = widget.state.layout;
     return Form(
       key: _formKey,
@@ -43,6 +47,7 @@ class _PageConfigFormState extends State<PageConfigForm> {
     );
   }
 
+  /// 创建表单项
   List<Widget> _createFormItems() {
     return [
       MyTextFormField(

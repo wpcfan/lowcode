@@ -7,6 +7,18 @@ import 'widgets/block_config_form.dart';
 import 'widgets/block_data_pane.dart';
 import 'widgets/page_config_form.dart';
 
+/// 右侧面板
+/// [state] 画布状态
+/// [showBlockConfig] 是否显示块配置
+/// [onSavePageLayout] 保存页面布局回调
+/// [onSavePageBlock] 保存页面块回调
+/// [onDeleteBlock] 删除块回调
+/// [onCategoryAdded] 添加分类回调
+/// [onCategoryUpdated] 更新分类回调
+/// [onCategoryRemoved] 删除分类回调
+/// [onProductAdded] 添加商品回调
+/// [onProductRemoved] 删除商品回调
+///
 class RightPane extends StatelessWidget {
   const RightPane({
     super.key,
@@ -20,6 +32,8 @@ class RightPane extends StatelessWidget {
     required this.onCategoryRemoved,
     required this.onProductAdded,
     required this.onProductRemoved,
+    required this.onImageAdded,
+    required this.onImageRemoved,
   });
   final CanvasState state;
   final bool showBlockConfig;
@@ -31,6 +45,8 @@ class RightPane extends StatelessWidget {
   final void Function(BlockData<Category>) onCategoryAdded;
   final void Function(BlockData<Category>) onCategoryUpdated;
   final void Function(int) onCategoryRemoved;
+  final void Function(BlockData<ImageData>) onImageAdded;
+  final void Function(int) onImageRemoved;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +106,16 @@ class RightPane extends StatelessWidget {
                       onProductRemoved
                           .call(state.selectedBlock!.data[index].id!);
                     },
-                    onImagesSubmitted: (images) {},
+                    onImageAdded: (image) {
+                      final data = BlockData<ImageData>(
+                        sort: state.selectedBlock!.data.length,
+                        content: image,
+                      );
+                      onImageAdded.call(data);
+                    },
+                    onImageRemoved: (id) {
+                      onImageRemoved.call(id);
+                    },
                   ),
                 ],
               ),

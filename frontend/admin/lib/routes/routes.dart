@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pages/pages.dart';
 
-import '../components/side_menu.dart';
+import '../widgets/widgets.dart';
 import 'router_config.dart';
 
 final routes = <RouteBase>[

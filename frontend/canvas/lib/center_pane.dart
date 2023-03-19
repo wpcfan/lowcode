@@ -3,10 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 
-import 'blocs/canvas_bloc.dart';
-import 'blocs/canvas_event.dart';
-import 'blocs/canvas_state.dart';
-import 'models/widget_data.dart';
+import 'blocs/blocs.dart';
+import 'models/models.dart';
 
 /// 中间画布
 class CenterPane extends StatefulWidget {

@@ -6,11 +6,9 @@ import 'package:models/models.dart';
 import 'package:networking/networking.dart';
 import 'package:repositories/repositories.dart';
 
-import 'blocs/page_bloc.dart';
-import 'blocs/page_event.dart';
-import 'blocs/page_state.dart';
-import 'create_or_update_page_dialog.dart';
-import 'page_table_widget.dart';
+import 'blocs/blocs.dart';
+import 'popups/popups.dart';
+import 'widgets/widgets.dart';
 
 class PageTableView extends StatelessWidget {
   const PageTableView({super.key});

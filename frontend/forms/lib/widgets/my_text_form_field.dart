@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'validators.dart';
+import '../validators/validators.dart';
 
 /// 文本输入表单组件
 /// [keyboardType] 键盘类型

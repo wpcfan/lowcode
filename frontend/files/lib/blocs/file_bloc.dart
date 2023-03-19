@@ -1,9 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:repositories/repositories.dart';
 
+import 'file_event.dart';
 import 'file_state.dart';
-import 'flie_event.dart';
 
+/// 处理文件上传、删除、加载等事件
 class FileBloc extends Bloc<FileEvent, FileState> {
   final FileUploadRepository fileRepo;
   final FileAdminRepository fileAdminRepo;
@@ -20,6 +21,7 @@ class FileBloc extends Bloc<FileEvent, FileState> {
     on<FileEventToggleSelected>(_onFileEventToggleSelected);
   }
 
+  /// 选择文件
   void _onFileEventToggleSelected(
       FileEventToggleSelected event, Emitter<FileState> emit) {
     if (state.selectedKeys.contains(event.key)) {
@@ -31,11 +33,13 @@ class FileBloc extends Bloc<FileEvent, FileState> {
     }
   }
 
+  /// 切换编辑模式
   void _onFileEventToggleEditable(
       FileEventToggleEditable event, Emitter<FileState> emit) {
     emit(state.copyWith(editable: !state.editable));
   }
 
+  /// 删除文件
   void _onFileEventDelete(
       FileEventDelete event, Emitter<FileState> emit) async {
     emit(state.copyWith(loading: true));
@@ -54,6 +58,7 @@ class FileBloc extends Bloc<FileEvent, FileState> {
     }
   }
 
+  /// 加载文件
   void _onFileEventLoad(FileEventLoad event, Emitter<FileState> emit) async {
     emit(state.copyWith(loading: true));
     try {
@@ -66,6 +71,7 @@ class FileBloc extends Bloc<FileEvent, FileState> {
     }
   }
 
+  /// 上传多个文件
   void _onFileEventUploadMultiple(
       FileEventUploadMultiple event, Emitter<FileState> emit) async {
     emit(state.copyWith(uploading: true));
@@ -82,6 +88,7 @@ class FileBloc extends Bloc<FileEvent, FileState> {
     }
   }
 
+  /// 上传单个文件
   void _onFileEventUpload(
       FileEventUpload event, Emitter<FileState> emit) async {
     emit(state.copyWith(uploading: true));

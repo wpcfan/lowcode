@@ -1,12 +1,24 @@
 import 'package:equatable/equatable.dart';
 import 'package:repositories/repositories.dart';
 
+/// 文件状态
 class FileState extends Equatable {
+  /// 文件列表
   final List<FileDto> files;
+
+  /// 是否正在加载文件列表
   final bool loading;
+
+  /// 是否正在上传文件
   final bool uploading;
+
+  /// 错误信息
   final String error;
+
+  /// 是否处于编辑模式
   final bool editable;
+
+  /// 选中的文件
   final List<String> selectedKeys;
 
   const FileState({

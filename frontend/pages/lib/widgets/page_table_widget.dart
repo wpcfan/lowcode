@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:repositories/repositories.dart';
 
-import 'filters/date_range_filter_widget.dart';
-import 'filters/selection_filter_widget.dart';
-import 'filters/text_filter_widget.dart';
+import '../filters/filters.dart';
+import 'custom_paginated_table.dart';
 import 'page_table_data_source.dart';
-import 'widgets/custom_paginated_table.dart';
 
 class PageTableWidget extends StatelessWidget {
   const PageTableWidget({

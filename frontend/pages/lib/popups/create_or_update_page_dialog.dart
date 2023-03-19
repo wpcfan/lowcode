@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
-import 'blocs/page_bloc.dart';
+import '../blocs/blocs.dart';
 
 class CreateOrUpdatePageDialog extends StatefulWidget {
   const CreateOrUpdatePageDialog({

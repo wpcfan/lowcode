@@ -1,9 +1,8 @@
-import 'package:admin/components/header.dart';
-import 'package:admin/components/side_menu.dart';
-import 'package:admin/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../constants.dart';
+import '../widgets/widgets.dart';
 import 'routes.dart';
 
 final scaffoldKey = GlobalKey<ScaffoldState>();

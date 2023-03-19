@@ -1,7 +1,7 @@
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 
-import '../../models/widget_data.dart';
+import 'models/models.dart';
 
 /// 左侧面板组件
 /// [widgets] 组件列表

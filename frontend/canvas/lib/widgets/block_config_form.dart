@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forms/forms.dart';
 import 'package:models/models.dart';
 
-import '../../blocs/canvas_state.dart';
+import '../blocs/blocs.dart';
 
 /// 用于区块配置的表单
 /// [onSave] 保存回调

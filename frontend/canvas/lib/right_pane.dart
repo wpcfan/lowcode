@@ -2,10 +2,8 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
-import '../../blocs/canvas_state.dart';
-import 'widgets/block_config_form.dart';
-import 'widgets/block_data_pane.dart';
-import 'widgets/page_config_form.dart';
+import 'blocs/blocs.dart';
+import 'widgets/widgets.dart';
 
 /// 右侧面板
 /// [state] 画布状态

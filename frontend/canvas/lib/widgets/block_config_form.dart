@@ -1,10 +1,8 @@
-import 'package:canvas/forms/color_picker_form_field.dart';
-import 'package:canvas/forms/my_text_form_field.dart';
 import 'package:flutter/material.dart';
+import 'package:forms/forms.dart';
 import 'package:models/models.dart';
 
 import '../../blocs/canvas_state.dart';
-import '../forms/validators.dart';
 
 /// 用于区块配置的表单
 /// [onSave] 保存回调

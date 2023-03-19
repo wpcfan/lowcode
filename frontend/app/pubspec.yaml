@@ -32,16 +32,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  common:
-    path: ../common
-  models:
-    path: ../models
-  networking:
-    path: ../networking
-  page_block_widgets:
-    path: ../page_block_widgets
-  repositories:
-    path: ../repositories
   url_launcher: ^6.1.9
   flutter_staggered_grid_view: ^0.6.2
   rxdart: ^0.27.7
@@ -54,6 +44,18 @@ dependencies:
   equatable: ^2.0.5
   sliver_tools: ^0.2.9
   hexcolor: ^3.0.1
+  common:
+    path: ../common
+  models:
+    path: ../models
+  networking:
+    path: ../networking
+  page_block_widgets:
+    path: ../page_block_widgets
+  repositories:
+    path: ../repositories
+  home:
+    path: ../home
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

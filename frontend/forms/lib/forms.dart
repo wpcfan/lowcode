@@ -1,7 +1,5 @@
 library forms;
 
-/// A Calculator.
-class Calculator {
-  /// Returns [value] plus 1.
-  int addOne(int value) => value + 1;
-}
+export 'color_picker_form_field.dart';
+export 'my_text_form_field.dart';
+export 'validators.dart';

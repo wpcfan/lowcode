@@ -1,4 +1,4 @@
-name: forms
+name: home
 description: A new Flutter package project.
 version: 0.0.1
 publish_to: "none"
@@ -11,9 +11,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flex_color_picker: ^3.1.0
+  flutter_bloc: ^8.1.2
+  skeletons: ^0.0.3
+  sliver_tools: ^0.2.9
+  url_launcher: ^6.1.9
   common:
     path: ../common
+  models:
+    path: ../models
+  repositories:
+    path: ../repositories
+  page_block_widgets:
+    path: ../page_block_widgets
 
 dev_dependencies:
   flutter_test:

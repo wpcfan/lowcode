@@ -306,6 +306,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  forms:
+    dependency: "direct main"
+    description:
+      path: "../forms"
+      relative: true
+    source: path
+    version: "0.0.1"
   glob:
     dependency: transitive
     description:

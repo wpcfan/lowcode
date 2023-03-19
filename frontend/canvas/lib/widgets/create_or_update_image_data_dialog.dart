@@ -1,10 +1,8 @@
 import 'package:files/files.dart';
 import 'package:flutter/material.dart';
+import 'package:forms/forms.dart';
 import 'package:models/models.dart';
 import 'package:repositories/repositories.dart';
-
-import '../forms/my_text_form_field.dart';
-import '../forms/validators.dart';
 
 /// 用于图片数据的对话框
 /// [onUpdate] 更新回调

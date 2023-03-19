@@ -29,6 +29,8 @@ dependencies:
     path: ../page_block_widgets
   files:
     path: ../files
+  forms:
+    path: ../forms
 
 dev_dependencies:
   flutter_test:

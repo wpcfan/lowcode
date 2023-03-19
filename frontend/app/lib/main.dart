@@ -1,14 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:home/home.dart';
 import 'package:models/models.dart';
 import 'package:networking/networking.dart';
 import 'package:repositories/repositories.dart';
 
-import 'blocs/home_bloc.dart';
-import 'blocs/home_event.dart';
 import 'blocs/simple_observer.dart';
-import 'views/home_view.dart';
 
 /// 入口函数
 /// 运行 Flutter 应用，也可以使用异步方式运行

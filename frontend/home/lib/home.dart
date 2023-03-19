@@ -1,3 +1,5 @@
+library home;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -13,6 +15,10 @@ import '../widgets/product_dialog.dart';
 import '../widgets/right_drawer.dart';
 import '../widgets/sliver_app_bar.dart';
 import '../widgets/sliver_body.dart';
+
+export 'blocs/home_bloc.dart';
+export 'blocs/home_event.dart';
+export 'blocs/home_state.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});

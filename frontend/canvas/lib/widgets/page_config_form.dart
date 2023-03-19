@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:forms/forms.dart';
 import 'package:models/models.dart';
 
 import '../blocs/canvas_state.dart';
-import '../forms/my_text_form_field.dart';
-import '../forms/validators.dart';
 
 /// 页面配置表单组件
 /// [state] 画布状态

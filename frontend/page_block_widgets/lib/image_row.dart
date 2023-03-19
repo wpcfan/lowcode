@@ -4,6 +4,12 @@ import 'package:models/models.dart';
 
 import 'image.dart';
 
+/// 图片行组件
+/// 用于展示一行图片
+/// 一行图片的数量可以是 1、2、3、或更多
+/// 当数量为 1 时，图片会铺满整行
+/// 当数量为 2 或 3 时，图片会平分整行
+/// 当数量大于 3 时，图片会以横向滚动的方式展示
 class ImageRowWidget extends StatelessWidget {
   const ImageRowWidget({
     super.key,
@@ -34,7 +40,13 @@ class ImageRowWidget extends StatelessWidget {
     final verticalPadding = (config.verticalPadding ?? 0) / ratio;
     final itemWidth = blockWidth - horizontalPadding * 2;
     final itemHeight = blockHeight - verticalPadding * 2;
-    page({required Widget child}) => SwiftUi.widget(child: child)
+
+    /// 构建外层容器，包含背景色、边框、内边距
+    /// 用于控制整个组件的大小
+    /// 以及控制组件的背景色、边框
+    /// 注意这是一个函数，一般我们构建完内层组件后，会调用它来构建外层组件
+    /// 使用上，内层如果是 child，那么可以通过 child.parent(page) 来构建外层
+    page({required Widget child}) => child
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .decorated(
           color: backgroundColor,

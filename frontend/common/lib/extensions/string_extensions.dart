@@ -16,10 +16,12 @@ extension StringExtension on String {
         patternList: patternList,
       );
 
-  EasyRichText toPriceWithDecimalSize(
-      {double defaultFontSize = 14,
-      double decimalFontSize = 12.0,
-      String decimalSign = '.'}) {
+  /// 价格的富文本展示
+  EasyRichText toPriceWithDecimalSize({
+    double defaultFontSize = 14,
+    double decimalFontSize = 12.0,
+    String decimalSign = '.',
+  }) {
     final defaultStyle = TextStyle(
       fontWeight: FontWeight.bold,
       fontSize: defaultFontSize,
@@ -65,25 +67,4 @@ extension StringExtension on String {
           decoration: TextDecoration.lineThrough,
         ));
   }
-
-  // 根据字体大小计算渲染后的宽度
-  double widthOfText({
-    double fontSize = 12.0,
-    FontWeight fontWeight = FontWeight.normal,
-  }) {
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: this,
-        style: TextStyle(
-          fontWeight: fontWeight,
-          fontSize: fontSize,
-        ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-    return textPainter.width;
-  }
-
-  Color hexToColor({String alphaChannel = 'FF'}) =>
-      Color(int.parse(replaceFirst('#', '0x$alphaChannel')));
 }

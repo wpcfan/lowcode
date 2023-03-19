@@ -3,6 +3,14 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/product_row.dart';
 
+/// 瀑布流组件
+/// 用于展示商品列表
+/// 会根据商品的宽高比来自动计算高度
+/// 以适应不同的屏幕
+/// 可以通过 [BlockConfig] 参数来指定区块的宽度、高度、内边距、外边距等
+/// 可以通过 [Product] 参数来指定商品列表
+/// 可以通过 [addToCart] 参数来指定点击添加到购物车按钮时的回调
+/// 可以通过 [onTap] 参数来指定点击商品卡片时的回调
 class WaterfallWidget extends StatelessWidget {
   const WaterfallWidget({
     super.key,

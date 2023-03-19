@@ -29,7 +29,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    page({required Widget child}) => SwiftUi.widget(child: child)
+    page({required Widget child}) => child
         .decorated(
           color: backgroundColor,
           border: Border.all(

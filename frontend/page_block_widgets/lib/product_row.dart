@@ -47,7 +47,7 @@ class ProductRowWidget extends StatelessWidget {
     /// 注意到 page 其实是一个方法，接受一个 Widget 作为参数，返回一个 Widget
     /// 通过这种方式，我们可以在 page 中对 Widget 进行一些处理，比如添加边框、背景色等
     /// 这样我们可以专注于 Widget 的内容，而不用关心 Widget 的样式
-    page({required Widget child}) => SwiftUi.widget(child: child)
+    page({required Widget child}) => child
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .decorated(
           color: backgroundColor,

@@ -27,7 +27,7 @@ class Header extends StatelessWidget {
           ),
         if (!Responsive.isMobile(context)) ...[
           Text(
-            "动态页面配置平台",
+            '动态页面配置平台',
             style: Theme.of(context).textTheme.titleLarge,
           ),
         ],

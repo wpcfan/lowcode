@@ -13,15 +13,6 @@ void main() {
   setUp(() {
     adminRepo = MockPageAdminRepository();
     pageBloc = PageBloc(adminRepo);
-
-    when(() => adminRepo.search(any<PageQuery>()))
-        .thenAnswer((_) async => PageWrapper(
-              items: [],
-              page: 0,
-              size: 10,
-              totalPage: 0,
-              totalSize: 0,
-            ));
   });
 
   setUpAll(() {
@@ -32,19 +23,37 @@ void main() {
     pageBloc.close();
   });
 
-  // Test for PageEventTitleChanged
-  blocTest<PageBloc, PageState>(
-    'emits updated state when title changed',
-    build: () => pageBloc,
-    act: (bloc) => bloc.add(PageEventTitleChanged('New Title')),
-    expect: () => [
-      const PageState(
-        status: FetchStatus.loading,
-      ),
-      const PageState(
-        query: PageQuery(title: 'New Title'),
-        status: FetchStatus.populated,
-      )
-    ], // Add expected states here
-  );
+  group('PageBloc', () {
+    blocTest<PageBloc, PageState>(
+      'emits [] when nothing is added',
+      build: () => pageBloc,
+      expect: () => [],
+    );
+
+    // Test for PageEventTitleChanged
+    blocTest<PageBloc, PageState>(
+      'emits updated state when title changed',
+      setUp: () {
+        when(() => adminRepo.search(any<PageQuery>()))
+            .thenAnswer((_) async => PageWrapper(
+                  items: [],
+                  page: 0,
+                  size: 10,
+                  totalPage: 0,
+                  totalSize: 0,
+                ));
+      },
+      build: () => pageBloc,
+      act: (bloc) => bloc.add(PageEventTitleChanged('New Title')),
+      expect: () => [
+        const PageState(
+          status: FetchStatus.loading,
+        ),
+        const PageState(
+          query: PageQuery(title: 'New Title'),
+          status: FetchStatus.populated,
+        )
+      ], // Add expected states here
+    );
+  });
 }

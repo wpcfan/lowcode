@@ -66,9 +66,15 @@ class CanvasPage extends StatelessWidget {
               if (state.error.isNotEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.error),
+                    backgroundColor: Colors.red,
+                    content: Text(state.error,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                        )),
                   ),
                 );
+                context.read<CanvasBloc>().add(CanvasEventErrorCleared());
               }
             },
             builder: (context, state) {
@@ -77,9 +83,6 @@ class CanvasPage extends StatelessWidget {
               }
               if (state.status == FetchStatus.loading) {
                 return const Center(child: CircularProgressIndicator());
-              }
-              if (state.status == FetchStatus.error) {
-                return const Center(child: Text('error'));
               }
               final rightPane = RightPane(
                 showBlockConfig: state.selectedBlock != null,

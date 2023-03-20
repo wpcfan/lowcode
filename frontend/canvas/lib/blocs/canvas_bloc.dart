@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -26,12 +27,20 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
     on<CanvasEventAddBlockData>(_onCanvasEventAddBlockData);
     on<CanvasEventDeleteBlockData>(_onCanvasEventDeleteBlockData);
     on<CanvasEventUpdateBlockData>(_onCanvasEventUpdateBlockData);
+    on<CanvasEventErrorCleared>(_onCanvasEventErrorCleared);
+  }
+
+  /// 清除错误
+  void _onCanvasEventErrorCleared(
+      CanvasEventErrorCleared event, Emitter<CanvasState> emit) {
+    emit(state.copyWith(error: ''));
   }
 
   /// 错误处理
   void _handleError(Emitter<CanvasState> emit, dynamic error) {
+    final message = error is DioError ? error.message : error.toString();
     emit(state.copyWith(
-      error: error.toString(),
+      error: message,
       saving: false,
       status: FetchStatus.error,
     ));

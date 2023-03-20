@@ -117,3 +117,10 @@ class CanvasEventUpdateBlockData extends CanvasEvent {
   @override
   List<Object> get props => [data];
 }
+
+class CanvasEventErrorCleared extends CanvasEvent {
+  CanvasEventErrorCleared() : super();
+
+  @override
+  List<Object?> get props => [];
+}

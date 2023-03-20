@@ -22,22 +22,7 @@ class _CenterPaneState extends State<CenterPane> {
 
   @override
   Widget build(BuildContext context) {
-    switch (widget.state.status) {
-      case FetchStatus.initial:
-        return const Center(
-          child: Text('初始状态'),
-        );
-      case FetchStatus.loading:
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
-      case FetchStatus.error:
-        return const Center(
-          child: Text('加载失败'),
-        );
-      case FetchStatus.populated:
-        return _buildCanvas(widget.state);
-    }
+    return _buildCanvas(widget.state);
   }
 
   Widget _buildCanvas(CanvasState state) {

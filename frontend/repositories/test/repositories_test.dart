@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:models/models.dart';
-import 'package:repositories/category_repository.dart';
+import 'package:repositories/repositories.dart';
 
 class MockDio extends Mock implements Dio {}
 
@@ -22,10 +22,10 @@ void main() {
         const Category(id: 2, name: 'Category 2'),
       ];
 
-      when(client.get('/categories',
-              queryParameters: anyNamed('queryParameters')))
-          .thenAnswer((_) async => Response(
-              data: categories,
+      when(() => client.get('/categories',
+              queryParameters: any(named: 'queryParameters')))
+          .thenAnswer((_) async => Response<List<Map<String, dynamic>>>(
+              data: categories.map((e) => e.toJson()).toList(),
               requestOptions: RequestOptions(
                 path: '/categories',
               )));
@@ -55,10 +55,10 @@ void main() {
         ),
       ];
 
-      when(client.get('/categories',
-              queryParameters: anyNamed('queryParameters')))
-          .thenAnswer((_) async => Response(
-              data: categories,
+      when(() => client.get('/categories',
+              queryParameters: any(named: 'queryParameters')))
+          .thenAnswer((_) async => Response<List<Map<String, dynamic>>>(
+              data: categories.map((e) => e.toJson()).toList(),
               requestOptions: RequestOptions(path: '/categories')));
 
       final result = await repository.getCategories(
@@ -73,10 +73,10 @@ void main() {
         const Category(id: 2, name: 'Category 2'),
       ];
 
-      when(client.get('/categories',
-              queryParameters: anyNamed('queryParameters')))
-          .thenAnswer((_) async => Response(
-              data: categories,
+      when(() => client.get('/categories',
+              queryParameters: any(named: 'queryParameters')))
+          .thenAnswer((_) async => Response<List<Map<String, dynamic>>>(
+              data: categories.map((e) => e.toJson()).toList(),
               requestOptions: RequestOptions(path: '/categories')));
 
       final result = await repository.getCategories(

@@ -5,3 +5,7 @@
 **/android/local.properties
 *.cc
 *.cmake
+**/**/.dart_tool/version
+**/**/.dart_tool/package_config.json
+**/**/.dart_tool/package_config_subset
+**/**/linux/flutter/ephemeral/.plugin_symlinks/url_launcher_linux

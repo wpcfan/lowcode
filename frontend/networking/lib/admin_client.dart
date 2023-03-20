@@ -13,7 +13,12 @@ class AdminClient {
       }),
     );
     final dio = Dio(options);
-    dio.interceptors.add(PrettyDioLogger());
+    _setupInterceptors(dio);
+    return dio;
+  }
+
+  static void _setupInterceptors(Dio dio) {
+     dio.interceptors.add(PrettyDioLogger());
     dio.interceptors.add(InterceptorsWrapper(
       onError: (e, handler) {
         if (e.response?.data != null) {
@@ -28,7 +33,6 @@ class AdminClient {
         return handler.next(e);
       },
     ));
-    return dio;
   }
 
   AdminClient._();

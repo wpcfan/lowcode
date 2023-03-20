@@ -4,7 +4,7 @@ import 'package:files/files.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:repositories/repositories.dart';
 
 class MockFileUploadRepository extends Mock implements FileUploadRepository {}
@@ -35,7 +35,7 @@ void main() {
     testWidgets('should show CircularProgressIndicator when loading',
         (WidgetTester tester) async {
       when(() => fileBloc.state).thenReturn(
-        () => const FileState(
+        const FileState(
           files: [],
           editable: false,
           selectedKeys: [],

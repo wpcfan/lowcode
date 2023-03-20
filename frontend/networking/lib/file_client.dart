@@ -14,6 +14,11 @@ class FileClient {
       }),
     );
     final dio = Dio(options);
+    _setupInterceptors(dio);
+    return dio;
+  }
+
+  static void _setupInterceptors(Dio dio) {
     dio.interceptors.add(PrettyDioLogger());
     dio.interceptors.add(InterceptorsWrapper(
       onError: (e, handler) {
@@ -29,6 +34,5 @@ class FileClient {
         return handler.next(e);
       },
     ));
-    return dio;
   }
 }

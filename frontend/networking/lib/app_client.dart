@@ -19,6 +19,11 @@ class AppClient {
       }),
     );
     final dio = Dio(options);
+    _setupInterceptors(dio);
+    return dio;
+  }
+
+  static void _setupInterceptors(Dio dio) {
     dio.interceptors.add(PrettyDioLogger());
     dio.interceptors.add(DioCacheInterceptor(options: cacheOptions));
     dio.interceptors.add(InterceptorsWrapper(
@@ -28,6 +33,5 @@ class AppClient {
         return handler.next(options);
       },
     ));
-    return dio;
   }
 }

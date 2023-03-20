@@ -126,7 +126,7 @@ void main() {
         borderColor: Colors.red,
         backgroundColor: Colors.blue,
         blockWidth: 400,
-        blockHeight: 280,
+        blockHeight: 120,
         horizontalPadding: 10,
         verticalPadding: 10,
         horizontalSpacing: 10,

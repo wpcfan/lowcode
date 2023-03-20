@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -26,8 +27,7 @@ class CategoryDataForm extends StatelessWidget {
     /// 类目仓库
     final categoryRepository = context.read<CategoryRepository>();
 
-    return SingleChildScrollView(
-        child: FutureBuilder(
+    return FutureBuilder(
       future: _getCategories(categoryRepository),
       initialData: const [],
       builder: (context, snapshot) {
@@ -49,7 +49,7 @@ class CategoryDataForm extends StatelessWidget {
         /// 类目
         final categories = snapshot.data as List<Category>;
 
-        return Autocomplete<Category>(
+        final autoComplete = Autocomplete<Category>(
           /// 构建选项
           optionsBuilder: (text) {
             return categories
@@ -57,11 +57,6 @@ class CategoryDataForm extends StatelessWidget {
                     .toLowerCase()
                     .contains(text.text.toLowerCase()))
                 .toList();
-          },
-
-          /// 构建选项视图
-          optionsViewBuilder: (context, onSelected, options) {
-            return _buildCategoryTree(options);
           },
 
           /// 选中回调
@@ -82,8 +77,12 @@ class CategoryDataForm extends StatelessWidget {
           /// 选中值在输入框中的显示
           displayStringForOption: (option) => option.name ?? '',
         );
+        final tree = _buildCategoryTree(categories);
+        return [autoComplete, tree]
+            .toColumn(mainAxisSize: MainAxisSize.min)
+            .scrollable();
       },
-    ));
+    );
   }
 
   /// 获取类目
@@ -97,7 +96,6 @@ class CategoryDataForm extends StatelessWidget {
   Widget _buildCategoryTree(Iterable<Category> categories) {
     return Material(
       child: ListView.builder(
-        /// 不可滚动
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {

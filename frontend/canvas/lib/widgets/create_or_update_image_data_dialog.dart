@@ -64,9 +64,7 @@ class _CreateOrUpdateImageDataDialogState
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [
-            ..._createFormItems(),
-          ],
+          children: _createFormItems(),
         ),
       ),
       actions: [

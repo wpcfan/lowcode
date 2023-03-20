@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:forms/forms.dart';
 import 'package:models/models.dart';
 
 class CreateOrUpdatePageDialog extends StatefulWidget {
@@ -36,161 +37,7 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                initialValue: widget.layout?.title,
-                decoration: const InputDecoration(
-                  labelText: '标题',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '标题不能为空';
-                  }
-                  if (value.length > 100) {
-                    return '标题不能超过100个字符';
-                  }
-                  if (value.length < 2) {
-                    return '标题不能少于2个字符';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  setState(() {
-                    _formValue = _formValue.copyWith(title: value);
-                  });
-                },
-              ),
-              DropdownButtonFormField<Platform>(
-                value: widget.layout?.platform,
-                decoration: const InputDecoration(
-                  labelText: '平台',
-                ),
-                items: [
-                  DropdownMenuItem(
-                    value: Platform.app,
-                    child: Text(Platform.app.value),
-                  ),
-                  DropdownMenuItem(
-                    value: Platform.web,
-                    child: Text(Platform.web.value),
-                  ),
-                ],
-                onChanged: (value) {},
-                onSaved: (newValue) {
-                  setState(() {
-                    _formValue = _formValue.copyWith(platform: newValue);
-                  });
-                },
-              ),
-              DropdownButtonFormField<PageType>(
-                value: widget.layout?.pageType,
-                decoration: const InputDecoration(
-                  labelText: '类型',
-                ),
-                items: const [
-                  DropdownMenuItem(
-                    value: PageType.home,
-                    child: Text('首页'),
-                  ),
-                  DropdownMenuItem(
-                    value: PageType.category,
-                    child: Text('列表'),
-                  ),
-                  DropdownMenuItem(
-                    value: PageType.about,
-                    child: Text('关于'),
-                  ),
-                ],
-                onChanged: (value) {},
-                onSaved: (newValue) => setState(() {
-                  _formValue = _formValue.copyWith(pageType: newValue);
-                }),
-              ),
-              TextFormField(
-                initialValue:
-                    widget.layout?.config.horizontalPadding?.toString(),
-                decoration: const InputDecoration(
-                  labelText: '水平内边距',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '水平内边距不能为空';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return '水平内边距必须是数字';
-                  }
-                  if (double.parse(value) < 0) {
-                    return '水平内边距不能小于0';
-                  }
-                  if (double.parse(value) > 100) {
-                    return '水平内边距不能大于100';
-                  }
-                  return null;
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    _formValue = _formValue.copyWith(
-                        config: _formValue.config.copyWith(
-                            horizontalPadding: double.parse(newValue!)));
-                  });
-                },
-              ),
-              TextFormField(
-                initialValue: widget.layout?.config.verticalPadding?.toString(),
-                decoration: const InputDecoration(
-                  labelText: '垂直内边距',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '垂直内边距不能为空';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return '垂直内边距必须是数字';
-                  }
-                  if (double.parse(value) < 0) {
-                    return '垂直内边距不能小于0';
-                  }
-                  if (double.parse(value) > 100) {
-                    return '垂直内边距不能大于100';
-                  }
-                  return null;
-                },
-                onSaved: (newValue) {
-                  setState(() {
-                    _formValue = _formValue.copyWith(
-                        config: _formValue.config.copyWith(
-                            verticalPadding: double.parse(newValue!)));
-                  });
-                },
-              ),
-              TextFormField(
-                initialValue:
-                    widget.layout?.config.baselineScreenWidth?.toString(),
-                decoration: const InputDecoration(
-                  labelText: '基线屏幕宽度',
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return '基线屏幕宽度不能为空';
-                  }
-                  if (double.tryParse(value) == null) {
-                    return '基线屏幕宽度必须是数字';
-                  }
-                  if (double.parse(value) < 300) {
-                    return '基线屏幕宽度不能小于0';
-                  }
-                  if (double.parse(value) > 1800) {
-                    return '基线屏幕宽度不能大于1800';
-                  }
-                  return null;
-                },
-                onSaved: (newValue) => setState(() {
-                  _formValue = _formValue.copyWith(
-                      config: _formValue.config.copyWith(
-                          baselineScreenWidth: double.parse(newValue!)));
-                }),
-              ),
-            ],
+            children: _createFormItems(),
           )),
       actions: [
         TextButton(
@@ -215,5 +62,123 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
         ),
       ],
     );
+  }
+
+  List<Widget> _createFormItems() {
+    return [
+      MyTextFormField(
+        initialValue: widget.layout?.title,
+        label: '标题',
+        hint: '请输入标题',
+        validators: [
+          Validators.required(label: '标题'),
+          Validators.maxLength(maxLength: 100, label: '标题'),
+          Validators.minLength(minLength: 2, label: '标题'),
+        ],
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue.copyWith(title: value);
+          });
+        },
+      ),
+      DropdownButtonFormField<Platform>(
+        value: widget.layout?.platform,
+        decoration: const InputDecoration(
+          labelText: '平台',
+        ),
+        items: [
+          DropdownMenuItem(
+            value: Platform.app,
+            child: Text(Platform.app.value),
+          ),
+          DropdownMenuItem(
+            value: Platform.web,
+            child: Text(Platform.web.value),
+          ),
+        ],
+        onChanged: (value) {},
+        onSaved: (newValue) {
+          setState(() {
+            _formValue = _formValue.copyWith(platform: newValue);
+          });
+        },
+      ),
+      DropdownButtonFormField<PageType>(
+        value: widget.layout?.pageType,
+        decoration: const InputDecoration(
+          labelText: '类型',
+        ),
+        items: const [
+          DropdownMenuItem(
+            value: PageType.home,
+            child: Text('首页'),
+          ),
+          DropdownMenuItem(
+            value: PageType.category,
+            child: Text('列表'),
+          ),
+          DropdownMenuItem(
+            value: PageType.about,
+            child: Text('关于'),
+          ),
+        ],
+        onChanged: (value) {},
+        onSaved: (newValue) => setState(() {
+          _formValue = _formValue.copyWith(pageType: newValue);
+        }),
+      ),
+      MyTextFormField(
+        initialValue: widget.layout?.config.horizontalPadding?.toString(),
+        label: '水平内边距',
+        hint: '请输入水平内边距',
+        validators: [
+          Validators.required(label: '水平内边距'),
+          Validators.isDouble(label: '水平内边距'),
+          Validators.min(min: 0, label: '水平内边距'),
+          Validators.max(max: 100, label: '水平内边距'),
+        ],
+        onChanged: (newValue) {
+          setState(() {
+            _formValue = _formValue.copyWith(
+                config: _formValue.config
+                    .copyWith(horizontalPadding: double.parse(newValue!)));
+          });
+        },
+      ),
+      MyTextFormField(
+        initialValue: widget.layout?.config.verticalPadding?.toString(),
+        label: '垂直内边距',
+        hint: '请输入垂直内边距',
+        validators: [
+          Validators.required(label: '垂直内边距'),
+          Validators.isDouble(label: '垂直内边距'),
+          Validators.min(min: 0, label: '垂直内边距'),
+          Validators.max(max: 100, label: '垂直内边距'),
+        ],
+        onChanged: (newValue) {
+          setState(() {
+            _formValue = _formValue.copyWith(
+                config: _formValue.config
+                    .copyWith(verticalPadding: double.parse(newValue!)));
+          });
+        },
+      ),
+      MyTextFormField(
+        initialValue: widget.layout?.config.baselineScreenWidth?.toString(),
+        label: '基线屏幕宽度',
+        hint: '请输入基线屏幕宽度',
+        validators: [
+          Validators.required(label: '基线屏幕宽度'),
+          Validators.isDouble(label: '基线屏幕宽度'),
+          Validators.min(min: 300, label: '基线屏幕宽度'),
+          Validators.max(max: 1800, label: '基线屏幕宽度'),
+        ],
+        onChanged: (newValue) => setState(() {
+          _formValue = _formValue.copyWith(
+              config: _formValue.config
+                  .copyWith(baselineScreenWidth: double.parse(newValue!)));
+        }),
+      ),
+    ];
   }
 }

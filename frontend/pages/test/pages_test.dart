@@ -55,5 +55,103 @@ void main() {
         )
       ], // Add expected states here
     );
+
+    blocTest<PageBloc, PageState>(
+      'emits updated state when page changed',
+      setUp: () {
+        when(() => adminRepo.search(any<PageQuery>()))
+            .thenAnswer((_) async => PageWrapper(
+                  items: [],
+                  page: 2,
+                  size: 10,
+                  totalPage: 0,
+                  totalSize: 0,
+                ));
+      },
+      build: () => pageBloc,
+      act: (bloc) => bloc.add(PageEventPageChanged(2)),
+      expect: () => [
+        const PageState(
+          status: FetchStatus.loading,
+        ),
+        const PageState(
+          page: 2,
+          query: PageQuery(page: 2),
+          status: FetchStatus.populated,
+        )
+      ], // Add expected states here
+    );
+
+    blocTest<PageBloc, PageState>('emits updated state when platform changed',
+        setUp: () {
+          when(() => adminRepo.search(any<PageQuery>()))
+              .thenAnswer((_) async => PageWrapper(
+                    items: [],
+                    page: 0,
+                    size: 10,
+                    totalPage: 0,
+                    totalSize: 0,
+                  ));
+        },
+        build: () => pageBloc,
+        act: (bloc) => bloc.add(PageEventPlatformChanged(Platform.app)),
+        expect: () => [
+              const PageState(
+                status: FetchStatus.loading,
+              ),
+              const PageState(
+                query: PageQuery(platform: Platform.app),
+                status: FetchStatus.populated,
+              )
+            ] // Add expected states here
+        );
+
+    blocTest<PageBloc, PageState>('emits updated state when status changed',
+        setUp: () {
+          when(() => adminRepo.search(any<PageQuery>()))
+              .thenAnswer((_) async => PageWrapper(
+                    items: [],
+                    page: 0,
+                    size: 10,
+                    totalPage: 0,
+                    totalSize: 0,
+                  ));
+        },
+        build: () => pageBloc,
+        act: (bloc) => bloc.add(PageEventPageStatusChanged(PageStatus.draft)),
+        expect: () => [
+              const PageState(
+                status: FetchStatus.loading,
+              ),
+              const PageState(
+                query: PageQuery(status: PageStatus.draft),
+                status: FetchStatus.populated,
+              )
+            ] // Add expected states here
+        );
+
+    blocTest<PageBloc, PageState>('emits updated state when page type changed',
+        setUp: () {
+          when(() => adminRepo.search(any<PageQuery>()))
+              .thenAnswer((_) async => PageWrapper(
+                    items: [],
+                    page: 0,
+                    size: 10,
+                    totalPage: 0,
+                    totalSize: 0,
+                  ));
+        },
+        build: () => pageBloc,
+        act: (bloc) => bloc.add(PageEventPageTypeChanged(PageType.home)),
+        expect: () => [
+              const PageState(
+                status: FetchStatus.loading,
+              ),
+              const PageState(
+                query: PageQuery(pageType: PageType.home),
+                status: FetchStatus.populated,
+              )
+            ] // Add expected states here
+        );
   });
 }

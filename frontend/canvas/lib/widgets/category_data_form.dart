@@ -109,35 +109,32 @@ class CategoryDataForm extends StatelessWidget {
 
   /// 构建类目项
   Widget _buildCategoryItem(Category category) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        /// 类目
-        RadioListTile(
-          title: Text(category.name ?? ''),
-          value: category,
-          selected: data.isEmpty ? false : data.first.content.id == category.id,
-          groupValue: data.isEmpty ? null : data.first.content,
-          onChanged: (value) {
-            if (value != null) {
-              if (data.isNotEmpty) {
-                onCategoryUpdated(value);
-                return;
-              }
-              onCategoryAdded(category);
-            } else {
-              onCategoryRemoved(category);
+    return [
+      /// 类目
+      RadioListTile(
+        title: Text(category.name ?? ''),
+        value: category,
+        selected: data.isEmpty ? false : data.first.content.id == category.id,
+        groupValue: data.isEmpty ? null : data.first.content,
+        onChanged: (value) {
+          if (value != null) {
+            if (data.isNotEmpty) {
+              onCategoryUpdated(value);
+              return;
             }
-          },
-        ),
+            onCategoryAdded(category);
+          } else {
+            onCategoryRemoved(category);
+          }
+        },
+      ),
 
-        /// 子类目
-        if (category.children != null && category.children!.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(left: 16),
-            child: _buildCategoryTree(category.children!),
-          ),
-      ],
-    );
+      /// 子类目
+      if (category.children != null && category.children!.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: _buildCategoryTree(category.children!),
+        ),
+    ].toColumn(mainAxisSize: MainAxisSize.min);
   }
 }

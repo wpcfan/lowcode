@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/forms.dart';
 import 'package:models/models.dart';
@@ -23,6 +24,7 @@ class CreateOrUpdatePageDialog extends StatefulWidget {
 class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
   late PageLayout _formValue;
   final _formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -31,36 +33,33 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final cancelButton = TextButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: const Text('取消'),
+    );
+
+    final confirmButton = TextButton(
+      onPressed: () {
+        if (_formKey.currentState?.validate() ?? false) {
+          _formKey.currentState?.save();
+          if (widget.layout == null) {
+            widget.onCreate?.call(_formValue);
+          } else {
+            widget.onUpdate?.call(_formValue);
+          }
+          Navigator.of(context).pop();
+        }
+      },
+      child: const Text('确定'),
+    );
     return AlertDialog(
       title: Text(widget.title),
       content: Form(
           key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: _createFormItems(),
-          )),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('取消'),
-        ),
-        TextButton(
-          onPressed: () {
-            if (_formKey.currentState?.validate() ?? false) {
-              _formKey.currentState?.save();
-              if (widget.layout == null) {
-                widget.onCreate?.call(_formValue);
-              } else {
-                widget.onUpdate?.call(_formValue);
-              }
-              Navigator.of(context).pop();
-            }
-          },
-          child: const Text('确定'),
-        ),
-      ],
+          child: _createFormItems().toColumn(mainAxisSize: MainAxisSize.min)),
+      actions: [cancelButton, confirmButton],
     );
   }
 

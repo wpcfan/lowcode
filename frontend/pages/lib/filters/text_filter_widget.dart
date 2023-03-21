@@ -51,26 +51,23 @@ class TextFilterWidget extends StatelessWidget {
               ),
             ),
             PopupMenuItem(
-              child: Row(
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      controller.text = '';
-                      onFilter(controller.text);
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(cancelText),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      onFilter(controller.text);
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(confirmText),
-                  ),
-                ],
+                child: [
+              TextButton(
+                onPressed: () {
+                  controller.text = '';
+                  onFilter(controller.text);
+                  Navigator.of(context).pop();
+                },
+                child: Text(cancelText),
               ),
-            ),
+              TextButton(
+                onPressed: () {
+                  onFilter(controller.text);
+                  Navigator.of(context).pop();
+                },
+                child: Text(confirmText),
+              ),
+            ].toRow()),
           ];
         },
         child: Icon(value == null || value!.isEmpty

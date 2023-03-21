@@ -90,21 +90,16 @@ class ImageRowWidget extends StatelessWidget {
     final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
     return items
         .mapWithIndex(
-          (item, index) => Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(
-                right: index == items.length - 1 ? 0 : spaceBetweenItems,
-              ),
-              child: ImageWidget(
-                imageUrl: item.image,
-                errorImage: errorImage,
-                width: width / items.length,
-                height: itemHeight,
-                link: item.link,
-                onTap: onTap,
-              ),
-            ),
-          ),
+          (item, index) => ImageWidget(
+            imageUrl: item.image,
+            errorImage: errorImage,
+            width: width / items.length,
+            height: itemHeight,
+            link: item.link,
+            onTap: onTap,
+          )
+              .padding(right: index == items.length - 1 ? 0 : spaceBetweenItems)
+              .expanded(),
         )
         .toList()
         .toRow(

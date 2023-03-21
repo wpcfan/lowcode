@@ -15,30 +15,22 @@ class ProductDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      child: SizedBox(
-        width: 300,
-        height: 400,
-        child: Column(
-          children: [
-            Expanded(
-              child: Image.network(
-                product.images.first,
-                errorBuilder: (context, error, stackTrace) {
-                  return Image.asset(errorImage);
-                },
-              ).padding(top: 12),
-            ),
-            Text(product.name!),
-            Text(product.price!),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add to cart'),
-            ),
-          ],
+      child: [
+        Image.network(
+          product.images.first,
+          errorBuilder: (context, error, stackTrace) {
+            return Image.asset(errorImage);
+          },
+        ).padding(top: 12).expanded(),
+        Text(product.name!),
+        Text(product.price!),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Add to cart'),
         ),
-      ),
+      ].toColumn().constrained(maxWidth: 300, maxHeight: 400),
     );
   }
 }

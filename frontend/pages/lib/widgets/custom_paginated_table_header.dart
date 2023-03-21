@@ -22,11 +22,9 @@ class _CustomPaginatedTableHeaderState
         hintText: '标题',
         border: OutlineInputBorder(),
       ),
-      onChanged: (value) {
-        setState(() {
-          _query = _query.copyWith(title: value);
-        });
-      },
+      onChanged: (value) => setState(() {
+        _query = _query.copyWith(title: value);
+      }),
     ).expanded();
 
     final platformDropdown = DropdownButtonFormField<Platform>(
@@ -44,11 +42,9 @@ class _CustomPaginatedTableHeaderState
           child: Text(Platform.web.value),
         ),
       ],
-      onChanged: (value) {
-        setState(() {
-          _query = _query.copyWith(platform: value);
-        });
-      },
+      onChanged: (value) => setState(() {
+        _query = _query.copyWith(platform: value);
+      }),
     ).expanded();
 
     final typeDropdown = DropdownButtonFormField<PageType>(
@@ -70,11 +66,9 @@ class _CustomPaginatedTableHeaderState
           child: Text(PageType.about.value),
         ),
       ],
-      onChanged: (value) {
-        setState(() {
-          _query = _query.copyWith(pageType: value);
-        });
-      },
+      onChanged: (value) => setState(() {
+        _query = _query.copyWith(pageType: value);
+      }),
     ).expanded();
 
     final statusDropdown = DropdownButtonFormField<PageStatus>(
@@ -96,11 +90,9 @@ class _CustomPaginatedTableHeaderState
           child: Text(PageStatus.archived.value),
         ),
       ],
-      onChanged: (value) {
-        setState(() {
-          _query = _query.copyWith(status: value);
-        });
-      },
+      onChanged: (value) => setState(() {
+        _query = _query.copyWith(status: value);
+      }),
     ).expanded();
 
     final startTimeFromField = TextFormField(
@@ -109,19 +101,7 @@ class _CustomPaginatedTableHeaderState
         hintText: '起始日期从',
         border: OutlineInputBorder(),
       ),
-    ).inkWell(onTap: () async {
-      final date = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-      );
-      if (date != null) {
-        setState(() {
-          _query = _query.copyWith(startDateFrom: date.formattedYYYYMMDD);
-        });
-      }
-    }).expanded();
+    ).inkWell(onTap: () => _handleStartTimeFrom(context)).expanded();
 
     final startTimeToField = TextFormField(
       enabled: false,
@@ -129,19 +109,7 @@ class _CustomPaginatedTableHeaderState
         hintText: '起始日期至',
         border: OutlineInputBorder(),
       ),
-    ).inkWell(onTap: () async {
-      final date = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-      );
-      if (date != null) {
-        setState(() {
-          _query = _query.copyWith(startDateTo: date.formattedYYYYMMDD);
-        });
-      }
-    }).expanded();
+    ).inkWell(onTap: () => _handleStartTimeTo(context)).expanded();
 
     final endTimeFromField = TextFormField(
       enabled: false,
@@ -149,19 +117,7 @@ class _CustomPaginatedTableHeaderState
         hintText: '结束日期从',
         border: OutlineInputBorder(),
       ),
-    ).inkWell(onTap: () async {
-      final date = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-      );
-      if (date != null) {
-        setState(() {
-          _query = _query.copyWith(endDateFrom: date.formattedYYYYMMDD);
-        });
-      }
-    }).expanded();
+    ).inkWell(onTap: () => _handleEndTimeFrom(context)).expanded();
 
     final endTimeToField = TextFormField(
       enabled: false,
@@ -169,36 +125,20 @@ class _CustomPaginatedTableHeaderState
         hintText: '结束日期至',
         border: OutlineInputBorder(),
       ),
-    ).inkWell(onTap: () async {
-      final date = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime(2000),
-        lastDate: DateTime(2100),
-      );
-      if (date != null) {
-        setState(() {
-          _query = _query.copyWith(endDateTo: date.formattedYYYYMMDD);
-        });
-      }
-    }).expanded();
+    ).inkWell(onTap: () => _handleEndTimeTo(context)).expanded();
 
     final clearButton = TextButton(
-      onPressed: () {
-        setState(() {
-          _query = const PageQuery();
-        });
-      },
+      onPressed: () => setState(() {
+        _query = const PageQuery();
+      }),
       child: const Text('清除'),
     ).constrained(height: 50).expanded();
 
     final searchButton = ElevatedButton(
-      onPressed: () {
-        setState(() {
-          _query = _query.copyWith(page: 0);
-          debugPrint(_query.toJsonString());
-        });
-      },
+      onPressed: () => setState(() {
+        _query = _query.copyWith(page: 0);
+        debugPrint(_query.toJsonString());
+      }),
       child: const Text('搜索'),
     ).constrained(height: 50).expanded();
 
@@ -230,5 +170,61 @@ class _CustomPaginatedTableHeaderState
       filterRow,
     ].toColumn();
     return headersColumn;
+  }
+
+  Future<void> _handleStartTimeFrom(BuildContext context) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (date != null) {
+      setState(() {
+        _query = _query.copyWith(startDateFrom: date.formattedYYYYMMDD);
+      });
+    }
+  }
+
+  Future<void> _handleStartTimeTo(BuildContext context) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (date != null) {
+      setState(() {
+        _query = _query.copyWith(startDateTo: date.formattedYYYYMMDD);
+      });
+    }
+  }
+
+  Future<void> _handleEndTimeFrom(BuildContext context) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (date != null) {
+      setState(() {
+        _query = _query.copyWith(endDateFrom: date.formattedYYYYMMDD);
+      });
+    }
+  }
+
+  Future<void> _handleEndTimeTo(BuildContext context) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (date != null) {
+      setState(() {
+        _query = _query.copyWith(endDateTo: date.formattedYYYYMMDD);
+      });
+    }
   }
 }

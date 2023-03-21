@@ -43,9 +43,7 @@ class SelectionFilterWidget<T> extends StatelessWidget {
             );
           }),
           PopupMenuItem(
-            onTap: () {
-              onFilter(null);
-            },
+            onTap: () => onFilter(null),
             enabled: value != null,
             child: Text(
               cancelText,
@@ -62,9 +60,7 @@ class SelectionFilterWidget<T> extends StatelessWidget {
 
     final clear = IconButton(
       icon: Icon(clearIconData),
-      onPressed: () {
-        onFilter(null);
-      },
+      onPressed: () => onFilter(null),
     );
 
     final arr =

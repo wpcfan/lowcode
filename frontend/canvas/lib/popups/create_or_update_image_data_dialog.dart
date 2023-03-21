@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:files/files.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/forms.dart';
@@ -58,25 +59,21 @@ class _CreateOrUpdateImageDataDialogState
 
   @override
   Widget build(BuildContext context) {
+    final cancelButton = TextButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: const Text('取消'),
+    );
+    final confirmButton = TextButton(
+      onPressed: () => _validateAndSave(context),
+      child: const Text('确定'),
+    );
     return AlertDialog(
       title: Text(widget.title),
       content: Form(
         key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: _createFormItems(),
-        ),
+        child: _createFormItems().toColumn(mainAxisSize: MainAxisSize.min),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('取消'),
-        ),
-        TextButton(
-          onPressed: () => _validateAndSave(context),
-          child: const Text('确定'),
-        ),
-      ],
+      actions: [cancelButton, confirmButton],
     );
   }
 

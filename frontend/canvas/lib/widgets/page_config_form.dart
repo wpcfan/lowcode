@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/forms.dart';
 import 'package:models/models.dart';
@@ -37,7 +38,7 @@ class _PageConfigFormState extends State<PageConfigForm> {
     ];
     return Form(
       key: _formKey,
-      child: Column(children: elements),
+      child: elements.toColumn(mainAxisSize: MainAxisSize.min),
     );
   }
 

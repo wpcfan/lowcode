@@ -21,26 +21,23 @@ class _PageConfigFormState extends State<PageConfigForm> {
   Widget build(BuildContext context) {
     /// 初始化表单值
     _formValue = widget.layout;
+    final elements = [
+      const Text('页面属性'),
+      ..._createFormItems(),
+      const SizedBox(height: 16),
+      ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState?.validate() ?? false) {
+            _formKey.currentState?.save();
+            widget.onSave?.call(_formValue!);
+          }
+        },
+        child: const Text('保存'),
+      ),
+    ];
     return Form(
       key: _formKey,
-      child: Column(
-        children: [
-          const Text('页面属性'),
-          ..._createFormItems(),
-          const SizedBox(
-            height: 16,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState?.validate() ?? false) {
-                _formKey.currentState?.save();
-                widget.onSave?.call(_formValue!);
-              }
-            },
-            child: const Text('保存'),
-          ),
-        ],
-      ),
+      child: Column(children: elements),
     );
   }
 

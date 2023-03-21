@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:forms/forms.dart';
 import 'package:models/models.dart';
@@ -35,45 +36,43 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
       _formValue = widget.block;
     });
 
-    return SingleChildScrollView(
-      child: Form(
-        /// 在此处设置表单key，然后可以通过_formKey.currentState来获取表单状态
-        key: _formKey,
-        child: Column(
-          children: [
-            ..._createFormItems(),
-            const SizedBox(
-              height: 16,
-            ),
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    /// 验证表单
-                    if (_formKey.currentState?.validate() ?? false) {
-                      /// 保存表单
-                      _formKey.currentState?.save();
-
-                      /// 回调
-                      widget.onSave?.call(_formValue);
-                    }
-                  },
-                  child: const Text('保存'),
-                ),
-                TextButton(
-                    onPressed: () {
-                      widget.onDelete?.call(_formValue.id!);
-                    },
-                    child: const Text(
-                      '删除',
-                      style: TextStyle(color: Colors.redAccent),
-                    ))
-              ],
-            )
-          ],
-        ),
+    final buttonRow = [
+      ElevatedButton(
+        onPressed: _validateAndSave,
+        child: const Text('保存'),
       ),
-    );
+      TextButton(
+          onPressed: () => widget.onDelete?.call(_formValue.id!),
+          child: const Text(
+            '删除',
+            style: TextStyle(color: Colors.redAccent),
+          ))
+    ].toRow();
+
+    final formColumn = [
+      ..._createFormItems(),
+      const SizedBox(
+        height: 16,
+      ),
+      buttonRow,
+    ].toColumn();
+
+    return Form(
+      /// 在此处设置表单key，然后可以通过_formKey.currentState来获取表单状态
+      key: _formKey,
+      child: formColumn,
+    ).scrollable();
+  }
+
+  void _validateAndSave() {
+    /// 验证表单
+    if (_formKey.currentState?.validate() ?? false) {
+      /// 保存表单
+      _formKey.currentState?.save();
+
+      /// 回调
+      widget.onSave?.call(_formValue);
+    }
   }
 
   /// 创建表单项

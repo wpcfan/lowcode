@@ -55,77 +55,8 @@ class _CenterPaneState extends State<CenterPane> {
             builder: (context, candidateData, rejectedData) {
               return ListView.builder(
                 itemBuilder: (BuildContext context, int index) {
-                  return DragTarget(
-                    builder: (context, candidateData, rejectedData) {
-                      final item = blocks[index];
-                      return _buildDraggableWidget(
-                          item, products, index, paneWidth, bloc);
-                    },
-                    onMove: (details) {
-                      setState(() {
-                        moveOverIndex = index;
-                      });
-                    },
-                    onLeave: (data) {
-                      setState(() {
-                        moveOverIndex = -1;
-                      });
-                    },
-                    onWillAccept: (data) {
-                      /// 如果是从侧边栏拖拽过来的，那么index为null
-                      if (data is WidgetData && data.sort == null) {
-                        if (data.type == PageBlockType.waterfall) {
-                          /// 瀑布流不能插入到中间
-                          return false;
-                        }
-                        return true;
-                      }
-                      if (data is PageBlock) {
-                        if (data.type == PageBlockType.waterfall) {
-                          /// 已经有瀑布流不能拖拽
-                          return false;
-                        }
-
-                        /// 如果是从画布中拖拽过来的，需要判断拖拽的和放置的不是同一个
-                        final int dragIndex =
-                            blocks.indexWhere((it) => it.sort == data.sort);
-                        final int dropIndex = blocks
-                            .indexWhere((it) => it.sort == blocks[index].sort);
-                        debugPrint('dragIndex: $dragIndex, dropIndex: ');
-                        return dragIndex != dropIndex;
-                      }
-                      return false;
-                    },
-                    onAccept: (data) {
-                      /// 获取要放置的位置
-                      final int dropIndex = blocks
-                          .indexWhere((it) => it.sort == blocks[index].sort);
-
-                      if (data is WidgetData) {
-                        /// 处理从侧边栏拖拽过来的
-                        /// 如果是从侧边栏拖拽过来的，在放置的位置下方插入
-                        if (data.sort == null) {
-                          setState(() {
-                            moveOverIndex = -1;
-                          });
-                          return _insertBlock(data, bloc, dropIndex,
-                              defaultBlockConfig, pageId!);
-                        }
-                      }
-                      if (data is PageBlock) {
-                        /// 处理从画布中拖拽过来的
-
-                        bloc.add(CanvasEventMoveBlock(
-                          pageId!,
-                          data.id!,
-                          dropIndex + 1,
-                        ));
-                        setState(() {
-                          moveOverIndex = -1;
-                        });
-                      }
-                    },
-                  );
+                  return _buildListItem(blocks, index, products, paneWidth,
+                      bloc, defaultBlockConfig, pageId);
                 },
                 itemCount: blocks.length,
               );
@@ -149,6 +80,85 @@ class _CenterPaneState extends State<CenterPane> {
           ),
         ),
       ),
+    );
+  }
+
+  DragTarget<Object> _buildListItem(
+      List<PageBlock<dynamic>> blocks,
+      int index,
+      List<Product> products,
+      double paneWidth,
+      CanvasBloc bloc,
+      BlockConfig defaultBlockConfig,
+      int? pageId) {
+    return DragTarget(
+      builder: (context, candidateData, rejectedData) {
+        final item = blocks[index];
+        return _buildDraggableWidget(item, products, index, paneWidth, bloc);
+      },
+      onMove: (details) {
+        setState(() {
+          moveOverIndex = index;
+        });
+      },
+      onLeave: (data) {
+        setState(() {
+          moveOverIndex = -1;
+        });
+      },
+      onWillAccept: (data) {
+        /// 如果是从侧边栏拖拽过来的，那么index为null
+        if (data is WidgetData && data.sort == null) {
+          if (data.type == PageBlockType.waterfall) {
+            /// 瀑布流不能插入到中间
+            return false;
+          }
+          return true;
+        }
+        if (data is PageBlock) {
+          if (data.type == PageBlockType.waterfall) {
+            /// 已经有瀑布流不能拖拽
+            return false;
+          }
+
+          /// 如果是从画布中拖拽过来的，需要判断拖拽的和放置的不是同一个
+          final int dragIndex = blocks.indexWhere((it) => it.sort == data.sort);
+          final int dropIndex =
+              blocks.indexWhere((it) => it.sort == blocks[index].sort);
+          debugPrint('dragIndex: $dragIndex, dropIndex: ');
+          return dragIndex != dropIndex;
+        }
+        return false;
+      },
+      onAccept: (data) {
+        /// 获取要放置的位置
+        final int dropIndex =
+            blocks.indexWhere((it) => it.sort == blocks[index].sort);
+
+        if (data is WidgetData) {
+          /// 处理从侧边栏拖拽过来的
+          /// 如果是从侧边栏拖拽过来的，在放置的位置下方插入
+          if (data.sort == null) {
+            setState(() {
+              moveOverIndex = -1;
+            });
+            return _insertBlock(
+                data, bloc, dropIndex, defaultBlockConfig, pageId!);
+          }
+        }
+        if (data is PageBlock) {
+          /// 处理从画布中拖拽过来的
+
+          bloc.add(CanvasEventMoveBlock(
+            pageId!,
+            data.id!,
+            dropIndex + 1,
+          ));
+          setState(() {
+            moveOverIndex = -1;
+          });
+        }
+      },
     );
   }
 

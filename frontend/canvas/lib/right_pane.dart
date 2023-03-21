@@ -69,56 +69,7 @@ class RightPane extends StatelessWidget {
                     onSave: onSavePageBlock,
                     onDelete: onDeleteBlock,
                   ),
-                  BlockDataPane(
-                    block: state.selectedBlock!,
-                    productRepository: productRepository,
-                    onCategoryAdded: (category) {
-                      final data = BlockData<Category>(
-                        sort: state.selectedBlock!.data.length,
-                        content: category,
-                      );
-                      onCategoryAdded.call(data);
-                    },
-                    onCategoryUpdated: (category) {
-                      final matchedData = state.selectedBlock!.data.first;
-                      final data = BlockData<Category>(
-                        id: matchedData.id,
-                        sort: matchedData.sort,
-                        content: category,
-                      );
-                      onCategoryUpdated.call(data);
-                    },
-                    onCategoryRemoved: (category) {
-                      final index = state.selectedBlock!.data.indexWhere(
-                          (element) => element.content.id == category.id);
-                      if (index == -1) return;
-                      onCategoryRemoved.call(index);
-                    },
-                    onProductAdded: (product) {
-                      final data = BlockData<Product>(
-                        sort: state.selectedBlock!.data.length,
-                        content: product,
-                      );
-                      onProductAdded.call(data);
-                    },
-                    onProductRemoved: (product) {
-                      final index = state.selectedBlock!.data.indexWhere(
-                          (element) => element.content.id == product.id);
-                      if (index == -1) return;
-                      onProductRemoved
-                          .call(state.selectedBlock!.data[index].id!);
-                    },
-                    onImageAdded: (image) {
-                      final data = BlockData<ImageData>(
-                        sort: state.selectedBlock!.data.length,
-                        content: image,
-                      );
-                      onImageAdded.call(data);
-                    },
-                    onImageRemoved: (id) {
-                      onImageRemoved.call(id);
-                    },
-                  ),
+                  _buildBlockDataPane(),
                 ],
               ),
             ),
@@ -128,5 +79,57 @@ class RightPane extends StatelessWidget {
             onSave: onSavePageLayout,
           );
     return child.padding(horizontal: 12);
+  }
+
+  BlockDataPane _buildBlockDataPane() {
+    return BlockDataPane(
+      block: state.selectedBlock!,
+      productRepository: productRepository,
+      onCategoryAdded: (category) {
+        final data = BlockData<Category>(
+          sort: state.selectedBlock!.data.length,
+          content: category,
+        );
+        onCategoryAdded(data);
+      },
+      onCategoryUpdated: (category) {
+        final matchedData = state.selectedBlock!.data.first;
+        final data = BlockData<Category>(
+          id: matchedData.id,
+          sort: matchedData.sort,
+          content: category,
+        );
+        onCategoryUpdated(data);
+      },
+      onCategoryRemoved: (category) {
+        final index = state.selectedBlock!.data
+            .indexWhere((element) => element.content.id == category.id);
+        if (index == -1) return;
+        onCategoryRemoved.call(index);
+      },
+      onProductAdded: (product) {
+        final data = BlockData<Product>(
+          sort: state.selectedBlock!.data.length,
+          content: product,
+        );
+        onProductAdded(data);
+      },
+      onProductRemoved: (product) {
+        final index = state.selectedBlock!.data
+            .indexWhere((element) => element.content.id == product.id);
+        if (index == -1) return;
+        onProductRemoved(state.selectedBlock!.data[index].id!);
+      },
+      onImageAdded: (image) {
+        final data = BlockData<ImageData>(
+          sort: state.selectedBlock!.data.length,
+          content: image,
+        );
+        onImageAdded(data);
+      },
+      onImageRemoved: (id) {
+        onImageRemoved(id);
+      },
+    );
   }
 }

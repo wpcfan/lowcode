@@ -15,33 +15,34 @@ class ProductTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const columns = [
+      DataColumn(label: Text('商品SKU')),
+      DataColumn(label: Text('商品名称')),
+      DataColumn(label: Text('商品图片')),
+      DataColumn(label: Text('商品价格')),
+      DataColumn(label: Text('操作')),
+    ];
     return DataTable(
-      columns: const [
-        DataColumn(label: Text('商品SKU')),
-        DataColumn(label: Text('商品名称')),
-        DataColumn(label: Text('商品图片')),
-        DataColumn(label: Text('商品价格')),
-        DataColumn(label: Text('操作')),
-      ],
-      rows: products
-          .map((e) => DataRow(
-                cells: [
-                  DataCell(Text(e.sku ?? '')),
-                  DataCell(Text(e.name ?? '')),
-                  DataCell(Image.network(
-                    e.images.first,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                  )),
-                  DataCell(Text(e.price.toString())),
-                  DataCell(IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () => onRemove?.call(e),
-                  )),
-                ],
-              ))
-          .toList(),
+      columns: columns,
+      rows: products.map((e) => DataRow(cells: _buildCells(e))).toList(),
     );
+  }
+
+  List<DataCell> _buildCells(Product e) {
+    return [
+      DataCell(Text(e.sku ?? '')),
+      DataCell(Text(e.name ?? '')),
+      DataCell(Image.network(
+        e.images.first,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      )),
+      DataCell(Text(e.price.toString())),
+      DataCell(IconButton(
+        icon: const Icon(Icons.delete),
+        onPressed: () => onRemove?.call(e),
+      )),
+    ];
   }
 }

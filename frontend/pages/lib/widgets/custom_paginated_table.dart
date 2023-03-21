@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 
 class CustomPaginatedTable extends StatelessWidget {
@@ -25,24 +26,24 @@ class CustomPaginatedTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Theme(
-        data: Theme.of(context).copyWith(
-            dividerColor: Colors.transparent,
-            cardColor: Theme.of(context).cardColor,
-            textTheme: Typography.whiteCupertino),
-        child: PaginatedDataTable(
-          header: header,
-          rowsPerPage: rowPerPage,
-          showFirstLastButtons: true,
-          onRowsPerPageChanged: onPageChanged,
-          actions: actions,
-          sortColumnIndex: sortColumnIndex,
-          sortAscending: sortColumnAsc,
-          columns: dataColumns,
-          source: dataTableSource,
-        ),
-      ),
+    final themeData = Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+        cardColor: Theme.of(context).cardColor,
+        textTheme: Typography.whiteCupertino);
+    final table = PaginatedDataTable(
+      header: header,
+      rowsPerPage: rowPerPage,
+      showFirstLastButtons: true,
+      onRowsPerPageChanged: onPageChanged,
+      actions: actions,
+      sortColumnIndex: sortColumnIndex,
+      sortAscending: sortColumnAsc,
+      columns: dataColumns,
+      source: dataTableSource,
     );
+    return Theme(
+      data: themeData,
+      child: table,
+    ).scrollable();
   }
 }

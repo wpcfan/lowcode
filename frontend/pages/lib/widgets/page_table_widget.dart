@@ -151,9 +151,7 @@ class PageTableWidget extends StatelessWidget {
       onPageChanged: onPageChanged,
       dataTableSource: PageTableDataSource(
           items: items,
-          onUpdate: (index) {
-            onUpdate.call(items[index]);
-          },
+          onUpdate: (index) => onUpdate(items[index]),
           onDelete: (index) {
             if (items[index].id != null) {
               onDelete.call(items[index].id!);

@@ -16,6 +16,7 @@ class ImageDataForm extends StatelessWidget {
   final List<BlockData<ImageData>> data;
   final void Function(int) onImageRemoved;
   final void Function(ImageData) onImageAdded;
+
   @override
   Widget build(BuildContext context) {
     /// 表格列头：图片、链接类型、链接地址、操作
@@ -27,24 +28,7 @@ class ImageDataForm extends StatelessWidget {
     ];
 
     /// 表格行：图片、链接类型、链接地址、删除按钮
-    final dataRows = data.map(
-      (e) {
-        final item = e.content;
-        return DataRow(
-          cells: [
-            DataCell(Image.network(item.image)),
-            DataCell(Text(item.link?.type.value ?? '')),
-            DataCell(Text(item.link?.value ?? '')),
-            DataCell(
-              IconButton(
-                onPressed: () => onImageRemoved(e.id!),
-                icon: const Icon(Icons.delete),
-              ),
-            ),
-          ],
-        );
-      },
-    ).toList();
+    final dataRows = data.map((e) => DataRow(cells: _buildCells(e))).toList();
 
     /// 表头：添加图片按钮
     final header = [
@@ -77,5 +61,20 @@ class ImageDataForm extends StatelessWidget {
       table,
     ].toColumn().scrollable();
     return widget;
+  }
+
+  List<DataCell> _buildCells(BlockData<ImageData> blockData) {
+    final item = blockData.content;
+    return [
+      DataCell(Image.network(item.image)),
+      DataCell(Text(item.link?.type.value ?? '')),
+      DataCell(Text(item.link?.value ?? '')),
+      DataCell(
+        IconButton(
+          onPressed: () => onImageRemoved(blockData.id!),
+          icon: const Icon(Icons.delete),
+        ),
+      ),
+    ];
   }
 }

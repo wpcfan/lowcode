@@ -22,6 +22,12 @@ class PageBloc extends Bloc<PageEvent, PageState> {
     on<PageEventClearAll>(_onPageEventClearAll);
     on<PageEventPublish>(_onPageEventPublish);
     on<PageEventDraft>(_onPageEventDraft);
+    on<PageEventClearError>(_onPageEventClearError);
+  }
+
+  void _onPageEventClearError(
+      PageEventClearError event, Emitter<PageState> emit) async {
+    emit(state.copyWith(error: ''));
   }
 
   void _onPageEventPublish(

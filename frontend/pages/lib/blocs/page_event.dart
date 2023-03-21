@@ -111,3 +111,10 @@ class PageEventClearAll extends PageEvent {
   @override
   List<Object> get props => [];
 }
+
+class PageEventClearError extends PageEvent {
+  PageEventClearError() : super();
+
+  @override
+  List<Object> get props => [];
+}

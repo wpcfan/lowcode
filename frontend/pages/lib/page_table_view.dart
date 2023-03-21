@@ -45,6 +45,7 @@ class PageTableView extends StatelessWidget {
                   content: Text(state.error),
                 ),
               );
+              context.read<PageBloc>().add(PageEventClearError());
             }
           },
           builder: (context, state) {
@@ -54,80 +55,58 @@ class PageTableView extends StatelessWidget {
                 return const Center(child: Text('initial'));
               case FetchStatus.loading:
                 return const Center(child: CircularProgressIndicator());
-              case FetchStatus.error:
-                return const Center(child: Text('error'));
-              case FetchStatus.populated:
-                return PageTableWidget(
-                  query: state.query,
-                  items: state.items,
-                  page: state.page,
-                  pageSize: state.pageSize,
-                  total: state.total,
-                  onPageChanged: (int? value) {
-                    bloc.add(PageEventPageChanged(value));
-                  },
-                  onTitleChanged: (String? value) {
-                    bloc.add(PageEventTitleChanged(value));
-                  },
-                  onPlatformChanged: (Platform? value) {
-                    bloc.add(PageEventPlatformChanged(value));
-                  },
-                  onStatusChanged: (PageStatus? value) {
-                    bloc.add(PageEventPageStatusChanged(value));
-                  },
-                  onPageTypeChanged: (PageType? value) {
-                    bloc.add(PageEventPageTypeChanged(value));
-                  },
-                  onStartDateChanged: (DateTimeRange? value) {
-                    bloc.add(
-                        PageEventStartDateChanged(value?.start, value?.end));
-                  },
-                  onEndDateChanged: (DateTimeRange? value) {
-                    bloc.add(PageEventEndDateChanged(value?.start, value?.end));
-                  },
-                  onClearAll: () {
-                    bloc.add(PageEventClearAll());
-                  },
-                  onAdd: () async {
-                    await showDialog(
-                        context: context,
-                        builder: (context) {
-                          return CreateOrUpdatePageDialog(
-                            title: '创建页面',
-                            onCreate: (layout) =>
-                                bloc.add(PageEventCreate(layout)),
-                          );
-                        });
-                  },
-                  onUpdate: (PageLayout layout) async {
-                    await showDialog(
-                        context: context,
-                        builder: (context) {
-                          return CreateOrUpdatePageDialog(
-                            title: '更新页面',
-                            layout: layout,
-                            onUpdate: (layout) =>
-                                bloc.add(PageEventUpdate(layout.id!, layout)),
-                          );
-                        });
-                  },
-                  onDelete: (int id) async {
-                    await _showDeleteDialog(context, bloc, id);
-                  },
-                  onPublish: (int id) async {
-                    await _showPublishDialog(context, bloc, id);
-                  },
-                  onDraft: (int id) async {
-                    await _showDraftDialog(context, bloc, id);
-                  },
-                  onSelect: (int id) {
-                    context.go('/$id');
-                  },
-                );
+              default:
+                return _buildPageTable(state, bloc, context);
             }
           },
         ),
       ),
+    );
+  }
+
+  PageTableWidget _buildPageTable(
+      PageState state, PageBloc bloc, BuildContext context) {
+    return PageTableWidget(
+      query: state.query,
+      items: state.items,
+      page: state.page,
+      pageSize: state.pageSize,
+      total: state.total,
+      onPageChanged: (int? value) => bloc.add(PageEventPageChanged(value)),
+      onTitleChanged: (String? value) => bloc.add(PageEventTitleChanged(value)),
+      onPlatformChanged: (Platform? value) =>
+          bloc.add(PageEventPlatformChanged(value)),
+      onStatusChanged: (PageStatus? value) =>
+          bloc.add(PageEventPageStatusChanged(value)),
+      onPageTypeChanged: (PageType? value) =>
+          bloc.add(PageEventPageTypeChanged(value)),
+      onStartDateChanged: (DateTimeRange? value) =>
+          bloc.add(PageEventStartDateChanged(value?.start, value?.end)),
+      onEndDateChanged: (DateTimeRange? value) =>
+          bloc.add(PageEventEndDateChanged(value?.start, value?.end)),
+      onClearAll: () => bloc.add(PageEventClearAll()),
+      onAdd: () => showDialog(
+          context: context,
+          builder: (context) {
+            return CreateOrUpdatePageDialog(
+              title: '创建页面',
+              onCreate: (layout) => bloc.add(PageEventCreate(layout)),
+            );
+          }),
+      onUpdate: (PageLayout layout) => showDialog(
+          context: context,
+          builder: (context) {
+            return CreateOrUpdatePageDialog(
+              title: '更新页面',
+              layout: layout,
+              onUpdate: (layout) =>
+                  bloc.add(PageEventUpdate(layout.id!, layout)),
+            );
+          }),
+      onDelete: (int id) => _showDeleteDialog(context, bloc, id),
+      onPublish: (int id) => _showPublishDialog(context, bloc, id),
+      onDraft: (int id) => _showDraftDialog(context, bloc, id),
+      onSelect: (int id) => context.go('/$id'),
     );
   }
 

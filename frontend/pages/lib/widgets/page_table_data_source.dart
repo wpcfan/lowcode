@@ -28,71 +28,63 @@ class PageTableDataSource extends DataTableSource {
             ? const Icon(Icons.drafts, color: Colors.yellow)
             : const Icon(Icons.archive, color: Colors.grey);
     final config = item.config;
+
     return DataRow.byIndex(
       index: index,
-      cells: [
-        DataCell(Text(
-          item.title,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          style: const TextStyle(decoration: TextDecoration.underline),
-        ).ripple().inkWell(onTap: () {
-          onSelect.call(index);
-        })),
-        DataCell(Text(item.platform.value)),
-        DataCell(Row(
-          children: [statusIcon, Text(item.status.value)],
-        )),
-        DataCell(Text(item.pageType.value)),
-        DataCell(Text(item.startTime?.formatted ?? '')),
-        DataCell(Text(item.endTime?.formatted ?? '')),
-        DataCell(Tooltip(
-          message: '''
+      cells: _buildCells(item, index, statusIcon, config),
+    );
+  }
+
+  List<DataCell> _buildCells(
+      PageLayout item, int index, Icon statusIcon, PageConfig config) {
+    return [
+      DataCell(Text(
+        item.title,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        style: const TextStyle(decoration: TextDecoration.underline),
+      ).ripple().inkWell(onTap: () => onSelect.call(index))),
+      DataCell(Text(item.platform.value)),
+      DataCell([statusIcon, Text(item.status.value)].toRow()),
+      DataCell(Text(item.pageType.value)),
+      DataCell(Text(item.startTime?.formatted ?? '')),
+      DataCell(Text(item.endTime?.formatted ?? '')),
+      DataCell(Tooltip(
+        message: '''
 水平内边距: ${config.horizontalPadding ?? 0}
 垂直内边距: ${config.verticalPadding ?? 0}
 基准屏幕宽度: ${config.baselineScreenWidth ?? ''}''',
-          child: const Icon(Icons.code),
-        )),
-        DataCell(
-          Row(
-            children: [
-              if (item.isDraft)
-                IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    onUpdate.call(index);
-                  },
-                  tooltip: '编辑',
-                ),
-              if (item.isDraft)
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () {
-                    onDelete.call(index);
-                  },
-                  tooltip: '删除',
-                ),
-              if (item.isDraft)
-                IconButton(
-                  onPressed: () {
-                    onPublish.call(index);
-                  },
-                  icon: const Icon(Icons.publish),
-                  tooltip: '发布',
-                ),
-              if (item.isPublished)
-                IconButton(
-                  onPressed: () {
-                    onDraft.call(index);
-                  },
-                  icon: const Icon(Icons.drafts),
-                  tooltip: '下架',
-                ),
-            ],
-          ),
-        )
-      ],
-    );
+        child: const Icon(Icons.code),
+      )),
+      DataCell(
+        [
+          if (item.isDraft)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => onUpdate(index),
+              tooltip: '编辑',
+            ),
+          if (item.isDraft)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () => onDelete(index),
+              tooltip: '删除',
+            ),
+          if (item.isDraft)
+            IconButton(
+              onPressed: () => onPublish(index),
+              icon: const Icon(Icons.publish),
+              tooltip: '发布',
+            ),
+          if (item.isPublished)
+            IconButton(
+              onPressed: () => onDraft(index),
+              icon: const Icon(Icons.drafts),
+              tooltip: '下架',
+            ),
+        ].toRow(),
+      )
+    ];
   }
 
   @override

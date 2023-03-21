@@ -69,24 +69,11 @@ class _CreateOrUpdateImageDataDialogState
       ),
       actions: [
         TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('取消'),
         ),
         TextButton(
-          onPressed: () {
-            if (_formKey.currentState?.validate() ?? false) {
-              _formKey.currentState?.save();
-              if (widget.onCreate != null) {
-                widget.onCreate?.call(_formValue);
-              }
-              if (widget.onUpdate != null) {
-                widget.onUpdate?.call(_formValue);
-              }
-            }
-            Navigator.of(context).pop();
-          },
+          onPressed: () => _validateAndSave(context),
           child: const Text('确定'),
         ),
       ],
@@ -101,17 +88,7 @@ class _CreateOrUpdateImageDataDialogState
         hint: '请输入图片地址',
         suffix: IconButton(
           icon: const Icon(Icons.image),
-          onPressed: () async {
-            final FileDto? result = await showDialog<FileDto?>(
-              context: context,
-              builder: (context) => const ImageExplorer(),
-            );
-            if (result != null) {
-              setState(() {
-                _selectedImage = result.url;
-              });
-            }
-          },
+          onPressed: _showImageExplorer,
         ),
         validators: [
           Validators.required(label: '图片地址'),
@@ -165,5 +142,30 @@ class _CreateOrUpdateImageDataDialogState
         },
       ),
     ];
+  }
+
+  void _validateAndSave(BuildContext context) {
+    if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState?.save();
+      if (widget.onCreate != null) {
+        widget.onCreate?.call(_formValue);
+      }
+      if (widget.onUpdate != null) {
+        widget.onUpdate?.call(_formValue);
+      }
+    }
+    Navigator.of(context).pop();
+  }
+
+  void _showImageExplorer() async {
+    final FileDto? result = await showDialog<FileDto?>(
+      context: context,
+      builder: (context) => const ImageExplorer(),
+    );
+    if (result != null) {
+      setState(() {
+        _selectedImage = result.url;
+      });
+    }
   }
 }

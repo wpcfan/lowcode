@@ -2,7 +2,7 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
-import 'create_or_update_image_data_dialog.dart';
+import '../popups/popups.dart';
 
 /// 图片数据表单组件
 /// [data] 数据

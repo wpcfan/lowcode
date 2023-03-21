@@ -75,11 +75,9 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
           Validators.maxLength(maxLength: 100, label: '标题'),
           Validators.minLength(minLength: 2, label: '标题'),
         ],
-        onChanged: (value) {
-          setState(() {
-            _formValue = _formValue.copyWith(title: value);
-          });
-        },
+        onChanged: (value) => setState(() {
+          _formValue = _formValue.copyWith(title: value);
+        }),
       ),
       DropdownButtonFormField<Platform>(
         value: widget.layout?.platform,
@@ -97,11 +95,9 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
           ),
         ],
         onChanged: (value) {},
-        onSaved: (newValue) {
-          setState(() {
-            _formValue = _formValue.copyWith(platform: newValue);
-          });
-        },
+        onSaved: (newValue) => setState(() {
+          _formValue = _formValue.copyWith(platform: newValue);
+        }),
       ),
       DropdownButtonFormField<PageType>(
         value: widget.layout?.pageType,
@@ -137,13 +133,11 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
           Validators.min(min: 0, label: '水平内边距'),
           Validators.max(max: 100, label: '水平内边距'),
         ],
-        onChanged: (newValue) {
-          setState(() {
-            _formValue = _formValue.copyWith(
-                config: _formValue.config
-                    .copyWith(horizontalPadding: double.parse(newValue!)));
-          });
-        },
+        onChanged: (newValue) => setState(() {
+          _formValue = _formValue.copyWith(
+              config: _formValue.config
+                  .copyWith(horizontalPadding: double.parse(newValue!)));
+        }),
       ),
       MyTextFormField(
         initialValue: widget.layout?.config.verticalPadding?.toString(),
@@ -155,13 +149,11 @@ class _CreateOrUpdatePageDialogState extends State<CreateOrUpdatePageDialog> {
           Validators.min(min: 0, label: '垂直内边距'),
           Validators.max(max: 100, label: '垂直内边距'),
         ],
-        onChanged: (newValue) {
-          setState(() {
-            _formValue = _formValue.copyWith(
-                config: _formValue.config
-                    .copyWith(verticalPadding: double.parse(newValue!)));
-          });
-        },
+        onChanged: (newValue) => setState(() {
+          _formValue = _formValue.copyWith(
+              config: _formValue.config
+                  .copyWith(verticalPadding: double.parse(newValue!)));
+        }),
       ),
       MyTextFormField(
         initialValue: widget.layout?.config.baselineScreenWidth?.toString(),

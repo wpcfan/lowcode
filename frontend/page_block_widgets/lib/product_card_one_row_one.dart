@@ -83,6 +83,8 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     final priceRow = [
       productOriginalPrice,
       productPrice,
+
+      /// 如果addToCart为null，则忽略点击事件
       IgnorePointer(ignoring: addToCart == null, child: cartBtn)
     ]
 

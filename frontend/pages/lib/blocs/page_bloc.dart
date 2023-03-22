@@ -135,8 +135,8 @@ class PageBloc extends Bloc<PageEvent, PageState> {
       PageEventEndDateChanged event, Emitter<PageState> emit) async {
     if (event.endDateFrom != null && event.endDateTo != null) {
       final pageQuery = state.query.copyWith(
-        endDateFrom: event.endDateFrom?.formattedYYYYMMDD,
-        endDateTo: event.endDateTo?.formattedYYYYMMDD,
+        endDateFrom: event.endDateFrom?.format('yyyy-MM-dd'),
+        endDateTo: event.endDateTo?.format('yyyy-MM-dd'),
       );
       await _query(pageQuery, emit);
     } else {
@@ -149,8 +149,8 @@ class PageBloc extends Bloc<PageEvent, PageState> {
       PageEventStartDateChanged event, Emitter<PageState> emit) async {
     if (event.startDateFrom != null && event.startDateTo != null) {
       final pageQuery = state.query.copyWith(
-        startDateFrom: event.startDateFrom?.formattedYYYYMMDD,
-        startDateTo: event.startDateTo?.formattedYYYYMMDD,
+        startDateFrom: event.startDateFrom?.format('yyyy-MM-dd'),
+        startDateTo: event.startDateTo?.format('yyyy-MM-dd'),
       );
       await _query(pageQuery, emit);
     } else {

@@ -10,7 +10,7 @@ class SearchFieldWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoSearchTextField(
-      placeholder: 'Search',
+      placeholder: '搜索商品',
       placeholderStyle: TextStyle(color: Colors.white30),
       prefixIcon: Icon(Icons.search, color: Colors.white),
       backgroundColor: Colors.black12,

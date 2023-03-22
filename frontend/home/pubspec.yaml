@@ -15,6 +15,8 @@ dependencies:
   skeletons: ^0.0.3
   sliver_tools: ^0.2.9
   url_launcher: ^6.1.9
+  equatable: ^2.0.5
+
   common:
     path: ../common
   models:

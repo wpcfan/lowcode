@@ -29,6 +29,7 @@ class HomeView extends StatelessWidget {
     );
     final key = GlobalKey<ScaffoldState>();
     const errorImage = '';
+    final bloc = context.read<HomeBloc>();
 
     return Scaffold(
       key: key,
@@ -37,9 +38,7 @@ class HomeView extends StatelessWidget {
         decoration: decoration,
         sliverAppBar: MySliverAppBar(
           decoration: decoration,
-          onTap: () {
-            context.read<HomeBloc>().add(HomeEventOpenDrawer(key));
-          },
+          onTap: () => bloc.add(HomeEventOpenDrawer(key)),
         ),
         sliver: SliverBodyWidget(
           errorImage: errorImage,
@@ -47,29 +46,28 @@ class HomeView extends StatelessWidget {
           onTapProduct: (product) => _onTapProduct(product, context),
           addToCart: (product) => _addToCart(product, context),
         ),
-        onRefresh: () async {
-          context.read<HomeBloc>().add(const HomeEventFetch(PageType.home));
-          await context
-              .read<HomeBloc>()
-              .stream
-              .firstWhere((element) => element.isPopulated || element.isError);
-          // 加载速度太快，容易看不到加载动画
-          await Future.delayed(const Duration(seconds: 2));
-        },
-        onLoadMore: () async {
-          context.read<HomeBloc>().add(const HomeEventLoadMore());
-          await context
-              .read<HomeBloc>()
-              .stream
-              .firstWhere((element) => element.isPopulated || element.isError);
-        },
+        onRefresh: () => _refresh(bloc),
+        onLoadMore: () => _loadMore(bloc),
       ),
-      bottomNavigationBar: MyBottomBar(onTap: (index) {
-        context.read<HomeBloc>().add(HomeEventSwitchBottomNavigation(index));
-      }),
+      bottomNavigationBar: MyBottomBar(
+          onTap: (index) => bloc.add(HomeEventSwitchBottomNavigation(index))),
       drawer: const LeftDrawer(),
       endDrawer: const RightDrawer(),
     );
+  }
+
+  Future<void> _refresh(HomeBloc bloc) async {
+    bloc.add(const HomeEventFetch(PageType.home));
+    await bloc.stream
+        .firstWhere((element) => element.isPopulated || element.isError);
+    // 加载速度太快，容易看不到加载动画
+    await Future.delayed(const Duration(seconds: 2));
+  }
+
+  Future<void> _loadMore(HomeBloc bloc) async {
+    bloc.add(const HomeEventLoadMore());
+    await bloc.stream
+        .firstWhere((element) => element.isPopulated || element.isError);
   }
 
   void _addToCart(Product product, BuildContext context) {

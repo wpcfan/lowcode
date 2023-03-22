@@ -44,18 +44,12 @@ class ImageWidget extends StatelessWidget {
       /// 加载中的占位图
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return SizedBox(
-          width: width,
-          height: height,
-          child: Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          ),
-        );
+        return CircularProgressIndicator(
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
+        ).center().constrained(width: width, height: height);
       },
 
       /// 加载失败的占位图

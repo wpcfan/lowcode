@@ -2,6 +2,11 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:repositories/repositories.dart';
 
+/// 文件对话框内容
+/// [images] 文件列表
+/// [editable] 是否可编辑
+/// [selectedKeys] 选中的文件 key 列表
+/// [onSelected] 选中文件的回调
 class FileDialogContent extends StatelessWidget {
   const FileDialogContent({
     super.key,
@@ -17,6 +22,7 @@ class FileDialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    /// 使用 GridView 显示图片
     return GridView.builder(
       shrinkWrap: true,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -34,24 +40,27 @@ class FileDialogContent extends StatelessWidget {
         );
 
         /// 编辑模式下的图片
-        final editableItem = [
-          Image.network(image.url),
-          Icon(selectedKeys.contains(image.key)
-                  ? Icons.check_box
-                  : Icons.check_box_outline_blank)
-              .inkWell(
-                onTap: () => onSelected(image.key),
-              )
-              .positioned(
-                top: 0,
-                right: 0,
-              ),
-        ].toStack();
+        final editableItem = _buildEditableItem(image);
         return editable ? editableItem : selectableItem;
       },
     ).constrained(
       width: 400,
       height: 600,
     );
+  }
+
+  /// 构建可编辑状态下的图片
+  Widget _buildEditableItem(FileDto image) {
+    final checkedIcon = Icon(selectedKeys.contains(image.key)
+            ? Icons.check_box
+            : Icons.check_box_outline_blank)
+        .inkWell(
+          onTap: () => onSelected(image.key),
+        )
+        .positioned(
+          top: 0,
+          right: 0,
+        );
+    return [Image.network(image.url), checkedIcon].toStack();
   }
 }

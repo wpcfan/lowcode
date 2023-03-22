@@ -34,25 +34,20 @@ class FileDialogTitle extends StatelessWidget {
         if (selectedKeys.isEmpty) {
           return;
         }
+        final cancelButton = TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('取消'),
+        );
+        final confirmButton = TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('确定'),
+        );
         final result = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('删除图片'),
             content: const Text('确定要删除这些图片吗？'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: const Text('取消'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('确定'),
-              ),
-            ],
+            actions: [cancelButton, confirmButton],
           ),
         );
         if (result ?? false) {

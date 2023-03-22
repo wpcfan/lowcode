@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,9 +53,9 @@ class PageTableView extends StatelessWidget {
             final bloc = context.read<PageBloc>();
             switch (state.status) {
               case FetchStatus.initial:
-                return const Center(child: Text('initial'));
+                return const Text('initial').center();
               case FetchStatus.loading:
-                return const Center(child: CircularProgressIndicator());
+                return const CircularProgressIndicator().center();
               default:
                 return _buildPageTable(state, bloc, context);
             }

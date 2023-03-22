@@ -51,9 +51,7 @@ class _BlockConfigFormState extends State<BlockConfigForm> {
 
     final formColumn = [
       ..._createFormItems(),
-      const SizedBox(
-        height: 16,
-      ),
+      const SizedBox(height: 16),
       buttonRow,
     ].toColumn();
 

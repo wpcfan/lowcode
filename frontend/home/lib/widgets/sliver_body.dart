@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -30,10 +31,8 @@ class SliverBodyWidget extends StatelessWidget {
       builder: (context, state) {
         /// 如果状态是错误状态，那么显示错误信息
         if (state.isError) {
-          return const SliverToBoxAdapter(
-            child: Center(
-              child: Text('Error'),
-            ),
+          return SliverToBoxAdapter(
+            child: const Text('Error').center(),
           );
         }
 

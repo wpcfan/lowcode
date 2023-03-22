@@ -1,3 +1,4 @@
+import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,12 +20,9 @@ class LoadMoreWidget extends StatelessWidget {
       builder: (context, state) {
         return state.isEnd
             ? Container()
-            : const SizedBox(
-                height: 50,
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
+            : const CircularProgressIndicator()
+                .center()
+                .constrained(height: 50);
       },
     );
   }

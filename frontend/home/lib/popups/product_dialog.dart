@@ -25,9 +25,7 @@ class ProductDialog extends StatelessWidget {
         Text(product.name!),
         Text(product.price!),
         TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          onPressed: () => Navigator.of(context).pop(),
           child: const Text('Add to cart'),
         ),
       ].toColumn().constrained(maxWidth: 300, maxHeight: 400),

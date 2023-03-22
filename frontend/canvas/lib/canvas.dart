@@ -46,10 +46,10 @@ class CanvasPage extends StatelessWidget {
             },
             builder: (context, state) {
               if (state.status == FetchStatus.initial) {
-                return const Center(child: Text('initial'));
+                return const Text('initial').center();
               }
               if (state.status == FetchStatus.loading) {
-                return const Center(child: CircularProgressIndicator());
+                return const CircularProgressIndicator().center();
               }
               final rightPane =
                   _buildRightPane(state, productRepository, context);

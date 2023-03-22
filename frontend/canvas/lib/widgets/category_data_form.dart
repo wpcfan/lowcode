@@ -33,7 +33,7 @@ class CategoryDataForm extends StatelessWidget {
       builder: (context, snapshot) {
         /// 加载中
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return const CircularProgressIndicator().center();
         }
 
         /// 错误
@@ -43,7 +43,7 @@ class CategoryDataForm extends StatelessWidget {
 
         /// 没有数据
         if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return const Center(child: Text('没有数据'));
+          return const Text('没有数据').center();
         }
 
         /// 类目

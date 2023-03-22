@@ -59,44 +59,45 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         return;
       }
 
-      /// 如果有瀑布流布局，获取瀑布流数据
-      if (layout.blocks
-          .where((element) => element.type == PageBlockType.waterfall)
-          .isNotEmpty) {
-        /// 获取第一个瀑布流布局
-        final waterfallBlock = layout.blocks
-            .firstWhere((element) => element.type == PageBlockType.waterfall);
+      final waterall = await _loadInitialWaterfallData(layout);
 
-        /// 如果瀑布流布局有内容，获取瀑布流数据
-        if (waterfallBlock.data.isNotEmpty) {
-          /// 获取瀑布流数据的分类ID
-          final categoryId = waterfallBlock.data.first.content.id;
-          if (categoryId != null) {
-            /// 按分类获取瀑布流中的产品数据
-            final waterfall =
-                await productRepo.getByCategory(categoryId: categoryId);
-            emit(state.copyWith(
-              status: FetchStatus.populated,
-              layout: layout,
-              waterfallList: waterfall.data,
-              hasReachedMax: !waterfall.hasNext,
-              page: waterfall.page,
-              categoryId: categoryId,
-            ));
-            return;
-          }
-        }
-      }
       emit(state.copyWith(
-          status: FetchStatus.populated,
-          layout: layout,
-          hasReachedMax: true,
-          page: 0,
-          categoryId: null,
-          waterfallList: []));
+        status: FetchStatus.populated,
+        layout: layout,
+        hasReachedMax: true,
+        page: 0,
+        categoryId: waterall.data.isNotEmpty ? waterall.data.first.id : null,
+        waterfallList: waterall.data,
+      ));
     } catch (e) {
       emit(state.copyWith(status: FetchStatus.error));
     }
+  }
+
+  Future<SliceWrapper<Product>> _loadInitialWaterfallData(
+      PageLayout layout) async {
+    /// 如果有瀑布流布局，获取瀑布流数据
+    if (layout.blocks
+        .where((element) => element.type == PageBlockType.waterfall)
+        .isNotEmpty) {
+      /// 获取第一个瀑布流布局
+      final waterfallBlock = layout.blocks
+          .firstWhere((element) => element.type == PageBlockType.waterfall);
+
+      /// 如果瀑布流布局有内容，获取瀑布流数据
+      if (waterfallBlock.data.isNotEmpty) {
+        /// 获取瀑布流数据的分类ID
+        final categoryId = waterfallBlock.data.first.content.id;
+        if (categoryId != null) {
+          /// 按分类获取瀑布流中的产品数据
+          final waterfall =
+              await productRepo.getByCategory(categoryId: categoryId);
+          return waterfall;
+        }
+      }
+    }
+    return const SliceWrapper<Product>(
+        data: [], hasNext: false, page: 0, size: 10);
   }
 
   void _onLoadMore(HomeEvent event, Emitter<HomeState> emit) async {

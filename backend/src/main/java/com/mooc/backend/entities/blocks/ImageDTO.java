@@ -11,7 +11,7 @@ import java.util.Objects;
 @JsonDeserialize(as = ImageDTO.class)
 
 public record ImageDTO(
-        @Schema(description = "图片地址", example = "https://via.placeholder.com/100x100/image1") @NotNull String image,
+        @Schema(description = "图片地址", example = "http://localhost:8080/api/images/100/100/image1") @NotNull String image,
         @Schema(description = "图片地址", example = "image1") @NotNull String title,
         @NotNull Link link
 ) implements BlockData {

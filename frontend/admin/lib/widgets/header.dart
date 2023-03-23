@@ -1,8 +1,8 @@
-import 'package:admin/constants.dart';
-import 'package:admin/routes/router_config.dart';
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 
+import '../constants.dart';
+import '../routes/router_config.dart';
 import 'profile_card.dart';
 
 class Header extends StatelessWidget {

@@ -1,7 +1,8 @@
-import 'package:admin/constants.dart';
 import 'package:canvas/canvas.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
+
+import '../constants.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({

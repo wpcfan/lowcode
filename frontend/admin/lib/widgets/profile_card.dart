@@ -1,6 +1,7 @@
-import 'package:admin/constants.dart';
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
+
+import '../constants.dart';
 
 class ProfileCard extends StatelessWidget {
   const ProfileCard({

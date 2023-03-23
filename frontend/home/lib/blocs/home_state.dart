@@ -11,6 +11,7 @@ class HomeState extends Equatable {
   final int? categoryId;
   final int selectedIndex;
   final bool drawerOpen;
+  final String error;
 
   const HomeState({
     this.layout,
@@ -22,6 +23,7 @@ class HomeState extends Equatable {
     this.categoryId,
     this.selectedIndex = 0,
     this.drawerOpen = false,
+    this.error = '',
   });
 
   HomeState copyWith({
@@ -34,6 +36,7 @@ class HomeState extends Equatable {
     int? categoryId,
     int? selectedIndex,
     bool? drawerOpen,
+    String? error,
   }) =>
       HomeState(
         layout: layout ?? this.layout,
@@ -45,11 +48,12 @@ class HomeState extends Equatable {
         categoryId: categoryId ?? this.categoryId,
         selectedIndex: selectedIndex ?? this.selectedIndex,
         drawerOpen: drawerOpen ?? this.drawerOpen,
+        error: error ?? this.error,
       );
 
   @override
   String toString() =>
-      'HomeState{layout: $layout, status: $status, waterfallList: $waterfallList, page: $page, hasReachedMax: $hasReachedMax, loadingMore: $loadingMore, categoryId: $categoryId, selectedIndex: $selectedIndex, drawerOpen: $drawerOpen}';
+      'HomeState{layout: $layout, status: $status, waterfallList: $waterfallList, page: $page, hasReachedMax: $hasReachedMax, loadingMore: $loadingMore, categoryId: $categoryId, selectedIndex: $selectedIndex, drawerOpen: $drawerOpen, error: $error}';
 
   @override
   List<Object?> get props => [
@@ -62,6 +66,7 @@ class HomeState extends Equatable {
         categoryId,
         selectedIndex,
         drawerOpen,
+        error,
       ];
 
   factory HomeState.populated(

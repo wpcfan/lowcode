@@ -181,7 +181,7 @@ class _CustomPaginatedTableHeaderState
     );
     if (date != null) {
       setState(() {
-        _query = _query.copyWith(startDateFrom: date.formattedYYYYMMDD);
+        _query = _query.copyWith(startDateFrom: date.format('yyyy-MM-dd'));
       });
     }
   }
@@ -195,7 +195,7 @@ class _CustomPaginatedTableHeaderState
     );
     if (date != null) {
       setState(() {
-        _query = _query.copyWith(startDateTo: date.formattedYYYYMMDD);
+        _query = _query.copyWith(startDateTo: date.format('yyyy-MM-dd'));
       });
     }
   }
@@ -209,7 +209,7 @@ class _CustomPaginatedTableHeaderState
     );
     if (date != null) {
       setState(() {
-        _query = _query.copyWith(endDateFrom: date.formattedYYYYMMDD);
+        _query = _query.copyWith(endDateFrom: date.format('yyyy-MM-dd'));
       });
     }
   }
@@ -223,7 +223,7 @@ class _CustomPaginatedTableHeaderState
     );
     if (date != null) {
       setState(() {
-        _query = _query.copyWith(endDateTo: date.formattedYYYYMMDD);
+        _query = _query.copyWith(endDateTo: date.format('yyyy-MM-dd'));
       });
     }
   }

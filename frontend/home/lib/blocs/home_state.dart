@@ -11,6 +11,7 @@ class HomeState extends Equatable {
   final int? categoryId;
   final int selectedIndex;
   final bool drawerOpen;
+  final String error;
 
   const HomeState({
     this.layout,
@@ -22,6 +23,7 @@ class HomeState extends Equatable {
     this.categoryId,
     this.selectedIndex = 0,
     this.drawerOpen = false,
+    this.error = '',
   });
 
   HomeState copyWith({
@@ -34,24 +36,24 @@ class HomeState extends Equatable {
     int? categoryId,
     int? selectedIndex,
     bool? drawerOpen,
-  }) {
-    return HomeState(
-      layout: layout ?? this.layout,
-      status: status ?? this.status,
-      waterfallList: waterfallList ?? this.waterfallList,
-      page: page ?? this.page,
-      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-      loadingMore: loadingMore ?? this.loadingMore,
-      categoryId: categoryId ?? this.categoryId,
-      selectedIndex: selectedIndex ?? this.selectedIndex,
-      drawerOpen: drawerOpen ?? this.drawerOpen,
-    );
-  }
+    String? error,
+  }) =>
+      HomeState(
+        layout: layout ?? this.layout,
+        status: status ?? this.status,
+        waterfallList: waterfallList ?? this.waterfallList,
+        page: page ?? this.page,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        loadingMore: loadingMore ?? this.loadingMore,
+        categoryId: categoryId ?? this.categoryId,
+        selectedIndex: selectedIndex ?? this.selectedIndex,
+        drawerOpen: drawerOpen ?? this.drawerOpen,
+        error: error ?? this.error,
+      );
 
   @override
-  String toString() {
-    return 'HomeState{layout: $layout, status: $status, waterfallList: $waterfallList, page: $page, hasReachedMax: $hasReachedMax, loadingMore: $loadingMore, categoryId: $categoryId, selectedIndex: $selectedIndex, drawerOpen: $drawerOpen}';
-  }
+  String toString() =>
+      'HomeState{layout: $layout, status: $status, waterfallList: $waterfallList, page: $page, hasReachedMax: $hasReachedMax, loadingMore: $loadingMore, categoryId: $categoryId, selectedIndex: $selectedIndex, drawerOpen: $drawerOpen, error: $error}';
 
   @override
   List<Object?> get props => [
@@ -64,6 +66,7 @@ class HomeState extends Equatable {
         categoryId,
         selectedIndex,
         drawerOpen,
+        error,
       ];
 
   factory HomeState.populated(
@@ -72,16 +75,15 @@ class HomeState extends Equatable {
     bool hasReachedMax = true,
     int page = 0,
     int? categoryId,
-  }) {
-    return HomeState(
-      layout: layout,
-      waterfallList: waterfallList,
-      status: FetchStatus.populated,
-      hasReachedMax: hasReachedMax,
-      page: page,
-      categoryId: categoryId,
-    );
-  }
+  }) =>
+      HomeState(
+        layout: layout,
+        waterfallList: waterfallList,
+        status: FetchStatus.populated,
+        hasReachedMax: hasReachedMax,
+        page: page,
+        categoryId: categoryId,
+      );
 
   bool get isInitial => status == FetchStatus.initial;
 

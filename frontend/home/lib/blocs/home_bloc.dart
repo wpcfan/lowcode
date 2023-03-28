@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:repositories/repositories.dart';
@@ -26,6 +27,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
     /// 关闭抽屉
     on<HomeEventCloseDrawer>(_onCloseDrawer);
+  }
+
+  /// 错误处理
+  void _handleError(Emitter<HomeState> emit, dynamic error) {
+    final message = error is DioError ? error.message : error.toString();
+    emit(state.copyWith(
+      loadingMore: false,
+      error: message,
+      status: FetchStatus.error,
+    ));
   }
 
   void _onOpenDrawer(HomeEvent event, Emitter<HomeState> emit) {
@@ -70,7 +81,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         waterfallList: waterall.data,
       ));
     } catch (e) {
-      emit(state.copyWith(status: FetchStatus.error));
+      _handleError(emit, e);
     }
   }
 
@@ -113,7 +124,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
         loadingMore: false,
       ));
     } catch (e) {
-      emit(state.copyWith(loadingMore: false));
+      _handleError(emit, e);
     }
   }
 }

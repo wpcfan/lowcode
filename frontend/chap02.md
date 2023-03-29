@@ -218,13 +218,81 @@
 
 - `admin` 模块是给运营人员使用的后台管理系统，它直接依赖了 `canvas` 模块和 `pages` 模块，这其实是两个大的管理后台页面。所以 `canvas` 模块和 `pages` 模块是按照业务模块拆分的。
 - `app` 模块是给用户使用的移动端应用，它直接依赖了 `home` 模块，这其实是用户的首页。所以 `home` 模块是按照业务模块拆分的。当然真正的移动端会有更多业务模块，但我们的项目只做了首页，所以我们只拆分了 `home` 模块。
-- `canvas` 模块是画布模块，它直接依赖了 `page_block_widgets` 模块，这其实是画布上的组件。所以 `page_block_widgets` 模块是按照业务模块拆分的。由于画布模块和首页模块都会用到相同的组件，所以我们把它拆分出来，形成 `page_block_widgets` 模块，这样可以让我们的代码更加的清晰。
-- `common` 模块是公共模块，里面主要是一些公共的工具和扩展。注意不要让它变得臃肿，因为它是所有模块都会依赖的，所以它的代码量一定要控制在最小。
+- `canvas` 模块是画布模块，它直接依赖了 `page_block_widgets` 模块，这其实是画布上的组件。所以 `page_block_widgets` 模块是按照业务模块拆分的。由于画布模块和首页模块都会用到相同的组件，所以我们把它拆分出来，形成 `page_block_widgets` 模块，这样可以让我们的代码更加的清晰。而其中属性的修改依赖了 `models` 模块和 `forms` 模块。数据操作依赖了 `repositories` 模块和 `networking` 模块。在图片的数据操作上依赖了 `files` 模块。
+- `common` 模块是公共模块，里面主要是一些公共的工具和扩展。注意不要让它变得臃肿，因为它是所有模块都会依赖的，所以它的代码量一定要控制在最小。几乎所有的模块都会依赖它。
 - `files` 模块是文件模块，这个模块其实是封装了文件列表和文件上传的功能，它直接依赖了 `models` 模块和 `networking` 模块，这其实是文件列表和文件上传的数据模型和网络请求。所以 `models` 模块和 `networking` 模块是按照功能模块拆分的。
 - `forms` 模块是表单模块，这里我们封装了一些自定义的表单组件以及定义了我们的通用验证规则。
-- `home` 模块是首页模块
-- `models` 模块是模型模块
+- `home` 模块是首页模块，一般 App 也不止一个页面，所以理论上应该存在多个模块，但这里我们课程重点不在移动端，所以我们只做了一个首页模块。首页模块直接依赖了 `page_block_widgets` 模块，这其实是首页上的组件。
+- `models` 模块是模型模块，也就是我们大部分的数据模型都在这里定义。这里我们封装了一些自定义的数据模型，比如 `Page`、`PageBlock`、`BlockData` 等等。
 - `networking` 模块是网络模块，在这个模块里面我们封装了一些网络请求的工具，比如 `dio` 的拦截器、`dio` 的配置等等。
-- `page_block_widgets` 模块是页面块模块
-- `pages` 模块是页面模块
+- `page_block_widgets` 模块是页面块模块，首页显示的区块都是这里定义的。这里我们封装了一些自定义的页面块组件，比如轮播图，图片行，产品行，瀑布流等等。
+- `pages` 模块是页面模块，这里我们封装了一些自定义的页面组件，比如 `Page`、`PageHeader`、`PageBody`、`PageFooter` 等等。其中表单部分依赖了 `forms` 模块，数据操作部分依赖了 `repositories` 模块。
 - `repositories` 模块是仓库模块，这里我们应用了 Repository 设计模式，它直接依赖了 `models` 模块和 `networking` 模块，这其实是仓库模块的数据模型和网络请求。所以 `models` 模块和 `networking` 模块是按照功能模块拆分的。
+
+我们的项目结构图如下：
+
+```dot
+digraph G {
+  rankdir=TD;
+  node [shape=box];
+  canvas [label="canvas", style=filled, fillcolor="grey"];
+  pages [label="pages", style=filled, fillcolor="grey"];
+  home [label="home", style=filled, fillcolor="grey"];
+  page_block_widgets [label="page_block_widgets", style=filled, fillcolor="yellow"];
+  files [label="files", style=filled, fillcolor="yellow"];
+  forms [label="forms", style=filled, fillcolor="yellow"];
+  repositories [label="repositories", style=filled, fillcolor="purple", fontcolor="white"];
+  networking [label="networking", style=filled, fillcolor="purple", fontcolor="white"];
+  models [label="models", style=filled, fillcolor="purple", fontcolor="white"];
+  common [label="common", style=filled, fillcolor="purple", fontcolor="white"];
+  admin -> canvas;
+  admin -> pages;
+  app -> home;
+  canvas -> page_block_widgets;
+  home -> page_block_widgets;
+  page_block_widgets -> models;
+  page_block_widgets -> common;
+  canvas -> files;
+  files -> repositories;
+  files -> common;
+  repositories -> networking;
+  pages -> forms;
+  canvas -> forms;
+  forms -> common;
+  pages -> repositories;
+  canvas -> repositories;
+  home -> repositories;
+
+  subgraph cluster_0 {
+    label = "业务模块";
+    color = "grey";
+    style = "filled";
+    fillcolor = "lightgrey";
+    canvas;
+    pages;
+    home;
+  }
+
+  subgraph cluster_1 {
+    label = "混合模块";
+    color = "yellow";
+    style = "filled";
+    fillcolor = "lightyellow";
+    page_block_widgets;
+    files;
+    forms;
+  }
+
+  subgraph cluster_2 {
+    label = "纯功能模块";
+    color = "purple";
+    style = "filled";
+    fillcolor = "pink";
+    repositories;
+    networking;
+    models;
+    common;
+  }
+
+}
+```

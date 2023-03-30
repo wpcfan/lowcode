@@ -9,7 +9,7 @@ INSERT INTO MOOC_PAGE_BLOCKS (`title`, `type`, `sort`, `config`, `page_id`) VALU
                                             (U&'\4e00\884c\4e09\56fe\7247\533a\5757', 'ImageRow', 4, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
                                             (U&'\4e00\884c\6eda\52a8\56fe\7247\533a\5757', 'ImageRow', 5, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":96.0}', 1),
                                             (U&'\4e00\884c\4e00\4ea7\54c1\533a\5757', 'ProductRow', 6, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":120.0}', 1),
-                                            (U&'\4e00\884c\4e8c\4ea7\54c1\533a\5757', 'ProductRow', 7, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":300.0}', 1),
+                                            (U&'\4e00\884c\4e8c\4ea7\54c1\533a\5757', 'ProductRow', 7, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":330.0}', 1),
                                             (U&'\7011\5e03\6d41\533a\5757', 'Waterfall', 8, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":null}', 1);
 
 INSERT INTO MOOC_PAGE_BLOCK_DATA (`sort`, `content`, `page_block_id`) VALUES

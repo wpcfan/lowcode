@@ -66,7 +66,7 @@ Flutter 可以在 iOS 和 Android 上运行，这意味着我们可以使用一�
 
 ### 4.5. 原生性能
 
-Flutter 使用了 Skia 2D 渲染引擎，这是 Google 在 Chrome 浏览器中使用的渲染引擎，它可以提供非常流畅的动画和 60fps 的渲染速度。
+Flutter 使用了 Flutter Engine，这是一个高性能的渲染引擎，它可以直接将 Flutter UI 绘制到设备屏幕上，而不需要经过中间层。Flutter Engine 也可以与现有的代码一起工作，这意味着我们可以在 Flutter 中使用原生的平台代码。
 
 ## 5. 需求分析
 

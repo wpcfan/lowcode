@@ -63,14 +63,22 @@ Flutter 的 UI 是响应式的，这意味着当应用程序的状态发生变�
 我们可以用一个简单的例子说明 Flutter 的响应式 UI 特性。假设我们有一个计数器应用程序，它有一个按钮和一个文本，当我们点击按钮时，文本的值会自动增加。在 Flutter 中，我们可以这样实现：
 
 ```dart
+import 'package:flutter/material.dart';
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    /// MaterialApp 一般作为应用程序的根组件
     return MaterialApp(
+      /// 应用程序的名称
       title: 'Flutter Demo',
+      /// 应用程序的主题
       theme: ThemeData(
+        /// 蓝色主题
+        /// primarySwatch 用于指定 Material Design 中的主题调色板
         primarySwatch: Colors.blue,
       ),
+      /// 应用程序的首页
       home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -89,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
   void _incrementCounter() {
+    /// 调用 setState 方法，通知 Flutter 框架，有状态发生了改变
     setState(() {
       _counter++;
     });
@@ -96,10 +105,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    /// Scaffold 是 Material 库中提供的页面脚手架
+    /// 通过它可以快速实现页面的基本结构
     return Scaffold(
+      /// 页面的导航栏
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      /// 页面的主要内容
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -114,6 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+      /// 页面的浮动按钮
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -319,8 +333,9 @@ digraph G {
     - 需求 1.1.2: 区块种类分为：图片行，轮播图，商品行，以及商品瀑布流
     - 需求 1.1.3: 图片行可以放一张图片，也可以放多张图片
       - 需求 1.1.3.1: 图片行中的图片是可以配置图片的链接以及点击跳转的链接
-      - 需求 1.1.3.2: 多于 3 张图片时，会形成可横向滑动的列表效果
-      - 需求 1.1.3.3: 2-3 张图片时，会形成等宽的效果，也就是说，图片按 `区块的宽度 - 2*内边距 - 间距` 等比例缩放
+      - 需求 1.1.3.2: 一张图片时，图片按 `区块的宽度 - 2*内边距` 等比例缩放
+      - 需求 1.1.3.3: 多于 3 张图片时，会形成可横向滑动的列表效果
+      - 需求 1.1.3.4: 2-3 张图片时，会形成等宽的效果，也就是说，图片按 `区块的宽度 - 2*内边距 - 间距` 等比例缩放
     - 需求 1.1.4: 轮播图可以多张图片，每张图片可以配置图片的链接以及点击跳转的链接
     - 需求 1.1.5: 商品行可以放 1-2 个商品，注意这个需求也是一个假定的数量，每个公司根据运营需要不一定和我们课程一样的。单个商品的卡片样式和 2 个商品的卡片样式都由 UI 设计师提供。不提供配置卡片内的样式的能力。
     - 需求 1.1.6: 商品瀑布流比较特殊，它不是一个固定高度的区块，而是需要配置商品的类目，这个区块可以支持上拉加载更多的功能，也就是说，当用户滑动到这个区块的底部时，会自动加载下一页的商品。所以它的高度是不固定的。另外由于这个组件的特殊性，只能位于页面的最后一个区块，而且只能有一个。每个商品的卡片样式和一行 2 个商品的卡片样式一致。不提供配置卡片内的样式的能力。

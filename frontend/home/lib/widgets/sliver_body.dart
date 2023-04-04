@@ -13,12 +13,12 @@ import '../blocs/home_state.dart';
 class SliverBodyWidget extends StatelessWidget {
   const SliverBodyWidget({
     super.key,
-    required this.errorImage,
+    this.errorImage,
     this.onTap,
     this.addToCart,
     this.onTapProduct,
   });
-  final String errorImage;
+  final String? errorImage;
   final void Function(MyLink?)? onTap;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTapProduct;

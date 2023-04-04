@@ -10,7 +10,7 @@ import 'image.dart';
 /// 使用PageView实现
 class BannerWidget extends StatefulWidget {
   final List<ImageData> items;
-  final String errorImage;
+  final String? errorImage;
   final int animationDuration;
   final Curve animationCurve;
   final BlockConfig config;
@@ -23,8 +23,8 @@ class BannerWidget extends StatefulWidget {
     super.key,
     required this.items,
     required this.config,
-    required this.errorImage,
     required this.ratio,
+    this.errorImage,
     this.animationDuration = 500,
     this.animationCurve = Curves.ease,
     this.onTap,

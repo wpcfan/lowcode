@@ -60,78 +60,55 @@ class ImageRowWidget extends StatelessWidget {
       case 0: // Empty
         return page(child: const Placeholder());
       case 1:
-        return _buildSingleImage(context, itemWidth, itemHeight).parent(page);
       case 2:
       case 3:
-        return _buildImages(context, itemWidth, itemHeight).parent(page);
+        return _buildRow(context, itemWidth, itemHeight).parent(page);
       default:
-        return _buildScrollableImages(context, itemWidth, itemHeight)
-            .parent(page);
+        return _buildList(context, itemWidth, itemHeight).parent(page);
     }
   }
 
-  Widget _buildSingleImage(
-      BuildContext context, double blockWidth, double blockHeight) {
-    final item = items.first;
-    return ImageWidget(
-      imageUrl: item.image,
-      errorImage: errorImage,
-      link: item.link,
-      onTap: onTap,
-      width: blockWidth,
-      height: blockHeight,
-    ).constrained(
-      maxWidth: blockWidth,
-      maxHeight: blockHeight,
-    );
-  }
-
-  Widget _buildImages(BuildContext context, double width, double itemHeight) {
+  Widget _buildRow(BuildContext context, double width, double itemHeight) {
     final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
     return items
-        .mapWithIndex(
-          (item, index) => ImageWidget(
-            imageUrl: item.image,
-            errorImage: errorImage,
-            width: width / items.length,
-            height: itemHeight,
-            link: item.link,
-            onTap: onTap,
-          )
-              .padding(right: index == items.length - 1 ? 0 : spaceBetweenItems)
-              .expanded(),
-        )
+        .map((e) {
+          final isLast = items.last == e;
+          return [
+            ImageWidget(
+              imageUrl: e.image,
+              errorImage: errorImage,
+              width: width,
+              height: itemHeight,
+              link: e.link,
+              onTap: onTap,
+            ).expanded(),
+            if (!isLast) SizedBox(width: spaceBetweenItems),
+          ];
+        })
+        .expand((element) => element)
         .toList()
-        .toRow(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          mainAxisSize: MainAxisSize.max,
-        );
+        .toRow();
   }
 
-  Widget _buildScrollableImages(
+  Widget _buildList(
       BuildContext context, double blockWidth, double itemHeight) {
     final itemWidth = blockWidth / 3;
     final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
-    return ListView(
+    return ListView.separated(
       scrollDirection: Axis.horizontal,
-      itemExtent: itemWidth,
-      children: items
-          .mapWithIndex(
-            (item, index) => Container(
-              width: itemWidth - spaceBetweenItems * 2,
-              height: itemHeight,
-              margin: EdgeInsets.only(
-                right: index == items.length - 1 ? 0 : spaceBetweenItems,
-              ),
-              child: ImageWidget(
-                imageUrl: item.image,
-                errorImage: errorImage,
-                link: item.link,
-                onTap: onTap,
-              ),
-            ),
-          )
-          .toList(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return ImageWidget(
+          imageUrl: item.image,
+          errorImage: errorImage,
+          width: itemWidth,
+          height: itemHeight,
+          link: item.link,
+          onTap: onTap,
+        );
+      },
+      separatorBuilder: (context, index) => SizedBox(width: spaceBetweenItems),
     );
   }
 }

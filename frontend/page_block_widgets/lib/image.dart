@@ -40,6 +40,8 @@ class ImageWidget extends StatelessWidget {
       imageUrl,
       fit: fit,
       alignment: alignment,
+      width: width,
+      height: height,
 
       /// 加载中的占位图
       loadingBuilder: (context, child, loadingProgress) {
@@ -58,8 +60,6 @@ class ImageWidget extends StatelessWidget {
           color: Colors.red,
         );
       },
-    )
-        .constrained(width: width, height: height)
-        .inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
+    ).inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
   }
 }

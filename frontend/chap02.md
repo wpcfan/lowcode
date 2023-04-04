@@ -1,5 +1,18 @@
 # 环境搭建和项目介绍
 
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [环境搭建和项目介绍](#环境搭建和项目介绍)
+  - [1. 环境搭建](#1-环境搭建)
+  - [2. 创建第一个 Flutter 应用](#2-创建第一个-flutter-应用)
+    - [2.1. Flutter 应用结构](#21-flutter-应用结构)
+  - [3. 项目结构](#3-项目结构)
+    - [3.1. 项目结构](#31-项目结构)
+
+<!-- /code_chunk_output -->
+
 ## 1. 环境搭建
 
 如果有条件，可以遵循 [官方文档](https://flutter.dev/docs/get-started/install) 进行安装，如果没有条件，可以使用 [flutter.cn](https://flutter.cn/docs/get-started/install) 提供的镜像进行安装。
@@ -98,6 +111,8 @@
 
   • No issues found!
   ```
+
+Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutter SDK。升级也很简单，只需要执行 `flutter upgrade` 命令即可。
 
 ## 2. 创建第一个 Flutter 应用
 

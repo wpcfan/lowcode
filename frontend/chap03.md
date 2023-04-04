@@ -379,3 +379,176 @@ class ImageRowWidget extends StatelessWidget {
     }
 }
 ```
+
+### 使用 Dart 的扩展方法改写
+
+由于 Flutter 的特点是一层层的 `Widget` 嵌套，这导致一个问题，就是如果嵌套多了的情况下会造成几个问题
+
+1. 代码不清晰：嵌套太多会很难找到对应的组件，或者理清楚其中的逻辑。
+2. 修改比较繁琐：在开发阶段，我们经常可能会改变这个树的层次或者内部结构，这种嵌套结构改起来比较费力。
+
+当然一般做法可以把一些子组件抽取出来，抽象为单独的组件。另一种方式其实是利用 `dart` 的扩展方法来帮我们把嵌套的写法变为 `builder` 的模式。
+
+那么什么是扩展方法？扩展方法就是在一个类上添加一个方法，这个方法可以直接在类的实例上调用，就好像是这个类的方法一样。这个方法的实现是在另一个类中实现的，这个类就是扩展方法的 `receiver`。
+
+这么说还是有点抽象，我们来看一个例子。下面的代码中，我们创建了 `WidgetExtension` 类，然后在这个类中添加了一个 `padding` 方法，这个方法的 `receiver` 是 `Widget` 类，也就是说这个方法可以在 `Widget` 类的实例上调用。
+
+```dart
+extension WidgetExtension on Widget {
+
+  Widget padding({
+    Key? key,
+    double? all,
+    double? horizontal,
+    double? vertical,
+    double? top,
+    double? bottom,
+    double? left,
+    double? right,
+  }) =>
+      Padding(
+        key: key,
+        padding: EdgeInsets.only(
+          top: top ?? vertical ?? all ?? 0.0,
+          bottom: bottom ?? vertical ?? all ?? 0.0,
+          left: left ?? horizontal ?? all ?? 0.0,
+          right: right ?? horizontal ?? all ?? 0.0,
+        ),
+        child: this,
+      );
+}
+```
+
+具体来讲，这个 `padding` 方法的作用就是在 `Widget` 的外面包一层 `Padding` 组件，这样就可以在 `Widget` 的外面添加内边距了。
+
+```dart
+Padding(
+  padding: EdgeInsets.all(16.0),
+  child: Text('Hello World'),
+)
+```
+
+上面的代码可以改写为
+
+```dart
+Text('Hello World').padding(all: 16.0)
+```
+
+这样就可以非常简洁的添加内边距了，而且易于维护，比如以后我们不想要 padding 了，就直接删掉 `.padding(all: 16.0)` 就行了。
+
+我们再来定义几个扩展方法，`constrained` 用来替代嵌套 `ConstrainedBox` ，而 `clipRRect` 用来替代嵌套 `ClipRRect`
+
+```dart
+extension WidgetExtension on Widget {
+
+  Widget constrained({
+    Key? key,
+    double? width,
+    double? height,
+    double minWidth = 0.0,
+    double maxWidth = double.infinity,
+    double minHeight = 0.0,
+    double maxHeight = double.infinity,
+  }) {
+    BoxConstraints constraints = BoxConstraints(
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight,
+    );
+    constraints = (width != null || height != null)
+        ? constraints.tighten(width: width, height: height)
+        : constraints;
+    return ConstrainedBox(
+      key: key,
+      constraints: constraints,
+      child: this,
+    );
+  }
+
+  Widget clipRRect({
+    Key? key,
+    double? all,
+    double? topLeft,
+    double? topRight,
+    double? bottomLeft,
+    double? bottomRight,
+    CustomClipper<RRect>? clipper,
+    Clip clipBehavior = Clip.antiAlias,
+  }) =>
+      ClipRRect(
+        key: key,
+        clipper: clipper,
+        clipBehavior: clipBehavior,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(topLeft ?? all ?? 0.0),
+          topRight: Radius.circular(topRight ?? all ?? 0.0),
+          bottomLeft: Radius.circular(bottomLeft ?? all ?? 0.0),
+          bottomRight: Radius.circular(bottomRight ?? all ?? 0.0),
+        ),
+        child: this,
+      );
+}
+```
+
+根据之前的扩展方法，我们改写一下 `ImageRowWidget`
+
+```dart
+import 'package:flutter/material.dart';
+
+class ImageRowWidget extends StatelessWidget {
+  final String imageUrl;
+  final double screenWidth;
+  final double blockHeight;
+  final double scaledPaddingVertical;
+  final double scaledPaddingHorizontal;
+  final double borderRadius;
+
+  const ImageRowWidget({
+    Key? key,
+    required this.imageUrl,
+    required this.screenWidth,
+    required this.blockHeight,
+    required this.scaledPaddingVertical,
+    required this.scaledPaddingHorizontal,
+    required this.borderRadius,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    /// 1. 获取屏幕宽度
+    final screenWidth = MediaQuery.of(context).size.width;
+    /// 2. 计算比例
+    final scale = screenWidth / baseScreenWidth;
+    /// 3. 计算水平内边距
+    final scaledPaddingHorizontal = paddingHorizontal * scale;
+    /// 4. 计算垂直内边距
+    final scaledPaddingVertical = paddingVertical * scale;
+    /// 5. 计算图片宽度
+    final imageWidth = screenWidth - 2 * scaledPaddingHorizontal;
+    /// 6. 计算区块高度
+    final blockHeight = height * scale;
+    /// 7. 计算图片高度
+    final imageHeight = blockHeight - 2 * scaledPaddingVertical;
+
+    return Image.network(
+      imageUrl,
+      width: imageWidth,
+      height: imageHeight,
+      fit: BoxFit.cover,
+    ).clipRRect(
+      all: borderRadius,
+    ).padding(
+      vertical: scaledPaddingVertical,
+      horizontal: scaledPaddingHorizontal,
+    ).constrained(
+      width: screenWidth,
+      height: blockHeight,
+    );
+  }
+}
+```
+
+大家可以明显看到这种写法非常简洁，而且易于维护，所以在后面的代码中我们会尽量使用这种写法，但不是所有都这样，遇到新的扩展方法我会提到，但不会逐字敲这个扩展方法了。
+
+我们在 `common/lib/extensions/widget_extensions.dart` 中写了很多这种扩展方法，这个类就留给大家进行阅读和练习，大部分的扩展方法其实就是一个转换器，把嵌套写法转换为了 `builder` 的方式。

@@ -15,24 +15,22 @@ class ImageWidget extends StatelessWidget {
   const ImageWidget({
     super.key,
     required this.imageUrl,
-    required this.errorImage,
+    this.errorImage,
     this.link,
     this.fit = BoxFit.cover,
     this.height,
     this.width,
     this.alignment = Alignment.center,
     this.onTap,
-    this.enableTap = true,
   });
   final String imageUrl;
-  final String errorImage;
+  final String? errorImage;
   final BoxFit fit;
   final double? height;
   final double? width;
   final Alignment alignment;
   final MyLink? link;
   final void Function(MyLink?)? onTap;
-  final bool enableTap;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +38,8 @@ class ImageWidget extends StatelessWidget {
       imageUrl,
       fit: fit,
       alignment: alignment,
+      width: width,
+      height: height,
 
       /// 加载中的占位图
       loadingBuilder: (context, child, loadingProgress) {
@@ -54,12 +54,18 @@ class ImageWidget extends StatelessWidget {
 
       /// 加载失败的占位图
       errorBuilder: (context, error, stackTrace) {
-        return const Placeholder(
-          color: Colors.red,
-        );
+        return errorImage != null
+            ? Image.asset(
+                errorImage!,
+                fit: fit,
+                alignment: alignment,
+                width: width,
+                height: height,
+              )
+            : const Placeholder(
+                color: Colors.red,
+              );
       },
-    )
-        .constrained(width: width, height: height)
-        .inkWell(onTap: () => enableTap ? onTap?.call(link) : null);
+    ).gestures(onTap: () => onTap?.call(link));
   }
 }

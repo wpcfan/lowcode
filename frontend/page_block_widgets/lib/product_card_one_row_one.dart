@@ -8,7 +8,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     required this.height,
     required this.horizontalSpacing,
     required this.verticalSpacing,
-    required this.errorImage,
+    this.errorImage,
     this.backgroundColor = Colors.white,
     this.borderColor = Colors.grey,
     this.borderWidth = 1.0,
@@ -20,7 +20,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
   final double height;
   final double horizontalSpacing;
   final double verticalSpacing;
-  final String errorImage;
+  final String? errorImage;
   final Color backgroundColor;
   final Color borderColor;
   final double borderWidth;

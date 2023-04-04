@@ -21,14 +21,14 @@ class ProductRowWidget extends StatelessWidget {
   const ProductRowWidget({
     super.key,
     required this.items,
-    required this.errorImage,
     required this.config,
     required this.ratio,
+    this.errorImage,
     this.addToCart,
     this.onTap,
   }) : assert(items.length <= 2 && items.length > 0);
   final List<Product> items;
-  final String errorImage;
+  final String? errorImage;
   final BlockConfig config;
   final double ratio;
   final void Function(Product)? addToCart;

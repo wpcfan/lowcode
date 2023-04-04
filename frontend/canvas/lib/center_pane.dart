@@ -287,7 +287,6 @@ class _CenterPaneState extends State<CenterPane> {
         );
 
     Widget widget;
-    const errorImage = 'assets/images/error_150_150.png';
     switch (block.type) {
       case PageBlockType.banner:
         final it = block as PageBlock<ImageData>;
@@ -308,7 +307,6 @@ class _CenterPaneState extends State<CenterPane> {
           items: items,
           config: it.config,
           ratio: 1.0,
-          errorImage: errorImage,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -331,7 +329,6 @@ class _CenterPaneState extends State<CenterPane> {
           items: items,
           config: it.config,
           ratio: 1.0,
-          errorImage: errorImage,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -357,7 +354,6 @@ class _CenterPaneState extends State<CenterPane> {
           items: items,
           config: it.config,
           ratio: 1.0,
-          errorImage: errorImage,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -410,7 +406,6 @@ class _CenterPaneState extends State<CenterPane> {
           products: items,
           config: it.config,
           ratio: 1.0,
-          errorImage: errorImage,
           isPreview: true,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));

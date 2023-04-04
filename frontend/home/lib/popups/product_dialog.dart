@@ -8,10 +8,10 @@ class ProductDialog extends StatelessWidget {
   const ProductDialog({
     super.key,
     required this.product,
-    required this.errorImage,
+    this.errorImage,
   });
   final Product product;
-  final String errorImage;
+  final String? errorImage;
 
   @override
   Widget build(BuildContext context) {

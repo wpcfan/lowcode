@@ -16,15 +16,15 @@ class WaterfallWidget extends StatelessWidget {
     super.key,
     required this.config,
     required this.products,
-    required this.errorImage,
     required this.ratio,
+    this.errorImage,
     this.addToCart,
     this.onTap,
     this.isPreview = false,
   });
   final BlockConfig config;
   final List<Product> products;
-  final String errorImage;
+  final String? errorImage;
   final double ratio;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTap;

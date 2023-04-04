@@ -28,7 +28,7 @@ class HomeView extends StatelessWidget {
       ),
     );
     final key = GlobalKey<ScaffoldState>();
-    const errorImage = '';
+    const errorImage = 'assets/images/error_150_150.png';
     final bloc = context.read<HomeBloc>();
 
     return Scaffold(

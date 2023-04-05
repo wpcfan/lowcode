@@ -10,6 +10,8 @@
     - [2.1. Flutter 应用结构](#21-flutter-应用结构)
   - [3. 项目结构](#3-项目结构)
     - [3.1. 项目结构](#31-项目结构)
+    - [3.2.2 工程搭建](#322-工程搭建)
+    - [3.2.3 依赖管理](#323-依赖管理)
 
 <!-- /code_chunk_output -->
 
@@ -311,3 +313,36 @@ digraph G {
 
 }
 ```
+
+### 3.2.2 工程搭建
+
+我们的工程搭建主要是搭建 `admin` 和 `app` 两个工程，这里我们使用 `flutter create` 命令来创建工程。为了以后便于管理，请先创建一个 `lowcode` 文件夹，然后在 `lowcode` 文件夹下创建 `frontend` 子文件夹。然后在这个目录下打开终端，执行下面的命令。注意要限定目标平台， app 端是 `android` 和 `iOS`， admin 端是 `web`。
+
+```bash
+flutter create --template=app admin --platforms=web
+flutter create --template=app app --platforms=android,ios
+```
+
+限定目标平台之后，生成的工程就只包含了对应平台的代码，这样可以减少工程体积。以后如果要添加其他平台的支持，可以通过命令行添加。
+
+```bash
+# 比如给当前目录下的工程添加 web 平台支持
+flutter create --platforms=web .
+```
+
+然后我们把上面说的各个模块都创建出来，这里我们使用 `flutter create` 命令来创建模块。
+
+```bash
+flutter create --template=package canvas
+flutter create --template=package common
+flutter create --template=package files
+flutter create --template=package forms
+flutter create --template=package home
+flutter create --template=package models
+flutter create --template=package networking
+flutter create --template=package page_block_widgets
+flutter create --template=package pages
+flutter create --template=package repositories
+```
+
+### 3.2.3 依赖管理

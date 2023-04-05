@@ -8,7 +8,7 @@
 
 - [App 的图片类组件](#app-的图片类组件)
   - [在“做”中理解需求](#在做中理解需求)
-  - [Flutter 布局原则](#flutter-布局原则)
+  - [Flutter 知识点：组件布局原则](#flutter-知识点组件布局原则)
   - [挖掘隐性需求](#挖掘隐性需求)
   - [组件的比例放缩](#组件的比例放缩)
   - [适配边距](#适配边距)
@@ -19,7 +19,7 @@
   - [实现大于 3 张图片的情况](#实现大于-3-张图片的情况)
     - [重构：怎样减少重复的代码](#重构怎样减少重复的代码)
     - [隐性需求：图片的加载与异常处理](#隐性需求图片的加载与异常处理)
-    - [Flutter 中的 Assets 简介](#flutter-中的-assets-简介)
+    - [Flutter 知识点：Assets 简介](#flutter-知识点assets-简介)
 
 <!-- /code_chunk_output -->
 
@@ -162,7 +162,7 @@ class ImageRowWidget extends StatelessWidget {
 
 那么为什么图片一届指定了宽高，还要再包裹一层 `ConstrainedBox` 组件呢？这是因为 Flutter 中组件的大小其实是由其父组件来决定的，我们在 `Image` 组件中设置了 `width` 和 `height` 属性，但是这些属性只是作为 `Image` 组件的建议值，而不是强制值，所以我们需要在其外层再包裹一层 `ConstrainedBox` 组件，然后设置 `ConstrainedBox` 组件的 `constraints` 属性，这样就可以实现图片的宽高了。
 
-## Flutter 布局原则
+## Flutter 知识点：组件布局原则
 
 这里单独提一下 Flutter 布局的原则： `Constraints go down. Sizes go up. Parent sets position.` 。
 
@@ -900,7 +900,7 @@ class MyApp extends StatelessWidget {
 
 ```dart
 class ImageRowWidget extends StatelessWidget {
-  final List<ImageData> imageData;
+  final List<ImageData> items;
   final double paddingVertical;
   final double paddingHorizontal;
   final double height;
@@ -911,7 +911,7 @@ class ImageRowWidget extends StatelessWidget {
 
   const ImageRowWidget({
       super.key,
-      required this.imageData,
+      required this.items,
       this.paddingVertical = 8.0,
       this.paddingHorizontal = 16.0,
       this.height = 200.0,
@@ -927,32 +927,32 @@ class ImageRowWidget extends StatelessWidget {
     final scale = screenWidth / baseScreenWidth;
     final scaledPaddingHorizontal = paddingHorizontal * scale;
     final scaledPaddingVertical = paddingVertical * scale;
-    final imageWidth = (screenWidth - 2 * scaledPaddingHorizontal - (imageData.length - 1) * horizontalSpacing) / imageData.length;
+    final imageWidth = (screenWidth - 2 * scaledPaddingHorizontal - (items.length - 1) * horizontalSpacing) / items.length;
     final blockHeight = height * scale;
     final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 
     return Row(
       children: [
         Image.network(
-          imageData[0].imageUrl,
+          items[0].imageUrl,
           width: imageWidth,
           height: imageHeight,
           fit: BoxFit.cover,
         ).clipRRect(
           all: borderRadius,
         ).gestures(
-          onTap: () => onTap?.call(imageData[0].link)
+          onTap: () => onTap?.call(items[0].link)
         ),
         SizedBox(width: horizontalSpacing),
         Image.network(
-          imageData[1].imageUrl,
+          items[1].imageUrl,
           width: imageWidth,
           height: imageHeight,
           fit: BoxFit.cover,
         ).clipRRect(
           all: borderRadius,
         ).gestures(
-          onTap: () => onTap?.call(imageData[1].link)
+          onTap: () => onTap?.call(items[1].link)
         ),
       ],
     ).padding(
@@ -981,7 +981,7 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Center(
           child: ImageRowWidget(
-            imageData: const [
+            items: const [
               ImageData(
                 imageUrl: 'https://picsum.photos/600/300',
                 link: MyLink(
@@ -1024,15 +1024,15 @@ class MyApp extends StatelessWidget {
 ```dart
 Row(
   children: [
-    for (var i = 0; i < imageData.length; i++) Image.network(
-      imageData[i].imageUrl,
+    for (var i = 0; i < items.length; i++) Image.network(
+      items[i].imageUrl,
       width: imageWidth,
       height: imageHeight,
       fit: BoxFit.cover,
     ).clipRRect(
       all: borderRadius,
     ).gestures(
-      onTap: () => onTap?.call(imageData[i].link)
+      onTap: () => onTap?.call(items[i].link)
     ),
   ],
 ).padding(
@@ -1049,7 +1049,7 @@ Row(
 
 ```dart
 Row(
-  children: imageData.map((e) => Image.network(
+  children: items.map((e) => Image.network(
     e.imageUrl,
     width: imageWidth,
     height: imageHeight,
@@ -1073,8 +1073,8 @@ Row(
 
 ```dart
 Row(
-  children: imageData.map((e) {
-    final isLast = imageData.last == e;
+  children: items.map((e) {
+    final isLast = items.last == e;
     return [
       Image.network(
         e.imageUrl,
@@ -1135,8 +1135,8 @@ extension ListWidget<E> on List<Widget> {
 这样的话上面的代码就可以简化为：
 
 ```dart
-imageData.map((e) {
-  final isLast = imageData.last == e;
+items.map((e) {
+  final isLast = items.last == e;
   return [
     Image.network(
       e.imageUrl,
@@ -1164,7 +1164,7 @@ imageData.map((e) {
 )
 ```
 
-事实上这个组件完美的兼容了多张图片的情况，我们可以在 `imageData` 中添加多张图片的数据，然后你可以看到下面的效果：
+事实上这个组件完美的兼容了多张图片的情况，我们可以在 `items` 中添加多张图片的数据，然后你可以看到下面的效果：
 
 ![图 8](images/9991fe67e5b51913aeb1291ba175c00cc2aef7588b92028cea2cb0d42f6f6877.png)
 
@@ -1180,22 +1180,22 @@ final scale = screenWidth / baseScreenWidth;
 final scaledPaddingHorizontal = paddingHorizontal * scale;
 final scaledPaddingVertical = paddingVertical * scale;
 /// 对于大于 3 张图片的情况，只显示 3 张，所以除的时候需要等于 3 其它情况下除的时候需要等于图片数量
-final imageWidth = (screenWidth - 2 * scaledPaddingHorizontal - (imageData.length - 1) * horizontalSpacing) / (imageData.length > 3 ? 3 : imageData.length);
+final imageWidth = (screenWidth - 2 * scaledPaddingHorizontal - (items.length - 1) * horizontalSpacing) / (items.length > 3 ? 3 : items.length);
 final blockHeight = height * scale;
 final imageHeight = blockHeight - 2 * scaledPaddingVertical;
-if (imageData.length > 3) {
+if (items.length > 3) {
   return ListView.separated(
     scrollDirection: Axis.horizontal,
-    itemCount: imageData.length,
+    itemCount: items.length,
     itemBuilder: (context, index) => Image.network(
-      imageData[index].imageUrl,
+      items[index].imageUrl,
       width: imageWidth,
       height: imageHeight,
       fit: BoxFit.cover,
     ).clipRRect(
       all: borderRadius,
     ).gestures(
-      onTap: () => onTap?.call(imageData[index].link)
+      onTap: () => onTap?.call(items[index].link)
     ),
     separatorBuilder: (BuildContext context, int index) => SizedBox(width: horizontalSpacing)
   ).padding(
@@ -1208,8 +1208,8 @@ if (imageData.length > 3) {
   );
 } else {
   return Row(
-    children: imageData.map((e) {
-      final isLast = imageData.last == e;
+    children: items.map((e) {
+      final isLast = items.last == e;
       return [
         Image.network(
           e.imageUrl,
@@ -1266,17 +1266,17 @@ Widget buildImageWidget(ImageData imageData) => Image.network(
     onTap: () => onTap?.call(imageData.link)
   );
 /// 大于 3 张图片的情况，返回横向滚动的 `ListView`
-if (imageData.length > 3) {
+if (items.length > 3) {
   return ListView.separated(
     scrollDirection: Axis.horizontal,
-    itemCount: imageData.length,
-    itemBuilder: (context, index) => buildImageWidget(imageData[index]),
+    itemCount: items.length,
+    itemBuilder: (context, index) => buildImageWidget(items[index]),
     separatorBuilder: (BuildContext context, int index) => SizedBox(width: horizontalSpacing)
   )
   .parent(page);
 }
-return imageData.map((e) {
-  final isLast = imageData.last == e;
+return items.map((e) {
+  final isLast = items.last == e;
   return [
         buildImageWidget(e),
         if (!isLast) SizedBox(width: horizontalSpacing),
@@ -1329,11 +1329,8 @@ Widget buildImageWidget(ImageData imageData) => Image.network(
         color: Colors.red,
       );
     },
-  ).clipRRect(
-    all: borderRadius,
-  ).gestures(
-    onTap: () => onTap?.call(imageData.link)
-  );
+  ).clipRRect(all: borderRadius)
+  .gestures(onTap: () => onTap?.call(imageData.link));
 ```
 
 隐性需求在实际开发中是很常见的，因为没人能够把所有的需求都写出来，所以我们需要自己去发现隐性需求，然后去实现它们。当然如果有时发现隐性需求比较多，那么我们可以把它们写在需求文档中，这样就可以避免遗漏了。
@@ -1423,7 +1420,7 @@ Widget buildImageWidget(ImageData imageData) => ImageWidget(
   );
 ```
 
-### Flutter 中的 Assets 简介
+### Flutter 知识点：Assets 简介
 
 上面的代码中我们使用了 `Image.asset` 来加载本地图片，这里我们来简单介绍一下 Flutter 中的 Assets。在 Flutter 中，我们可以把一些图片、音频、视频等资源放在 `assets` 目录下，然后在 `pubspec.yaml` 文件中配置 `assets`，这样就可以在项目中使用这些资源了。
 

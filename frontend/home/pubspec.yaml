@@ -22,6 +22,8 @@ dependencies:
     path: ../common
   models:
     path: ../models
+  networking:
+    path: ../networking
   repositories:
     path: ../repositories
   page_block_widgets:

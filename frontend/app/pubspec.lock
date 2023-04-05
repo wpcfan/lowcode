@@ -122,7 +122,7 @@ packages:
     source: hosted
     version: "1.17.0"
   common:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../common"
       relative: true
@@ -415,7 +415,7 @@ packages:
     source: hosted
     version: "0.3.0"
   models:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../models"
       relative: true
@@ -438,7 +438,7 @@ packages:
     source: hosted
     version: "2.1.1"
   networking:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../networking"
       relative: true
@@ -461,7 +461,7 @@ packages:
     source: hosted
     version: "2.1.0"
   page_block_widgets:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../page_block_widgets"
       relative: true
@@ -516,7 +516,7 @@ packages:
     source: hosted
     version: "2.1.3"
   repositories:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../repositories"
       relative: true

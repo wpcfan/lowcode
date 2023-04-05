@@ -43,22 +43,10 @@ dependencies:
   # local package
   common:
     path: ../common
-  models:
-    path: ../models
-  networking:
-    path: ../networking
-  page_block_widgets:
-    path: ../page_block_widgets
-  repositories:
-    path: ../repositories
-  files:
-    path: ../files
   canvas:
     path: ../canvas
   pages:
     path: ../pages
-  forms:
-    path: ../forms
 
 dev_dependencies:
   flutter_test:

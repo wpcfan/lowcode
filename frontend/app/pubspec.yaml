@@ -36,16 +36,6 @@ dependencies:
   dio: ^5.0.2
   flutter_bloc: ^8.1.2
 
-  common:
-    path: ../common
-  models:
-    path: ../models
-  networking:
-    path: ../networking
-  page_block_widgets:
-    path: ../page_block_widgets
-  repositories:
-    path: ../repositories
   home:
     path: ../home
 

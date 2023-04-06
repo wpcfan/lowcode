@@ -12,6 +12,8 @@
     - [3.1. 项目结构](#31-项目结构)
     - [3.2.2 工程搭建](#322-工程搭建)
     - [3.2.3 依赖管理](#323-依赖管理)
+      - [admin 工程](#admin-工程)
+      - [app 工程](#app-工程)
 
 <!-- /code_chunk_output -->
 
@@ -346,3 +348,92 @@ flutter create --template=package repositories
 ```
 
 ### 3.2.3 依赖管理
+
+#### admin 工程
+
+我们的工程依赖管理主要是使用 `pubspec.yaml` 文件来管理依赖。我们先来看一下 `admin` 工程的 `pubspec.yaml` 文件。注意由于我们使用了本地包依赖，而不是发布到 `pub.dev`，所以我们需要在 `pubspec.yaml` 文件中添加 `publish_to: "none"`，这样就不会发布到 `pub.dev`。
+
+```yml
+name: admin
+description: 后台管理界面
+
+# 这个值设置为 "none" 表示不发布到 pub.dev
+# 可以使用 path 依赖，这样可以直接修改依赖的模块代码，不用重新发布
+# 如果要发布到 `pub.dev`，可以把这行删掉，然后执行 `flutter pub publish` 命令发布
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+
+  # 本地包依赖
+  common:
+    path: ../common
+  canvas:
+    path: ../canvas
+  pages:
+    path: ../pages
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+```
+
+本地包依赖的路径是相对于 `pubspec.yaml` 文件的路径，所以我们使用 `../` 来表示上一级目录。这样我们就可以在 `admin` 工程中使用 `common`、`canvas`、`pages` 这三个模块了。
+
+#### app 工程
+
+`app` 工程的 `pubspec.yaml` 文件也是类似的，我们不详细讲解，这里贴出。
+
+```yml
+name: app
+description: App 演示
+
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.0.5
+  dio: ^5.0.2
+  flutter_bloc: ^8.1.2
+  # 本地包依赖
+  home:
+    path: ../home
+
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^2.0.0
+  network_image_mock: ^2.1.1
+  bloc_test: ^9.1.1
+  mocktail: ^0.3.0
+
+flutter:
+  uses-material-design: true
+```

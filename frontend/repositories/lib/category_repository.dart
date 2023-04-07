@@ -22,7 +22,7 @@ class CategoryRepository {
     this.baseUrl = '/categories',
     this.enableCache = true,
     this.refreshCache = false,
-  }) : client = client ?? AdminClient.getInstance();
+  }) : client = client ?? AdminClient();
 
   Future<List<Category>> getCategories(
       {CategoryRepresenation categoryRepresenation =

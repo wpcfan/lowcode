@@ -1,10 +1,8 @@
 import 'package:common/common.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:models/models.dart';
-import 'package:networking/networking.dart';
 import 'package:repositories/repositories.dart';
 
 import 'blocs/blocs.dart';
@@ -18,11 +16,8 @@ class PageTableView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<Dio>(
-          create: (context) => AdminClient.getInstance(),
-        ),
         RepositoryProvider<PageAdminRepository>(
-          create: (context) => PageAdminRepository(client: context.read<Dio>()),
+          create: (context) => PageAdminRepository(),
         ),
       ],
       child: MultiBlocProvider(

@@ -8,7 +8,7 @@ class FileAdminRepository {
   FileAdminRepository({
     Dio? client,
     this.baseUrl = '/files',
-  }) : client = client ?? AdminClient.getInstance();
+  }) : client = client ?? AdminClient();
 
   Future<List<FileDto>> getFiles() async {
     final url = baseUrl;

@@ -10,7 +10,7 @@ class PageBlockDataRepository {
   PageBlockDataRepository({
     Dio? client,
     this.baseUrl = '/pages',
-  }) : client = client ?? AdminClient.getInstance();
+  }) : client = client ?? AdminClient();
 
   Future<BlockData> addData(int pageId, int blockId, BlockData data) async {
     debugPrint('PageAdminRepository.addData($blockId, $data)');

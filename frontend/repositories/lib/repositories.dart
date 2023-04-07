@@ -54,7 +54,7 @@ class PageRepository {
     this.baseUrl = '/pages',
     this.enableCache = true,
     this.refreshCache = false,
-  }) : client = client ?? AppClient.getInstance();
+  }) : client = client ?? AppClient();
 
   Future<PageLayout> getByPageType(PageType pageType) async {
     debugPrint('PageRepository.getByPageType($pageType)');

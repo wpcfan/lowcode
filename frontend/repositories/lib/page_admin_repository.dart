@@ -14,7 +14,7 @@ class PageAdminRepository {
   PageAdminRepository({
     Dio? client,
     this.baseUrl = '/pages',
-  }) : client = client ?? AdminClient.getInstance();
+  }) : client = client ?? AdminClient();
 
   /// 获取页面
   /// [id] 页面ID

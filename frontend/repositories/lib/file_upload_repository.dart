@@ -13,7 +13,7 @@ class FileUploadRepository {
   FileUploadRepository({
     Dio? client,
     this.baseUrl = '',
-  }) : client = client ?? FileClient.getInstance();
+  }) : client = client ?? FileClient();
 
   Future<FileDto> uploadFile(UploadFile file) async {
     debugPrint('FileUploadRepository.upload($file)');

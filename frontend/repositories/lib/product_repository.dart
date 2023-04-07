@@ -15,7 +15,7 @@ class ProductRepository {
     this.baseUrl = '/products',
     this.enableCache = true,
     this.refreshCache = false,
-  }) : client = client ?? AppClient.getInstance();
+  }) : client = client ?? AppClient();
 
   Future<SliceWrapper<Product>> getByCategory(
       {required int categoryId, int page = 0}) async {

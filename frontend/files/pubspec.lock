@@ -180,10 +180,10 @@ packages:
     dependency: transitive
     description:
       name: dio
-      sha256: "2644a9e0965a7aa3deb09cb8ce4081db4450c178f472818c8cd34216a3070d7b"
+      sha256: "0894a098594263fe1caaba3520e3016d8a855caeb010a882273189cca10f11e9"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.1.1"
   dio_cache_interceptor:
     dependency: transitive
     description:
@@ -463,7 +463,7 @@ packages:
     source: hosted
     version: "2.1.1"
   networking:
-    dependency: "direct main"
+    dependency: transitive
     description:
       path: "../networking"
       relative: true

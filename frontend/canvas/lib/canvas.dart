@@ -1,12 +1,10 @@
 library canvas;
 
 import 'package:common/common.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:nested/nested.dart';
-import 'package:networking/networking.dart';
 import 'package:repositories/repositories.dart';
 
 import 'blocs/blocs.dart';
@@ -97,24 +95,20 @@ class CanvasPage extends StatelessWidget {
 
   /// 构建 RepositoryProviders 数组
   List<SingleChildWidget> get _buildRepositoryProviders => [
-        RepositoryProvider<Dio>(
-          create: (context) => AdminClient.getInstance(),
-        ),
         RepositoryProvider<PageAdminRepository>(
-          create: (context) => PageAdminRepository(client: context.read<Dio>()),
+          create: (context) => PageAdminRepository(),
         ),
         RepositoryProvider<PageBlockRepository>(
-          create: (context) => PageBlockRepository(client: context.read<Dio>()),
+          create: (context) => PageBlockRepository(),
         ),
         RepositoryProvider<PageBlockDataRepository>(
-          create: (context) =>
-              PageBlockDataRepository(client: context.read<Dio>()),
+          create: (context) => PageBlockDataRepository(),
         ),
         RepositoryProvider<ProductRepository>(
-          create: (context) => ProductRepository(client: context.read<Dio>()),
+          create: (context) => ProductRepository(),
         ),
         RepositoryProvider<CategoryRepository>(
-          create: (context) => CategoryRepository(client: context.read<Dio>()),
+          create: (context) => CategoryRepository(),
         ),
       ];
 

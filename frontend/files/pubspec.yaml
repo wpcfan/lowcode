@@ -19,8 +19,6 @@ dependencies:
 
   common:
     path: ../common
-  networking:
-    path: ../networking
   repositories:
     path: ../repositories
 

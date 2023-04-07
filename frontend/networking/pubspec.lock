@@ -93,10 +93,10 @@ packages:
     dependency: "direct main"
     description:
       name: dio
-      sha256: "2644a9e0965a7aa3deb09cb8ce4081db4450c178f472818c8cd34216a3070d7b"
+      sha256: "0894a098594263fe1caaba3520e3016d8a855caeb010a882273189cca10f11e9"
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.2"
+    version: "5.1.1"
   dio_cache_interceptor:
     dependency: "direct main"
     description:
@@ -416,14 +416,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
-  ua_client_hints:
-    dependency: "direct main"
-    description:
-      name: ua_client_hints
-      sha256: "15299fa9234628d814d4293630e2a7789ac96f4a5b28d0571af8bb7940c951dc"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.1.3"
   uuid:
     dependency: transitive
     description:

@@ -10,7 +10,7 @@ class PageBlockRepository {
   PageBlockRepository({
     Dio? client,
     this.baseUrl = '/pages',
-  }) : client = client ?? AdminClient.getInstance();
+  }) : client = client ?? AdminClient();
 
   Future<PageLayout> createBlock(int pageId, PageBlock block) async {
     debugPrint('PageAdminRepository.createBlock($pageId, $block)');

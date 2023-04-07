@@ -2,9 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:networking/networking.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-class FileClient {
-  static Dio getInstance() {
-    final options = BaseOptions(
+class FileClient with DioMixin implements Dio {
+  static final FileClient _instance = FileClient._();
+  factory FileClient() => _instance;
+
+  FileClient._() {
+    options = BaseOptions(
       baseUrl: 'http://localhost:8080/api/v1/admin',
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
@@ -13,14 +16,9 @@ class FileClient {
         'Accept': 'application/json',
       }),
     );
-    final dio = Dio(options);
-    _setupInterceptors(dio);
-    return dio;
-  }
-
-  static void _setupInterceptors(Dio dio) {
-    dio.interceptors.add(PrettyDioLogger());
-    dio.interceptors.add(InterceptorsWrapper(
+    httpClientAdapter = HttpClientAdapter();
+    interceptors.add(PrettyDioLogger());
+    interceptors.add(InterceptorsWrapper(
       onError: (e, handler) {
         if (e.response?.data != null) {
           final problem = Problem.fromJson(e.response?.data);

@@ -57,14 +57,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  carousel_slider:
-    dependency: transitive
-    description:
-      name: carousel_slider
-      sha256: "9c695cc963bf1d04a47bd6021f68befce8970bcd61d24938e1fb0918cf5d9c42"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.2.1"
   characters:
     dependency: transitive
     description:
@@ -128,14 +120,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
-  custom_refresh_indicator:
-    dependency: transitive
-    description:
-      name: custom_refresh_indicator
-      sha256: c67a9145190eae17d7b7034b6085e7446f9340d9ed0b352caf63cc84e9486ef0
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.1"
   diff_match_patch:
     dependency: transitive
     description:

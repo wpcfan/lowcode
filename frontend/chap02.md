@@ -14,6 +14,9 @@
     - [3.2.3 依赖管理](#323-依赖管理)
       - [admin 工程](#admin-工程)
       - [app 工程](#app-工程)
+      - [页面模块](#页面模块)
+      - [组件模块](#组件模块)
+      - [功能模块](#功能模块)
 
 <!-- /code_chunk_output -->
 
@@ -364,16 +367,27 @@ publish_to: "none"
 
 version: 1.0.0+1
 
+# 依赖的 SDK 版本，这里限定了 Flutter 的版本
 environment:
+  # dart 版本
   sdk: ">=2.19.4 <3.0.0"
+  # flutter 版本
   flutter: ">=3.7.0"
 
+# 依赖的包，可以在 pub.dev 上查找
 dependencies:
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  # 图标
   cupertino_icons: ^1.0.2
+  # 版本号规则：https://dart.dev/tools/pub/dependencies#version-constraints
+  # 版本限定规则： ^1.2.3 相当于 >=1.2.3 <2.0.0
+  # 路由
+  go_router: ^6.0.1
+  # 状态管理
+  flutter_bloc: ^8.1.2
 
   # 本地包依赖
   common:
@@ -383,17 +397,31 @@ dependencies:
   pages:
     path: ../pages
 
+# 开发依赖，运行时不需要
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^2.0.0
+  network_image_mock: ^2.1.1
+  bloc_test: ^9.1.1
+  mocktail: ^0.3.0
 
 flutter:
+  # 使用 material design
   uses-material-design: true
-
+  # 本地图片
   assets:
     - assets/images/
+  # 本地字体
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto/Roboto-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto/Roboto-Bold.ttf
+          weight: 700
 ```
 
 本地包依赖的路径是相对于 `pubspec.yaml` 文件的路径，所以我们使用 `../` 来表示上一级目录。这样我们就可以在 `admin` 工程中使用 `common`、`canvas`、`pages` 这三个模块了。
@@ -416,14 +444,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.2
   provider: ^6.0.5
-  dio: ^5.0.2
   flutter_bloc: ^8.1.2
   # 本地包依赖
   home:
     path: ../home
-
-  cupertino_icons: ^1.0.2
 
 dev_dependencies:
   flutter_test:
@@ -437,3 +463,348 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 ```
+
+#### 页面模块
+
+我们的工程中，对于页面采用单独模块化的方案，这样可以让页面模块更加独立，方便后期维护。
+
+对于后台管理界面 `admin` 这个工程来说，我们的页面模块主要是由 `pages` 和 `cavas` 两个模块组成。其中 `pages` 模块用于显示页面布局列表，以及新增布局，修改页面参数，删除布局，上线布局以及下线布局等功能。`canvas` 模块用于显示页面布局，以及对布局进行编辑。
+
+首先来修改一下 `pages` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: pages
+description: A new Flutter package project.
+version: 0.0.1
+publish_to: "none"
+homepage: https://imooc.com
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.2
+  equatable: ^2.0.5
+  go_router: ^6.0.1
+
+  common:
+    path: ../common
+  models:
+    path: ../models
+  repositories:
+    path: ../repositories
+  page_block_widgets:
+    path: ../page_block_widgets
+  forms:
+    path: ../forms
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  network_image_mock: ^2.1.1
+  bloc_test: ^9.1.1
+  mocktail: ^0.3.0
+
+flutter:
+```
+
+`pages` 模块依赖了 `common`、`models`、`repositories`、`page_block_widgets`、`forms` 这五个模块。其中 `common` 模块是公共模块，`models` 模块是数据模型模块，`repositories` 模块是数据仓库模块，`page_block_widgets` 模块是页面区块模块，`forms` 模块是表单模块。
+
+然后我们来修改 `canvas` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: canvas
+description: 画布页面
+version: 0.0.1
+publish_to: "none"
+homepage: https://imooc.com
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.2
+  equatable: ^2.0.5
+  hexcolor: ^3.0.1
+  flex_color_picker: ^3.1.0
+  nested: ^1.0.0
+
+  common:
+    path: ../common
+  models:
+    path: ../models
+  repositories:
+    path: ../repositories
+  page_block_widgets:
+    path: ../page_block_widgets
+  files:
+    path: ../files
+  forms:
+    path: ../forms
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  bloc_test: ^9.1.1
+  mocktail: ^0.3.0
+
+flutter:
+```
+
+`canvas` 模块依赖了 `common`、`models`、`repositories`、`page_block_widgets`、`files`、`forms` 这六个模块。其中 `common` 模块是公共模块，`models` 模块是数据模型模块，`repositories` 模块是数据仓库模块，`page_block_widgets` 模块是页面区块模块，`files` 模块是文件模块，`forms` 模块是表单模块。
+
+#### 组件模块
+
+在有的时候，由于页面比较复杂，或者在不同页面间有重复的组件，我们就需要把这些组件抽离出来，单独作为一个模块，这样可以让页面模块更加独立，方便后期维护。
+
+我们的项目中，有以下几个组件模块。
+
+- `files`：文件模块，用于显示文件列表，以及上传文件、删除文件等功能。
+- `forms`：表单模块，有封装的表单组件，用于显示表单。
+- `page_block_widgets`：页面区块模块，有图片行区块，商品行区块，轮播图区块以及瀑布流区块等。
+
+首先我们来修改 `files` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: files
+description: 文件浏览/上传/选择/删除组件
+version: 0.0.1
+publish_to: "none"
+homepage: https://imooc.com
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # 状态管理
+  flutter_bloc: ^8.1.2
+  # 对象比较
+  equatable: ^2.0.5
+  # 图片选择器
+  image_picker: ^0.8.6+4
+  image_picker_for_web: ^2.1.11
+  nested: ^1.0.0
+
+  common:
+    path: ../common
+  repositories:
+    path: ../repositories
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  network_image_mock: ^2.1.1
+  bloc_test: ^9.1.1
+  mocktail: ^0.3.0
+
+flutter:
+```
+
+`files` 模块依赖了 `common`、`repositories` 这两个模块。其中 `common` 模块是公共模块，`repositories` 模块是数据仓库模块。
+
+然后我们来修改 `forms` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: forms
+description: 表单组件
+version: 0.0.1
+publish_to: "none"
+homepage: https://imooc.com
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # 颜色选择器
+  flex_color_picker: ^3.1.0
+  common:
+    path: ../common
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+```
+
+`forms` 模块依赖了 `common` 这个模块。其中 `common` 模块是公共模块。
+
+然后我们来修改 `page_block_widgets` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: page_block_widgets
+description: 页面区块组件
+version: 0.0.1
+homepage: https://imooc.com
+publish_to: "none"
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # 瀑布流网格
+  flutter_staggered_grid_view: ^0.6.2
+
+  common:
+    path: ../common
+  models:
+    path: ../models
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  network_image_mock: ^2.1.1
+
+flutter:
+```
+
+`page_block_widgets` 模块依赖了 `common`、`models` 这两个模块。其中 `common` 模块是公共模块，`models` 模块是数据模型模块。
+
+#### 功能模块
+
+我们的项目中，有以下几个功能模块。
+
+- `common`：公共模块，有公共的扩展类和一些基础的组件。
+- `models`：数据模型模块，我们对公用数据的抽象建模存放在这个模块。
+- `repositories`：数据仓库模块，我们对数据的抽象存放在这个模块。
+- `networking`：网络模块，我们对网络请求的抽象存放在这个模块。这个模块涉及到一些具体的 HTTP 库的封装，比如 `dio`、`http` 等。我们对于拦截器、请求头、请求参数、响应数据等进行了封装。
+
+首先我们来修改 `common` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: common
+description: 公共模块，有公共的扩展类和一些基础的组件
+version: 0.0.1
+homepage: https://imooc.com
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # 富文本处理
+  easy_rich_text: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+```
+
+`common` 模块没有依赖其他本地模块，但是依赖了一个富文本处理的库 `easy_rich_text`，这个后面会用于处理商品价格的显示。
+
+然后我们来修改 `models` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: models
+description: 数据模型模块，我们对公用数据的抽象建模存放在这个模块。
+version: 0.0.1
+homepage: https://imooc.com
+publish_to: none
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  equatable: ^2.0.5
+  flutter:
+    sdk: flutter
+  hexcolor: ^3.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+```
+
+`models` 模块没有依赖其他本地模块，但是依赖了一个颜色处理的库 `hexcolor`，这个库用于处理字符串和颜色的转换。
+
+然后我们来修改 `repositories` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: repositories
+description: 数据仓库模块，我们对数据的抽象存放在这个模块。
+version: 0.0.1
+homepage: https://imooc.com
+publish_to: "none"
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.1.1
+  models:
+    path: ../models
+  networking:
+    path: ../networking
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+```
+
+`repositories` 模块依赖了 `models`、`networking` 这两个模块。其中 `models` 模块是数据模型模块，`networking` 模块是网络模块。
+
+然后我们来修改 `networking` 模块的 `pubspec.yaml` 文件。
+
+```yml
+name: networking
+description: 网络模块，我们对网络请求的抽象存放在这个模块。这个模块有拦截器、请求头、请求参数、响应数据等进行了封装。
+version: 0.0.1
+homepage: https://imooc.com
+
+environment:
+  sdk: ">=2.19.4 <3.0.0"
+  flutter: ">=3.7.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dio: ^5.1.1
+  pretty_dio_logger: ^1.3.1
+  dio_cache_interceptor: ^3.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  mocktail: ^0.3.0
+
+flutter:
+```
+
+`networking` 模块依赖了 `dio`、`pretty_dio_logger`、`dio_cache_interceptor` 这三个库。其中 `pretty_dio_logger` 是一个日志打印库，`dio_cache_interceptor` 是一个缓存库。

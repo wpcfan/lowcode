@@ -1,25 +1,26 @@
-# 第一章
+# 第一章 课程介绍
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-- [第一章](#第一章)
+- [第一章 课程介绍](#第一章-课程介绍)
   - [1. 为什么全栈技能很重要](#1-为什么全栈技能很重要)
   - [2. 课程介绍](#2-课程介绍)
   - [3. 课程结构](#3-课程结构)
-  - [4. Flutter 简介](#4-flutter-简介)
-  - [4.1. Flutter 特性](#41-flutter-特性)
-    - [4.2. Dart 语言](#42-dart-语言)
-    - [4.3. 响应式 UI](#43-响应式-ui)
-    - [4.4. 跨平台](#44-跨平台)
-    - [4.5. 原生性能](#45-原生性能)
-    - [4.6. 热重载](#46-热重载)
-    - [4.7. 声明式 UI](#47-声明式-ui)
-  - [5. 需求分析](#5-需求分析)
-    - [5.1. 需求的来源](#51-需求的来源)
-    - [5.2. 需求梳理](#52-需求梳理)
-    - [5.3. 需求分解](#53-需求分解)
+  - [4. 需求分析](#4-需求分析)
+    - [4.1. 需求的来源](#41-需求的来源)
+    - [4.2. 需求梳理](#42-需求梳理)
+    - [4.3. 需求分解](#43-需求分解)
+  - [5. 技术选型](#5-技术选型)
+  - [6. Flutter 简介](#6-flutter-简介)
+    - [6.1. Flutter 特性](#61-flutter-特性)
+    - [6.2. Dart 语言](#62-dart-语言)
+    - [6.3. 响应式 UI](#63-响应式-ui)
+    - [6.4. 跨平台](#64-跨平台)
+    - [6.5. 原生性能](#65-原生性能)
+    - [6.6. 热重载](#66-热重载)
+    - [6.7. 声明式 UI](#67-声明式-ui)
 
 <!-- /code_chunk_output -->
 
@@ -57,170 +58,13 @@
 
 - 第一章：为什么全栈技能很重要
 
-## 4. Flutter 简介
-
-Flutter 是 Google 开源的移动 UI 框架，可以快速在 iOS 和 Android 上构建高质量的原生用户界面。Flutter 可以与现有的代码一起工作。在全世界，Flutter 正在被越来越多的开发者和组织使用，并且 Flutter 是完全免费、开源的。
-
-## 4.1. Flutter 特性
-
-fllutter 的特性如下：
-
-- 快速开发
-- 热重载
-- 响应式 UI
-- 跨平台
-- 原生性能
-- 富有表现力和灵活的 UI
-
-### 4.2. Dart 语言
-
-Flutter 的开发语言是 Dart。 Dart 是一种客户端-优先的语言，可以快速开发出高质量的产品，Dart 语言的特性如下：
-
-- 一致的编程体验
-- 快速开发
-- 丰富的库
-- 声明式 UI
-- 异步编程
-- 跨平台
-
-Dart 在语法上与 Java、C#、JavaScript、Kotlin、Swift、TypeScript 等语言非常相似，因此，如果你已经熟悉这些语言中的任何一种，那么学习 Dart 语言将会非常容易。
-
-### 4.3. 响应式 UI
-
-Flutter 的 UI 是响应式的，这意味着当应用程序的状态发生变化时，Flutter 框架会自动更新 UI，这样可以避免手动更新 UI 的麻烦。
-
-我们可以用一个简单的例子说明 Flutter 的响应式 UI 特性。假设我们有一个计数器应用程序，它有一个按钮和一个文本，当我们点击按钮时，文本的值会自动增加。在 Flutter 中，我们可以这样实现：
-
-```dart
-import 'package:flutter/material.dart';
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    /// MaterialApp 一般作为应用程序的根组件
-    return MaterialApp(
-      /// 应用程序的名称
-      title: 'Flutter Demo',
-      /// 应用程序的主题
-      theme: ThemeData(
-        /// 蓝色主题
-        /// primarySwatch 用于指定 Material Design 中的主题调色板
-        primarySwatch: Colors.blue,
-      ),
-      /// 应用程序的首页
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    /// 调用 setState 方法，通知 Flutter 框架，有状态发生了改变
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    /// Scaffold 是 Material 库中提供的页面脚手架
-    /// 通过它可以快速实现页面的基本结构
-    return Scaffold(
-      /// 页面的导航栏
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      /// 页面的主要内容
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
-      ),
-      /// 页面的浮动按钮
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ),
-    );
-  }
-}
-```
-
-在上面的代码中，我们使用了一个 StatefulWidget，这个 StatefulWidget 有一个状态，这个状态中有一个计数器，当我们点击按钮时，计数器的值会自动增加，这个计数器的值会自动更新到 UI 中。其中 setState 方法会通知 Flutter 框架，有状态发生了变化，Flutter 框架会自动调用 build 方法来更新 UI。
-
-需要指出的是，每次 setState 方法被调用时，Flutter 框架都会重新调用 build 方法来更新 UI，这意味着我们不需要手动更新 UI，这样可以大大提高开发效率。但是，这也意味着我们不能在 build 方法中执行耗时的操作，因为每次 setState 方法被调用时，Flutter 框架都会重新调用 build 方法来更新 UI，如果在 build 方法中执行耗时的操作，那么 UI 将会卡顿。
-
-在 App 的开发框架中，这种行为很像 React/Vue 中的响应式 UI。因此，如果你已经熟悉 React/Vue，那么学习 Flutter 将会非常容易。当然现在在 Android/iOS 官方的原生开发框架也有受 React/Vue 启发的响应式 UI 框架，比如 Android Jetpack Compose 和 iOS SwiftUI。学习了 Flutter，你将会发现学习 Android Jetpack Compose 和 iOS SwiftUI 将会非常容易。
-
-### 4.4. 跨平台
-
-Flutter 可以在 iOS 和 Android 上运行，这意味着我们可以使用一套代码来同时开发 iOS 和 Android 应用程序。Flutter 现在还可以在 Windows、MacOS、Linux、Web 等平台上运行，但是这些平台的支持还不是很完善。
-
-Flutter 的跨平台特性是通过 Flutter Engine 实现的，Flutter Engine 是一个高性能的渲染引擎，它可以直接将 Flutter UI 绘制到设备屏幕上，而不需要经过中间层。Flutter Engine 也可以与现有的代码一起工作，这意味着我们可以在 Flutter 中使用原生的平台代码。
-
-如果我们使用命令行创建一个 Flutter 项目，那么 Flutter 会自动为我们创建一个 Android 项目和一个 iOS 项目，这两个项目都是使用原生的 Android/iOS 代码来实现的。Flutter 会将 Flutter 代码编译成原生的 Android/iOS 代码，然后将编译后的原生代码集成到 Android/iOS 项目中。这样，我们就可以使用一套代码来同时开发 iOS 和 Android 应用程序了。
-
-### 4.5. 原生性能
-
-Flutter 使用了 Flutter Engine，这是一个高性能的渲染引擎，它可以直接将 Flutter UI 绘制到设备屏幕上，而不需要经过中间层。Flutter Engine 也可以与现有的代码一起工作，这意味着我们可以在 Flutter 中使用原生的平台代码。
-
-Flutter Engine 使用了 Dart VM，Dart VM 是一个高性能的虚拟机，它可以直接将 Dart 代码编译成原生的机器码，而不需要经过中间层。
-
-Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutter 和 Dart 都是原生的，它们的性能是非常高的。
-
-### 4.6. 热重载
-
-在 Flutter 中，我们可以在不重新启动应用的情况下，实时更新应用的 UI。这意味着我们可以在开发过程中，不断地修改代码，然后 Flutter 框架会自动重新编译代码，并将编译后的代码热重载到应用中，这样我们就可以在不重新启动应用的情况下，实时更新应用的 UI。
-
-这种热重载的特性是通过 Flutter Engine 实现的，Flutter Engine 会监听文件系统的变化，当文件系统发生变化时，Flutter Engine 会自动重新编译代码，并将编译后的代码热重载到应用中。
-
-其机制和 React/Vue 中的热重载机制是一样的，都是通过监听文件系统的变化来实现的。
-
-### 4.7. 声明式 UI
-
-声明式 UI 是一种用户界面编程模式，其中开发人员声明应该显示什么，而不是编写代码来指定应该如何显示。它是一种与命令式编程相对的编程模式。
-
-在声明式 UI 中，开发人员定义了应该显示的内容、布局和交互，但不指定实现的方式。相反，它们使用某种类型的描述性语言（如 XML、JSON 或 Flutter 的 Widget 树）来表示用户界面，将这些描述传递给框架或库，并由框架或库负责创建实际的用户界面。
-
-例如，当使用 Flutter 编写声明式 UI 时，开发人员使用 Widget 树来描述用户界面。Widget 树是一个由嵌套 Widget 组成的层次结构，每个 Widget 都描述了用户界面的一部分，如文本、按钮、图像、容器等。当开发人员更改 Widget 树时，Flutter 框架会自动重新构建用户界面以反映这些更改。开发人员不必关心如何创建、排列或呈现小部件。相反，他们可以专注于声明用户界面应该是什么样子，框架会负责实现。
-
-声明式 UI 的优点包括：
-
-- 代码更容易理解和维护，因为代码更加清晰、简洁和可读。
-- 更容易进行跨平台开发，因为相同的代码可以用于多个平台。
-- 更容易进行测试，因为 UI 的状态可以更容易地检查和验证。
-- 更容易进行迭代和重构，因为 UI 可以在不影响应用程序的功能的情况下更改和重新设计。
-
-因此，声明式 UI 是现代应用程序开发中非常流行的一种编程模式。
-
-## 5. 需求分析
+## 4. 需求分析
 
 在这个课程中，我们将开发一个全栈应用，这个应用有几个部分构成：
 
 - **Flutter App**：目标平台是 Android/iOS，我们将开发一个常见的 App 首页，这个首页是由一系列组件构成，包括轮播图，一行一张的图片，一行两张的图片，一行三张的图片，一行多张的图片，一行一个商品卡片，一行两个的商品卡片以及一个商品瀑布流。区别于一般 App 的是，这个首页是动态的，它的内容是从后端获取的，而不是写死在代码中的。这个应用的主要功能是展示我们后台的布局配置，所以我们不会做的太复杂，仅做演示目的。
-
-  ![图 2](images/1988699ac738caf22f477cb075d2dcd86734dc7e28d557cb3122ad41b462edfb.png)
+  ![图 1](https://i.imgur.com/48MkJhP.jpg)
+  ![图 2](https://i.imgur.com/iSPVEIT.jpg)
 
 - **Flutter Web 前端**：目标平台是 Web，这个前端是用于给运营人员操作的，运营人员可以通过这个前端来配置首页的布局，比如添加轮播图，添加一行一张的图片，添加一行两张的图片，添加一行三张的图片，添加一行多张的图片，添加一行一个商品卡片，添加一行两个的商品卡片以及添加商品瀑布流。这个前端的主要功能是让运营人员可以通过图形化的界面来配置首页的布局，而不是通过代码来配置。本质上是一个可视化的配置平台，也可以理解成一个简单的低代码平台。
   ![图 3](https://i.imgur.com/q2BghnG.png)  
@@ -233,7 +77,7 @@ Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutt
 
     ![图 5](https://i.imgur.com/NmQBTPg.png)
 
-### 5.1. 需求的来源
+### 4.1. 需求的来源
 
 在做需求分析的时候，第一步是要确定需求的来源，也就是要确定需求是从哪里来的。这个过程往往需要和不同的人进行沟通，比如和产品经理、项目经理、UI 设计师、运营人员等进行沟通，确定需求的来源。
 
@@ -250,7 +94,7 @@ Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutt
 - **运营人员**：我们假定运营人员是一个没有技术基础的人，他可以通过可视化的界面来配置首页的布局，但是他不会编写代码。而且他也不能接受太繁琐的配置步骤，比如太多的参数需要配置，太多的步骤需要操作，这样他就会觉得很繁琐，不愿意去配置。他的首要目的是想要快速的配置出一个在指定时间内可以上线的首页，而不是想要一个在线页面编辑器。
 - **首页性能**：我们假定公司对于首页性能有较高的要求，所以我们的技术选择需要考虑到这一点。
 
-### 5.2. 需求梳理
+### 4.2. 需求梳理
 
 一般来说，我们在国内很少会从用户处直接得到完善的需求文档，所以我们需要从运营人员那里得到需求，然后再进行需求梳理，梳理出完整的需求文档。
 
@@ -271,7 +115,7 @@ Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutt
 - 需求 10：运营人员可以发布/下线布局
 - 需求 11：一个用于 demo 的 App，可以获取到配置的布局
 
-### 5.3. 需求分解
+### 4.3. 需求分解
 
 上面这些需求只是一个骨架，还需要进一步细化，比如需求 1。但在细化之前我们必须先确定需求的范围，也就是要确定我们要做什么，不要做什么。这个过程往往需要和不同的人进行沟通，比如和产品经理、项目经理、UI 设计师、运营人员等进行沟通，确定我们要做什么，不要做什么。而且这个需求还和可能方案有关，涉及到我们如何设计这个可视化的配置。
 
@@ -392,3 +236,177 @@ digraph G {
 - 需求 8：运营人员可以按条件查询布局
 - 需求 9：运营人员可以发布/下线布局
 - 需求 10：一个用于 demo 的 App，可以获取到配置的布局并展示
+
+## 5. 技术选型
+
+本课程的技术选型如下：
+
+- 前端：Flutter
+- 后端：Java
+- 数据库：H2，MySQL
+- 运维：Docker
+
+前端采用 Flutter 的原因是我们的课程中既有 App 也有 Web 页面，而 Flutter 可以同时开发 App 和 Web 页面，这样大家可以使用同一种技术栈开发 App 和 Web，所以我们选择 Flutter 作为前端技术栈。
+
+后端采用 Java 的原因是 Java 是一种非常成熟的语言，而且 Java 有非常成熟的生态，比如 Spring Boot、Spring Data JPA 等，这些都是非常成熟的框架，可以让我们快速地开发出高质量的产品。而且 Java 有非常成熟的开发工具，比如 IntelliJ IDEA、Eclipse 等，这些都是非常成熟的开发工具，可以让我们快速地开发出高质量的产品。
+
+数据库采用 H2 和 MySQL 的原因是 H2 是一个内存数据库，而且可以模拟多种主流大型数据的方言，非常适合在开发阶段使用。而 MySQL 是一个关系型数据库，是目前在国内以及在开源社区普遍使用的数据库，所以我们选择 H2 和 MySQL 作为数据库技术栈。
+
+运维采用 Docker 的原因是 Docker 是一个开源的应用容器引擎，可以让我们快速地部署和运行应用。而且 Docker 有非常成熟的生态和开发工具。
+
+## 6. Flutter 简介
+
+Flutter 是 Google 开源的移动 UI 框架，可以快速在 iOS 和 Android 上构建高质量的原生用户界面。Flutter 可以与现有的代码一起工作。在全世界，Flutter 正在被越来越多的开发者和组织使用，并且 Flutter 是完全免费、开源的。
+
+### 6.1. Flutter 特性
+
+fllutter 的特性如下：
+
+- 快速开发
+- 热重载
+- 响应式 UI
+- 跨平台
+- 原生性能
+- 富有表现力和灵活的 UI
+
+### 6.2. Dart 语言
+
+Flutter 的开发语言是 Dart。 Dart 是一种客户端-优先的语言，可以快速开发出高质量的产品，Dart 语言的特性如下：
+
+- 一致的编程体验
+- 快速开发
+- 丰富的库
+- 声明式 UI
+- 异步编程
+- 跨平台
+
+Dart 在语法上与 Java、C#、JavaScript、Kotlin、Swift、TypeScript 等语言非常相似，因此，如果你已经熟悉这些语言中的任何一种，那么学习 Dart 语言将会非常容易。
+
+### 6.3. 响应式 UI
+
+Flutter 的 UI 是响应式的，这意味着当应用程序的状态发生变化时，Flutter 框架会自动更新 UI，这样可以避免手动更新 UI 的麻烦。
+
+我们可以用一个简单的例子说明 Flutter 的响应式 UI 特性。假设我们有一个计数器应用程序，它有一个按钮和一个文本，当我们点击按钮时，文本的值会自动增加。在 Flutter 中，我们可以这样实现：
+
+```dart
+import 'package:flutter/material.dart';
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    /// MaterialApp 一般作为应用程序的根组件
+    return MaterialApp(
+      /// 应用程序的名称
+      title: 'Flutter Demo',
+      /// 应用程序的主题
+      theme: ThemeData(
+        /// 蓝色主题
+        /// primarySwatch 用于指定 Material Design 中的主题调色板
+        primarySwatch: Colors.blue,
+      ),
+      /// 应用程序的首页
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  MyHomePage({Key key, this.title}) : super(key: key);
+
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    /// 调用 setState 方法，通知 Flutter 框架，有状态发生了改变
+    setState(() {
+      _counter++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    /// Scaffold 是 Material 库中提供的页面脚手架
+    /// 通过它可以快速实现页面的基本结构
+    return Scaffold(
+      /// 页面的导航栏
+      appBar: AppBar(
+        title: Text(widget.title),
+      ),
+      /// 页面的主要内容
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headline4,
+            ),
+          ],
+        ),
+      ),
+      /// 页面的浮动按钮
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+      ),
+    );
+  }
+}
+```
+
+在上面的代码中，我们使用了一个 StatefulWidget，这个 StatefulWidget 有一个状态，这个状态中有一个计数器，当我们点击按钮时，计数器的值会自动增加，这个计数器的值会自动更新到 UI 中。其中 setState 方法会通知 Flutter 框架，有状态发生了变化，Flutter 框架会自动调用 build 方法来更新 UI。
+
+需要指出的是，每次 setState 方法被调用时，Flutter 框架都会重新调用 build 方法来更新 UI，这意味着我们不需要手动更新 UI，这样可以大大提高开发效率。但是，这也意味着我们不能在 build 方法中执行耗时的操作，因为每次 setState 方法被调用时，Flutter 框架都会重新调用 build 方法来更新 UI，如果在 build 方法中执行耗时的操作，那么 UI 将会卡顿。
+
+在 App 的开发框架中，这种行为很像 React/Vue 中的响应式 UI。因此，如果你已经熟悉 React/Vue，那么学习 Flutter 将会非常容易。当然现在在 Android/iOS 官方的原生开发框架也有受 React/Vue 启发的响应式 UI 框架，比如 Android Jetpack Compose 和 iOS SwiftUI。学习了 Flutter，你将会发现学习 Android Jetpack Compose 和 iOS SwiftUI 将会非常容易。
+
+### 6.4. 跨平台
+
+Flutter 可以在 iOS 和 Android 上运行，这意味着我们可以使用一套代码来同时开发 iOS 和 Android 应用程序。Flutter 现在还可以在 Windows、MacOS、Linux、Web 等平台上运行，但是这些平台的支持还不是很完善。
+
+Flutter 的跨平台特性是通过 Flutter Engine 实现的，Flutter Engine 是一个高性能的渲染引擎，它可以直接将 Flutter UI 绘制到设备屏幕上，而不需要经过中间层。Flutter Engine 也可以与现有的代码一起工作，这意味着我们可以在 Flutter 中使用原生的平台代码。
+
+如果我们使用命令行创建一个 Flutter 项目，那么 Flutter 会自动为我们创建一个 Android 项目和一个 iOS 项目，这两个项目都是使用原生的 Android/iOS 代码来实现的。Flutter 会将 Flutter 代码编译成原生的 Android/iOS 代码，然后将编译后的原生代码集成到 Android/iOS 项目中。这样，我们就可以使用一套代码来同时开发 iOS 和 Android 应用程序了。
+
+### 6.5. 原生性能
+
+Flutter 使用了 Flutter Engine，这是一个高性能的渲染引擎，它可以直接将 Flutter UI 绘制到设备屏幕上，而不需要经过中间层。Flutter Engine 也可以与现有的代码一起工作，这意味着我们可以在 Flutter 中使用原生的平台代码。
+
+Flutter Engine 使用了 Dart VM，Dart VM 是一个高性能的虚拟机，它可以直接将 Dart 代码编译成原生的机器码，而不需要经过中间层。
+
+Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutter 和 Dart 都是原生的，它们的性能是非常高的。
+
+### 6.6. 热重载
+
+在 Flutter 中，我们可以在不重新启动应用的情况下，实时更新应用的 UI。这意味着我们可以在开发过程中，不断地修改代码，然后 Flutter 框架会自动重新编译代码，并将编译后的代码热重载到应用中，这样我们就可以在不重新启动应用的情况下，实时更新应用的 UI。
+
+这种热重载的特性是通过 Flutter Engine 实现的，Flutter Engine 会监听文件系统的变化，当文件系统发生变化时，Flutter Engine 会自动重新编译代码，并将编译后的代码热重载到应用中。
+
+其机制和 React/Vue 中的热重载机制是一样的，都是通过监听文件系统的变化来实现的。
+
+### 6.7. 声明式 UI
+
+声明式 UI 是一种用户界面编程模式，其中开发人员声明应该显示什么，而不是编写代码来指定应该如何显示。它是一种与命令式编程相对的编程模式。
+
+在声明式 UI 中，开发人员定义了应该显示的内容、布局和交互，但不指定实现的方式。相反，它们使用某种类型的描述性语言（如 XML、JSON 或 Flutter 的 Widget 树）来表示用户界面，将这些描述传递给框架或库，并由框架或库负责创建实际的用户界面。
+
+例如，当使用 Flutter 编写声明式 UI 时，开发人员使用 Widget 树来描述用户界面。Widget 树是一个由嵌套 Widget 组成的层次结构，每个 Widget 都描述了用户界面的一部分，如文本、按钮、图像、容器等。当开发人员更改 Widget 树时，Flutter 框架会自动重新构建用户界面以反映这些更改。开发人员不必关心如何创建、排列或呈现小部件。相反，他们可以专注于声明用户界面应该是什么样子，框架会负责实现。
+
+声明式 UI 的优点包括：
+
+- 代码更容易理解和维护，因为代码更加清晰、简洁和可读。
+- 更容易进行跨平台开发，因为相同的代码可以用于多个平台。
+- 更容易进行测试，因为 UI 的状态可以更容易地检查和验证。
+- 更容易进行迭代和重构，因为 UI 可以在不影响应用程序的功能的情况下更改和重新设计。
+
+因此，声明式 UI 是现代应用程序开发中非常流行的一种编程模式。

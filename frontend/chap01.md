@@ -153,42 +153,7 @@
 
 为了说清楚布局和区块的概念，我们先来看一下一个布局的示意图：
 
-```dot
-digraph G {
-  rankdir=TD;
-  node [shape=box];
-  edge[dir=none];
-  overlap = true;
-
-  subgraph cluster_p {
-    margin=20.0;
-    label = "Page Layout";
-    landscape = true;
-    style = "filled";
-    fillcolor = "lightgrey";
-
-    subgraph cluster_c1 {
-      margin=10.0;
-      label = "Page Block";
-      style = "filled";
-      fillcolor = "yellow";
-
-      subgraph cluster_c1_1 {
-        margin=0.0;
-        label = "Widget";
-        node [shape=box];
-        edge[dir=none];
-        overlap = true;
-        style = "filled";
-        fillcolor = "green";
-        c1_1_1 [label="Carousel"];
-        c1_1_2 [label="Image"];
-        c1_1_3 [label="Product"];
-      }
-    }
-  }
-}
-```
+![页面布局示意图](https://i.imgur.com/mZ9dS76.png)
 
 需要指出的是，这里面的区块和组件是有区别的，区块是一个矩形区域，而组件是一个个的元素，比如轮播图里面的图片、商品的图片、商品的标题等等。这里面的区块和组件是有区别的，区块是一个矩形区域，而组件是不含这个边距的元素，比如轮播图里面的图片、商品的图片、商品的标题等等。
 

@@ -5,22 +5,24 @@
 <!-- code_chunk_output -->
 
 - [第二章：环境搭建和项目介绍](#第二章环境搭建和项目介绍)
-  - [1. 环境搭建](#1-环境搭建)
-  - [2. 创建第一个 Flutter 应用](#2-创建第一个-flutter-应用)
-    - [2.1. Flutter 应用结构](#21-flutter-应用结构)
-  - [3. 项目结构](#3-项目结构)
-    - [3.1. 项目结构](#31-项目结构)
-    - [3.2.2 工程搭建](#322-工程搭建)
-    - [3.2.3 依赖管理](#323-依赖管理)
-      - [admin 工程](#admin-工程)
-      - [app 工程](#app-工程)
-      - [页面模块](#页面模块)
-      - [组件模块](#组件模块)
-      - [功能模块](#功能模块)
+  - [2.1. 环境搭建](#21-环境搭建)
+  - [2.2. 创建第一个 Flutter 应用](#22-创建第一个-flutter-应用)
+    - [2.2.1. Flutter 应用结构](#221-flutter-应用结构)
+  - [2.3. 项目结构](#23-项目结构)
+    - [2.3.1. 项目结构](#231-项目结构)
+  - [2.4 工程搭建](#24-工程搭建)
+  - [2.5. 依赖管理](#25-依赖管理)
+    - [2.5.1 admin 工程](#251-admin-工程)
+    - [2.5.2. app 工程](#252-app-工程)
+    - [2.5.3. 页面模块](#253-页面模块)
+    - [2.5.4 组件模块](#254-组件模块)
+    - [2.5.5 功能模块](#255-功能模块)
 
 <!-- /code_chunk_output -->
 
-## 1. 环境搭建
+如果大家已经熟悉 Flutter 的环境搭建，可以直接跳到 2.3 节，了解项目结构，开始搭建项目。
+
+## 2.1. 环境搭建
 
 如果有条件，可以遵循 [官方文档](https://flutter.dev/docs/get-started/install) 进行安装，如果没有条件，可以使用 [flutter.cn](https://flutter.cn/docs/get-started/install) 提供的镜像进行安装。
 
@@ -96,9 +98,11 @@
 
   - 安装 `VSCode` 后，需要安装 `Dart` 和 `Flutter` 插件，安装方法如下：
 
-    - 打开 `VSCode`，点击左下角的扩展图标，搜索 `Dart` 和 `Flutter` 插件，安装即可。
+    - 打开 `VSCode`，点击左下角的扩展图标，搜索 `Dart` 、 `Flutter` 插件，安装即可。
 
     - 如果安装过程中出现问题，可以参考 [VSCode 安装 Dart 和 Flutter 插件](https://flutter.cn/docs/get-started/editor?tab=vscode#vscode) 进行安装。
+
+    - 根据需要可以选择一个自己喜欢的代码快捷生成插件，推荐 `Awesome Flutter Snippets`
 
 - 验证安装
 
@@ -121,7 +125,7 @@
 
 Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutter SDK。升级也很简单，只需要执行 `flutter upgrade` 命令即可。
 
-## 2. 创建第一个 Flutter 应用
+## 2.2. 创建第一个 Flutter 应用
 
 - 使用命令行创建
 
@@ -157,7 +161,7 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
     lib/main.dart:1
     ```
 
-### 2.1. Flutter 应用结构
+### 2.2.1. Flutter 应用结构
 
 - `lib` 目录
 
@@ -175,7 +179,7 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
 
   - `pubspec.yaml` 文件中的 `flutter` 字段是 Flutter 的配置。
 
-## 3. 项目结构
+## 2.3. 项目结构
 
 我们的前端项目从大的方面来说可以分为两个部分：
 
@@ -185,7 +189,7 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
 
 但由于两个大的部分都是基于 Flutter 开发的，而且有相当的可复用性，所以我们采用了多模块的方式来进行开发，这样可以让我们的代码更加的清晰，也可以让我们的开发更加的高效。
 
-### 3.1. 项目结构
+### 2.3.1. 项目结构
 
 项目模块的拆分方式一般有两种：
 
@@ -253,73 +257,9 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
 
 我们的项目结构图如下：
 
-```dot
-digraph G {
-  rankdir=TD;
-  node [shape=box];
-  canvas [label="canvas", style=filled, fillcolor="grey"];
-  pages [label="pages", style=filled, fillcolor="grey"];
-  home [label="home", style=filled, fillcolor="grey"];
-  page_block_widgets [label="page_block_widgets", style=filled, fillcolor="yellow"];
-  files [label="files", style=filled, fillcolor="yellow"];
-  forms [label="forms", style=filled, fillcolor="yellow"];
-  repositories [label="repositories", style=filled, fillcolor="purple", fontcolor="white"];
-  networking [label="networking", style=filled, fillcolor="purple", fontcolor="white"];
-  models [label="models", style=filled, fillcolor="purple", fontcolor="white"];
-  common [label="common", style=filled, fillcolor="purple", fontcolor="white"];
-  admin -> canvas;
-  admin -> pages;
-  app -> home;
-  canvas -> page_block_widgets;
-  home -> page_block_widgets;
-  page_block_widgets -> models;
-  page_block_widgets -> common;
-  canvas -> files;
-  files -> repositories;
-  files -> common;
-  repositories -> networking;
-  pages -> forms;
-  canvas -> forms;
-  forms -> common;
-  pages -> repositories;
-  canvas -> repositories;
-  home -> repositories;
+![项目结构图](https://i.imgur.com/0KEpJAV.png)
 
-  subgraph cluster_0 {
-    label = "业务模块";
-    color = "grey";
-    style = "filled";
-    fillcolor = "lightgrey";
-    canvas;
-    pages;
-    home;
-  }
-
-  subgraph cluster_1 {
-    label = "混合模块";
-    color = "yellow";
-    style = "filled";
-    fillcolor = "lightyellow";
-    page_block_widgets;
-    files;
-    forms;
-  }
-
-  subgraph cluster_2 {
-    label = "纯功能模块";
-    color = "purple";
-    style = "filled";
-    fillcolor = "pink";
-    repositories;
-    networking;
-    models;
-    common;
-  }
-
-}
-```
-
-### 3.2.2 工程搭建
+## 2.4 工程搭建
 
 我们的工程搭建主要是搭建 `admin` 和 `app` 两个工程，这里我们使用 `flutter create` 命令来创建工程。为了以后便于管理，请先创建一个 `lowcode` 文件夹，然后在 `lowcode` 文件夹下创建 `frontend` 子文件夹。然后在这个目录下打开终端，执行下面的命令。注意要限定目标平台， app 端是 `android` 和 `iOS`， admin 端是 `web`。
 
@@ -350,9 +290,9 @@ flutter create --template=package pages
 flutter create --template=package repositories
 ```
 
-### 3.2.3 依赖管理
+## 2.5. 依赖管理
 
-#### admin 工程
+### 2.5.1 admin 工程
 
 我们的工程依赖管理主要是使用 `pubspec.yaml` 文件来管理依赖。我们先来看一下 `admin` 工程的 `pubspec.yaml` 文件。注意由于我们使用了本地包依赖，而不是发布到 `pub.dev`，所以我们需要在 `pubspec.yaml` 文件中添加 `publish_to: "none"`，这样就不会发布到 `pub.dev`。
 
@@ -426,7 +366,7 @@ flutter:
 
 本地包依赖的路径是相对于 `pubspec.yaml` 文件的路径，所以我们使用 `../` 来表示上一级目录。这样我们就可以在 `admin` 工程中使用 `common`、`canvas`、`pages` 这三个模块了。
 
-#### app 工程
+### 2.5.2. app 工程
 
 `app` 工程的 `pubspec.yaml` 文件也是类似的，我们不详细讲解，这里贴出。
 
@@ -464,7 +404,7 @@ flutter:
   uses-material-design: true
 ```
 
-#### 页面模块
+### 2.5.3. 页面模块
 
 我们的工程中，对于页面采用单独模块化的方案，这样可以让页面模块更加独立，方便后期维护。
 
@@ -561,7 +501,7 @@ flutter:
 
 `canvas` 模块依赖了 `common`、`models`、`repositories`、`page_block_widgets`、`files`、`forms` 这六个模块。其中 `common` 模块是公共模块，`models` 模块是数据模型模块，`repositories` 模块是数据仓库模块，`page_block_widgets` 模块是页面区块模块，`files` 模块是文件模块，`forms` 模块是表单模块。
 
-#### 组件模块
+### 2.5.4 组件模块
 
 在有的时候，由于页面比较复杂，或者在不同页面间有重复的组件，我们就需要把这些组件抽离出来，单独作为一个模块，这样可以让页面模块更加独立，方便后期维护。
 
@@ -680,7 +620,7 @@ flutter:
 
 `page_block_widgets` 模块依赖了 `common`、`models` 这两个模块。其中 `common` 模块是公共模块，`models` 模块是数据模型模块。
 
-#### 功能模块
+### 2.5.5 功能模块
 
 我们的项目中，有以下几个功能模块。
 

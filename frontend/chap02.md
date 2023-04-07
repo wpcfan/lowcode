@@ -385,7 +385,7 @@ dependencies:
   # 版本号规则：https://dart.dev/tools/pub/dependencies#version-constraints
   # 版本限定规则： ^1.2.3 相当于 >=1.2.3 <2.0.0
   # 路由
-  go_router: ^6.0.1
+  go_router: ^6.5.5
   # 状态管理
   flutter_bloc: ^8.1.2
 
@@ -488,7 +488,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.2
   equatable: ^2.0.5
-  go_router: ^6.0.1
+  go_router: ^6.5.5
 
   common:
     path: ../common
@@ -735,6 +735,7 @@ dependencies:
   equatable: ^2.0.5
   flutter:
     sdk: flutter
+  # 字符串和颜色的转换
   hexcolor: ^3.0.1
 
 dev_dependencies:
@@ -763,6 +764,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 网络请求
   dio: ^5.1.1
   models:
     path: ../models
@@ -794,8 +796,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 网络请求
   dio: ^5.1.1
+  # 日志打印
   pretty_dio_logger: ^1.3.1
+  # 缓存
   dio_cache_interceptor: ^3.4.0
 
 dev_dependencies:

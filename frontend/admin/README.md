@@ -768,7 +768,7 @@ class SecondPage extends StatelessWidget {
 dependencies:
   flutter:
     sdk: flutter
-  go_router: ^6.0.1
+  go_router: ^6.5.5
 ```
 
 我们可以通过 `GoRouter` 来管理路由：

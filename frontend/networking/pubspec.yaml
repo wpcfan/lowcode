@@ -1,5 +1,5 @@
 name: networking
-description: A new Flutter package project.
+description: 网络模块，我们对网络请求的抽象存放在这个模块。这个模块有拦截器、请求头、请求参数、响应数据等进行了封装。
 version: 0.0.1
 homepage: https://imooc.com
 

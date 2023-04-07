@@ -1,5 +1,5 @@
 name: files
-description: A new Flutter package project.
+description: 文件浏览/上传/选择/删除组件
 version: 0.0.1
 publish_to: "none"
 homepage: https://imooc.com
@@ -11,8 +11,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 状态管理
   flutter_bloc: ^8.1.2
+  # 对象比较
   equatable: ^2.0.5
+  # 图片选择器
   image_picker: ^0.8.6+4
   image_picker_for_web: ^2.1.11
   nested: ^1.0.0

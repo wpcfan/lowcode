@@ -1,5 +1,5 @@
 name: common
-description: A new Flutter package project.
+description: 公共模块，有公共的扩展类和一些基础的组件
 version: 0.0.1
 homepage: https://imooc.com
 
@@ -11,10 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  equatable: ^2.0.5
-  carousel_slider: ^4.2.1
+  # 富文本处理
   easy_rich_text: ^1.1.0
-  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:

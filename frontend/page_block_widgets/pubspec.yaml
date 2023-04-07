@@ -1,5 +1,5 @@
 name: page_block_widgets
-description: A new Flutter package project.
+description: 页面区块组件
 version: 0.0.1
 homepage: https://imooc.com
 publish_to: "none"
@@ -11,8 +11,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # 瀑布流网格
   flutter_staggered_grid_view: ^0.6.2
-  custom_refresh_indicator: ^2.0.1
 
   common:
     path: ../common

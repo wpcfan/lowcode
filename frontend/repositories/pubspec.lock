@@ -98,7 +98,7 @@ packages:
     source: hosted
     version: "5.1.1"
   dio_cache_interceptor:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: dio_cache_interceptor
       sha256: "24f5fb2fbffea25325e9eabc1501b6582d0928b0ef5cb9127c920e58fbf6ca62"
@@ -106,7 +106,7 @@ packages:
     source: hosted
     version: "3.4.0"
   equatable:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: equatable
       sha256: c2b87cb7756efdf69892005af546c56c0b5037f54d2a88269b4f347a505e3ca2
@@ -169,7 +169,7 @@ packages:
     source: hosted
     version: "2.1.1"
   hexcolor:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: hexcolor
       sha256: c07f4bbb9095df87eeca87e7c69e8c3d60f70c66102d7b8d61c4af0453add3f6
@@ -311,7 +311,7 @@ packages:
     source: hosted
     version: "1.5.1"
   pretty_dio_logger:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: pretty_dio_logger
       sha256: "00b80053063935cf9a6190da344c5373b9d0e92da4c944c878ff2fbef0ef6dc2"

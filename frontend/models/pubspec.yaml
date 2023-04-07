@@ -1,5 +1,5 @@
 name: models
-description: A new Flutter package project.
+description: 数据模型模块，我们对公用数据的抽象建模存放在这个模块。
 version: 0.0.1
 homepage: https://imooc.com
 publish_to: none

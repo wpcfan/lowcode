@@ -10,12 +10,9 @@ import com.mooc.backend.services.PageQueryService;
 import com.mooc.backend.services.ProductQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ua_parser.Client;
-import ua_parser.Parser;
 
 
 @Tag(name = "页面", description = "获取页面信息")
@@ -32,11 +29,7 @@ public class PageController {
     @GetMapping("/published/{pageType}")
     public PageDTO findPublished(
             @Parameter(description = "页面类型", name = "pageType") @PathVariable PageType pageType,
-            @Parameter(description = "User-Agent", in = ParameterIn.HEADER, hidden = true) @RequestHeader("User-Agent") String uaString) {
-        Parser uaParser = new Parser();
-        Client c = uaParser.parse(uaString);
-        var os = c.os.family;
-        var platform = os.equals("Android") || os.equals("iOS") ? Platform.App : Platform.Web;
+            @Parameter(description = "平台类型", name = "platform") @RequestParam(defaultValue = "App") Platform platform) {
         return pageQueryService.findPublished(platform, pageType)
                 .map(PageDTO::fromEntity)
                 .orElseThrow(() -> new CustomException("Page not found", "PageController#findPublished",

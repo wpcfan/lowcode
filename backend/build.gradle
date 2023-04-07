@@ -11,7 +11,6 @@ targetCompatibility = '19'
 
 // 项目依赖版本号定义
 ext {
-    uaParserVersion = '1.5.3'
     qiNiuVersion = '7.12.1'
     springdocVersion = '2.0.2'
     hypersistenceVersion = '3.1.1'
@@ -33,7 +32,6 @@ repositories {
 
 // 项目依赖
 dependencies {
-    implementation "com.github.ua-parser:uap-java:${uaParserVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

@@ -1,10 +1,10 @@
-# 环境搭建和项目介绍
+# 第二章：环境搭建和项目介绍
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-- [环境搭建和项目介绍](#环境搭建和项目介绍)
+- [第二章：环境搭建和项目介绍](#第二章环境搭建和项目介绍)
   - [1. 环境搭建](#1-环境搭建)
   - [2. 创建第一个 Flutter 应用](#2-创建第一个-flutter-应用)
     - [2.1. Flutter 应用结构](#21-flutter-应用结构)

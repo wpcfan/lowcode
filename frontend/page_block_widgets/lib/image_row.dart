@@ -2,8 +2,6 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
-import 'image.dart';
-
 /// 图片行组件
 /// 用于展示一行图片
 /// 一行图片的数量可以是 1、2、3、或更多
@@ -17,12 +15,14 @@ class ImageRowWidget extends StatelessWidget {
     required this.config,
     required this.ratio,
     this.errorImage,
+    this.numOfDisplayed = 3,
     this.onTap,
   });
   final List<ImageData> items;
   final BlockConfig config;
   final double ratio;
   final String? errorImage;
+  final int numOfDisplayed;
 
   final void Function(MyLink?)? onTap;
 
@@ -34,12 +34,25 @@ class ImageRowWidget extends StatelessWidget {
     final borderColor =
         config.borderColor != null ? config.borderColor! : Colors.transparent;
     final borderWidth = config.borderWidth ?? 0.0;
-    final blockWidth = (config.blockWidth ?? 0) / ratio;
-    final blockHeight = (config.blockHeight ?? 0) / ratio;
-    final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
-    final verticalPadding = (config.verticalPadding ?? 0) / ratio;
-    final itemWidth = blockWidth - horizontalPadding * 2;
-    final itemHeight = blockHeight - verticalPadding * 2;
+    final horizontalSpacing = (config.horizontalSpacing ?? 0.0) * ratio;
+    final scaledPaddingHorizontal = (config.horizontalPadding ?? 0.0) * ratio;
+    final scaledPaddingVertical = (config.verticalPadding ?? 0.0) * ratio;
+
+    final imageWidth = ((config.blockWidth ?? 0.0) -
+            2 * scaledPaddingHorizontal -
+            (items.length - 1) * horizontalSpacing) /
+        (items.length > numOfDisplayed
+            ?
+
+            /// 以 List 显示的时候需要露出30%下一张图片的内容
+            (numOfDisplayed + 0.3)
+
+            /// 其它情况下，图片数量就是显示的数量
+
+            : items.length);
+    final blockWidth = (config.blockWidth ?? 0.0) * ratio;
+    final blockHeight = (config.blockHeight ?? 0.0) * ratio;
+    final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 
     /// 构建外层容器，包含背景色、边框、内边距
     /// 用于控制整个组件的大小
@@ -47,7 +60,9 @@ class ImageRowWidget extends StatelessWidget {
     /// 注意这是一个函数，一般我们构建完内层组件后，会调用它来构建外层组件
     /// 使用上，内层如果是 child，那么可以通过 child.parent(page) 来构建外层
     page({required Widget child}) => child
-        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
+        .padding(
+            horizontal: scaledPaddingHorizontal,
+            vertical: scaledPaddingVertical)
         .decorated(
           color: backgroundColor,
           border: Border.all(
@@ -55,60 +70,43 @@ class ImageRowWidget extends StatelessWidget {
             width: borderWidth,
           ),
         )
-        .constrained(maxWidth: blockWidth, maxHeight: blockHeight);
-    switch (items.length) {
-      case 0: // Empty
-        return page(child: const Placeholder());
-      case 1:
-      case 2:
-      case 3:
-        return _buildRow(context, itemWidth, itemHeight).parent(page);
-      default:
-        return _buildList(context, itemWidth, itemHeight).parent(page);
-    }
-  }
+        .constrained(width: blockWidth, height: blockHeight);
 
-  Widget _buildRow(BuildContext context, double width, double itemHeight) {
-    final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
+    /// 构建图片组件
+    Widget buildImageWidget(ImageData imageData) => Image.network(
+          imageData.image,
+          width: imageWidth,
+          height: imageHeight,
+          fit: BoxFit.cover,
+        ).gestures(onTap: () => onTap?.call(imageData.link));
+
+    /// 如果没有图片，那么直接返回一个占位符
+    if (items.isEmpty) {
+      return page(child: const Placeholder()).parent(page);
+    }
+
+    /// 如果图片数量大于 3，那么使用横向滚动的方式展示
+    if (items.length > numOfDisplayed) {
+      return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: items.length,
+          itemBuilder: (context, index) => buildImageWidget(items[index]),
+          separatorBuilder: (BuildContext context, int index) =>
+              SizedBox(width: horizontalSpacing)).parent(page);
+    }
+
+    /// 如果图片数量小于等于 3，那么使用 Row 的方式展示
     return items
         .map((e) {
           final isLast = items.last == e;
           return [
-            ImageWidget(
-              imageUrl: e.image,
-              errorImage: errorImage,
-              width: width,
-              height: itemHeight,
-              link: e.link,
-              onTap: onTap,
-            ).expanded(),
-            if (!isLast) SizedBox(width: spaceBetweenItems),
+            buildImageWidget(e),
+            if (!isLast) SizedBox(width: horizontalSpacing),
           ];
         })
         .expand((element) => element)
         .toList()
-        .toRow();
-  }
-
-  Widget _buildList(
-      BuildContext context, double blockWidth, double itemHeight) {
-    final itemWidth = blockWidth / 3;
-    final spaceBetweenItems = (config.horizontalSpacing ?? 0) / ratio;
-    return ListView.separated(
-      scrollDirection: Axis.horizontal,
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return ImageWidget(
-          imageUrl: item.image,
-          errorImage: errorImage,
-          width: itemWidth,
-          height: itemHeight,
-          link: item.link,
-          onTap: onTap,
-        );
-      },
-      separatorBuilder: (context, index) => SizedBox(width: spaceBetweenItems),
-    );
+        .toRow()
+        .parent(page);
   }
 }

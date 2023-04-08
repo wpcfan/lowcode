@@ -42,12 +42,12 @@ class ProductRowWidget extends StatelessWidget {
     final borderColor =
         config.borderColor != null ? config.borderColor! : Colors.transparent;
     final borderWidth = config.borderWidth ?? 0.0;
-    final width = (config.blockWidth ?? 0) / ratio;
-    final height = (config.blockHeight ?? 0) / ratio;
-    final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
-    final verticalPadding = (config.verticalPadding ?? 0) / ratio;
-    final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
-    final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
+    final width = (config.blockWidth ?? 0) * ratio;
+    final height = (config.blockHeight ?? 0) * ratio;
+    final horizontalPadding = (config.horizontalPadding ?? 0) * ratio;
+    final verticalPadding = (config.verticalPadding ?? 0) * ratio;
+    final horizontalSpacing = (config.horizontalSpacing ?? 0) * ratio;
+    final verticalSpacing = (config.verticalSpacing ?? 0) * ratio;
 
     /// 将 Widget 包裹在 Page 中
     /// 注意到 page 其实是一个方法，接受一个 Widget 作为参数，返回一个 Widget

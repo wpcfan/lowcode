@@ -38,11 +38,11 @@ class WaterfallWidget extends StatelessWidget {
     final borderColor =
         config.borderColor != null ? config.borderColor! : Colors.transparent;
     final borderWidth = config.borderWidth ?? 0.0;
-    final horizontalPadding = (config.horizontalPadding ?? 0) / ratio;
-    final verticalPadding = (config.verticalPadding ?? 0) / ratio;
-    final horizontalSpacing = (config.horizontalSpacing ?? 0) / ratio;
-    final verticalSpacing = (config.verticalSpacing ?? 0) / ratio;
-    final blockWidth = (config.blockWidth ?? 0) / ratio;
+    final horizontalPadding = (config.horizontalPadding ?? 0) * ratio;
+    final verticalPadding = (config.verticalPadding ?? 0) * ratio;
+    final horizontalSpacing = (config.horizontalSpacing ?? 0) * ratio;
+    final verticalSpacing = (config.verticalSpacing ?? 0) * ratio;
+    final blockWidth = (config.blockWidth ?? 0) * ratio;
     final itemWidth = (blockWidth) / 2;
     return isPreview
         ? _buildPreview(

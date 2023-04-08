@@ -1,11 +1,11 @@
 import 'dart:ui';
 
+import 'package:common/common.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hexcolor/hexcolor.dart';
-import 'package:models/product.dart';
 
 import 'category.dart';
 import 'enumerations.dart';
+import 'product.dart';
 
 part 'page_block_config.dart';
 part 'page_config.dart';

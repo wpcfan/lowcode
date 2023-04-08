@@ -86,11 +86,11 @@ class _BannerWidgetState extends State<BannerWidget> {
     final borderWidth = widget.config.borderWidth ?? 0;
     final borderColor = widget.config.borderColor ?? Colors.transparent;
     final backgroundColor = widget.config.backgroundColor ?? Colors.transparent;
-    final blockWidth = (widget.config.blockWidth ?? 0) / widget.ratio;
-    final blockHeight = (widget.config.blockHeight ?? 0) / widget.ratio;
+    final blockWidth = (widget.config.blockWidth ?? 0) * widget.ratio;
+    final blockHeight = (widget.config.blockHeight ?? 0) * widget.ratio;
     final horizontalPadding =
-        (widget.config.horizontalPadding ?? 0) / widget.ratio;
-    final verticalPadding = (widget.config.verticalPadding ?? 0) / widget.ratio;
+        (widget.config.horizontalPadding ?? 0) * widget.ratio;
+    final verticalPadding = (widget.config.verticalPadding ?? 0) * widget.ratio;
 
     page({required Widget child}) => child
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)

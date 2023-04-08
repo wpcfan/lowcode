@@ -94,7 +94,9 @@ class _CenterPaneState extends State<CenterPane> {
     return DragTarget(
       builder: (context, candidateData, rejectedData) {
         final item = blocks[index];
-        return _buildDraggableWidget(item, products, index, paneWidth, bloc);
+        final ratio = MediaQuery.of(context).size.width / paneWidth;
+        return _buildDraggableWidget(
+            item, products, index, paneWidth, bloc, ratio);
       },
       onMove: (details) {
         setState(() {
@@ -267,7 +269,7 @@ class _CenterPaneState extends State<CenterPane> {
   }
 
   Widget _buildDraggableWidget(PageBlock block, List<Product> products,
-      int index, double itemWidth, CanvasBloc bloc) {
+      int index, double itemWidth, CanvasBloc bloc, double ratio) {
     page({required Widget child}) => Draggable(
           data: block,
           feedback: SizedBox(
@@ -306,7 +308,7 @@ class _CenterPaneState extends State<CenterPane> {
         widget = BannerWidget(
           items: items,
           config: it.config,
-          ratio: 1.0,
+          ratio: ratio,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -328,7 +330,7 @@ class _CenterPaneState extends State<CenterPane> {
         widget = ImageRowWidget(
           items: items,
           config: it.config,
-          ratio: 1.0,
+          ratio: ratio,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -353,7 +355,7 @@ class _CenterPaneState extends State<CenterPane> {
         widget = ProductRowWidget(
           items: items,
           config: it.config,
-          ratio: 1.0,
+          ratio: ratio,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -405,7 +407,7 @@ class _CenterPaneState extends State<CenterPane> {
         widget = WaterfallWidget(
           products: items,
           config: it.config,
-          ratio: 1.0,
+          ratio: ratio,
           isPreview: true,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));

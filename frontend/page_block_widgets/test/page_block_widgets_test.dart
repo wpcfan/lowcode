@@ -94,14 +94,14 @@ void main() {
         final size = tester.getSize(finder);
         expect(
             size.width,
-            (config.blockWidth! / ratio -
-                    2 * config.horizontalPadding! / ratio) /
+            (config.blockWidth! * ratio -
+                    2 * config.horizontalPadding! * ratio) /
                 items.length);
         expect(size.height,
-            config.blockHeight! / ratio - 2 * config.verticalPadding! / ratio);
+            config.blockHeight! * ratio - 2 * config.verticalPadding! * ratio);
       }
       final size = tester.getSize(find.byType(ImageRowWidget));
-      expect(size.width, config.blockWidth! / ratio);
+      expect(size.width, config.blockWidth! * ratio);
     });
   });
 
@@ -134,9 +134,9 @@ void main() {
       );
       const ratio = 1.0;
       final width =
-          config.blockWidth! / ratio - 2 * config.horizontalPadding! / ratio;
+          config.blockWidth! * ratio - 2 * config.horizontalPadding! * ratio;
       final height =
-          config.blockHeight! / ratio - 2 * config.verticalPadding! / ratio;
+          config.blockHeight! * ratio - 2 * config.verticalPadding! * ratio;
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: ProductCardOneRowOneWidget(
@@ -144,8 +144,8 @@ void main() {
             width: width,
             height: height,
             errorImage: 'https://example.com/error.jpg',
-            horizontalSpacing: config.horizontalSpacing! / ratio,
-            verticalSpacing: config.verticalSpacing! / ratio,
+            horizontalSpacing: config.horizontalSpacing! * ratio,
+            verticalSpacing: config.verticalSpacing! * ratio,
           ),
         ),
       ));
@@ -162,8 +162,8 @@ void main() {
         final imageWidget = imageWidgetElement.widget as ImageWidget;
         final finder = find.byWidget(imageWidget);
         final size = tester.getSize(finder);
-        expect(size.width, height - 2 * config.borderWidth! / ratio);
-        expect(size.height, height - 2 * config.borderWidth! / ratio);
+        expect(size.width, height - 2 * config.borderWidth! * ratio);
+        expect(size.height, height - 2 * config.borderWidth! * ratio);
       }
     });
   });

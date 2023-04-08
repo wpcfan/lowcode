@@ -33,9 +33,8 @@ class BlockConfig {
       verticalSpacing: json['verticalSpacing'] as double?,
       blockWidth: json['blockWidth'] as double?,
       blockHeight: json['blockHeight'] as double?,
-      backgroundColor:
-          hexBackgroundColor != null ? HexColor(hexBackgroundColor) : null,
-      borderColor: hexBorderColor != null ? HexColor(hexBorderColor) : null,
+      backgroundColor: hexBackgroundColor?.hexToColor(),
+      borderColor: hexBorderColor?.hexToColor(),
       borderWidth: json['borderWidth'] as double?,
     );
   }

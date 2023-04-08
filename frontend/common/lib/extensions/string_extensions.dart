@@ -54,6 +54,7 @@ extension StringExtension on String {
     );
   }
 
+  /// 划线价格
   Text lineThru({
     double fontSize = 12.0,
     FontWeight fontWeight = FontWeight.w600,
@@ -66,5 +67,18 @@ extension StringExtension on String {
           color: fontColor,
           decoration: TextDecoration.lineThrough,
         ));
+  }
+
+  /// 转换 hex 颜色值为 Color
+  /// 例如：#FF0000
+  /// 例如：#FF0000FF
+  Color hexToColor() {
+    final hexColor = toUpperCase().replaceAll("#", "");
+    if (hexColor.length == 6) {
+      return Color(int.parse("FF$hexColor", radix: 16));
+    } else if (hexColor.length == 8) {
+      return Color(int.parse(hexColor, radix: 16));
+    }
+    return Colors.transparent;
   }
 }

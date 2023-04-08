@@ -17,10 +17,12 @@
   - [3.8. 数据模型的抽象](#38-数据模型的抽象)
   - [3.9. 实现一行两张图片的布局](#39-实现一行两张图片的布局)
     - [3.9.1 使用函数式编程方式优化代码](#391-使用函数式编程方式优化代码)
-  - [实现大于 3 张图片的情况](#实现大于-3-张图片的情况)
-    - [重构：怎样减少重复的代码](#重构怎样减少重复的代码)
-    - [隐性需求：图片的加载与异常处理](#隐性需求图片的加载与异常处理)
-    - [Flutter 知识点：Assets 简介](#flutter-知识点assets-简介)
+  - [3.10. 实现大于 3 张图片的情况](#310-实现大于-3-张图片的情况)
+    - [3.10.1 重构：怎样减少重复的代码](#3101-重构怎样减少重复的代码)
+    - [3.10.2 隐性需求：图片的加载与异常处理](#3102-隐性需求图片的加载与异常处理)
+    - [3.10.3 Flutter 知识点：Assets 简介](#3103-flutter-知识点assets-简介)
+  - [3.11. 抽象数据模型和参数模型](#311-抽象数据模型和参数模型)
+    - [3.11.1 模拟数据并验证](#3111-模拟数据并验证)
 
 <!-- /code_chunk_output -->
 
@@ -108,7 +110,7 @@ class MyApp extends StatelessWidget {
 - 需求 1.1.3: 图片行可以放一张图片，也可以放多张图片
   - 需求 1.1.3.1: 图片行中的图片是可以配置图片的链接以及点击跳转的链接
   - 需求 1.1.3.2: 一张图片时，图片按 `区块的宽度 - 2*内边距` 等比例缩放
-  - 需求 1.1.3.3: 多于 3 张图片时，会形成可横向滑动的列表效果
+  - 需求 1.1.3.3: 多于 3 张图片时，会形成可横向滑动的列表效果，但区别于小于等于 3 张图片的效果，需要显示第 4 张图片的 30%，以示还有更多图片。
   - 需求 1.1.3.4: 2-3 张图片时，会形成等宽的效果，也就是说，图片按 `区块的宽度 - 2*内边距 - 间距` 等比例缩放
 
 我们不是单单要实现一个图片组件，而是要实现一个图片行组件，图片行要考虑的东西比较多，我们先来看一下最简单的一张图片的实现。简单来说，对一张图片而言，我们需要在之前的组件外面包裹一层 `Padding` 组件，然后设置 `Padding` 组件的 `padding` 属性，这样就可以实现图片的内边距了。
@@ -302,9 +304,9 @@ class ImageRowWidget extends StatelessWidget {
         /// 2. 计算图片宽度
         final imageWidth = screenWidth - 2 * paddingHorizontal;
         /// 3. 计算比例
-        final scale = screenWidth / baseScreenWidth;
+        final ratio = screenWidth / baseScreenWidth;
         /// 4. 计算区块高度
-        final blockHeight = height * scale;
+        final blockHeight = height * ratio;
         /// 5. 计算图片高度
         final imageHeight = blockHeight - 2 * paddingVertical;
 
@@ -369,15 +371,15 @@ class ImageRowWidget extends StatelessWidget {
         /// 1. 获取屏幕宽度
         final screenWidth = MediaQuery.of(context).size.width;
         /// 2. 计算比例
-        final scale = screenWidth / baseScreenWidth;
+        final ratio = screenWidth / baseScreenWidth;
         /// 3. 计算水平内边距
-        final scaledPaddingHorizontal = paddingHorizontal * scale;
+        final scaledPaddingHorizontal = paddingHorizontal * ratio;
         /// 4. 计算垂直内边距
-        final scaledPaddingVertical = paddingVertical * scale;
+        final scaledPaddingVertical = paddingVertical * ratio;
         /// 5. 计算图片宽度
         final imageWidth = screenWidth - 2 * scaledPaddingHorizontal;
         /// 6. 计算区块高度
-        final blockHeight = height * scale;
+        final blockHeight = height * ratio;
         /// 7. 计算图片高度
         final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 
@@ -543,15 +545,15 @@ class ImageRowWidget extends StatelessWidget {
     /// 1. 获取屏幕宽度
     final screenWidth = MediaQuery.of(context).size.width;
     /// 2. 计算比例
-    final scale = screenWidth / baseScreenWidth;
+    final ratio = screenWidth / baseScreenWidth;
     /// 3. 计算水平内边距
-    final scaledPaddingHorizontal = paddingHorizontal * scale;
+    final scaledPaddingHorizontal = paddingHorizontal * ratio;
     /// 4. 计算垂直内边距
-    final scaledPaddingVertical = paddingVertical * scale;
+    final scaledPaddingVertical = paddingVertical * ratio;
     /// 5. 计算图片宽度
     final imageWidth = screenWidth - 2 * scaledPaddingHorizontal;
     /// 6. 计算区块高度
-    final blockHeight = height * scale;
+    final blockHeight = height * ratio;
     /// 7. 计算图片高度
     final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 
@@ -697,15 +699,15 @@ class ImageRowWidget extends StatelessWidget {
       /// 1. 获取屏幕宽度
       final screenWidth = MediaQuery.of(context).size.width;
       /// 2. 计算比例
-      final scale = screenWidth / baseScreenWidth;
+      final ratio = screenWidth / baseScreenWidth;
       /// 3. 计算水平内边距
-      final scaledPaddingHorizontal = paddingHorizontal * scale;
+      final scaledPaddingHorizontal = paddingHorizontal * ratio;
       /// 4. 计算垂直内边距
-      final scaledPaddingVertical = paddingVertical * scale;
+      final scaledPaddingVertical = paddingVertical * ratio;
       /// 5. 计算图片宽度
       final imageWidth = screenWidth - 2 * scaledPaddingHorizontal;
       /// 6. 计算区块高度
-      final blockHeight = height * scale;
+      final blockHeight = height * ratio;
       /// 7. 计算图片高度
       final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 
@@ -794,11 +796,11 @@ class MyLink {
 
 ```dart
 class ImageData {
-  final String imageUrl;
+  final String image;
   final MyLink link;
 
   const ImageData({
-    required this.imageUrl,
+    required this.image,
     required this.link,
   });
 }
@@ -830,15 +832,15 @@ class ImageRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final scale = screenWidth / baseScreenWidth;
-    final scaledPaddingHorizontal = paddingHorizontal * scale;
-    final scaledPaddingVertical = paddingVertical * scale;
+    final ratio = screenWidth / baseScreenWidth;
+    final scaledPaddingHorizontal = paddingHorizontal * ratio;
+    final scaledPaddingVertical = paddingVertical * ratio;
     final imageWidth = screenWidth - 2 * scaledPaddingHorizontal;
-    final blockHeight = height * scale;
+    final blockHeight = height * ratio;
     final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 
     return Image.network(
-      imageData.imageUrl,
+      imageData.image,
       width: imageWidth,
       height: imageHeight,
       fit: BoxFit.cover,
@@ -876,7 +878,7 @@ class MyApp extends StatelessWidget {
         body: Center(
           child: ImageRowWidget(
             imageData: const ImageData(
-              imageUrl: 'https://picsum.photos/600/300',
+              image: 'https://picsum.photos/600/300',
               link: MyLink(
                 type: LinkType.url,
                 value: 'https://baidu.com'
@@ -929,17 +931,17 @@ class ImageRowWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final scale = screenWidth / baseScreenWidth;
-    final scaledPaddingHorizontal = paddingHorizontal * scale;
-    final scaledPaddingVertical = paddingVertical * scale;
+    final ratio = screenWidth / baseScreenWidth;
+    final scaledPaddingHorizontal = paddingHorizontal * ratio;
+    final scaledPaddingVertical = paddingVertical * ratio;
     final imageWidth = (screenWidth - 2 * scaledPaddingHorizontal - (items.length - 1) * horizontalSpacing) / items.length;
-    final blockHeight = height * scale;
+    final blockHeight = height * ratio;
     final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 
     return Row(
       children: [
         Image.network(
-          items[0].imageUrl,
+          items[0].image,
           width: imageWidth,
           height: imageHeight,
           fit: BoxFit.cover,
@@ -950,7 +952,7 @@ class ImageRowWidget extends StatelessWidget {
         ),
         SizedBox(width: horizontalSpacing),
         Image.network(
-          items[1].imageUrl,
+          items[1].image,
           width: imageWidth,
           height: imageHeight,
           fit: BoxFit.cover,
@@ -988,14 +990,14 @@ class MyApp extends StatelessWidget {
           child: ImageRowWidget(
             items: const [
               ImageData(
-                imageUrl: 'https://picsum.photos/600/300',
+                image: 'https://picsum.photos/600/300',
                 link: MyLink(
                   type: LinkType.url,
                   value: 'https://bing.com'
                 )
               ),
               ImageData(
-                imageUrl: 'https://picsum.photos/600/300',
+                image: 'https://picsum.photos/600/300',
                 link: MyLink(
                   type: LinkType.url,
                   value: 'https://baidu.com'
@@ -1030,7 +1032,7 @@ class MyApp extends StatelessWidget {
 Row(
   children: [
     for (var i = 0; i < items.length; i++) Image.network(
-      items[i].imageUrl,
+      items[i].image,
       width: imageWidth,
       height: imageHeight,
       fit: BoxFit.cover,
@@ -1055,7 +1057,7 @@ Row(
 ```dart
 Row(
   children: items.map((e) => Image.network(
-    e.imageUrl,
+    e.image,
     width: imageWidth,
     height: imageHeight,
     fit: BoxFit.cover,
@@ -1082,7 +1084,7 @@ Row(
     final isLast = items.last == e;
     return [
       Image.network(
-        e.imageUrl,
+        e.image,
         width: imageWidth,
         height: imageHeight,
         fit: BoxFit.cover,
@@ -1144,7 +1146,7 @@ items.map((e) {
   final isLast = items.last == e;
   return [
     Image.network(
-      e.imageUrl,
+      e.image,
       width: imageWidth,
       height: imageHeight,
       fit: BoxFit.cover,
@@ -1175,25 +1177,36 @@ items.map((e) {
 
 除了 `toRow` 方法，我们还可以实现 `toColumn`, `toStack` 和 `toWrap` 几个方法, 详情可以参考 `common/lib/extensions/list_widget_extensions.dart` 。
 
-## 实现大于 3 张图片的情况
+## 3.10. 实现大于 3 张图片的情况
 
 大于 3 张图片的情况，需要支持横向滚动，所以我们需要使用 `ListView` 来实现，但是 `ListView` 只能支持一个方向的滚动，所以我们需要使用 `ListView.builder` 来实现，`ListView.builder` 可以根据需要动态创建子组件，这样就可以实现横向滚动了。我们需要做一个判断，如果图片数量大于 3 张，就使用 `ListView.builder` 来实现，否则使用 `Row` 来实现。
 
 ```dart
 final screenWidth = MediaQuery.of(context).size.width;
-final scale = screenWidth / baseScreenWidth;
-final scaledPaddingHorizontal = paddingHorizontal * scale;
-final scaledPaddingVertical = paddingVertical * scale;
-/// 对于大于 3 张图片的情况，只显示 3 张，所以除的时候需要等于 3 其它情况下除的时候需要等于图片数量
-final imageWidth = (screenWidth - 2 * scaledPaddingHorizontal - (items.length - 1) * horizontalSpacing) / (items.length > 3 ? 3 : items.length);
-final blockHeight = height * scale;
+final ratio = screenWidth / baseScreenWidth;
+final scaledPaddingHorizontal = paddingHorizontal * ratio;
+final scaledPaddingVertical = paddingVertical * ratio;
+/// 对于大于 3 张图片的情况，完整显示 3 张以及 30% 的下一张，所以除的时候需要等于 3.3， 其它情况下除的时候需要等于图片数量
+final imageWidth = ((config.blockWidth ?? 0.0) -
+            2 * scaledPaddingHorizontal -
+            (items.length - 1) * horizontalSpacing) /
+        (items.length > numOfDisplayed
+            ?
+
+            /// 以 List 显示的时候需要露出30%下一张图片的内容
+            (3 + 0.3)
+
+            /// 其它情况下，图片数量就是显示的数量
+
+            : items.length);
+final blockHeight = height * ratio;
 final imageHeight = blockHeight - 2 * scaledPaddingVertical;
 if (items.length > 3) {
   return ListView.separated(
     scrollDirection: Axis.horizontal,
     itemCount: items.length,
     itemBuilder: (context, index) => Image.network(
-      items[index].imageUrl,
+      items[index].image,
       width: imageWidth,
       height: imageHeight,
       fit: BoxFit.cover,
@@ -1217,7 +1230,7 @@ if (items.length > 3) {
       final isLast = items.last == e;
       return [
         Image.network(
-          e.imageUrl,
+          e.image,
           width: imageWidth,
           height: imageHeight,
           fit: BoxFit.cover,
@@ -1246,7 +1259,7 @@ if (items.length > 3) {
 
 ![图 9](https://i.imgur.com/2nTUVZS.jpg)
 
-### 重构：怎样减少重复的代码
+### 3.10.1 重构：怎样减少重复的代码
 
 我们注意到上面的代码中，有很多重复的代码，首先图片本身的样式是一样的，所以我们可以把图片的样式抽取出来，然后在 `Row` 和 `ListView` 中使用，这样就可以减少重复的代码了。类似的，我们还可以把 `padding` 和 `constrained` 抽取出来，这样就可以减少重复的代码了。
 
@@ -1261,7 +1274,7 @@ page({required Widget child}) => child
 /// 这是一个函数，用于定义图片的样式
 /// 也就是我们重构之前的在 `Row` 和 `ListView` 里面构建图片的代码
 Widget buildImageWidget(ImageData imageData) => Image.network(
-    imageData.imageUrl,
+    imageData.image,
     width: imageWidth,
     height: imageHeight,
     fit: BoxFit.cover,
@@ -1304,7 +1317,7 @@ extension WidgetExtension on Widget {
 
 可以看出，这个扩展方法的作用就是把 `child` 作为参数传递给 `outer` 方法，然后返回 `outer` 方法的返回值，这样就可以实现把 `child` 作为参数传递给 `outer` 方法的效果了。也就是起到了在子组件上直接添加外层组件的效果。
 
-### 隐性需求：图片的加载与异常处理
+### 3.10.2 隐性需求：图片的加载与异常处理
 
 我们可以看到，上面的代码中，图片的加载是异步的，所以我们需要在图片加载之前显示一个占位图，图片加载完成之后再显示图片，如果图片加载失败，则显示一个错误图。这个需求是隐性的，我们需要自己去实现。
 
@@ -1314,7 +1327,7 @@ extension WidgetExtension on Widget {
 /// 这是一个函数，用于定义图片的样式
 /// 也就是我们重构之前的在 `Row` 和 `ListView` 里面构建图片的代码
 Widget buildImageWidget(ImageData imageData) => Image.network(
-    imageData.imageUrl,
+    imageData.image,
     width: imageWidth,
     height: imageHeight,
     fit: BoxFit.cover,
@@ -1355,7 +1368,7 @@ Widget buildImageWidget(ImageData imageData) => Image.network(
 class ImageWidget extends StatelessWidget {
   const ImageWidget({
     super.key,
-    required this.imageUrl,
+    required this.image,
     this.errorImage,
     this.link,
     this.fit = BoxFit.cover,
@@ -1364,7 +1377,7 @@ class ImageWidget extends StatelessWidget {
     this.alignment = Alignment.center,
     this.onTap,
   });
-  final String imageUrl;
+  final String image;
   final String? errorImage;
   final BoxFit fit;
   final double? height;
@@ -1376,7 +1389,7 @@ class ImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Image.network(
-      imageUrl,
+      image,
       fit: fit,
       alignment: alignment,
       width: width,
@@ -1416,7 +1429,7 @@ class ImageWidget extends StatelessWidget {
 
 ```dart
 Widget buildImageWidget(ImageData imageData) => ImageWidget(
-    imageUrl: imageData.imageUrl,
+    image: imageData.image,
     errorImage: 'assets/images/error.png',
     width: imageWidth,
     height: imageHeight,
@@ -1425,7 +1438,7 @@ Widget buildImageWidget(ImageData imageData) => ImageWidget(
   );
 ```
 
-### Flutter 知识点：Assets 简介
+### 3.10.3 Flutter 知识点：Assets 简介
 
 上面的代码中我们使用了 `Image.asset` 来加载本地图片，这里我们来简单介绍一下 Flutter 中的 Assets。在 Flutter 中，我们可以把一些图片、音频、视频等资源放在 `assets` 目录下，然后在 `pubspec.yaml` 文件中配置 `assets`，这样就可以在项目中使用这些资源了。
 
@@ -1460,3 +1473,397 @@ flutter:
         - asset: assets/fonts/Roboto/Roboto-Bold.ttf
           weight: 700
 ```
+
+## 3.11. 抽象数据模型和参数模型
+
+现在组件中的输入参数很多，可以分为两类，一类是配置类型的参数，我们其实可以抽象一下这些参数为一个类：
+
+```dart
+/// 图片区块配置参数模型
+class BlockConfig {
+  final double? horizontalPadding;
+  final double? verticalPadding;
+  final double? horizontalSpacing;
+  final double? verticalSpacing;
+  final double? blockWidth;
+  final double? blockHeight;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final double? borderWidth;
+
+  BlockConfig({
+    this.horizontalPadding,
+    this.verticalPadding,
+    this.horizontalSpacing,
+    this.verticalSpacing,
+    this.blockWidth,
+    this.blockHeight,
+    this.backgroundColor,
+    this.borderColor,
+    this.borderWidth,
+  });
+}
+```
+
+上面的参数模型定义了图片区块的一些参数，比如 `horizontalPadding` 表示图片区块的水平边距，`horizontalSpacing` 表示图片区块之间的水平间距，`blockWidth` 表示图片区块的宽度，`blockHeight` 表示图片区块的高度，`backgroundColor` 表示图片区块的背景颜色，`borderColor` 表示图片区块的边框颜色，`borderWidth` 表示图片区块的边框宽度。
+
+所以我们可以把原来的组件的输入参数去掉，然后把这些参数放到 `BlockConfig` 中。
+
+另外我们组件中，现在其实没有考虑页面的边距，这当然是合理的，因为按一般逻辑，我们在页面一层应该会有一个容器组件，那个组件负责处理页面的边距。但是我们现在的计算是有点问题的，我们是用屏幕的宽度来计算图片的宽度的，但是实际上图片的宽度应该是屏幕宽度减去页面左右边距的宽度。但这时候，我们就要思考一下，这个比例计算到底是在每个区块里面去处理合理呢？还是在页面一层去处理合理呢？在我们的项目中，我们倾向于在页面一层去处理，因为这样可以减少组件的耦合度，组件只需要关心自己的数据就可以了，不需要关心页面的边距。所以这个组件需要一个计算好的比例 `ratio` ，这样就可以在组件内部计算出图片的宽高了。
+
+根据上面的讨论，我们重构组件的输入参数，把配置参数和数据参数分开：
+
+```dart
+class ImageRowWidget extends StatelessWidget {
+  const ImageRowWidget({
+    super.key,
+    required this.items,
+    required this.config,
+    required this.ratio,
+    this.errorImage,
+    this.numOfDisplayed = 3,
+    this.onTap,
+  });
+  final List<ImageData> items;
+  final BlockConfig config;
+  final double ratio;
+  final String? errorImage;
+  final int numOfDisplayed;
+
+  final void Function(MyLink?)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = config.backgroundColor != null
+        ? config.backgroundColor!
+        : Colors.transparent;
+    final borderColor =
+        config.borderColor != null ? config.borderColor! : Colors.transparent;
+    final borderWidth = config.borderWidth ?? 0.0;
+    final horizontalSpacing = (config.horizontalSpacing ?? 0.0) * ratio;
+    final scaledPaddingHorizontal = (config.horizontalPadding ?? 0.0) * ratio;
+    final scaledPaddingVertical = (config.verticalPadding ?? 0.0) * ratio;
+
+    final imageWidth = ((config.blockWidth ?? 0.0) -
+            2 * scaledPaddingHorizontal -
+            (items.length - 1) * horizontalSpacing) /
+        (items.length > numOfDisplayed
+            ?
+
+            /// 以 List 显示的时候需要露出30%下一张图片的内容
+            (numOfDisplayed + 0.3)
+
+            /// 其它情况下，图片数量就是显示的数量
+
+            : items.length);
+    final blockWidth = (config.blockWidth ?? 0.0) * ratio;
+    final blockHeight = (config.blockHeight ?? 0.0) * ratio;
+    final imageHeight = blockHeight - 2 * scaledPaddingVertical;
+
+    /// 构建外层容器，包含背景色、边框、内边距
+    /// 用于控制整个组件的大小
+    /// 以及控制组件的背景色、边框
+    /// 注意这是一个函数，一般我们构建完内层组件后，会调用它来构建外层组件
+    /// 使用上，内层如果是 child，那么可以通过 child.parent(page) 来构建外层
+    page({required Widget child}) => child
+        .padding(
+            horizontal: scaledPaddingHorizontal,
+            vertical: scaledPaddingVertical)
+        .decorated(
+          color: backgroundColor,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
+        )
+        .constrained(width: blockWidth, height: blockHeight);
+
+    /// 构建图片组件
+    Widget buildImageWidget(ImageData imageData) => Image.network(
+          imageData.image,
+          width: imageWidth,
+          height: imageHeight,
+          fit: BoxFit.cover,
+        ).gestures(onTap: () => onTap?.call(imageData.link));
+
+    /// 如果没有图片，那么直接返回一个占位符
+    if (items.isEmpty) {
+      return page(child: const Placeholder()).parent(page);
+    }
+
+    /// 如果图片数量大于 3，那么使用横向滚动的方式展示
+    if (items.length > numOfDisplayed) {
+      return ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: items.length,
+          itemBuilder: (context, index) => buildImageWidget(items[index]),
+          separatorBuilder: (BuildContext context, int index) =>
+              SizedBox(width: horizontalSpacing)).parent(page);
+    }
+
+    /// 如果图片数量小于等于 3，那么使用 Row 的方式展示
+    return items
+        .map((e) {
+          final isLast = items.last == e;
+          return [
+            buildImageWidget(e),
+            if (!isLast) SizedBox(width: horizontalSpacing),
+          ];
+        })
+        .expand((element) => element)
+        .toList()
+        .toRow()
+        .parent(page);
+  }
+}
+```
+
+### 3.11.1 模拟数据并验证
+
+由于我们的组件已经重构完毕，我们可以使用模拟数据来验证一下我们的组件是否能正常工作。但在此之前，我们需要继续抽象数据模型，首先是区块的模型。
+
+一个区块，可以由一个参数模型和一个数据模型的列表组成，我们可能希望定义区块为类似下面的样子
+
+```dart
+class PageBlock {
+  final BlockConfig config;
+  final List<ImageData> data;
+}
+```
+
+但显然目前的形式只适合于图片类的区块，我们暂时没有想清楚其它区块应该怎么定义，但不管怎样，我们先以此为基础。
+
+上面的结构其实对应着我们后面实际从后端 API 获得的 `Json` 数据，我们可以把 `Json` 数据转换成我们的数据模型，然后我们的组件就可以直接使用这个数据模型了。这个 `Json` 看起来就应该是下面的样子：
+
+```json
+{
+  "config": {
+    "horizontalPadding": 12,
+    "verticalPadding": 12,
+    "horizontalSpacing": 4,
+    "verticalSpacing": 4,
+    "blockWidth": 376,
+    "blockHeight": 96
+  },
+  "data": [
+    {
+      "image": "https://picsum.photos/600/300",
+      "link": {
+        "type": "url",
+        "value": "https://baidu.com"
+      }
+    },
+    {
+      "image": "https://picsum.photos/600/300",
+      "link": {
+        "type": "url",
+        "value": "https://bing.com"
+      }
+    }
+  ]
+}
+```
+
+为了可以从 `Json` 结构的数据转换成 `PageBlock` 类，我们需要定义一个 `fromJson` 的工厂方法，这个方法的实现如下：
+
+```dart
+class PageBlock {
+  final BlockConfig config;
+  final List<ImageData> data;
+
+  PageBlock({
+    required this.config,
+    required this.data,
+  });
+
+  factory PageBlock.fromJson(Map<String, dynamic> json) {
+    return PageBlock(
+      config: BlockConfig.fromJson(json['config']),
+      data: (json['data'] as List).map((e) => ImageData.fromJson(e)).toList(),
+    );
+  }
+}
+```
+
+`fromJson` 这种工厂方法在 `Dart` 中是非常常见的，它的作用是从 `Json` 数据中构建一个对象，这个对象的属性值就是 `Json` 数据中的值。这里我们使用了 `Dart` 的类型推断，所以我们不需要显式的指定 `json['config']` 的类型，`Dart` 会自动推断出来。
+
+但是大家如果仔细看的话会发现 `fromJson` 方法中还调用了 `ImageData.fromJson` 方法，这个方法是在哪里定义的呢？其实这个方法是在 `ImageData` 类中定义的，我们可以看到它的定义如下：
+
+```dart
+class ImageData {
+  final String image;
+  final MyLink? link;
+
+  const ImageData({
+    required this.image,
+    required this.link,
+  });
+
+  factory ImageData.fromJson(Map<String, dynamic> json) {
+    return ImageData(
+      image: json['image'],
+      link: json['link'] != null ? MyLink.fromJson(json['link']) : null,
+    );
+  }
+}
+```
+
+类似的，我们还得给 `MyLink` 类定义一个 `fromJson` 方法，这个方法的实现如下：
+
+```dart
+class MyLink {
+  final String type;
+  final String value;
+
+  const MyLink({
+    required this.type,
+    required this.value,
+  });
+
+  factory MyLink.fromJson(Map<String, dynamic> json) {
+    return MyLink(
+      type: LinkType.values.firstWhere((e) => e.value == json['type']),
+      value: json['value'],
+    );
+  }
+}
+```
+
+接下来就是 `BlockConfig` 类了，也给加上 `fromJson` ：
+
+```dart
+class BlockConfig {
+  final double? horizontalPadding;
+  final double? verticalPadding;
+  final double? horizontalSpacing;
+  final double? verticalSpacing;
+  final double? blockWidth;
+  final double? blockHeight;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final double? borderWidth;
+
+  BlockConfig({
+    this.horizontalPadding,
+    this.verticalPadding,
+    this.horizontalSpacing,
+    this.verticalSpacing,
+    this.blockWidth,
+    this.blockHeight,
+    this.backgroundColor,
+    this.borderColor,
+    this.borderWidth,
+  });
+
+  factory BlockConfig.fromJson(Map<String, dynamic> json) {
+    final hexBackgroundColor = json['backgroundColor'] as String?;
+    final hexBorderColor = json['borderColor'] as String?;
+    return BlockConfig(
+      horizontalPadding: json['horizontalPadding'] as double?,
+      verticalPadding: json['verticalPadding'] as double?,
+      horizontalSpacing: json['horizontalSpacing'] as double?,
+      verticalSpacing: json['verticalSpacing'] as double?,
+      blockWidth: json['blockWidth'] as double?,
+      blockHeight: json['blockHeight'] as double?,
+      backgroundColor: hexBackgroundColor?.hexToColor(),
+      borderColor: hexBorderColor?.hexToColor(),
+      borderWidth: json['borderWidth'] as double?,
+    );
+  }
+}
+```
+
+然后我们就可以在 `main.dart` 中使用这个数据模型了，我们可以在 `main.dart` 中定义一个 `PageBlock` 的实例，然后使用 `fromJson` 方法从数据中构建出来：
+
+```dart
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: darkBlue,
+      ),
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (context) {
+              /// 1. 获取屏幕宽度
+              final screenWidth = MediaQuery.of(context).size.width;
+              /// 2. 定义基准屏幕宽度
+              const baselineScreenWidth = 375.0;
+              /// 3. 计算比例
+              final ratio = screenWidth / baselineScreenWidth;
+              /// 4. 定义页面水平边距
+              const pageHorizontalPadding = 20.0;
+              /// 5. 计算区块宽度
+              const blockWidth = baselineScreenWidth - 2 * pageHorizontalPadding;
+              /// 6. 定义区块高度
+              const blockHeight = 100.0;
+              final block = PageBlock.fromJson({
+                'data':  [
+                  {
+                    'image': 'https://picsum.photos/600/300',
+                    'link': {
+                      'type': LinkType.url.value,
+                      'value': 'https://bing.com'
+                    }
+                  },
+                  {
+                    'image': 'https://picsum.photos/600/300',
+                    'link': {
+                      'type': LinkType.url.value,
+                      'value': 'https://google.com'
+                    }
+                  },
+                  {
+                    'image': 'https://picsum.photos/600/300',
+                    'link': {
+                      'type': LinkType.url.value,
+                      'value': 'https://baidu.com'
+                    }
+                  },
+                  {
+                    'image': 'https://picsum.photos/600/300',
+                    'link': {
+                      'type': LinkType.url.value,
+                      'value': 'https://baidu.com'
+                    }
+                  },
+                ],
+                'config': {
+                  'horizontalPadding': 12.0,
+                  'verticalPadding': 6.0,
+                  'horizontalSpacing': 6.0,
+                  'blockWidth': blockWidth,
+                  'blockHeight': blockHeight,
+                }
+              });
+
+              return ImageRowWidget(
+                items: block.data,
+                config: block.config,
+                ratio: ratio,
+                onTap: (link) {
+                  if (link?.type == LinkType.url) {
+                    /// 处理 URL
+                    debugPrint('link is ${link?.value}');
+                  } else if (link?.type == LinkType.route) {
+                    Navigator.of(context).pushNamed(link!.value);
+                  }
+                }
+              );
+            }
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+![图 10](http://ngassets.twigcodes.com/136ed1a0e1d8643e16f2a9ea69bcfff1fd150cc2ff09f24cef6ac5a233f1d282.png)

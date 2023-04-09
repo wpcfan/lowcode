@@ -5,26 +5,32 @@
 <!-- code_chunk_output -->
 
 - [第一章 课程介绍](#第一章-课程介绍)
-  - [1. 为什么全栈技能很重要](#1-为什么全栈技能很重要)
-  - [2. 课程介绍](#2-课程介绍)
-  - [3. 课程结构](#3-课程结构)
-  - [4. 需求分析](#4-需求分析)
-    - [4.1. 需求的来源](#41-需求的来源)
-    - [4.2. 需求梳理](#42-需求梳理)
-    - [4.3. 需求分解](#43-需求分解)
-  - [5. 技术选型](#5-技术选型)
-  - [6. Flutter 简介](#6-flutter-简介)
-    - [6.1. Flutter 特性](#61-flutter-特性)
-    - [6.2. Dart 语言](#62-dart-语言)
-    - [6.3. 响应式 UI](#63-响应式-ui)
-    - [6.4. 跨平台](#64-跨平台)
-    - [6.5. 原生性能](#65-原生性能)
-    - [6.6. 热重载](#66-热重载)
-    - [6.7. 声明式 UI](#67-声明式-ui)
+  - [1.1 为什么全栈技能很重要](#11-为什么全栈技能很重要)
+  - [1.2 课程介绍](#12-课程介绍)
+  - [1.3 课程结构](#13-课程结构)
+  - [1.4 需求分析](#14-需求分析)
+    - [1.4.1. 需求的来源](#141-需求的来源)
+    - [1.4.2. 需求梳理](#142-需求梳理)
+    - [1.4.3. 需求分解](#143-需求分解)
+  - [1.5 技术选型](#15-技术选型)
+  - [1.6 Flutter 简介](#16-flutter-简介)
+    - [1.6.1 Flutter 特性](#161-flutter-特性)
+    - [1.6.2 Dart 语言](#162-dart-语言)
+    - [1.6.3 响应式 UI](#163-响应式-ui)
+    - [1.6.4 跨平台](#164-跨平台)
+    - [1.6.5 原生性能](#165-原生性能)
+    - [1.6.6 热重载](#166-热重载)
+    - [1.6.7 声明式 UI](#167-声明式-ui)
+  - [1.7 Spring Boot 简介](#17-spring-boot-简介)
+    - [1.7.1 Spring Boot 3.x](#171-spring-boot-3x)
+  - [1.8 容器（Docker）](#18-容器docker)
+    - [1.8.1 Docker 简介](#181-docker-简介)
+    - [1.8.2 Docker 架构](#182-docker-架构)
+    - [1.8.3 Docker 安装](#183-docker-安装)
 
 <!-- /code_chunk_output -->
 
-## 1. 为什么全栈技能很重要
+## 1.1 为什么全栈技能很重要
 
 全栈技能是指一个人能够同时掌握多个技能，比如前端、后端、移动端、数据库、运维等等。全栈技能的重要性在于，它可以让一个人在一个项目中同时承担多个角色，这样可以大大提高项目的开发效率。
 
@@ -38,7 +44,7 @@
 
 不同的技术栈的技能积累是不一样的，比如前端技能的积累主要是在 HTML、CSS、JavaScript、TypeScript、Vue、React、Angular 等技术栈中，后端技能的积累主要是在 Java、Python、Go、Node.js 等技术栈中，移动端技能的积累主要是在 Android、iOS、Flutter 等技术栈中，数据库技能的积累主要是在 MySQL、MongoDB、Redis 等技术栈中，运维技能的积累主要是在 Linux、Docker、Kubernetes 等技术栈中。
 
-## 2. 课程介绍
+## 1.2 课程介绍
 
 本课程是一个以 Flutter 为前端技术栈，Java 为后端技术栈的全栈开发课程。我们预期读者是有一定前端或移动端编程基础的人，比如你已经掌握了 HTML、CSS、JavaScript、TypeScript、Vue、React、Angular 等技术栈中的一种或多种，或者你已经掌握了 Android、iOS、Flutter 等技术栈中的一种或多种。
 
@@ -54,13 +60,13 @@
 
 本课程采用了 **“问题-方案-原型-验证-改进”** 的开发模式，我们会先讲解一个问题，然后探讨一个方案，随之构建一个原型，接着会完成验证，然后会进行改进，之后再讲解下一个问题，如此循环。这样做的好处是大家的设计，开发，重构和测试能力都会得到提升，而且会反复强化。
 
-## 3. 课程结构
+## 1.3 课程结构
 
 本课程的结构如下：
 
 - 第一章：为什么全栈技能很重要
 
-## 4. 需求分析
+## 1.4 需求分析
 
 在这个课程中，我们将开发一个全栈应用，这个应用有几个部分构成：
 
@@ -79,7 +85,7 @@
 
     ![图 5](https://i.imgur.com/NmQBTPg.png)
 
-### 4.1. 需求的来源
+### 1.4.1. 需求的来源
 
 在做需求分析的时候，第一步是要确定需求的来源，也就是要确定需求是从哪里来的。这个过程往往需要和不同的人进行沟通，比如和产品经理、项目经理、UI 设计师、运营人员等进行沟通，确定需求的来源。
 
@@ -96,7 +102,7 @@
 - **运营人员**：我们假定运营人员是一个没有技术基础的人，他可以通过可视化的界面来配置首页的布局，但是他不会编写代码。而且他也不能接受太繁琐的配置步骤，比如太多的参数需要配置，太多的步骤需要操作，这样他就会觉得很繁琐，不愿意去配置。他的首要目的是想要快速的配置出一个在指定时间内可以上线的首页，而不是想要一个在线页面编辑器。
 - **首页性能**：我们假定公司对于首页性能有较高的要求，所以我们的技术选择需要考虑到这一点。
 
-### 4.2. 需求梳理
+### 1.4.2. 需求梳理
 
 一般来说，我们在国内很少会从用户处直接得到完善的需求文档，所以我们需要从运营人员那里得到需求，然后再进行需求梳理，梳理出完整的需求文档。
 
@@ -117,7 +123,7 @@
 - 需求 10：运营人员可以发布/下线布局
 - 需求 11：一个用于 demo 的 App，可以获取到配置的布局
 
-### 4.3. 需求分解
+### 1.4.3. 需求分解
 
 上面这些需求只是一个骨架，还需要进一步细化，比如需求 1。但在细化之前我们必须先确定需求的范围，也就是要确定我们要做什么，不要做什么。这个过程往往需要和不同的人进行沟通，比如和产品经理、项目经理、UI 设计师、运营人员等进行沟通，确定我们要做什么，不要做什么。而且这个需求还和可能方案有关，涉及到我们如何设计这个可视化的配置。
 
@@ -204,7 +210,7 @@
 - 需求 9：运营人员可以发布/下线布局
 - 需求 10：一个用于 demo 的 App，可以获取到配置的布局并展示
 
-## 5. 技术选型
+## 1.5 技术选型
 
 本课程的技术选型如下：
 
@@ -221,11 +227,11 @@
 
 运维采用 Docker 的原因是 Docker 是一个开源的应用容器引擎，可以让我们快速地部署和运行应用。而且 Docker 有非常成熟的生态和开发工具。
 
-## 6. Flutter 简介
+## 1.6 Flutter 简介
 
 Flutter 是 Google 开源的移动 UI 框架，可以快速在 iOS 和 Android 上构建高质量的原生用户界面。Flutter 可以与现有的代码一起工作。在全世界，Flutter 正在被越来越多的开发者和组织使用，并且 Flutter 是完全免费、开源的。
 
-### 6.1. Flutter 特性
+### 1.6.1 Flutter 特性
 
 fllutter 的特性如下：
 
@@ -236,7 +242,7 @@ fllutter 的特性如下：
 - 原生性能
 - 富有表现力和灵活的 UI
 
-### 6.2. Dart 语言
+### 1.6.2 Dart 语言
 
 Flutter 的开发语言是 Dart。 Dart 是一种客户端-优先的语言，可以快速开发出高质量的产品，Dart 语言的特性如下：
 
@@ -249,7 +255,7 @@ Flutter 的开发语言是 Dart。 Dart 是一种客户端-优先的语言，可
 
 Dart 在语法上与 Java、C#、JavaScript、Kotlin、Swift、TypeScript 等语言非常相似，因此，如果你已经熟悉这些语言中的任何一种，那么学习 Dart 语言将会非常容易。
 
-### 6.3. 响应式 UI
+### 1.6.3 响应式 UI
 
 Flutter 的 UI 是响应式的，这意味着当应用程序的状态发生变化时，Flutter 框架会自动更新 UI，这样可以避免手动更新 UI 的麻烦。
 
@@ -337,7 +343,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 在 App 的开发框架中，这种行为很像 React/Vue 中的响应式 UI。因此，如果你已经熟悉 React/Vue，那么学习 Flutter 将会非常容易。当然现在在 Android/iOS 官方的原生开发框架也有受 React/Vue 启发的响应式 UI 框架，比如 Android Jetpack Compose 和 iOS SwiftUI。学习了 Flutter，你将会发现学习 Android Jetpack Compose 和 iOS SwiftUI 将会非常容易。
 
-### 6.4. 跨平台
+### 1.6.4 跨平台
 
 Flutter 可以在 iOS 和 Android 上运行，这意味着我们可以使用一套代码来同时开发 iOS 和 Android 应用程序。Flutter 现在还可以在 Windows、MacOS、Linux、Web 等平台上运行，但是这些平台的支持还不是很完善。
 
@@ -345,7 +351,7 @@ Flutter 的跨平台特性是通过 Flutter Engine 实现的，Flutter Engine �
 
 如果我们使用命令行创建一个 Flutter 项目，那么 Flutter 会自动为我们创建一个 Android 项目和一个 iOS 项目，这两个项目都是使用原生的 Android/iOS 代码来实现的。Flutter 会将 Flutter 代码编译成原生的 Android/iOS 代码，然后将编译后的原生代码集成到 Android/iOS 项目中。这样，我们就可以使用一套代码来同时开发 iOS 和 Android 应用程序了。
 
-### 6.5. 原生性能
+### 1.6.5 原生性能
 
 Flutter 使用了 Flutter Engine，这是一个高性能的渲染引擎，它可以直接将 Flutter UI 绘制到设备屏幕上，而不需要经过中间层。Flutter Engine 也可以与现有的代码一起工作，这意味着我们可以在 Flutter 中使用原生的平台代码。
 
@@ -353,7 +359,7 @@ Flutter Engine 使用了 Dart VM，Dart VM 是一个高性能的虚拟机，它�
 
 Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutter 和 Dart 都是原生的，它们的性能是非常高的。
 
-### 6.6. 热重载
+### 1.6.6 热重载
 
 在 Flutter 中，我们可以在不重新启动应用的情况下，实时更新应用的 UI。这意味着我们可以在开发过程中，不断地修改代码，然后 Flutter 框架会自动重新编译代码，并将编译后的代码热重载到应用中，这样我们就可以在不重新启动应用的情况下，实时更新应用的 UI。
 
@@ -361,7 +367,7 @@ Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutt
 
 其机制和 React/Vue 中的热重载机制是一样的，都是通过监听文件系统的变化来实现的。
 
-### 6.7. 声明式 UI
+### 1.6.7 声明式 UI
 
 声明式 UI 是一种用户界面编程模式，其中开发人员声明应该显示什么，而不是编写代码来指定应该如何显示。它是一种与命令式编程相对的编程模式。
 
@@ -377,3 +383,128 @@ Flutter Engine 和 Dart VM 都是使用 C++ 语言实现的，这意味着 Flutt
 - 更容易进行迭代和重构，因为 UI 可以在不影响应用程序的功能的情况下更改和重新设计。
 
 因此，声明式 UI 是现代应用程序开发中非常流行的一种编程模式。
+
+## 1.7 Spring Boot 简介
+
+Spring Boot 是一个基于 Spring 框架的快速开发脚手架，它可以简化 Spring 应用的开发和部署。Spring Boot 为所有 Spring 开发者提供了一个快速入门的方式，可以使用最少的代码创建一个独立的、产品级别的 Spring 应用。
+
+Spring Boot 的主要目标是：
+
+- 为所有 Spring 开发者提供一个快速入门的方式。
+- 开箱即用，提供各种默认配置来简化项目配置。
+- 减少配置代码。
+- 无需 XML 配置。
+
+Spring Boot 有以下特点：
+
+- 创建独立的 Spring 应用。
+- 嵌入式的 Servlet 容器，无需部署 WAR 文件。
+- starters（启动器）简化 Maven/Gradle 配置。
+- 自动配置 Spring。
+- 提供生产就绪型功能，如指标、健康检查和外部化配置。
+
+可以把 Spring Boot 看作一个胶水，它把各种 Spring 项目都粘在了一起。Spring Boot 使得开发 Spring 应用变得更加简单。
+
+很多 Spring 周边的项目都提供了 Spring Boot 的支持，例如 Spring Data、Spring Security、Spring Session、Spring Cloud 等等。
+
+在 Java 社区里面，Spring Boot 是非常流行的一个项目，它已经成为了 Java 开发者的首选框架以及事实上的标准。
+
+### 1.7.1 Spring Boot 3.x
+
+Spring Boot 3.x 是 Spring Boot 2.x 的下一个大版本，它要求的 JDK 版本是 JDK 17，而不是 JDK 8/11。从某种角度上说，Spring Boot 3.x 会带动整个 Java 生态系统的升级。与 Spring Boot 3.x 配合的 Spring Framework 也已经发布了 6.x 版本，它要求的 JDK 版本也是 JDK 17。
+
+Spring Boot 3.x 的主要特性包括：
+
+- 支持 JAVA 17。
+
+  - Record 类型： Record 类型是 Java 16 引入的新特性，它可以用来定义一个不可变的数据类型，它的属性是 final 的，它的方法是隐式的，它的 equals() 和 hashCode() 方法也是隐式的。
+
+  ```java
+  public record Person(String name, int age) {}
+  ```
+
+  - Text Blocks：Text Blocks 是 Java 15 引入的新特性，它可以用来定义多行字符串。
+
+  ```java
+  String textBlock = """
+      Hello,
+      World
+      """;
+  ```
+
+  - Switch 表达式：Switch 表达式是 Java 14 引入的新特性，它可以用来替代 switch 语句。
+
+  ```java
+  DayOfWeek day = DayOfWeek.FRIDAY;
+  int numOfLetters = switch (day) {
+      case MONDAY, FRIDAY, SUNDAY -> 6;
+      case TUESDAY                -> 7;
+      case THURSDAY, SATURDAY     -> 8;
+      case WEDNESDAY              -> 9;
+  };
+  ```
+
+  - Pattern Matching for instanceof：Pattern Matching for instanceof 是 Java 14 引入的新特性，它可以用来替代 instanceof 运算符。
+
+  ```java
+  Object obj = "Hello";
+  if (obj instanceof String s) {
+      System.out.println(s);
+  }
+  // 我们也可以在 switch-case 语句中使用它：
+  switch (obj) {
+      case String s -> System.out.println(s);
+      case Integer i -> System.out.println(i);
+      default -> System.out.println("Unknown type");
+  }
+  ```
+
+  - Sealed Classes：Sealed Classes 是 Java 15 引入的新特性，它可以用来限制类的继承。
+
+  ```java
+  public sealed class Shape permits Circle, Rectangle, Square {}
+  public final class Circle extends Shape {}
+  public final class Rectangle extends Shape {}
+  public final class Square extends Shape {}
+  ```
+
+  - Jakarta EE 9：最重要的变化可能是从 Java EE 跳转到 Jakarta EE9，其中包命名空间从 javax._ 更改为 jakarta._。因此，每当我们直接使用 Java EE 中的类时，我们都需要调整代码中的所有导入。
+
+  - Spring Web MVC 的改进：最重要的一个改进是支持 RFC 7807，它是一个标准，它定义了一种标准的方式来表示错误和异常。
+
+## 1.8 容器（Docker）
+
+课程中采用容器作为开发和部署的方式，这样可以避免开发环境和生产环境的差异，从而提高开发效率。
+
+### 1.8.1 Docker 简介
+
+Docker 是一个开源的应用容器引擎，它可以让开发者打包他们的应用以及依赖包到一个可移植的容器中，然后发布到任何流行的 Linux 或 Windows 服务器上，也可以实现虚拟化。
+
+Docker 的主要特性包括：
+
+- 应用程序打包：Docker 可以将应用程序及其依赖项打包到一个可移植的容器中，这样就可以在任何地方运行它。
+- 轻量级和可移植：Docker 容器比虚拟机更轻量级，因为容器不需要额外的操作系统，它们直接运行在宿主机的内核上。
+- 可扩展性：Docker 可以很容易地扩展到多台服务器上，它提供了分布式应用程序的完美解决方案。
+- 开源：Docker 是一个开源项目，它的源代码托管在 GitHub 上。
+
+### 1.8.2 Docker 架构
+
+Docker 客户端（Docker CLI）：Docker 客户端是 Docker 的主要用户界面，它允许用户在 Docker 主机上执行 Docker 命令。
+
+Docker 镜像（Image）：Docker 镜像是一个只读的模板，它包含了运行一个应用程序所需的所有内容，包括代码、运行时、系统工具、系统库和设置。镜像可以用来创建 Docker 容器。
+
+Docker 容器（Container）：Docker 容器是一个运行时的实例，它是从镜像创建的。容器可以被启动、启动、暂停、恢复、停止或删除。每个容器都是相互隔离的，它们有自己的文件系统、内存空间、进程空间和网络空间。
+
+Docker 注册表（Registry）：Docker 注册表是一个存储和分发镜像的场所。Docker Hub 是 Docker 官方提供的一个公共注册表，它提供了丰富的镜像，可以用来创建 Docker 容器。
+
+Docker Hub：Docker Hub 是一个公共的镜像仓库，它提供了丰富的镜像，可以用来创建 Docker 容器。
+
+### 1.8.3 Docker 安装
+
+Docker 的安装非常简单，我们只需要在 Linux 上运行以下命令即可：
+
+```bash
+$ curl -fsSL https://get.docker.com | bash -s docker --mirror Aliyun
+```
+
+在 Windows/Mac 上安装 Docker，我们可以直接下载安装包进行安装。下载地址：https://www.docker.com/products/docker-desktop

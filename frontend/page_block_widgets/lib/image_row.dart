@@ -34,12 +34,12 @@ class ImageRowWidget extends StatelessWidget {
     final borderColor =
         config.borderColor != null ? config.borderColor! : Colors.transparent;
     final borderWidth = config.borderWidth ?? 0.0;
-    final horizontalSpacing = (config.horizontalSpacing ?? 0.0) * ratio;
-    final scaledPaddingHorizontal = (config.horizontalPadding ?? 0.0) * ratio;
-    final scaledPaddingVertical = (config.verticalPadding ?? 0.0) * ratio;
+    final horizontalSpacing = config.horizontalSpacing ?? 0.0;
+    final horizontalPadding = config.horizontalPadding ?? 0.0;
+    final verticalPadding = config.verticalPadding ?? 0.0;
 
     final imageWidth = ((config.blockWidth ?? 0.0) -
-            2 * scaledPaddingHorizontal -
+            2 * horizontalPadding -
             (items.length - 1) * horizontalSpacing) /
         (items.length > numOfDisplayed
             ?
@@ -50,9 +50,9 @@ class ImageRowWidget extends StatelessWidget {
             /// 其它情况下，图片数量就是显示的数量
 
             : items.length);
-    final blockWidth = (config.blockWidth ?? 0.0) * ratio;
-    final blockHeight = (config.blockHeight ?? 0.0) * ratio;
-    final imageHeight = blockHeight - 2 * scaledPaddingVertical;
+    final blockWidth = config.blockWidth ?? 0.0;
+    final blockHeight = config.blockHeight ?? 0.0;
+    final imageHeight = blockHeight - 2 * verticalPadding;
 
     /// 构建外层容器，包含背景色、边框、内边距
     /// 用于控制整个组件的大小
@@ -60,9 +60,7 @@ class ImageRowWidget extends StatelessWidget {
     /// 注意这是一个函数，一般我们构建完内层组件后，会调用它来构建外层组件
     /// 使用上，内层如果是 child，那么可以通过 child.parent(page) 来构建外层
     page({required Widget child}) => child
-        .padding(
-            horizontal: scaledPaddingHorizontal,
-            vertical: scaledPaddingVertical)
+        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .decorated(
           color: backgroundColor,
           border: Border.all(
@@ -100,13 +98,16 @@ class ImageRowWidget extends StatelessWidget {
         .map((e) {
           final isLast = items.last == e;
           return [
-            buildImageWidget(e),
+            buildImageWidget(e).expanded(),
             if (!isLast) SizedBox(width: horizontalSpacing),
           ];
         })
         .expand((element) => element)
         .toList()
-        .toRow()
+        .toRow(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+        )
         .parent(page);
   }
 }

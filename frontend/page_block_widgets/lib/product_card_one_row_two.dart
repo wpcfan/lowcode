@@ -37,7 +37,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
             strokeAlign: BorderSide.strokeAlignOutside,
           ),
         )
-        .constrained(maxWidth: itemWidth);
+        .constrained(width: itemWidth);
     // 商品名称
     final productName = Text(
       product.name ?? '',
@@ -90,14 +90,9 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       height: itemWidth - 2 * borderWidth,
       errorImage: errorImage,
       onTap: onTap != null ? (link) => onTap!(product) : null,
-    )
-        .padding(
-          bottom: verticalSpacing,
-        )
-        .constrained(
-          maxWidth: itemWidth - 2 * borderWidth,
-          maxHeight: itemWidth - 2 * borderWidth,
-        );
+    ).padding(
+      bottom: verticalSpacing,
+    );
     // 商品图片、名称和描述形成一列
     final imageNameAndDesc = <Widget>[
       productImage,

@@ -42,12 +42,12 @@ class ProductRowWidget extends StatelessWidget {
     final borderColor =
         config.borderColor != null ? config.borderColor! : Colors.transparent;
     final borderWidth = config.borderWidth ?? 0.0;
-    final width = (config.blockWidth ?? 0) * ratio;
-    final height = (config.blockHeight ?? 0) * ratio;
-    final horizontalPadding = (config.horizontalPadding ?? 0) * ratio;
-    final verticalPadding = (config.verticalPadding ?? 0) * ratio;
-    final horizontalSpacing = (config.horizontalSpacing ?? 0) * ratio;
-    final verticalSpacing = (config.verticalSpacing ?? 0) * ratio;
+    final width = config.blockWidth ?? 0;
+    final height = config.blockHeight ?? 0;
+    final horizontalPadding = config.horizontalPadding ?? 0;
+    final verticalPadding = config.verticalPadding ?? 0;
+    final horizontalSpacing = config.horizontalSpacing ?? 0;
+    final verticalSpacing = config.verticalSpacing ?? 0;
     final blockWidth = width - 2 * horizontalPadding;
 
     /// 将 Widget 包裹在 Page 中
@@ -63,7 +63,7 @@ class ProductRowWidget extends StatelessWidget {
             width: borderWidth,
           ),
         )
-        .constrained(width: width);
+        .constrained(width: width, maxHeight: height);
 
     switch (items.length) {
       /// 如果商品数量为 1，那么展示一行一列的商品卡片
@@ -86,7 +86,10 @@ class ProductRowWidget extends StatelessWidget {
 
         /// 如果商品数量为 2，那么展示一行两列的商品卡片
         return items
-            .map((e) => ProductCardOneRowTwoWidget(
+            .map((e) {
+              final isLast = items.last == e;
+              return [
+                ProductCardOneRowTwoWidget(
                   product: e,
                   itemWidth: (blockWidth - horizontalSpacing) / 2,
                   itemHeight: height - 2 * verticalPadding,
@@ -97,7 +100,11 @@ class ProductRowWidget extends StatelessWidget {
                   backgroundColor: Colors.white,
                   borderColor: Colors.grey,
                   borderWidth: 1,
-                ))
+                ).expanded(),
+                if (!isLast) SizedBox(width: horizontalSpacing),
+              ];
+            })
+            .expand((element) => element)
             .toList()
             .toRow(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

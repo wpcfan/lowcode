@@ -81,6 +81,20 @@ class BlockConfig {
     );
   }
 
+  BlockConfig withRatio(double ratio) {
+    return BlockConfig(
+      horizontalPadding: (horizontalPadding ?? 0) * ratio,
+      verticalPadding: (verticalPadding ?? 0) * ratio,
+      horizontalSpacing: (horizontalSpacing ?? 0) * ratio,
+      verticalSpacing: (verticalSpacing ?? 0) * ratio,
+      blockWidth: (blockWidth ?? 0) * ratio,
+      blockHeight: (blockHeight ?? 0) * ratio,
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
+      borderWidth: (borderWidth ?? 0) * ratio,
+    );
+  }
+
   @override
   String toString() {
     return 'BlockConfig(horizontalPadding: $horizontalPadding, verticalPadding: $verticalPadding, horizontalSpacing: $horizontalSpacing, verticalSpacing: $verticalSpacing, blockWidth: $blockWidth, blockHeight: $blockHeight, backgroundColor: $backgroundColor, borderColor: $borderColor, borderWidth: $borderWidth)';

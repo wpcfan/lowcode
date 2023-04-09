@@ -33,7 +33,6 @@ void main() {
             items: items,
             config: config,
             errorImage: 'https://example.com/error.jpg',
-            ratio: 1.0,
           ),
         ),
       ));
@@ -75,7 +74,6 @@ void main() {
             items: items,
             config: config,
             errorImage: 'https://example.com/error.jpg',
-            ratio: ratio,
           ),
         ),
       ));

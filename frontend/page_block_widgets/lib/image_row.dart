@@ -13,14 +13,12 @@ class ImageRowWidget extends StatelessWidget {
     super.key,
     required this.items,
     required this.config,
-    required this.ratio,
     this.errorImage,
     this.numOfDisplayed = 3,
     this.onTap,
   });
   final List<ImageData> items;
   final BlockConfig config;
-  final double ratio;
   final String? errorImage;
   final int numOfDisplayed;
 

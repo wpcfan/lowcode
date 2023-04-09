@@ -11,7 +11,6 @@ import 'image.dart';
 /// [items] 数据
 /// [errorImage] 加载失败时的占位图
 /// [config] 区块配置
-/// [ratio] 屏幕宽度与设计稿宽度的比例
 /// [onTap] 点击事件
 /// [animationCurve] 动画曲线
 /// [transitionDuration] 动画持续时间, 单位毫秒
@@ -20,7 +19,6 @@ class BannerWidget extends StatefulWidget {
   final List<ImageData> items;
   final String? errorImage;
   final BlockConfig config;
-  final double ratio;
   final void Function(MyLink?)? onTap;
   final Curve animationCurve;
   final int transitionDuration;
@@ -30,7 +28,6 @@ class BannerWidget extends StatefulWidget {
     super.key,
     required this.items,
     required this.config,
-    required this.ratio,
     this.errorImage,
     this.onTap,
     this.animationCurve = Curves.ease,

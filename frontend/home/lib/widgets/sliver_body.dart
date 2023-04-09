@@ -71,7 +71,6 @@ class SliverBodyWidget extends StatelessWidget {
                   child: BannerWidget(
                     items: it.data.map((di) => di.content).toList(),
                     config: config,
-                    ratio: ratio,
                     errorImage: errorImage,
                     onTap: onTap,
                   ),
@@ -82,7 +81,6 @@ class SliverBodyWidget extends StatelessWidget {
                   child: ImageRowWidget(
                     items: it.data.map((di) => di.content).toList(),
                     config: config,
-                    ratio: ratio,
                     errorImage: errorImage,
                     onTap: onTap,
                   ),
@@ -93,7 +91,6 @@ class SliverBodyWidget extends StatelessWidget {
                   child: ProductRowWidget(
                     items: it.data.map((di) => di.content).toList(),
                     config: config,
-                    ratio: ratio,
                     errorImage: errorImage,
                     onTap: onTapProduct,
                     addToCart: addToCart,
@@ -107,7 +104,6 @@ class SliverBodyWidget extends StatelessWidget {
                 return WaterfallWidget(
                   products: products,
                   config: config,
-                  ratio: ratio,
                   errorImage: errorImage,
                   onTap: onTapProduct,
                   addToCart: addToCart,

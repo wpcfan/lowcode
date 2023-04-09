@@ -16,7 +16,6 @@ class WaterfallWidget extends StatelessWidget {
     super.key,
     required this.config,
     required this.products,
-    required this.ratio,
     this.errorImage,
     this.addToCart,
     this.onTap,
@@ -25,7 +24,6 @@ class WaterfallWidget extends StatelessWidget {
   final BlockConfig config;
   final List<Product> products;
   final String? errorImage;
-  final double ratio;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTap;
   final bool isPreview;

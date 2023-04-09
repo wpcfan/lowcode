@@ -22,7 +22,6 @@ class ProductRowWidget extends StatelessWidget {
     super.key,
     required this.items,
     required this.config,
-    required this.ratio,
     this.errorImage,
     this.addToCart,
     this.onTap,
@@ -30,7 +29,6 @@ class ProductRowWidget extends StatelessWidget {
   final List<Product> items;
   final String? errorImage;
   final BlockConfig config;
-  final double ratio;
   final void Function(Product)? addToCart;
   final void Function(Product)? onTap;
 

@@ -1513,7 +1513,7 @@ class BlockConfig {
 
 所以我们可以把原来的组件的输入参数去掉，然后把这些参数放到 `BlockConfig` 中。
 
-另外我们组件中，现在其实没有考虑页面的边距，这当然是合理的，因为按一般逻辑，我们在页面一层应该会有一个容器组件，那个组件负责处理页面的边距。但是我们现在的计算是有点问题的，我们是用屏幕的宽度来计算图片的宽度的，但是实际上图片的宽度应该是屏幕宽度减去页面左右边距的宽度。但这时候，我们就要思考一下，这个比例计算到底是在每个区块里面去处理合理呢？还是在页面一层去处理合理呢？在我们的项目中，我们倾向于在页面一层去处理，因为这样可以减少组件的耦合度，组件只需要关心自己的数据就可以了，不需要关心页面的边距。所以这个组件需要一个计算好的比例 `ratio` ，这样就可以在组件内部计算出图片的宽高了。
+另外我们组件中，现在其实没有考虑页面的边距，这当然是合理的，因为按一般逻辑，我们在页面一层应该会有一个容器组件，那个组件负责处理页面的边距。但是我们现在的计算是有点问题的，我们是用屏幕的宽度来计算图片的宽度的，但是实际上图片的宽度应该是屏幕宽度减去页面左右边距的宽度。但这时候，我们就要思考一下，这个比例计算到底是在每个区块里面去处理合理呢？还是在页面一层去处理合理呢？在我们的项目中，我们倾向于在页面一层去处理，因为这样可以减少组件的耦合度，组件只需要关心自己的数据就可以了，不需要关心页面的边距。
 
 根据上面的讨论，我们重构组件的输入参数，把配置参数和数据参数分开：
 
@@ -1523,14 +1523,12 @@ class ImageRowWidget extends StatelessWidget {
     super.key,
     required this.items,
     required this.config,
-    required this.ratio,
     this.errorImage,
     this.numOfDisplayed = 3,
     this.onTap,
   });
   final List<ImageData> items;
   final BlockConfig config;
-  final double ratio;
   final String? errorImage;
   final int numOfDisplayed;
 
@@ -1544,9 +1542,9 @@ class ImageRowWidget extends StatelessWidget {
     final borderColor =
         config.borderColor != null ? config.borderColor! : Colors.transparent;
     final borderWidth = config.borderWidth ?? 0.0;
-    final horizontalSpacing = (config.horizontalSpacing ?? 0.0) * ratio;
-    final scaledPaddingHorizontal = (config.horizontalPadding ?? 0.0) * ratio;
-    final scaledPaddingVertical = (config.verticalPadding ?? 0.0) * ratio;
+    final horizontalSpacing = config.horizontalSpacing ?? 0.0;
+    final horizontalPadding = config.horizontalPadding ?? 0.0;
+    final verticalPadding = config.verticalPadding ?? 0.0;
 
     final imageWidth = ((config.blockWidth ?? 0.0) -
             2 * scaledPaddingHorizontal -
@@ -1560,9 +1558,9 @@ class ImageRowWidget extends StatelessWidget {
             /// 其它情况下，图片数量就是显示的数量
 
             : items.length);
-    final blockWidth = (config.blockWidth ?? 0.0) * ratio;
-    final blockHeight = (config.blockHeight ?? 0.0) * ratio;
-    final imageHeight = blockHeight - 2 * scaledPaddingVertical;
+    final blockWidth = config.blockWidth ?? 0.0;
+    final blockHeight = config.blockHeight ?? 0.0;
+    final imageHeight = blockHeight - 2 * verticalPadding;
 
     /// 构建外层容器，包含背景色、边框、内边距
     /// 用于控制整个组件的大小
@@ -1756,7 +1754,7 @@ class MyLink {
 }
 ```
 
-接下来就是 `BlockConfig` 类了，也给加上 `fromJson` ：
+接下来就是 `BlockConfig` 类了，也给加上 `fromJson` 和 `toJson`，为了比例缩放，我们同样提供一个 `withRatio` 方法，可以把得到的配置参数统一按比例计算 ：
 
 ```dart
 class BlockConfig {
@@ -1811,6 +1809,20 @@ class BlockConfig {
       'borderWidth': borderWidth,
     };
   }
+  /// 根据比例缩放
+  BlockConfig withRatio(double ratio) {
+    return BlockConfig(
+      horizontalPadding: (horizontalPadding ?? 0) * ratio,
+      verticalPadding: (verticalPadding ?? 0) * ratio,
+      horizontalSpacing: (horizontalSpacing ?? 0) * ratio,
+      verticalSpacing: (verticalSpacing ?? 0) * ratio,
+      blockWidth: (blockWidth ?? 0) * ratio,
+      blockHeight: (blockHeight ?? 0) * ratio,
+      backgroundColor: backgroundColor,
+      borderColor: borderColor,
+      borderWidth: (borderWidth ?? 0) * ratio,
+    );
+  }
 }
 ```
 
@@ -1845,6 +1857,13 @@ class MyApp extends StatelessWidget {
               const blockWidth = baselineScreenWidth - 2 * pageHorizontalPadding;
               /// 6. 定义区块高度
               const blockHeight = 100.0;
+              final config = BlockConfig(
+                horizontalPadding: 12.0,
+                verticalPadding: 6.0,
+                horizontalSpacing: 6.0,
+                blockWidth: blockWidth,
+                blockHeight: blockHeight,
+              ).withRatio(ratio);
               final block = PageBlock.fromJson({
                 'data':  [
                   {
@@ -1876,19 +1895,12 @@ class MyApp extends StatelessWidget {
                     }
                   },
                 ],
-                'config': {
-                  'horizontalPadding': 12.0,
-                  'verticalPadding': 6.0,
-                  'horizontalSpacing': 6.0,
-                  'blockWidth': blockWidth,
-                  'blockHeight': blockHeight,
-                }
+                'config': config.toJson(),
               });
 
               return ImageRowWidget(
                 items: block.data,
-                config: block.config,
-                ratio: ratio,
+                config: config,
                 onTap: (link) {
                   if (link?.type == LinkType.url) {
                     /// 处理 URL
@@ -2031,7 +2043,6 @@ import 'image.dart';
 /// [items] 数据
 /// [errorImage] 加载失败时的占位图
 /// [config] 区块配置
-/// [ratio] 屏幕宽度与设计稿宽度的比例
 /// [onTap] 点击事件
 /// [animationCurve] 动画曲线
 /// [transitionDuration] 动画持续时间, 单位毫秒
@@ -2040,7 +2051,6 @@ class BannerWidget extends StatefulWidget {
   final List<ImageData> items;
   final String? errorImage;
   final BlockConfig config;
-  final double ratio;
   final void Function(MyLink?)? onTap;
   final Curve animationCurve;
   final int transitionDuration;
@@ -2050,7 +2060,6 @@ class BannerWidget extends StatefulWidget {
     super.key,
     required this.items,
     required this.config,
-    required this.ratio,
     this.errorImage,
     this.onTap,
     this.animationCurve = Curves.ease,
@@ -2103,11 +2112,10 @@ class _BannerWidgetState extends State<BannerWidget> {
     final borderWidth = widget.config.borderWidth ?? 0;
     final borderColor = widget.config.borderColor ?? Colors.transparent;
     final backgroundColor = widget.config.backgroundColor ?? Colors.transparent;
-    final blockWidth = (widget.config.blockWidth ?? 0) * widget.ratio;
-    final blockHeight = (widget.config.blockHeight ?? 0) * widget.ratio;
-    final horizontalPadding =
-        (widget.config.horizontalPadding ?? 0) * widget.ratio;
-    final verticalPadding = (widget.config.verticalPadding ?? 0) * widget.ratio;
+    final blockWidth = widget.config.blockWidth ?? 0;
+    final blockHeight = widget.config.blockHeight ?? 0;
+    final horizontalPadding = widget.config.horizontalPadding ?? 0;
+    final verticalPadding = widget.config.verticalPadding ?? 0;
 
     // TODO: 作业，写出轮播图区块的布局
   }

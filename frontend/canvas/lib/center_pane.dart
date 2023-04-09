@@ -270,6 +270,7 @@ class _CenterPaneState extends State<CenterPane> {
 
   Widget _buildDraggableWidget(PageBlock block, List<Product> products,
       int index, double itemWidth, CanvasBloc bloc, double ratio) {
+    final config = block.config.withRatio(ratio);
     page({required Widget child}) => Draggable(
           data: block,
           feedback: SizedBox(
@@ -307,8 +308,7 @@ class _CenterPaneState extends State<CenterPane> {
         /// SliverToBoxAdapter 可以将一个 Widget 转换成 Sliver
         widget = BannerWidget(
           items: items,
-          config: it.config,
-          ratio: ratio,
+          config: config,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -329,8 +329,7 @@ class _CenterPaneState extends State<CenterPane> {
               ];
         widget = ImageRowWidget(
           items: items,
-          config: it.config,
-          ratio: ratio,
+          config: config,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -354,8 +353,7 @@ class _CenterPaneState extends State<CenterPane> {
               ];
         widget = ProductRowWidget(
           items: items,
-          config: it.config,
-          ratio: ratio,
+          config: config,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));
           },
@@ -406,8 +404,7 @@ class _CenterPaneState extends State<CenterPane> {
 
         widget = WaterfallWidget(
           products: items,
-          config: it.config,
-          ratio: ratio,
+          config: config,
           isPreview: true,
           onTap: (_) {
             bloc.add(CanvasEventSelectBlock(block));

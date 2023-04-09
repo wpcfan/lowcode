@@ -29,8 +29,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    page({required Widget child}) =>
-        child.constrained(maxWidth: width, maxHeight: height);
     // 商品名称
     final productName = Text(
       product.name ?? '',
@@ -132,7 +130,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
         )
-        .parent(page)
         .gestures(onTap: onTap != null ? () => onTap!(product) : null);
   }
 }

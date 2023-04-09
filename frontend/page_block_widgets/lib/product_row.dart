@@ -48,6 +48,7 @@ class ProductRowWidget extends StatelessWidget {
     final verticalPadding = (config.verticalPadding ?? 0) * ratio;
     final horizontalSpacing = (config.horizontalSpacing ?? 0) * ratio;
     final verticalSpacing = (config.verticalSpacing ?? 0) * ratio;
+    final blockWidth = width - 2 * horizontalPadding;
 
     /// 将 Widget 包裹在 Page 中
     /// 注意到 page 其实是一个方法，接受一个 Widget 作为参数，返回一个 Widget
@@ -62,7 +63,7 @@ class ProductRowWidget extends StatelessWidget {
             width: borderWidth,
           ),
         )
-        .constrained(maxWidth: width, maxHeight: height);
+        .constrained(width: width);
 
     switch (items.length) {
       /// 如果商品数量为 1，那么展示一行一列的商品卡片
@@ -70,7 +71,7 @@ class ProductRowWidget extends StatelessWidget {
         final product = items.first;
         return ProductCardOneRowOneWidget(
           product: product,
-          width: width - 2 * horizontalPadding,
+          width: blockWidth,
           height: height - 2 * verticalPadding,
           horizontalSpacing: horizontalSpacing,
           verticalSpacing: verticalSpacing,
@@ -84,27 +85,26 @@ class ProductRowWidget extends StatelessWidget {
       default:
 
         /// 如果商品数量为 2，那么展示一行两列的商品卡片
-        return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              final product = items[index];
-              return ProductCardOneRowTwoWidget(
-                product: product,
-                itemWidth: (width - horizontalSpacing) / 2,
-                itemHeight: height - 2 * verticalPadding,
-                verticalSpacing: verticalSpacing,
-                errorImage: errorImage,
-                onTap: onTap,
-                addToCart: addToCart,
-                backgroundColor: Colors.white,
-                borderColor: Colors.grey,
-                borderWidth: 1,
-              ).padding(
-
-                  /// 如果是最后一个商品，那么右边距为 0，否则为 horizontalSpacing
-                  right: index == items.length - 1 ? 0 : horizontalSpacing);
-            }).parent(page);
+        return items
+            .map((e) => ProductCardOneRowTwoWidget(
+                  product: e,
+                  itemWidth: (blockWidth - horizontalSpacing) / 2,
+                  itemHeight: height - 2 * verticalPadding,
+                  verticalSpacing: verticalSpacing,
+                  errorImage: errorImage,
+                  onTap: onTap,
+                  addToCart: addToCart,
+                  backgroundColor: Colors.white,
+                  borderColor: Colors.grey,
+                  borderWidth: 1,
+                ))
+            .toList()
+            .toRow(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+            )
+            .parent(page);
     }
   }
 }

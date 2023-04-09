@@ -8,14 +8,21 @@ import 'image.dart';
 
 /// 轮播图组件
 /// 使用PageView实现
+/// [items] 数据
+/// [errorImage] 加载失败时的占位图
+/// [config] 区块配置
+/// [ratio] 屏幕宽度与设计稿宽度的比例
+/// [onTap] 点击事件
+/// [animationCurve] 动画曲线
+/// [transitionDuration] 动画持续时间, 单位毫秒
+/// [secondsToNextPage] 每隔多少秒，跳转到下一页
 class BannerWidget extends StatefulWidget {
   final List<ImageData> items;
   final String? errorImage;
-  final int animationDuration;
-  final Curve animationCurve;
   final BlockConfig config;
   final double ratio;
   final void Function(MyLink?)? onTap;
+  final Curve animationCurve;
   final int transitionDuration;
   final int secondsToNextPage;
 
@@ -25,9 +32,8 @@ class BannerWidget extends StatefulWidget {
     required this.config,
     required this.ratio,
     this.errorImage,
-    this.animationDuration = 500,
-    this.animationCurve = Curves.ease,
     this.onTap,
+    this.animationCurve = Curves.ease,
     this.transitionDuration = 500,
     this.secondsToNextPage = 5,
   });
@@ -41,6 +47,7 @@ class _BannerWidgetState extends State<BannerWidget> {
   late PageController _pageController;
   Timer? _timer;
 
+  /// 页面创建时，启动计时器
   @override
   void initState() {
     super.initState();
@@ -48,6 +55,7 @@ class _BannerWidgetState extends State<BannerWidget> {
     _startTimer();
   }
 
+  /// 页面销毁时，停止计时器
   @override
   void dispose() {
     _stopTimer();
@@ -55,29 +63,34 @@ class _BannerWidgetState extends State<BannerWidget> {
     super.dispose();
   }
 
+  /// 开始计时器
   void _startTimer() {
     if (widget.items.isEmpty) return;
     _timer =
         Timer.periodic(Duration(seconds: widget.secondsToNextPage), (timer) {
-      _pageController.animateToPage(
-        (_currentPage + 1) % widget.items.length,
-        duration: Duration(milliseconds: widget.transitionDuration),
-        curve: Curves.ease,
-      );
+      /// 每隔一段时间，跳转到下一页
+      /// 为了实现无限循环，需要对数据进行取模运算
+      _nextPage((_currentPage + 1) % widget.items.length);
     });
   }
 
+  /// 停止计时器
   void _stopTimer() {
     if (widget.items.isEmpty) return;
     _timer?.cancel();
     _timer = null;
   }
 
+  /// 跳转到指定页
   void _nextPage(int page) {
     _pageController.animateToPage(
       page,
-      duration: Duration(milliseconds: widget.animationDuration),
-      curve: Curves.easeInOut,
+
+      /// 动画持续时间
+      duration: Duration(milliseconds: widget.transitionDuration),
+
+      /// 动画曲线
+      curve: widget.animationCurve,
     );
   }
 
@@ -92,6 +105,7 @@ class _BannerWidgetState extends State<BannerWidget> {
         (widget.config.horizontalPadding ?? 0) * widget.ratio;
     final verticalPadding = (widget.config.verticalPadding ?? 0) * widget.ratio;
 
+    /// 区块的样式
     page({required Widget child}) => child
         .padding(horizontal: horizontalPadding, vertical: verticalPadding)
         .decorated(
@@ -99,16 +113,22 @@ class _BannerWidgetState extends State<BannerWidget> {
             color: backgroundColor)
         .constrained(width: blockWidth, height: blockHeight);
 
-    final pagedItem = widget.items.isEmpty
+    final pageView = widget.items.isEmpty
+
+        /// 如果没有数据，显示占位图
         ? const Placeholder()
+
+        /// 如果有数据，使用PageView，可以支持以页的方式滑动
         : PageView.builder(
             controller: _pageController,
             onPageChanged: (index) {
               setState(() {
+                /// 更新当前页
                 _currentPage = index % widget.items.length;
               });
             },
             itemBuilder: (context, index) {
+              /// 为了实现无限循环，需要对数据进行取模运算
               int idx = index % widget.items.length;
               return ImageWidget(
                 imageUrl: widget.items[idx].image,
@@ -120,6 +140,8 @@ class _BannerWidgetState extends State<BannerWidget> {
               );
             },
           );
+
+    /// 指示器
     final indicators = List.generate(
       widget.items.length,
       (index) => const SizedBox(width: 8.0, height: 8.0)
@@ -133,8 +155,10 @@ class _BannerWidgetState extends State<BannerWidget> {
         .toRow(mainAxisAlignment: MainAxisAlignment.center)
         .padding(bottom: 8.0)
         .alignment(Alignment.bottomCenter);
+
+    /// 以 Stack 的方式将图片和指示器组合起来
     return [
-      pagedItem.constrained(width: blockWidth, height: blockHeight),
+      pageView.constrained(width: blockWidth, height: blockHeight),
       indicators,
     ].toStack().parent(page);
   }

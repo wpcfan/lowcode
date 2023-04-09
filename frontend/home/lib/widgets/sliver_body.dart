@@ -53,6 +53,7 @@ class SliverBodyWidget extends StatelessWidget {
             (state.layout?.config.horizontalPadding ?? 0) * ratio;
         final verticalPadding =
             (state.layout?.config.verticalPadding ?? 0) * ratio;
+        final blockWidth = screenWidth - 2 * horizontalPadding;
 
         /// MultiSliver 是一个可以包含多个 Sliver 的 Widget
         /// 允许一个方法返回多个 Sliver，这个是 `sliver_tools` 包提供的
@@ -80,8 +81,7 @@ class SliverBodyWidget extends StatelessWidget {
                 return SliverToBoxAdapter(
                   child: ImageRowWidget(
                     items: it.data.map((di) => di.content).toList(),
-                    config: it.config.copyWith(
-                        blockWidth: screenWidth - 2 * horizontalPadding),
+                    config: it.config.copyWith(blockWidth: blockWidth),
                     ratio: ratio,
                     errorImage: errorImage,
                     onTap: onTap,
@@ -92,7 +92,7 @@ class SliverBodyWidget extends StatelessWidget {
                 return SliverToBoxAdapter(
                   child: ProductRowWidget(
                     items: it.data.map((di) => di.content).toList(),
-                    config: it.config,
+                    config: it.config.copyWith(blockWidth: blockWidth),
                     ratio: ratio,
                     errorImage: errorImage,
                     onTap: onTapProduct,

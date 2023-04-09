@@ -23,6 +23,10 @@
     - [3.10.3 Flutter 知识点：Assets 简介](#3103-flutter-知识点assets-简介)
   - [3.11. 抽象数据模型和参数模型](#311-抽象数据模型和参数模型)
     - [3.11.1 模拟数据并验证](#3111-模拟数据并验证)
+  - [3.12 作业 - 轮播图区块](#312-作业---轮播图区块)
+    - [3.12.1 Flutter 知识点：StatefulWidget](#3121-flutter-知识点statefulwidget)
+    - [3.12.2 Flutter 知识点：Timer](#3122-flutter-知识点timer)
+    - [3.12.3 Flutter 知识点：PageView](#3123-flutter-知识点pageview)
 
 <!-- /code_chunk_output -->
 
@@ -1682,10 +1686,19 @@ class PageBlock {
       data: (json['data'] as List).map((e) => ImageData.fromJson(e)).toList(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'config': config.toJson(),
+      'data': data.map((e) => e.toJson()).toList(),
+    };
+  }
 }
 ```
 
 `fromJson` 这种工厂方法在 `Dart` 中是非常常见的，它的作用是从 `Json` 数据中构建一个对象，这个对象的属性值就是 `Json` 数据中的值。这里我们使用了 `Dart` 的类型推断，所以我们不需要显式的指定 `json['config']` 的类型，`Dart` 会自动推断出来。
+
+`toJson` 方法的作用是把一个对象转换成 `Json` 数据，这个方法的实现也很简单，就是把对象的属性值转换成 `Json` 数据中的值。
 
 但是大家如果仔细看的话会发现 `fromJson` 方法中还调用了 `ImageData.fromJson` 方法，这个方法是在哪里定义的呢？其实这个方法是在 `ImageData` 类中定义的，我们可以看到它的定义如下：
 
@@ -1705,10 +1718,17 @@ class ImageData {
       link: json['link'] != null ? MyLink.fromJson(json['link']) : null,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'image': image,
+      'link': link?.toJson(),
+    };
+  }
 }
 ```
 
-类似的，我们还得给 `MyLink` 类定义一个 `fromJson` 方法，这个方法的实现如下：
+类似的，我们还得给 `MyLink` 类定义一个 `fromJson` 方法和 `toJson` 方法，这个方法的实现如下：
 
 ```dart
 class MyLink {
@@ -1725,6 +1745,13 @@ class MyLink {
       type: LinkType.values.firstWhere((e) => e.value == json['type']),
       value: json['value'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'type': type.value,
+      'value': value,
+    };
   }
 }
 ```
@@ -1769,6 +1796,20 @@ class BlockConfig {
       borderColor: hexBorderColor?.hexToColor(),
       borderWidth: json['borderWidth'] as double?,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'horizontalPadding': horizontalPadding,
+      'verticalPadding': verticalPadding,
+      'horizontalSpacing': horizontalSpacing,
+      'verticalSpacing': verticalSpacing,
+      'blockWidth': blockWidth,
+      'blockHeight': blockHeight,
+      'backgroundColor': backgroundColor?.toHex(),
+      'borderColor': borderColor?.toHex(),
+      'borderWidth': borderWidth,
+    };
   }
 }
 ```
@@ -1866,4 +1907,337 @@ class MyApp extends StatelessWidget {
 }
 ```
 
+然后就可以启动应用程序了
+
 ![图 10](http://ngassets.twigcodes.com/136ed1a0e1d8643e16f2a9ea69bcfff1fd150cc2ff09f24cef6ac5a233f1d282.png)
+
+## 3.12 作业 - 轮播图区块
+
+和图片区块非常类似，轮播图区块也是一个图片类区块，只不过区别在于它可以展示多张图片，而且可以自动轮播。它的数据模型和图片区块的数据模型也是非常类似的，
+
+这个区块由于和图片区块非常类似，所以我们当成作业给大家，大家可以自己尝试实现一下。
+
+这里涉及到的知识点有：
+
+1. Stateful Widget 的使用
+2. `Timer` 类的使用
+3. `PageView` 类的使用
+
+如果大家不了解以上知识点，我们后面的小节，有些简略的介绍，大家可以看一下，然后再来尝试实现这个区块。
+
+这里提示一些实现思路：
+
+1. 由于需要实现定时的轮播，所以我们需要使用 `Timer` 类，它可以在指定的时间间隔后执行指定的回调函数。
+
+```dart
+/// 仅为示例，并无实际意义
+Timer.periodic(Duration(seconds: 3), (timer) {
+  debugPrint('timer');
+});
+```
+
+2. 由于轮播图区块需要展示多张图片，所以我们需要使用 `PageView` 类，它可以实现水平滚动的效果。
+
+```dart
+/// 仅为示例，并无实际意义
+PageView.builder(
+  itemBuilder: (context, index) {
+    return Container(
+      color: Colors.red,
+      child: Center(
+        child: Text('index is $index'),
+      ),
+    );
+  },
+  itemCount: 3,
+);
+```
+
+3. 这个组件应该是 Stateful 的，因为它需要维护一个当前的图片索引，然后根据这个索引来切换图片。对于 Stateful 组件，改变状态需要调用 `setState` 方法。
+
+```dart
+setState(() {
+  /// 更新状态
+});
+```
+
+4. 组件应该有一个图片指示器，用几个圆点来表示有多少张图片，然后根据当前的图片索引来切换圆点的颜色。
+
+```dart
+/// 仅为示例，只是画了一个圆点
+SizedBox(width: 8.0, height: 8.0)
+  .decorated(
+    shape: BoxShape.circle,
+    color: Colors.grey[500],
+  )
+```
+
+5. 指示器位于图片的底部居中，因为是重叠的，所以我们需要使用 `Stack` 组件来实现。
+6. 使用 `PageView` 的 `onPageChanged` 回调来监听当前的图片索引，然后更新组件的状态。
+
+```dart
+/// 仅为示例，并无实际意义
+PageView.builder(
+  onPageChanged: (index) {
+    debugPrint('index is $index');
+  },
+  itemBuilder: (context, index) {
+    return Container(
+      color: Colors.red,
+      child: Center(
+        child: Text('index is $index'),
+      ),
+    );
+  },
+  itemCount: 3,
+);
+```
+
+7. 使用 `PageView` 的 `controller` 来切换图片。
+
+```dart
+/// 仅为示例，并无实际意义
+/// initialPage 表示初始的图片索引
+final controller = PageController(initialPage: 0);
+controller.animateToPage(
+  1, /// 要切换到的图片索引
+  duration: Duration(milliseconds: 500), /// 切换的时间间隔
+  curve: Curves.ease); /// 切换的动画曲线
+```
+
+8. 由于图片滑动到最后一张时，我们需要切换到第一张，这种情况可以考虑对图片数组的长度取余来得到当前的图片索引。
+
+```dart
+/// 仅为示例，并无实际意义
+const items = [1, 2, 3];
+final index = 3 % items.length; /// index 是 0
+final index = 4 % items.length; /// index 是 1
+final index = 5 % items.length; /// index 是 2
+```
+
+我们这里给大家一个可以作为起点的代码，大家可以在这个基础上继续完善。
+
+```dart
+import 'dart:async';
+
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+
+import 'image.dart';
+
+/// 轮播图组件
+/// 使用PageView实现
+/// [items] 数据
+/// [errorImage] 加载失败时的占位图
+/// [config] 区块配置
+/// [ratio] 屏幕宽度与设计稿宽度的比例
+/// [onTap] 点击事件
+/// [animationCurve] 动画曲线
+/// [transitionDuration] 动画持续时间, 单位毫秒
+/// [secondsToNextPage] 每隔多少秒，跳转到下一页
+class BannerWidget extends StatefulWidget {
+  final List<ImageData> items;
+  final String? errorImage;
+  final BlockConfig config;
+  final double ratio;
+  final void Function(MyLink?)? onTap;
+  final Curve animationCurve;
+  final int transitionDuration;
+  final int secondsToNextPage;
+
+  const BannerWidget({
+    super.key,
+    required this.items,
+    required this.config,
+    required this.ratio,
+    this.errorImage,
+    this.onTap,
+    this.animationCurve = Curves.ease,
+    this.transitionDuration = 500,
+    this.secondsToNextPage = 5,
+  });
+
+  @override
+  State<BannerWidget> createState() => _BannerWidgetState();
+}
+
+class _BannerWidgetState extends State<BannerWidget> {
+  int _currentPage = 0;
+  late PageController _pageController;
+  Timer? _timer;
+
+  /// 页面创建时，启动计时器
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentPage);
+    _startTimer();
+  }
+
+  /// 页面销毁时，停止计时器
+  @override
+  void dispose() {
+    _stopTimer();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  /// 开始计时器
+  void _startTimer() {
+    // TODO: 作业，启动计时器
+  }
+
+  /// 停止计时器
+  void _stopTimer() {
+    // TODO: 作业，停止计时器
+  }
+
+  /// 跳转到指定页
+  void _nextPage(int page) {
+    // TODO: 作业，使用 _pageController 来切换图片
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final borderWidth = widget.config.borderWidth ?? 0;
+    final borderColor = widget.config.borderColor ?? Colors.transparent;
+    final backgroundColor = widget.config.backgroundColor ?? Colors.transparent;
+    final blockWidth = (widget.config.blockWidth ?? 0) * widget.ratio;
+    final blockHeight = (widget.config.blockHeight ?? 0) * widget.ratio;
+    final horizontalPadding =
+        (widget.config.horizontalPadding ?? 0) * widget.ratio;
+    final verticalPadding = (widget.config.verticalPadding ?? 0) * widget.ratio;
+
+    // TODO: 作业，写出轮播图区块的布局
+  }
+}
+```
+
+如果遇到问题，同学可以参考 `page_block_widgets/lib/banner.dart` 来实现。
+
+### 3.12.1 Flutter 知识点：StatefulWidget
+
+`StatefulWidget` 是 `Flutter` 中最基础的组件之一，它可以维护自己的状态，当状态发生变化时，会重新构建组件。还是以计数器为例，我们来看看如何使用 StatefulWidget 来实现。
+
+```dart
+class CounterWidget extends StatefulWidget {
+  const CounterWidget({super.key});
+  @override
+  State<CounterWidget> createState() => _CounterWidgetState();
+}
+
+class _CounterWidgetState extends State<CounterWidget> {
+  /// 计数器的状态
+  int _count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        /// 显示当前的计数
+        Text('$_count'),
+        ElevatedButton(
+          onPressed: () {
+            /// 更新状态
+            setState(() {
+              _count++;
+            });
+          },
+          child: Text('Increment'),
+        ),
+      ],
+    );
+  }
+}
+```
+
+一个 `StatefulWidget` 至少需要两个类，一个是 `StatefulWidget` ，另一个是 `State` `。StatefulWidget` 用来描述组件的外观， `State` 用来描述组件的状态。
+
+所谓的状态，就是组件的一些属性，比如上面的 `_count`，当这些属性发生变化时，我们需要重新构建组件（重新调用 `build` 方法），这就是为什么我们需要调用 `setState` 来更新状态。
+
+下面的知识点可能对你完成作业有帮助，但如果你已经掌握了，可以跳过。
+
+### 3.12.2 Flutter 知识点：Timer
+
+Timer 是 Flutter 中的一个定时器，它可以在指定的时间后，执行指定的回调函数。
+
+```dart
+/// 创建一个定时器，每隔 1 秒，执行一次回调函数
+final timer = Timer.periodic(Duration(seconds: 1), (timer) {
+  print('Hello World');
+});
+```
+
+当我们不再需要这个定时器时，需要调用 `cancel` 方法来取消定时器。
+
+```dart
+timer.cancel();
+```
+
+### 3.12.3 Flutter 知识点：PageView
+
+`PageView` 是 `Flutter` 中的一个组件，它可以用来实现轮播图的效果。
+
+```dart
+PageView(
+  children: [
+    Text('Page 1'),
+    Text('Page 2'),
+    Text('Page 3'),
+  ],
+);
+```
+
+`children`，用来指定要显示的页面，我们可以在这里放置任意的组件。
+
+```dart
+PageView(
+  children: [
+    Image.network('https://example.com/image1.jpg'),
+    Image.network('https://example.com/image2.jpg'),
+    Image.network('https://example.com/image3.jpg'),
+  ],
+);
+```
+
+如果我们想要在页面切换时，执行一些操作，可以使用 `onPageChanged` 回调函数。
+
+```dart
+PageView(
+  onPageChanged: (page) {
+    print('Page changed: $page');
+  },
+  children: [
+    Image.network('https://example.com/image1.jpg'),
+    Image.network('https://example.com/image2.jpg'),
+    Image.network('https://example.com/image3.jpg'),
+  ],
+);
+```
+
+`PageView` 是可以指定一个 `controller` 的，这个 `controller` 可以用来控制 `PageView` 的行为。
+
+```dart
+final controller = PageController();
+PageView(
+  controller: controller,
+  children: [
+    Image.network('https://example.com/image1.jpg'),
+    Image.network('https://example.com/image2.jpg'),
+    Image.network('https://example.com/image3.jpg'),
+  ],
+);
+```
+
+`PageController` 有一个 `jumpToPage` 方法，可以用来跳转到指定的页面。
+
+```dart
+controller.jumpToPage(2);
+```
+
+但是，如果我们想要在页面切换时，有一个动画的效果，就需要使用 `animateToPage` 方法。
+
+```dart
+controller.animateToPage(2, duration: Duration(seconds: 1), curve: Curves.ease);
+```

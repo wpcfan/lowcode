@@ -90,9 +90,14 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       height: itemWidth - 2 * borderWidth,
       errorImage: errorImage,
       onTap: onTap != null ? (link) => onTap!(product) : null,
-    ).padding(
-      bottom: verticalSpacing,
-    );
+    )
+        .padding(
+          bottom: verticalSpacing,
+        )
+        .constrained(
+          maxWidth: itemWidth - 2 * borderWidth,
+          maxHeight: itemWidth - 2 * borderWidth,
+        );
     // 商品图片、名称和描述形成一列
     final imageNameAndDesc = <Widget>[
       productImage,

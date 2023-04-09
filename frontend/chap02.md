@@ -17,6 +17,7 @@
     - [2.5.3. 页面模块](#253-页面模块)
     - [2.5.4 组件模块](#254-组件模块)
     - [2.5.5 功能模块](#255-功能模块)
+  - [3.1. 调试验证](#31-调试验证)
 
 <!-- /code_chunk_output -->
 
@@ -753,3 +754,57 @@ flutter:
 ```
 
 `networking` 模块依赖了 `dio`、`pretty_dio_logger`、`dio_cache_interceptor` 这三个库。其中 `pretty_dio_logger` 是一个日志打印库，`dio_cache_interceptor` 是一个缓存库。
+
+## 3.1. 调试验证
+
+在 VSCode 中，我们可以在左侧的调试面板中，点击 `运行和调试` 按钮，然后在上面的下拉菜单中选择 `添加配置` ，然后选择 `Dart` ，然后在弹出的对话框中选择 `Flutter` ，然后点击 `创建 launch.json 文件` ，这样就会在项目根目录下生成一个 `launch.json` 文件，这个文件就是 VSCode 的调试配置文件，我们可以在这个文件中配置调试的参数，比如我们可以在 `launch.json` 文件中添加如下的配置：
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "admin",
+      "cwd": "admin",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "admin (profile mode)",
+      "cwd": "admin",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "admin (release mode)",
+      "cwd": "admin",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "app",
+      "cwd": "app",
+      "request": "launch",
+      "type": "dart"
+    },
+    {
+      "name": "app (profile mode)",
+      "cwd": "app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "app (release mode)",
+      "cwd": "app",
+      "request": "launch",
+      "type": "dart",
+      "flutterMode": "release"
+    }
+  ]
+}
+```
+
+这样我们就为 `admin` 和 `app` 两个项目分别配置了调试的参数，然后我们就可以在 VSCode 的调试面板中选择 `admin` 或者 `app` 来进行调试了，比如我们可以在 `app` 的 `main.dart` 中添加一个断点，然后点击调试面板中的 `启动调试` 按钮，这样就可以在调试面板中看到调试的信息了

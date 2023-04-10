@@ -78,11 +78,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     const double buttonSize = 30.0;
     final cartBtn = const Icon(Icons.add_shopping_cart, color: Colors.white)
         .rounded(size: buttonSize, color: Colors.red)
-        .gestures(onTap: () {
-      if (addToCart != null) {
-        addToCart!(product);
-      }
-    });
+        .gestures(onTap: () => addToCart?.call(product));
     // 商品图片
     final productImage = ImageWidget(
       imageUrl: product.images.first,
@@ -90,8 +86,6 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       height: itemWidth - 2 * borderWidth,
       errorImage: errorImage,
       onTap: onTap != null ? (link) => onTap!(product) : null,
-    ).padding(
-      bottom: verticalSpacing,
     );
     // 商品图片、名称和描述形成一列
     final imageNameAndDesc = <Widget>[
@@ -120,13 +114,11 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
     );
     final nameDescAndPrice = [imageNameAndDesc, priceRow].toColumn(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start);
 
-    return nameDescAndPrice.parent(page).gestures(onTap: () {
-      if (onTap != null) {
-        onTap!(product);
-      }
-    });
+    return nameDescAndPrice
+        .parent(page)
+        .gestures(onTap: () => onTap?.call(product));
   }
 }

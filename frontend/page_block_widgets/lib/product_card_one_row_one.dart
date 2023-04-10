@@ -72,11 +72,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
     const double buttonSize = 24.0;
     final cartBtn = const Icon(Icons.add_shopping_cart, color: Colors.white)
         .rounded(size: buttonSize, color: Colors.red)
-        .gestures(onTap: () {
-      if (addToCart != null) {
-        addToCart!(product);
-      }
-    });
+        .gestures(onTap: () => addToCart?.call(product));
 
     final priceRow = [
       productOriginalPrice,
@@ -130,6 +126,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
         )
-        .gestures(onTap: onTap != null ? () => onTap!(product) : null);
+        .gestures(onTap: () => onTap?.call(product));
   }
 }

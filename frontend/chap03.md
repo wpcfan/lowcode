@@ -1851,19 +1851,7 @@ class MyApp extends StatelessWidget {
               const baselineScreenWidth = 375.0;
               /// 3. 计算比例
               final ratio = screenWidth / baselineScreenWidth;
-              /// 4. 定义页面水平边距
-              const pageHorizontalPadding = 20.0;
-              /// 5. 计算区块宽度
-              const blockWidth = baselineScreenWidth - 2 * pageHorizontalPadding;
-              /// 6. 定义区块高度
-              const blockHeight = 100.0;
-              final config = BlockConfig(
-                horizontalPadding: 12.0,
-                verticalPadding: 6.0,
-                horizontalSpacing: 6.0,
-                blockWidth: blockWidth,
-                blockHeight: blockHeight,
-              ).withRatio(ratio);
+              /// 4. 从数据中构建出 PageBlock
               final block = PageBlock.fromJson({
                 'data':  [
                   {
@@ -1895,12 +1883,19 @@ class MyApp extends StatelessWidget {
                     }
                   },
                 ],
-                'config': config.toJson(),
+                'config': {
+                  'horizontalPadding': 12.0,
+                  'verticalPadding': 6.0,
+                  'horizontalSpacing': 6.0,
+                  'blockWidth': 355,
+                  'blockHeight': 100,
+                  'backgroundColor': '#ffffff',
+                },
               });
 
               return ImageRowWidget(
                 items: block.data,
-                config: config,
+                config: block.config.withRatio(ratio),
                 onTap: (link) {
                   if (link?.type == LinkType.url) {
                     /// 处理 URL
@@ -1921,7 +1916,7 @@ class MyApp extends StatelessWidget {
 
 然后就可以启动应用程序了
 
-![图 10](http://ngassets.twigcodes.com/136ed1a0e1d8643e16f2a9ea69bcfff1fd150cc2ff09f24cef6ac5a233f1d282.png)
+![图 11](http://ngassets.twigcodes.com/e1f75e3026cd6ed0858b8b9a993cfba8b73af77a8fcf288eb2ba417bfec9cfd4.png)
 
 ## 3.12 作业 - 轮播图区块
 

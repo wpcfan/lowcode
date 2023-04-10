@@ -1887,7 +1887,7 @@ class MyApp extends StatelessWidget {
                   'horizontalPadding': 12.0,
                   'verticalPadding': 6.0,
                   'horizontalSpacing': 6.0,
-                  'blockWidth': 355,
+                  'blockWidth': 375 - 12 * 2,
                   'blockHeight': 100,
                   'backgroundColor': '#ffffff',
                 },

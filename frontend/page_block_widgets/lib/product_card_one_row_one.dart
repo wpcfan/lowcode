@@ -48,7 +48,7 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
         fontSize: 14,
         color: Colors.black54,
       ),
-      softWrap: true,
+      softWrap: false,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
     ).padding(bottom: verticalSpacing);

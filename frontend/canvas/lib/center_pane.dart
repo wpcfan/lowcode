@@ -94,7 +94,7 @@ class _CenterPaneState extends State<CenterPane> {
     return DragTarget(
       builder: (context, candidateData, rejectedData) {
         final item = blocks[index];
-        final ratio = MediaQuery.of(context).size.width / paneWidth;
+        final ratio = paneWidth / (item.config.blockWidth ?? 375.0);
         return _buildDraggableWidget(
             item, products, index, paneWidth, bloc, ratio);
       },

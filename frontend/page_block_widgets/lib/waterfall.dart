@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:models/models.dart';
-import 'package:page_block_widgets/product_row.dart';
+
+import 'product_row.dart';
 
 /// 瀑布流组件
 /// 用于展示商品列表

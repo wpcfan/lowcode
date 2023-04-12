@@ -1,6 +1,6 @@
 # 第四章：App 商品组件的实现
 
-做了两个图片类型的组件之后，我们应该对于组件的实现有了一定的了解。现在我们来实现一个商品组件，它的功能是展示商品的图片、名称、价格、购买按钮等信息。当然它在布局上更为复杂。
+做了两个图片类型的组件之后，我们应该对于组件的实现有了一定的了解。现在我们来实现一个商品组件，它的功能是展示商品的图片、名称、价格、购买按钮等信息。当然它在布局上更为复杂。我们仍然遵循 **“问题-方案-原型-验证-改进”** 的开发模式
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
@@ -23,7 +23,10 @@
     - [4.3.7.2 商品行区块](#4372-商品行区块)
     - [4.3.7.3 使用假数据测试](#4373-使用假数据测试)
     - [4.3.8 挖掘隐性需求](#438-挖掘隐性需求)
-  - [4.4 一行二商品组件的实现](#44-一行二商品组件的实现)
+  - [4.4 作业：一行二商品组件的实现](#44-作业一行二商品组件的实现)
+    - [4.4.1 整合到商品行区块中](#441-整合到商品行区块中)
+  - [4.5 瀑布流商品组件](#45-瀑布流商品组件)
+  - [如何实现瀑布流的无限加载](#如何实现瀑布流的无限加载)
 
 <!-- /code_chunk_output -->
 
@@ -534,9 +537,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
         fontSize: 16,
         color: Colors.black87,
       ),
-      softWrap: true,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
     ).padding(bottom: verticalSpacing);
     // 商品描述
     final productDescription = Text(
@@ -545,9 +545,6 @@ class ProductCardOneRowOneWidget extends StatelessWidget {
         fontSize: 14,
         color: Colors.black54,
       ),
-      softWrap: true,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
     ).padding(bottom: verticalSpacing);
 
     // 商品原价：划线价
@@ -741,10 +738,7 @@ class PageBlock<T extends Jsonable> {
 /// 可以通过 [addToCart] 参数来指定点击添加到购物车按钮时的回调
 /// 可以通过 [onTap] 参数来指定点击商品卡片时的回调
 class ProductRowWidget extends StatelessWidget {
-  /// assert 关键字用于断言，当条件不满足时，抛出异常
-  /// assert(items.length <= 2 && items.length > 0);
-  /// 1. items.length <= 2 表示 items 的长度必须小于等于 2
-  /// 2. items.length > 0 表示 items 的长度必须大于 0
+
   const ProductRowWidget({
     super.key,
     required this.items,
@@ -752,7 +746,12 @@ class ProductRowWidget extends StatelessWidget {
     this.errorImage,
     this.addToCart,
     this.onTap,
-  }) : assert(items.length <= 2 && items.length > 0);
+  }) :
+  /// 这里我们引入 assert 关键字用于断言，当条件不满足时，抛出异常
+  /// assert(items.length <= 2 && items.length > 0);
+  /// 1. items.length <= 2 表示 items 的长度必须小于等于 2
+  /// 2. items.length > 0 表示 items 的长度必须大于 0
+  assert(items.length <= 2 && items.length > 0);
   final List<Product> items;
   final String? errorImage;
   final BlockConfig config;
@@ -880,6 +879,467 @@ class MyApp extends StatelessWidget {
 
 ### 4.3.8 挖掘隐性需求
 
-上面的
+上面的代码中，有一些需求不是那么明显，但是，我们可以通过一些技巧来挖掘出来，比如：
 
-## 4.4 一行二商品组件的实现
+1. 文字类的内容，一般都要考虑过长的情况。比如商品名称、商品描述等，这些内容一般都要考虑过长的情况。那么解决办法有几种，一种是省略或截断，另一种是折行。具体采用什么方案需要和 UI 设计师沟通，然后再做决定。我们这里对于商品名称采用折行，而且最大折行数为 2 行，对于商品描述采用省略，最大省略长度为 1 行，具体的实现如下：
+
+```dart
+// 商品名称
+final productName = Text(
+  product.name ?? '',
+  style: const TextStyle(
+    fontWeight: FontWeight.bold,
+    fontSize: 16,
+    color: Colors.black87,
+  ),
+  softWrap: true,
+  maxLines: 2,
+  overflow: TextOverflow.ellipsis,
+).padding(bottom: verticalSpacing);
+// 商品描述
+final productDescription = Text(
+  product.description ?? '',
+  style: const TextStyle(
+    fontSize: 14,
+    color: Colors.black54,
+  ),
+  softWrap: false,
+  maxLines: 1,
+  overflow: TextOverflow.ellipsis,
+).padding(bottom: verticalSpacing);
+```
+
+2. 价格文本由于位于图片和购物车图标之间，而且价格一般不允许截断、省略或折行，所以这里一定要确定的是价格的上限是多少，这个地方需要和 UI 设计师以及后台开发人员沟通。这个需求主要是后端控制，我们后面会讲。
+
+## 4.4 作业：一行二商品组件的实现
+
+有了之前的基础，大家可以来实现一行二商品组件了，一个起始框架如下：
+
+```dart
+class ProductCardOneRowTwoWidget extends StatelessWidget {
+  const ProductCardOneRowTwoWidget({
+    super.key,
+    required this.product,
+    required this.itemWidth,
+    this.itemHeight,
+    required this.verticalSpacing,
+    this.errorImage,
+    this.backgroundColor = Colors.white,
+    this.borderColor = Colors.grey,
+    this.borderWidth = 1.0,
+    this.addToCart,
+    this.onTap,
+  });
+  final Product product;
+  final double itemWidth;
+  final double? itemHeight;
+  final double verticalSpacing;
+  final String? errorImage;
+  final Color backgroundColor;
+  final Color borderColor;
+  final double borderWidth;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    page({required Widget child}) => child
+        .padding(all: 6)
+        .decorated(
+          color: backgroundColor,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+            strokeAlign: BorderSide.strokeAlignOutside,
+          ),
+        )
+        .constrained(width: itemWidth);
+    /// TODO: 实现一行二商品组件
+  }
+}
+```
+
+具体，如果发现有什么问题，可以参考 `page_block_widgets/lib/product_card_one_row_two.dart` 文件。
+
+### 4.4.1 整合到商品行区块中
+
+```dart
+/// 商品行组件
+/// 用于展示一或两个商品
+/// 可以通过 [BlockConfig] 参数来指定区块的宽度、高度、内边距、外边距等
+/// 可以通过 [Product] 参数来指定商品列表
+/// 可以通过 [addToCart] 参数来指定点击添加到购物车按钮时的回调
+/// 可以通过 [onTap] 参数来指定点击商品卡片时的回调
+class ProductRowWidget extends StatelessWidget {
+  /// assert 关键字用于断言，当条件不满足时，抛出异常
+  /// assert(items.length <= 2 && items.length > 0);
+  /// 1. items.length <= 2 表示 items 的长度必须小于等于 2
+  /// 2. items.length > 0 表示 items 的长度必须大于 0
+  const ProductRowWidget({
+    super.key,
+    required this.items,
+    required this.config,
+    this.errorImage,
+    this.addToCart,
+    this.onTap,
+  }) : assert(items.length <= 2 && items.length > 0);
+  final List<Product> items;
+  final String? errorImage;
+  final BlockConfig config;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = config.backgroundColor != null
+        ? config.backgroundColor!
+        : Colors.transparent;
+    final borderColor =
+        config.borderColor != null ? config.borderColor! : Colors.transparent;
+    final borderWidth = config.borderWidth ?? 0.0;
+    final width = config.blockWidth ?? 0;
+    final height = config.blockHeight ?? 0;
+    final horizontalPadding = config.horizontalPadding ?? 0;
+    final verticalPadding = config.verticalPadding ?? 0;
+    final horizontalSpacing = config.horizontalSpacing ?? 0;
+    final verticalSpacing = config.verticalSpacing ?? 0;
+    final blockWidth = width - 2 * horizontalPadding;
+
+    /// 将 Widget 包裹在 Page 中
+    /// 注意到 page 其实是一个方法，接受一个 Widget 作为参数，返回一个 Widget
+    /// 通过这种方式，我们可以在 page 中对 Widget 进行一些处理，比如添加边框、背景色等
+    /// 这样我们可以专注于 Widget 的内容，而不用关心 Widget 的样式
+    page({required Widget child}) => child
+        .padding(horizontal: horizontalPadding, vertical: verticalPadding)
+        .decorated(
+          color: backgroundColor,
+          border: Border.all(
+            color: borderColor,
+            width: borderWidth,
+          ),
+        )
+        .constrained(width: width, maxHeight: height);
+
+    switch (items.length) {
+      /// 如果商品数量为 1，那么展示一行一列的商品卡片
+      case 1:
+        final product = items.first;
+        return ProductCardOneRowOneWidget(
+          product: product,
+          width: blockWidth,
+          height: height - 2 * verticalPadding,
+          horizontalSpacing: horizontalSpacing,
+          verticalSpacing: verticalSpacing,
+          errorImage: errorImage,
+          onTap: onTap,
+          addToCart: addToCart,
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          borderWidth: borderWidth,
+        ).parent(page);
+      default:
+
+        /// 如果商品数量为 2，那么展示一行两列的商品卡片
+        return items
+            .map((e) {
+              final isLast = items.last == e;
+              return [
+                ProductCardOneRowTwoWidget(
+                  product: e,
+                  itemWidth: (blockWidth - horizontalSpacing) / 2,
+                  itemHeight: height - 2 * verticalPadding,
+                  verticalSpacing: verticalSpacing,
+                  errorImage: errorImage,
+                  onTap: onTap,
+                  addToCart: addToCart,
+                  backgroundColor: Colors.white,
+                  borderColor: Colors.grey,
+                  borderWidth: 1,
+                ).expanded(),
+                if (!isLast) SizedBox(width: horizontalSpacing),
+              ];
+            })
+            .expand((element) => element)
+            .toList()
+            .toRow(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+            )
+            .parent(page);
+    }
+  }
+}
+```
+
+商品行的效果如下：
+
+![图 7](http://ngassets.twigcodes.com/721894a8923a72e6f5f57058018193e2a77e7add6ee10a1da122484dd6293dc1.png)
+
+## 4.5 瀑布流商品组件
+
+瀑布流商品组件，是一种比较常见的商品展示方式，它的特点是商品卡片的宽度是固定的，但是高度是不固定的，为什么高度会不固定呢？因为商品卡片中的内容是不固定的，比如商品名称可以一行，也可以两行，另外，有的时候伴随着一些优惠，可能会有划线价的出现，所以高度是不固定的。这里我们先来看一下瀑布流商品组件的效果：
+
+![图 6](http://ngassets.twigcodes.com/3540fdeb768bd3591be166746935d31a47c6ab3dfd35e34f490b7028e7f3ac8b.png)
+
+可以看到，其实瀑布流的商品卡片本身整体布局和一行二商品卡片是一样的，只是商品卡片的高度是不固定的，所以我们需要看一下是否可以复用一行二商品卡片的代码。
+
+在 `page_block_widgets/lib/product_card_one_row_two.dart` 中，我们可以看到外层并没有限制高度。一行二的高度其实是定义在 `page_block_widgets/lib/product_row.dart` 中定义的。这就说明我们可以直接复用一行二商品卡片的代码。
+
+```dart
+page({required Widget child}) => child
+  .padding(all: 6)
+  .decorated(
+    color: backgroundColor,
+    border: Border.all(
+      color: borderColor,
+      width: borderWidth,
+      strokeAlign: BorderSide.strokeAlignOutside,
+    ),
+  )
+  .constrained(width: itemWidth);
+```
+
+那么我们可以在 `page_block_widgets/lib` 中创建一个文件 `waterfall.dart` 。
+
+```dart
+/// 瀑布流组件
+/// 用于展示商品列表
+/// 会根据商品的宽高比来自动计算高度
+/// 以适应不同的屏幕
+/// 可以通过 [BlockConfig] 参数来指定区块的宽度、高度、内边距、外边距等
+/// 可以通过 [Product] 参数来指定商品列表
+/// 可以通过 [addToCart] 参数来指定点击添加到购物车按钮时的回调
+/// 可以通过 [onTap] 参数来指定点击商品卡片时的回调
+class WaterfallWidget extends StatelessWidget {
+  const WaterfallWidget({
+    super.key,
+    required this.config,
+    required this.products,
+    this.errorImage,
+    this.addToCart,
+    this.onTap,
+    this.isPreview = false,
+  });
+  final BlockConfig config;
+  final List<Product> products;
+  final String? errorImage;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTap;
+  final bool isPreview;
+
+  @override
+  Widget build(BuildContext context) {
+    final backgroundColor = config.backgroundColor != null
+        ? config.backgroundColor!
+        : Colors.transparent;
+    final borderColor =
+        config.borderColor != null ? config.borderColor! : Colors.transparent;
+    final borderWidth = config.borderWidth ?? 0.0;
+    final horizontalPadding = config.horizontalPadding ?? 0;
+    final verticalPadding = config.verticalPadding ?? 0;
+    final horizontalSpacing = config.horizontalSpacing ?? 0;
+    final verticalSpacing = config.verticalSpacing ?? 0;
+    final blockWidth = config.blockWidth ?? 0;
+    final itemWidth = (blockWidth) / 2;
+    /// 在这里构建瀑布流布局
+  }
+}
+```
+
+首先，为了更聚焦课程本身的内容，我们就不自己从头实现瀑布流布局了，我们直接使用第三方库 [flutter_staggered_grid_view](https://pub.dev/packages/flutter_staggered_grid_view) 来实现瀑布流布局。
+
+在 `page_block_widgets/pubspec.yaml` 中添加依赖：
+
+```yaml
+dependencies:
+  flutter_staggered_grid_view: ^0.6.2
+```
+
+然后在 `page_block_widgets/lib/waterfall.dart` 中引入 `flutter_staggered_grid_view` 。
+
+```dart
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+```
+
+然后我们就可以直接使用 `SliverMasonryGrid.count` 来实现瀑布流布局了。
+
+```dart
+return SliverPadding(
+  padding: EdgeInsets.symmetric(
+    horizontal: horizontalPadding,
+    vertical: verticalPadding,
+  ),
+  sliver: SliverMasonryGrid.count(
+    /// 一行显示两个商品
+    crossAxisCount: 2,
+    /// 水平间距
+    mainAxisSpacing: horizontalSpacing,
+    /// 垂直间距
+    crossAxisSpacing: verticalSpacing,
+    /// 商品个数
+    childCount: products.length,
+    /// 构建卡片
+    itemBuilder: (context, index) {
+      final product = products[index];
+      return ProductCardOneRowTwoWidget(
+        product: product,
+        itemWidth: itemWidth,
+        verticalSpacing: verticalSpacing,
+        errorImage: errorImage,
+        addToCart: addToCart,
+        onTap: onTap,
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        borderWidth: borderWidth,
+      );
+    },
+  ),
+);
+```
+
+上面代码中，大家可能很奇怪，为什么我们使用了 `SliverPadding` 来设置内边距，而不是 `Padding` ? 这是因为 `SliverPadding` 是 `Sliver` 的子类，而 `Sliver` 是 `SliverMasonryGrid.count` 的父类，所以我们需要使用 `SliverPadding` 来设置内边距。
+
+那么 `Sliver` 是什么呢？`Sliver` 是 `Flutter` 中的一个概念，它的优点是可以实现懒加载，也就是说，当我们滚动到某个位置的时候，才会去加载对应的内容，而不是一次性加载所有的内容。这样可以提高性能。有很多组件支持 `Sliver`，比如 `SliverAppBar`、`SliverList`、`SliverGrid` 等等。
+
+由于瀑布流是可以无尽加载，所以我们要使用性能好一些的 `SliverMasonryGrid.count` 来实现瀑布流布局。
+
+## 如何实现瀑布流的无限加载
+
+其实这个问题不应该仅仅针对瀑布流，因为瀑布流之所以会有上拉加载更多的行为，不是它自己的原因，而是因为所有的区块是放在一个列表中的，所以当我们滚动到列表的底部的时候，就会触发上拉加载更多的行为。
+
+但是如果希望列表支持 `Sliver`，那么就不能使用 `ListView` 了，而是要使用 `CustomScrollView`。
+
+`CustomScrollView` 是 `Flutter` 中的一个组件，它可以让我们自定义滚动效果，但我们不打算在这个上面花太多时间，因为这不是课程的主要目标，有兴趣的同学可以参考 [CustomScrollView](https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html) 的文档。
+
+简单来说，我们要自定义一个自己的 `CustomScrollView`，它支持下拉刷新、上拉加载更多、自定义 `SliverAppBar`。
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+/// 自定义的 CustomScrollView
+/// 1. 支持下拉刷新
+/// 2. 支持上拉加载更多
+/// 3. 支持自定义 SliverAppBar
+class MyCustomScrollView extends StatelessWidget {
+  const MyCustomScrollView({
+    super.key,
+    required this.sliver,
+    required this.onRefresh,
+    this.onLoadMore,
+    this.sliverAppBar,
+    this.decoration,
+    this.loadMoreWidget = const CupertinoActivityIndicator(),
+
+    /// 要注意，如果我们的 CustomScrollView 的外层不是 Scaffold，那么
+    /// 在这个空间如果要使用文本，会发现文本下方有两条黄线，这是因为 Text 默认
+    /// 是需要外层有 DefaultTextStyle 的，而 Scaffold 会自动包裹一个
+    /// 但如果没有 Scaffold，那么就需要我们自己手动包裹一个
+    this.pullToRefreshWidget = const DefaultTextStyle(
+      style: TextStyle(color: Colors.white),
+      child: Text('下拉刷新'),
+    ),
+    this.releaseToRefreshWidget = const DefaultTextStyle(
+      style: TextStyle(color: Colors.white),
+      child: Text('松开刷新'),
+    ),
+    this.refreshingWidget = const CupertinoActivityIndicator(
+      color: Colors.white,
+    ),
+    this.refreshCompleteWidget = const DefaultTextStyle(
+      style: TextStyle(color: Colors.white),
+      child: Text('刷新完成'),
+    ),
+  });
+  final Widget sliver;
+  final Future<void> Function() onRefresh;
+  final Future<void> Function()? onLoadMore;
+  final Widget? sliverAppBar;
+  final BoxDecoration? decoration;
+  final Widget loadMoreWidget;
+  final Widget refreshingWidget;
+  final Widget pullToRefreshWidget;
+  final Widget releaseToRefreshWidget;
+  final Widget refreshCompleteWidget;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+
+      /// 不触发 RefreshIndicator 的下拉刷新
+      notificationPredicate: (notification) => false,
+      child: NotificationListener(
+        onNotification: (scrollNotification) {
+          if (scrollNotification is ScrollEndNotification) {
+            /// 如果滑动到了最底部，那么就触发加载更多
+            if (scrollNotification.metrics.pixels ==
+                scrollNotification.metrics.maxScrollExtent) {
+              onLoadMore?.call();
+            }
+          }
+          return true;
+        },
+        child: CustomScrollView(
+          /// 这个属性是用来控制下拉刷新的，如果不设置，是无法下拉出一段距离的
+          physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics()),
+          slivers: [
+            /// AppBar 一般位于最顶部，所以这里放在最前面
+            sliverAppBar,
+
+            /// 自定义在刷新的不同状态下的显示内容
+            /// 这里面我们使用了 CupertinoSliverRefreshControl，这个控件是 iOS 风格的
+            CupertinoSliverRefreshControl(
+              refreshTriggerPullDistance: 100,
+              refreshIndicatorExtent: 60,
+              onRefresh: onRefresh,
+              builder: (context, refreshState, pulledExtent,
+                      refreshTriggerPullDistance, refreshIndicatorExtent) =>
+                  Container(
+                decoration: decoration,
+                height: pulledExtent,
+                alignment: Alignment.center,
+                child: _buildRefreshIndicator(
+                  refreshState,
+                ),
+              ),
+            ),
+
+            /// 把其他传入的 slivers 放在这里
+            sliver,
+
+            /// 在页面底部显示加载更多的 Widget
+            SliverToBoxAdapter(
+              child: loadMoreWidget,
+            ),
+          ]
+              // 用于过滤掉空的 Widget
+              .whereType<Widget>()
+              .toList(),
+        ),
+      ),
+    );
+  }
+
+  _buildRefreshIndicator(
+    RefreshIndicatorMode refreshState,
+  ) {
+    switch (refreshState) {
+      case RefreshIndicatorMode.drag:
+        return pullToRefreshWidget;
+      case RefreshIndicatorMode.armed:
+        return releaseToRefreshWidget;
+      case RefreshIndicatorMode.refresh:
+        return refreshingWidget;
+      case RefreshIndicatorMode.done:
+        return refreshCompleteWidget;
+      default:
+        return Container();
+    }
+  }
+}
+```
+
+![下拉刷新效果](https://i.imgur.com/mq0jWaU.gif)

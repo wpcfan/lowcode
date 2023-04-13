@@ -25,8 +25,13 @@
     - [4.3.8 挖掘隐性需求](#438-挖掘隐性需求)
   - [4.4 作业：一行二商品组件的实现](#44-作业一行二商品组件的实现)
     - [4.4.1 整合到商品行区块中](#441-整合到商品行区块中)
+    - [4.4.2 一行二商品区块验证](#442-一行二商品区块验证)
   - [4.5 瀑布流商品组件](#45-瀑布流商品组件)
   - [如何实现瀑布流的无限加载](#如何实现瀑布流的无限加载)
+    - [一个基础的 `CustomScrollView`](#一个基础的-customscrollview)
+    - [实现上拉加载更多](#实现上拉加载更多)
+    - [实现下拉刷新](#实现下拉刷新)
+    - [使用假数据进行 `CustomScrollView` 的验证](#使用假数据进行-customscrollview-的验证)
 
 <!-- /code_chunk_output -->
 
@@ -1072,6 +1077,70 @@ class ProductRowWidget extends StatelessWidget {
 }
 ```
 
+### 4.4.2 一行二商品区块验证
+
+```dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: darkBlue,
+      ),
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (context) {
+              /// 1. 获取屏幕宽度
+              final screenWidth = MediaQuery.of(context).size.width;
+              /// 2. 定义基准屏幕宽度
+              const baselineScreenWidth = 375.0;
+              /// 3. 计算比例
+              final ratio = screenWidth / baselineScreenWidth;
+
+              final block = PageBlock<Product>.fromJson({
+                'data':  [
+                  {
+                    'id': 1,
+                    'sku': 'sku_001',
+                    'name': 'product 001',
+                    'description': 'some description 001',
+                    'price': '¥230.21',
+                    'images': ['https://picsum.photos/600/300']
+                  },
+                  {
+                    'id': 2,
+                    'sku': 'sku_002',
+                    'name': 'product 002',
+                    'description': 'some description 002',
+                    'price': '¥200.32',
+                    'images': ['https://picsum.photos/600/300']
+                  },
+                ],
+                'config': {
+                  'horizontalPadding': 12.0,
+                  'verticalPadding': 6.0,
+                  'horizontalSpacing': 6.0,
+                  'blockWidth': 375 - 12 * 2,
+                  'blockHeight': 240,
+                  'backgroundColor': '#ffffff',
+                },
+              }, Product.fromJson);
+
+              return ProductRowWidget(
+                items: block.data,
+                config: block.config.withRatio(ratio),
+              );
+            }
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
 商品行的效果如下：
 
 ![图 7](http://ngassets.twigcodes.com/721894a8923a72e6f5f57058018193e2a77e7add6ee10a1da122484dd6293dc1.png)
@@ -1210,9 +1279,121 @@ return SliverPadding(
 
 但是如果希望列表支持 `Sliver`，那么就不能使用 `ListView` 了，而是要使用 `CustomScrollView`。
 
-`CustomScrollView` 是 `Flutter` 中的一个组件，它可以让我们自定义滚动效果，但我们不打算在这个上面花太多时间，因为这不是课程的主要目标，有兴趣的同学可以参考 [CustomScrollView](https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html) 的文档。
+`CustomScrollView` 是 `Flutter` 中的一个组件，它可以让我们自定义滚动效果，有兴趣的同学可以参考 [CustomScrollView](https://api.flutter.dev/flutter/widgets/CustomScrollView-class.html) 的文档。
 
 简单来说，我们要自定义一个自己的 `CustomScrollView`，它支持下拉刷新、上拉加载更多、自定义 `SliverAppBar`。
+
+### 一个基础的 `CustomScrollView`
+
+一个基本的 `CustomScrollView` 的代码非常简单，如下所示：
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+class MyCustomScrollView extends StatelessWidget {
+  const MyCustomScrollView({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return
+    CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          title: Text('CustomScrollView'),
+          floating: true,
+          snap: true,
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              return Container(
+                height: 100,
+                color: Colors.primaries[index % Colors.primaries.length],
+              );
+            },
+            childCount: 20,
+          ),
+        ),
+      ],
+    );
+  }
+}
+```
+
+`CustomScrollView` 的 `slivers` 属性，它是一个 `List<Widget>` 类型的属性，我们可以在这里添加任意的 `Sliver` 组件，比如 `SliverAppBar`、`SliverList`、`SliverGrid` 等等。
+
+效果如下：
+
+![图 8](http://ngassets.twigcodes.com/9c85904a73c8d00c121fae43d2254f7562d5ca3932fa51bc6264a336c55a1f66.png)
+
+### 实现上拉加载更多
+
+上拉加载更多其实就是要监听 `CustomScrollView` 的滚动事件，当滚动到底部的时候，就去加载更多的数据。
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+class MyCustomScrollView extends StatelessWidget {
+  const MyCustomScrollView({
+    super.key,
+    required this.sliver,
+    this.onLoadMore,
+    this.loadMoreWidget = const CupertinoActivityIndicator(),
+  });
+
+final Widget sliver;
+final Future<void> Function()? onLoadMore;
+final Widget loadMoreWidget;
+
+@override
+Widget build(BuildContext context) {
+  /// 监听滚动事件，当滚动到底部的时候，就去加载更多的数据
+  return
+  NotificationListener<ScrollNotification>(
+    onNotification: (notification) {
+      /// 当滚动停止
+      if (notification is ScrollEndNotification) {
+        final metrics = notification.metrics;
+        /// 检查是否滚动到底部
+        if (metrics.pixels == metrics.maxScrollExtent) {
+          /// 如果有加载更多的回调，就去加载更多
+          if (onLoadMore != null) {
+            onLoadMore!();
+          }
+        }
+      }
+      return false;
+    },
+    child: CustomScrollView(
+      /// slivers 是一个列表，里面可以放很多个 Sliver 组件
+      slivers: [
+        sliver,
+        if (onLoadMore != null)
+        /// SliverToBoxAdapter 可以把一个 Widget 转换成 Sliver
+          SliverToBoxAdapter(
+            child: Container(
+              height: 50,
+              child: Center(
+                child: loadMoreWidget,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+```
+
+要监听 `CustomScrollView` 的滚动事件，我们需要使用 `NotificationListener` 组件，它的 `onNotification` 属性，它是一个 `NotificationListenerCallback` 类型的属性，它的参数是 `ScrollNotification` 类型的，我们可以通过 `notification.metrics` 属性来获取滚动的信息，比如 `pixels`、`maxScrollExtent` 等等。
+
+### 实现下拉刷新
+
+由于我们想要的下拉刷新效果不是一个标准的 `Material` 风格，所以我们使用了 `CupertinoSliverRefreshControl` 来实现，它的 `builder` 属性，它是一个 `CupertinoSliverRefreshControlBuilder` 类型的属性，它的参数是 `BuildContext`、`RefreshIndicatorMode`、`double`、`double`、`double`，分别代表 `BuildContext`、刷新的状态、下拉的距离、触发刷新的距离、刷新的高度。
+
+但是外层又需要套一个 `RefreshIndicator`，并且设置 `notificationPredicate` 属性为 `false` ，隐藏 `Material` 风格的刷新。这种做法没有什么道理，如果要实现这个效果，就只能这么做。
 
 ```dart
 import 'package:flutter/cupertino.dart';
@@ -1342,4 +1523,14 @@ class MyCustomScrollView extends StatelessWidget {
 }
 ```
 
+这个组件中为了更好的定制，我们还给出了一些属性，比如 `pullToRefreshWidget`、`releaseToRefreshWidget`、`refreshingWidget`、`refreshCompleteWidget`，分别代表下拉刷新的状态下的显示内容，这样我们就可以自定义下拉刷新的效果了。
+
+整体的效果见下图：
+
 ![下拉刷新效果](https://i.imgur.com/mq0jWaU.gif)
+
+### 使用假数据进行 `CustomScrollView` 的验证
+
+```dart
+
+```

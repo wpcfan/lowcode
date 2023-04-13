@@ -27,6 +27,8 @@
     - [4.4.1 整合到商品行区块中](#441-整合到商品行区块中)
   - [4.5 瀑布流商品组件](#45-瀑布流商品组件)
   - [如何实现瀑布流的无限加载](#如何实现瀑布流的无限加载)
+    - [整体布局的领域模型](#整体布局的领域模型)
+    - [测试整体布局](#测试整体布局)
 
 <!-- /code_chunk_output -->
 
@@ -89,11 +91,12 @@ class Product {
   final String? name;
   final String? description;
   final String? price;
+  final String? originalPrice;
   final String? imageUrl;
 }
 ```
 
-商品区块的领域模型非常简单，只有四个属性，分别是商品名称、商品描述、商品价格和商品图片的 URL。这里我们把商品价格定义为字符串，因为商品价格是一个带有货币符号小数点的数字，所以我们把它定义为字符串类型。
+商品区块的领域模型非常简单，只有四个属性，分别是商品名称、商品描述、商品价格、商品原价和商品图片的 URL。这里我们把商品价格定义为字符串，因为商品价格是一个带有货币符号小数点的数字，所以我们把它定义为字符串类型。
 
 我们目前只是根据可见的元素构建模型，但是如果更深入的思考一下，我们要问自己几个问题：
 
@@ -110,6 +113,7 @@ class Product {
   final String? name;
   final String? description;
   final String? price;
+  final String? originalPrice;
   final String? imageUrl;
 }
 ```
@@ -123,6 +127,7 @@ class Product {
   final String? name;
   final String? description;
   final String? price;
+  final String? originalPrice;
   final String? imageUrl;
 }
 ```
@@ -136,6 +141,7 @@ class Product {
   final String? name;
   final String? description;
   final String? price;
+  final String? originalPrice;
   final List<String>? images;
 }
 ```
@@ -150,6 +156,7 @@ class Product {
     this.name,
     this.description,
     this.price,
+    this.originalPrice,
     this.images = const [],
   });
 
@@ -158,16 +165,8 @@ class Product {
   final String? name;
   final String? description;
   final String? price;
+  final String? originalPrice;
   final List<String> images;
-
-  @override
-  List<Object?> get props => [
-        id,
-        name,
-        description,
-        price,
-        images,
-      ];
 
   Product copyWith({
     int? id,
@@ -175,6 +174,7 @@ class Product {
     String? name,
     String? description,
     String? price,
+    String? originalPrice,
     List<String>? images,
   }) {
     return Product(
@@ -183,13 +183,14 @@ class Product {
       name: name ?? this.name,
       description: description ?? this.description,
       price: price ?? this.price,
+      originalPrice: originalPrice ?? this.originalPrice,
       images: images ?? this.images,
     );
   }
 
   @override
   String toString() {
-    return 'Product(id: $id, sku: $sku, name: $name, description: $description, price: $price, images: $images)';
+    return 'Product(id: $id, sku: $sku, name: $name, description: $description, price: $price, originalPrice: $originalPrice, images: $images)';
   }
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
@@ -198,6 +199,7 @@ class Product {
         name: json['name'] as String?,
         description: json['description'] as String?,
         price: json['price'] as String?,
+        originalPrice: json['originalPrice'] as String?,
         images: (json['images'] as List<dynamic>?)
                 ?.map((e) => e as String)
                 .toList() ??
@@ -210,6 +212,7 @@ class Product {
         'name': name,
         'description': description,
         'price': price,
+        'originalPrice': originalPrice,
         'images': images,
       };
 }
@@ -376,11 +379,37 @@ extension StringExtension on String {
 }
 ```
 
+另外对于商品的原价，一般都会有一个删除线，我们也可以在 `common` 工程中的 `string_extension.dart` 文件中添加一个扩展方法:
+
+```dart
+/// 划线价格
+  Text lineThru({
+    double fontSize = 12.0,
+    FontWeight fontWeight = FontWeight.w600,
+    Color fontColor = Colors.grey,
+  }) {
+    return Text(this,
+        style: TextStyle(
+          fontWeight: fontWeight,
+          fontSize: fontSize,
+          color: fontColor,
+          decoration: TextDecoration.lineThrough,
+        ));
+  }
+```
+
 ### 4.3.4 商品价格和购物车按钮
 
 有了处理价格富文本的扩展方法，我们就可以在商品卡片中使用了:
 
 ```dart
+// 商品原价：划线价
+    final productOriginalPrice = product.originalPrice != null
+        ? product.originalPrice!
+            .lineThru()
+            .padding(bottom: verticalSpacing, right: horizontalSpacing)
+            .alignment(Alignment.centerRight)
+        : null;
 // 商品价格
 final productPrice = product.price != null
   ? product.price!
@@ -396,6 +425,7 @@ final cartBtn = const Icon(Icons.add_shopping_cart, color: Colors.white)
 
 // 将价格和购物车按钮放在一行
 final priceRow = [
+  productOriginalPrice,
   productPrice,
   cartBtn
 ]
@@ -1343,3 +1373,98 @@ class MyCustomScrollView extends StatelessWidget {
 ```
 
 ![下拉刷新效果](https://i.imgur.com/mq0jWaU.gif)
+
+### 整体布局的领域模型
+
+在可以测试整体布局之前，我们需要先把整体布局的领域模型搞清楚。我们首先来回顾一下和布局有关的需求：
+
+- 需求 1.1: 页面布局是由一个个区块组成的
+- 需求 2：首页的布局是有生效时间段的，比如 2020-01-01 00:00:00 到 2020-01-02 00:00:00
+- 需求 3：首页的布局可以有多个，因为不同的时间段，首页的布局可能是不一样的
+- 需求 3.1：布局保存时，不会立即生效，而是需要运营人员手动发布布局，才会生效
+- 需求 3.2：布局保存时，不保存生效时间段，而是保存布局的状态，比如草稿、已发布、已下线
+- 需求 4：首页的布局可以有几个状态，比如草稿、已发布、已下线
+- 需求 4.1：草稿状态的布局和已下线状态的布局，只有运营人员可以看到，App 是看不到的
+- 需求 4.2：已发布状态的布局，运营人员和 App 都可以看到
+- 需求 4.3：运营人员可以发布布局，在发布时，需要选择布局的生效时间段，后端会校验时间段是否有重叠，如果有重叠，那么会提示运营人员，需要重新选择时间段
+- 需求 4.4：运营人员可以下线布局，下线布局后，App 就看不到这个布局了
+- 需求 5：相同或者重叠的时间段，只能有一个布局是已发布的，因为 App 只能展示一个布局
+- 需求 8.1：布局名称含有输入字符
+- 需求 8.2：选择布局状态：草稿、已发布、已下线
+- 需求 8.3：选择布局生效起始时间段，比如查询所有生效起始时间在从 2020-01-01 00:00:00 到 2020-01-02 00:00:00 之间的布局
+- 需求 8.4：选择布局生效结束时间段，比如查询所有生效结束时间在从 2020-01-01 00:00:00 到 2020-01-02 00:00:00 之间的布局
+- 需求 8.5：选择平台 App / Web ，默认是 App，其中 web 做为扩展需求
+- 需求 8.6：选择布局的目标对象，比如 Home / Category / About 等等，这个是扩展需求
+
+一个布局显然应该是一组区块 `PageBlock` 构成的。
+
+```dart
+/// 平台类型
+/// - app: App 包括 iOS 和 Android
+/// - web: Web 包括移动网页
+enum Platform {
+  app('App'),
+  web('Web');
+
+  final String value;
+
+  const Platform(this.value);
+}
+/// 页面类型
+/// - home: 首页
+/// - category: 分类页
+/// - about: 关于页
+enum PageType {
+  home('home'),
+  category('category'),
+  about('about');
+
+  final String value;
+
+  const PageType(this.value);
+}
+/// 页面状态
+/// - draft: 草稿
+/// - published: 已发布
+/// - archived: 已归档，过期后会自动归档
+enum PageStatus {
+  draft('Draft'),
+  published('Published'),
+  archived('Archived');
+
+  final String value;
+
+  const PageStatus(this.value);
+}
+class PageLayout extends Equatable {
+  final int? id;
+  final String title;
+  final Platform platform;
+  final PageType pageType;
+  final PageConfig config;
+  final PageStatus status;
+  final DateTime? startTime;
+  final DateTime? endTime;
+  final List<PageBlock> blocks;
+
+  const PageLayout({
+    this.id,
+    required this.title,
+    required this.platform,
+    required this.pageType,
+    required this.config,
+    required this.status,
+    this.startTime,
+    this.endTime,
+    this.blocks = const [],
+  });
+}
+```
+
+### 测试整体布局
+
+我们把之前的布局都放到 `MyCustomScrollView` 中，然后在 `MyHomePage` 中使用 `MyCustomScrollView`。
+
+```dart
+
+```

@@ -1730,7 +1730,7 @@ class ImageData {
 
 ```dart
 class MyLink {
-  final String type;
+  final LinkType type;
   final String value;
 
   const MyLink({
@@ -1804,12 +1804,40 @@ class BlockConfig {
       'verticalSpacing': verticalSpacing,
       'blockWidth': blockWidth,
       'blockHeight': blockHeight,
-      'backgroundColor': backgroundColor?.toHex(),
-      'borderColor': borderColor?.toHex(),
+      'backgroundColor': backgroundColor != null
+          ? '#${backgroundColor!.value.toRadixString(16)}'
+          : null,
+      'borderColor': borderColor != null
+          ? '#${borderColor!.value.toRadixString(16)}'
+          : null,
       'borderWidth': borderWidth,
     };
   }
-  /// 根据比例缩放
+
+  BlockConfig copyWith({
+    double? horizontalPadding,
+    double? verticalPadding,
+    double? horizontalSpacing,
+    double? verticalSpacing,
+    double? blockWidth,
+    double? blockHeight,
+    Color? backgroundColor,
+    Color? borderColor,
+    double? borderWidth,
+  }) {
+    return BlockConfig(
+      horizontalPadding: horizontalPadding ?? this.horizontalPadding,
+      verticalPadding: verticalPadding ?? this.verticalPadding,
+      horizontalSpacing: horizontalSpacing ?? this.horizontalSpacing,
+      verticalSpacing: verticalSpacing ?? this.verticalSpacing,
+      blockWidth: blockWidth ?? this.blockWidth,
+      blockHeight: blockHeight ?? this.blockHeight,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      borderColor: borderColor ?? this.borderColor,
+      borderWidth: borderWidth ?? this.borderWidth,
+    );
+  }
+
   BlockConfig withRatio(double ratio) {
     return BlockConfig(
       horizontalPadding: (horizontalPadding ?? 0) * ratio,
@@ -1822,6 +1850,11 @@ class BlockConfig {
       borderColor: borderColor,
       borderWidth: (borderWidth ?? 0) * ratio,
     );
+  }
+
+  @override
+  String toString() {
+    return 'BlockConfig(horizontalPadding: $horizontalPadding, verticalPadding: $verticalPadding, horizontalSpacing: $horizontalSpacing, verticalSpacing: $verticalSpacing, blockWidth: $blockWidth, blockHeight: $blockHeight, backgroundColor: $backgroundColor, borderColor: $borderColor, borderWidth: $borderWidth)';
   }
 }
 ```

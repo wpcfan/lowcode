@@ -6,21 +6,26 @@
 
 - [第二章：环境搭建和项目介绍](#第二章环境搭建和项目介绍)
   - [2.1. 环境搭建](#21-环境搭建)
-  - [2.2. 创建第一个 Flutter 应用](#22-创建第一个-flutter-应用)
-    - [2.2.1. Flutter 应用结构](#221-flutter-应用结构)
-  - [2.3. 项目结构](#23-项目结构)
-    - [2.3.1. 项目结构](#231-项目结构)
-  - [2.4 工程搭建](#24-工程搭建)
-  - [2.5. 依赖管理](#25-依赖管理)
-    - [2.5.1 admin 工程](#251-admin-工程)
-    - [2.5.2. app 工程](#252-app-工程)
-    - [2.5.3. 页面模块](#253-页面模块)
-    - [2.5.4 组件模块](#254-组件模块)
-    - [2.5.5 功能模块](#255-功能模块)
-  - [2.6. 调试验证](#26-调试验证)
-  - [2.7 App 和 Admin 的脚手架](#27-app-和-admin-的脚手架)
-    - [2.7.1. App 的脚手架](#271-app-的脚手架)
-    - [2.7.2. Admin 的脚手架](#272-admin-的脚手架)
+    - [2.1.1 Flutter 环境搭建](#211-flutter-环境搭建)
+    - [2.1.2 创建第一个 Flutter 应用](#212-创建第一个-flutter-应用)
+    - [2.1.3 Flutter 应用结构](#213-flutter-应用结构)
+    - [2.1.4 项目结构](#214-项目结构)
+    - [2.1.5 Flutter 工程搭建](#215-flutter-工程搭建)
+    - [2.1.6 依赖管理](#216-依赖管理)
+      - [2.1.6.1 admin 工程](#2161-admin-工程)
+      - [2.1.6.2. app 工程](#2162-app-工程)
+      - [2.1.6.3 页面模块](#2163-页面模块)
+      - [2.1.6.4 组件模块](#2164-组件模块)
+      - [2.1.6.5 功能模块](#2165-功能模块)
+    - [2.1.7 调试验证](#217-调试验证)
+  - [2.1.8 App 和 Admin 的脚手架](#218-app-和-admin-的脚手架)
+    - [2.1.8.1. App 的脚手架](#2181-app-的脚手架)
+      - [2.1.8.2. Admin 的脚手架](#2182-admin-的脚手架)
+  - [2.2 Spring Boot 环境搭建](#22-spring-boot-环境搭建)
+    - [2.2.1 创建 Spring Boot 项目](#221-创建-spring-boot-项目)
+    - [2.2.2 Gradle 介绍](#222-gradle-介绍)
+    - [2.2.3 Lombok 介绍](#223-lombok-介绍)
+    - [2.2.4 IDEA 插件安装](#224-idea-插件安装)
 
 <!-- /code_chunk_output -->
 
@@ -28,7 +33,9 @@
 
 ## 2.1. 环境搭建
 
-如果有条件，可以遵循 [官方文档](https://flutter.dev/docs/get-started/install) 进行安装，如果没有条件，可以使用 [flutter.cn](https://flutter.cn/docs/get-started/install) 提供的镜像进行安装。
+### 2.1.1 Flutter 环境搭建
+
+可以使用 [flutter.cn](https://flutter.cn/docs/get-started/install) 提供的镜像进行安装。
 
 - 下载 Flutter SDK
 
@@ -129,7 +136,7 @@
 
 Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutter SDK。升级也很简单，只需要执行 `flutter upgrade` 命令即可。
 
-## 2.2. 创建第一个 Flutter 应用
+### 2.1.2 创建第一个 Flutter 应用
 
 - 使用命令行创建
 
@@ -165,7 +172,7 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
     lib/main.dart:1
     ```
 
-### 2.2.1. Flutter 应用结构
+### 2.1.3 Flutter 应用结构
 
 - `lib` 目录
 
@@ -183,7 +190,7 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
 
   - `pubspec.yaml` 文件中的 `flutter` 字段是 Flutter 的配置。
 
-## 2.3. 项目结构
+### 2.1.4 项目结构
 
 我们的前端项目从大的方面来说可以分为两个部分：
 
@@ -192,8 +199,6 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
 - 给用户使用的移动端应用
 
 但由于两个大的部分都是基于 Flutter 开发的，而且有相当的可复用性，所以我们采用了多模块的方式来进行开发，这样可以让我们的代码更加的清晰，也可以让我们的开发更加的高效。
-
-### 2.3.1. 项目结构
 
 项目模块的拆分方式一般有两种：
 
@@ -263,7 +268,7 @@ Flutter 团队会经常更新 Flutter SDK，所以我们需要定期升级 Flutt
 
 ![项目结构图](https://i.imgur.com/0KEpJAV.png)
 
-## 2.4 工程搭建
+### 2.1.5 Flutter 工程搭建
 
 我们的工程搭建主要是搭建 `admin` 和 `app` 两个工程，这里我们使用 `flutter create` 命令来创建工程。为了以后便于管理，请先创建一个 `lowcode` 文件夹，然后在 `lowcode` 文件夹下创建 `frontend` 子文件夹。然后在这个目录下打开终端，执行下面的命令。注意要限定目标平台， app 端是 `android` 和 `iOS`， admin 端是 `web`。
 
@@ -294,9 +299,9 @@ flutter create --template=package pages
 flutter create --template=package repositories
 ```
 
-## 2.5. 依赖管理
+### 2.1.6 依赖管理
 
-### 2.5.1 admin 工程
+#### 2.1.6.1 admin 工程
 
 我们的工程依赖管理主要是使用 `pubspec.yaml` 文件来管理依赖。我们先来看一下 `admin` 工程的 `pubspec.yaml` 文件。注意由于我们使用了本地包依赖，而不是发布到 `pub.dev`，所以我们需要在 `pubspec.yaml` 文件中添加 `publish_to: "none"`，这样就不会发布到 `pub.dev`。
 
@@ -370,7 +375,7 @@ flutter:
 
 本地包依赖的路径是相对于 `pubspec.yaml` 文件的路径，所以我们使用 `../` 来表示上一级目录。这样我们就可以在 `admin` 工程中使用 `common`、`canvas`、`pages` 这三个模块了。
 
-### 2.5.2. app 工程
+#### 2.1.6.2. app 工程
 
 `app` 工程的 `pubspec.yaml` 文件也是类似的，我们不详细讲解，这里贴出。
 
@@ -408,7 +413,7 @@ flutter:
   uses-material-design: true
 ```
 
-### 2.5.3. 页面模块
+#### 2.1.6.3 页面模块
 
 我们的工程中，对于页面采用单独模块化的方案，这样可以让页面模块更加独立，方便后期维护。
 
@@ -505,7 +510,7 @@ flutter:
 
 `canvas` 模块依赖了 `common`、`models`、`repositories`、`page_block_widgets`、`files`、`forms` 这六个模块。其中 `common` 模块是公共模块，`models` 模块是数据模型模块，`repositories` 模块是数据仓库模块，`page_block_widgets` 模块是页面区块模块，`files` 模块是文件模块，`forms` 模块是表单模块。
 
-### 2.5.4 组件模块
+#### 2.1.6.4 组件模块
 
 在有的时候，由于页面比较复杂，或者在不同页面间有重复的组件，我们就需要把这些组件抽离出来，单独作为一个模块，这样可以让页面模块更加独立，方便后期维护。
 
@@ -624,7 +629,7 @@ flutter:
 
 `page_block_widgets` 模块依赖了 `common`、`models` 这两个模块。其中 `common` 模块是公共模块，`models` 模块是数据模型模块。
 
-### 2.5.5 功能模块
+#### 2.1.6.5 功能模块
 
 我们的项目中，有以下几个功能模块。
 
@@ -758,7 +763,7 @@ flutter:
 
 `networking` 模块依赖了 `dio`、`pretty_dio_logger`、`dio_cache_interceptor` 这三个库。其中 `pretty_dio_logger` 是一个日志打印库，`dio_cache_interceptor` 是一个缓存库。
 
-## 2.6. 调试验证
+### 2.1.7 调试验证
 
 在 VSCode 中，我们可以在左侧的调试面板中，点击 `运行和调试` 按钮，然后在上面的下拉菜单中选择 `添加配置` ，然后选择 `Dart` ，然后在弹出的对话框中选择 `Flutter` ，然后点击 `创建 launch.json 文件` ，这样就会在项目根目录下生成一个 `launch.json` 文件，这个文件就是 VSCode 的调试配置文件，我们可以在这个文件中配置调试的参数，比如我们可以在 `launch.json` 文件中添加如下的配置：
 
@@ -812,11 +817,11 @@ flutter:
 
 这样我们就为 `admin` 和 `app` 两个项目分别配置了调试的参数，然后我们就可以在 VSCode 的调试面板中选择 `admin` 或者 `app` 来进行调试了，比如我们可以在 `app` 的 `main.dart` 中添加一个断点，然后点击调试面板中的 `启动调试` 按钮，这样就可以在调试面板中看到调试的信息了
 
-## 2.7 App 和 Admin 的脚手架
+## 2.1.8 App 和 Admin 的脚手架
 
 为了后面的学习更专注于业务本身，我们在这一节会把两个工程的脚手架搭建好，然后我们就可以在这个基础上进行业务的开发了。
 
-### 2.7.1. App 的脚手架
+### 2.1.8.1. App 的脚手架
 
 我们先来看看 `app` 工程的脚手架，我们在 `app` 工程的 `lib` 目录下找到 `main.dart` 文件，然后把 `main.dart` 改为如下的代码：
 
@@ -871,10 +876,217 @@ class MyApp extends StatelessWidget {
 
 这个 `main.dart` 文件就是 `app` 工程的入口文件，我们在这个文件中创建了一个 `MyApp` 组件，然后在 `main` 函数中调用了 `runApp` 函数，这个函数的作用就是运行 Flutter 应用，我们可以在这个函数中传入一个 `Widget`，这个 `Widget` 就是 Flutter 应用的根 `Widget`，也就是我们的应用都是从这里开始的。
 
-### 2.7.2. Admin 的脚手架
+#### 2.1.8.2. Admin 的脚手架
 
 我们再来看看 `admin` 工程的脚手架，我们在 `admin` 工程的 `lib` 目录下找到 `main.dart` 文件，然后把 `main.dart` 改为如下代码：
 
 ```dart
 
 ```
+
+## 2.2 Spring Boot 环境搭建
+
+- 下载 JDK 17： https://www.oracle.com/java/technologies/javase-downloads.html
+
+- 下载安装 IntelliJ IDEA： https://www.jetbrains.com/idea/download
+
+### 2.2.1 创建 Spring Boot 项目
+
+- 打开 IntelliJ IDEA，点击 `Create New Project` 按钮，选择 `Spring Initializr`。
+- 填写项目名称，语言选择 `Java`, 项目类型选择 `Gradle - Groovy`, 项目 JDK 选择 `JDK 17`，Java 版本选择 `17` , 组填写 `com.mooc`，工件填写 `backend`，点击 `Next` 按钮。
+- 勾选 `Spring Web` , `Spring Data JPA` , `Spring Boot DevTools` , `MySQL Driver` , `Lombok` , `Spring Configuration Processor`，`H2 Database`，`Validation`, `Flyway Migration`，`TestContainers`，点击 `Next` 按钮。
+- 填写项目路径，点击 `Finish` 按钮。
+
+然后等待项目创建完成，项目创建完成后，我们可以看到项目结构如下：
+
+```bash
+├── backend
+│   ├── build.gradle
+│   ├── gradle
+│   │   └── wrapper
+│   │       ├── gradle-wrapper.jar
+│   │       └── gradle-wrapper.properties
+│   ├── gradlew
+│   ├── gradlew.bat
+│   ├── settings.gradle
+│   └── src
+│       ├── main
+│       │   ├── java
+│       │   │   └── com
+│       │   │       └── mooc
+│       │   │           └── backend
+│       │   │               ├── BackendApplication.java
+```
+
+其中 `build.gradle` 是项目的构建文件，`src/main/java` 是项目的源代码目录，`src/test/java` 是项目的测试代码目录。
+
+### 2.2.2 Gradle 介绍
+
+Gradle 是一个基于 Groovy 的构建工具，它是一个开源项目，由 Gradle 开发团队维护。Gradle 与 Maven 有着相似的功能，但是 Gradle 的构建速度更快，而且 Gradle 的构建脚本更加灵活，可以使用 Groovy 或者 Kotlin 编写。
+
+由于 Spring Boot 3.x 版本默认使用的是 Gradle 作为构建工具，所以我们这里也使用 Gradle 作为构建工具。
+
+Spring Boot 项目的构建文件是 `build.gradle`，我们可以在 `build.gradle` 中配置项目的依赖，以及项目的构建脚本。
+
+我们改写一下 `build.gradle` 文件，添加一些常用的依赖，以及一些常用的配置。
+
+```groovy
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.0.5'
+    id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.mooc'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '19'
+targetCompatibility = '19'
+
+// 项目依赖版本号定义
+ext {
+    qiNiuVersion = '7.12.1'
+    springdocVersion = '2.0.2'
+    hypersistenceVersion = '3.1.1'
+    testcontainersVersion = '1.17.6'
+    redissonVersion = '3.20.0'
+    springbootAdminVersion = '3.0.0'
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+// 项目依赖仓库
+repositories {
+    mavenCentral()
+}
+
+// 项目依赖
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation "io.hypersistence:hypersistence-utils-hibernate-60:${hypersistenceVersion}"
+    implementation "org.redisson:redisson-hibernate-6:${redissonVersion}"
+    implementation "org.redisson:redisson-spring-boot-starter:${redissonVersion}"
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+    implementation "de.codecentric:spring-boot-admin-starter-server:${springbootAdminVersion}"
+    implementation "de.codecentric:spring-boot-admin-starter-client:${springbootAdminVersion}"
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.hamcrest:hamcrest-library'
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+    testImplementation "org.testcontainers:mysql:${testcontainersVersion}"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+```
+
+### 2.2.3 Lombok 介绍
+
+Lombok 是一个 Java 开源库，它可以帮助我们减少 Java 代码的冗余，它可以帮助我们自动生成一些常用的方法，比如 `getter` 和 `setter` 方法，`equals` 和 `hashCode` 方法，`toString` 方法等。
+
+Lombok 提供了一系列的注解，我们可以在 Java 类中使用这些注解，然后 Lombok 会自动生成相应的方法。
+
+比如我们在 `User` 类中使用 `@Data` 注解，Lombok 就会自动生成 `getter` 和 `setter` 方法，`equals` 和 `hashCode` 方法，`toString` 方法等。
+
+```java
+@Data
+class User {
+    private Long id;
+    private String name;
+    private String email;
+}
+```
+
+相当于 Lombok 为我们自动生成了如下代码：
+
+```java
+class User {
+  private Long id;
+  private String name;
+  private String email;
+
+  public Long getId() {
+    return this.id;
+  }
+
+  public String getName() {
+    return this.name;
+  }
+
+  public String getEmail() {
+    return this.email;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public boolean equals(final Object o) {
+    if (o == this) return true;
+    if (!(o instanceof User)) return false;
+    final User other = (User) o;
+    if (!other.canEqual((Object) this)) return false;
+    final Object this$id = this.getId();
+    final Object other$id = other.getId();
+    if (this$id == null ? other$id != null : !this$id.equals(other$id)) return false;
+    final Object this$name = this.getName();
+    final Object other$name = other.getName();
+    if (this$name == null ? other$name != null : !this$name.equals(other$name)) return false;
+    final Object this$email = this.getEmail();
+    final Object other$email = other.getEmail();
+    if (this$email == null ? other$email != null : !this$email.equals(other$email)) return false;
+    return true;
+  }
+
+  protected boolean canEqual(final Object other) {
+    return other instanceof User;
+  }
+
+  public int hashCode() {
+    final int PRIME = 59;
+    int result = 1;
+    final Object $id = this.getId();
+    result = result * PRIME + ($id == null ? 43 : $id.hashCode());
+    final Object $name = this.getName();
+    result = result * PRIME + ($name == null ? 43 : $name.hashCode());
+    final Object $email = this.getEmail();
+    result = result * PRIME + ($email == null ? 43 : $email.hashCode());
+    return result;
+  }
+
+  public String toString() {
+    return "User(id=" + this.getId() + ", name=" + this.getName() + ", email=" + this.getEmail() + ")";
+  }
+
+}
+```
+
+对于 Java 开发者来说，Lombok 是一个非常好用的工具，它可以帮助我们减少代码的冗余，提高开发效率。
+
+### 2.2.4 IDEA 插件安装
+
+JPABuddy：JPABuddy 是一个 IDEA 插件，它可以帮助我们生成 JPA 实体类。在 IDEA 的设置中点击 `Plugins`，然后搜索 `JPABuddy`，点击 `Install` 安装即可。
+
+![图 3](http://ngassets.twigcodes.com/732fcc8366d5aa39e137505b062a78126c149a141c3de0664f186dcfbc902d60.png)

@@ -1,4 +1,4 @@
-# 第四章：App 商品组件的实现
+# 第四章：App 原型之商品组件和瀑布流
 
 做了两个图片类型的组件之后，我们应该对于组件的实现有了一定的了解。现在我们来实现一个商品组件，它的功能是展示商品的图片、名称、价格、购买按钮等信息。当然它在布局上更为复杂。我们仍然遵循 **“问题-方案-原型-验证-改进”** 的开发模式
 
@@ -6,7 +6,7 @@
 
 <!-- code_chunk_output -->
 
-- [第四章：App 商品组件的实现](#第四章app-商品组件的实现)
+- [第四章：App 原型之商品组件和瀑布流](#第四章app-原型之商品组件和瀑布流)
   - [4.1 需求分析](#41-需求分析)
     - [4.1.1 一行一商品的卡片界面需求分析](#411-一行一商品的卡片界面需求分析)
     - [4.1.2 一行二商品的卡片界面需求分析](#412-一行二商品的卡片界面需求分析)
@@ -27,12 +27,14 @@
     - [4.4.1 整合到商品行区块中](#441-整合到商品行区块中)
     - [4.4.2 一行二商品区块验证](#442-一行二商品区块验证)
   - [4.5 瀑布流商品组件](#45-瀑布流商品组件)
-  - [如何实现瀑布流的无限加载](#如何实现瀑布流的无限加载)
-    - [一个基础的 `CustomScrollView`](#一个基础的-customscrollview)
-    - [实现上拉加载更多](#实现上拉加载更多)
-    - [实现下拉刷新](#实现下拉刷新)
-    - [整体布局的领域模型](#整体布局的领域模型)
-    - [测试整体布局](#测试整体布局)
+    - [4.5.1 瀑布流的数据模型](#451-瀑布流的数据模型)
+  - [4.6 如何实现瀑布流的无限加载](#46-如何实现瀑布流的无限加载)
+    - [4.6.1 一个基础的 `CustomScrollView`](#461-一个基础的-customscrollview)
+    - [4.6.2 实现上拉加载更多](#462-实现上拉加载更多)
+    - [4.6.3 验证上拉加载更多](#463-验证上拉加载更多)
+    - [4.6.4 实现下拉刷新](#464-实现下拉刷新)
+  - [4.7 整体布局的领域模型](#47-整体布局的领域模型)
+    - [4.7.1 测试整体布局](#471-测试整体布局)
 
 <!-- /code_chunk_output -->
 
@@ -1302,7 +1304,144 @@ return SliverPadding(
 
 由于瀑布流是可以无尽加载，所以我们要使用性能好一些的 `SliverMasonryGrid.count` 来实现瀑布流布局。
 
-## 如何实现瀑布流的无限加载
+### 4.5.1 瀑布流的数据模型
+
+瀑布流区块能不能使用商品的数据模型呢？这个问题取决于你的业务需求，如果你的业务需求是，运营人员会直接配置数量非常多的商品到这个区块，那么你就可以复用商品的数据模型。但是如果你的业务需求是，运营人员会配置一个商品的分类，然后根据这个分类来获取商品列表，那么你就不能复用商品的数据模型了。
+
+在这种情况下，我们需要新创建一个 `Category` 的数据模型，它包含了分类的 ID 、分类的名称、分类的编码、分类的子分类等信息。
+
+```dart
+/// 分类
+class Category {
+  const Category({
+    this.id,
+    this.name,
+    this.code,
+    this.children,
+  });
+
+  final int? id;
+  final String? name;
+  final String? code;
+  final List<Category>? children;
+
+  Category copyWith({
+    int? id,
+    String? name,
+    String? code,
+    List<Category>? children,
+  }) {
+    return Category(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      code: code ?? this.code,
+      children: children ?? this.children,
+    );
+  }
+
+  @override
+  String toString() =>
+      'Category { id: $id, name: $name, code: $code, children: $children}';
+
+  factory Category.fromJson(Map<String, dynamic> json) => Category(
+        id: json['id'] as int?,
+        name: json['name'] as String?,
+        code: json['code'] as String?,
+        children: (json['children'] as List<dynamic>?)
+            ?.map((e) => Category.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'code': code,
+        'children': children?.map((e) => e.toJson()).toList(),
+      };
+}
+```
+
+商品的模型中也应该加上分类的字段，由于一个商品可以属于多个分类，所以这个字段应该是列表：
+
+```dart
+class Product {
+  const Product({
+    this.id,
+    this.sku,
+    this.name,
+    this.description,
+    this.price,
+    this.originalPrice,
+    this.images = const [],
+    this.categories,
+  });
+
+  final int? id;
+  final String? sku;
+  final String? name;
+  final String? description;
+  final String? price;
+  final String? originalPrice;
+  final List<String> images;
+  final List<Category>? categories;
+
+  Product copyWith({
+    int? id,
+    String? sku,
+    String? name,
+    String? description,
+    String? price,
+    String? originalPrice,
+    List<String>? images,
+    List<Category>? categories,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      sku: sku ?? this.sku,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      originalPrice: originalPrice ?? this.originalPrice,
+      images: images ?? this.images,
+      categories: categories ?? this.categories,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Product(id: $id, sku: $sku, name: $name, description: $description, price: $price, originalPrice: $originalPrice, images: $images, categories: $categories)';
+  }
+
+  factory Product.fromJson(Map<String, dynamic> json) => Product(
+        id: json['id'] as int?,
+        sku: json['sku'] as String?,
+        name: json['name'] as String?,
+        description: json['description'] as String?,
+        price: json['price'] as String?,
+        originalPrice: json['originalPrice'] as String?,
+        images: (json['images'] as List<dynamic>?)
+                ?.map((e) => e as String)
+                .toList() ??
+            [],
+        categories: (json['categories'] as List<dynamic>?)
+            ?.map((e) => Category.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'sku': sku,
+        'name': name,
+        'description': description,
+        'price': price,
+        'originalPrice': originalPrice,
+        'images': images,
+        'categories': categories?.map((e) => e.toJson()).toList(),
+      };
+}
+```
+
+## 4.6 如何实现瀑布流的无限加载
 
 其实这个问题不应该仅仅针对瀑布流，因为瀑布流之所以会有上拉加载更多的行为，不是它自己的原因，而是因为所有的区块是放在一个列表中的，所以当我们滚动到列表的底部的时候，就会触发上拉加载更多的行为。
 
@@ -1312,7 +1451,7 @@ return SliverPadding(
 
 简单来说，我们要自定义一个自己的 `CustomScrollView`，它支持下拉刷新、上拉加载更多、自定义 `SliverAppBar`。
 
-### 一个基础的 `CustomScrollView`
+### 4.6.1 一个基础的 `CustomScrollView`
 
 一个基本的 `CustomScrollView` 的代码非常简单，如下所示：
 
@@ -1358,13 +1497,14 @@ class MyCustomScrollView extends StatelessWidget {
 
 ![图 8](http://ngassets.twigcodes.com/9c85904a73c8d00c121fae43d2254f7562d5ca3932fa51bc6264a336c55a1f66.png)
 
-### 实现上拉加载更多
+### 4.6.2 实现上拉加载更多
 
 上拉加载更多其实就是要监听 `CustomScrollView` 的滚动事件，当滚动到底部的时候，就去加载更多的数据。
 
 ```dart
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 class MyCustomScrollView extends StatelessWidget {
   const MyCustomScrollView({
     super.key,
@@ -1373,52 +1513,126 @@ class MyCustomScrollView extends StatelessWidget {
     this.loadMoreWidget = const CupertinoActivityIndicator(),
   });
 
-final Widget sliver;
-final Future<void> Function()? onLoadMore;
-final Widget loadMoreWidget;
+  final Widget sliver;
+  final Future<void> Function()? onLoadMore;
+  final Widget loadMoreWidget;
 
-@override
-Widget build(BuildContext context) {
-  /// 监听滚动事件，当滚动到底部的时候，就去加载更多的数据
-  return
-  NotificationListener<ScrollNotification>(
-    onNotification: (notification) {
-      /// 当滚动停止
-      if (notification is ScrollEndNotification) {
-        final metrics = notification.metrics;
-        /// 检查是否滚动到底部
-        if (metrics.pixels == metrics.maxScrollExtent) {
-          /// 如果有加载更多的回调，就去加载更多
-          if (onLoadMore != null) {
-            onLoadMore!();
+  @override
+  Widget build(BuildContext context) {
+    /// 监听滚动事件，当滚动到底部的时候，就去加载更多的数据
+    return
+    NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        /// 当滚动停止
+        if (notification is ScrollEndNotification) {
+          final metrics = notification.metrics;
+          /// 检查是否滚动到底部
+          if (metrics.pixels == metrics.maxScrollExtent) {
+            /// 如果有加载更多的回调，就去加载更多
+            if (onLoadMore != null) {
+              onLoadMore!();
+            }
           }
         }
-      }
-      return false;
-    },
-    child: CustomScrollView(
-      /// slivers 是一个列表，里面可以放很多个 Sliver 组件
-      slivers: [
-        sliver,
-        if (onLoadMore != null)
-        /// SliverToBoxAdapter 可以把一个 Widget 转换成 Sliver
-          SliverToBoxAdapter(
-            child: Container(
-              height: 50,
-              child: Center(
-                child: loadMoreWidget,
+        return false;
+      },
+      child: CustomScrollView(
+        /// slivers 是一个列表，里面可以放很多个 Sliver 组件
+        slivers: [
+          sliver,
+          if (onLoadMore != null)
+          /// SliverToBoxAdapter 可以把一个 Widget 转换成 Sliver
+            SliverToBoxAdapter(
+              child: Container(
+                height: 50,
+                child: Center(
+                  child: loadMoreWidget,
+                ),
               ),
             ),
-          ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 ```
 
 要监听 `CustomScrollView` 的滚动事件，我们需要使用 `NotificationListener` 组件，它的 `onNotification` 属性，它是一个 `NotificationListenerCallback` 类型的属性，它的参数是 `ScrollNotification` 类型的，我们可以通过 `notification.metrics` 属性来获取滚动的信息，比如 `pixels`、`maxScrollExtent` 等等。
 
-### 实现下拉刷新
+### 4.6.3 验证上拉加载更多
+
+我们可以在 `MyCustomScrollView` 的 `onLoadMore` 属性中，添加一个 `print` 语句，来验证是否触发了上拉加载更多的行为。
+
+```dart
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: darkBlue,
+      ),
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Builder(
+            builder: (context) {
+              return PullToLoadMore();
+            }
+          ),
+        ),
+      ),
+    );
+  }
+}
+/// 为测试方便，我们创建一个 StatefulWidget
+class PullToLoadMore extends StatefulWidget {
+  const PullToLoadMore({super.key});
+
+  @override
+  State<PullToLoadMore> createState() => _PullToLoadMoreState();
+}
+
+class _PullToLoadMoreState extends State<PullToLoadMore> {
+  int page = 1;
+  @override
+  Widget build(BuildContext context) {
+    return MyCustomScrollView(
+      sliver: SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            return Container(
+              height: 100,
+              color: Colors.primaries[index % Colors.primaries.length],
+            );
+          },
+          childCount: page * 20,
+        ),
+      ),
+      onLoadMore: () async {
+        print('加载更多');
+        /// 模拟网络请求
+        await Future.delayed(Duration(seconds: 2));
+        setState(() {
+          page++;
+        });
+      }
+    );
+  }
+}
+```
+
+效果如下：
+
+![图 9](http://ngassets.twigcodes.com/8996962f523de1338d15181be8a22caa47b44e243e8155cf8f13a736b03d5c81.gif)
+
+### 4.6.4 实现下拉刷新
 
 由于我们想要的下拉刷新效果不是一个标准的 `Material` 风格，所以我们使用了 `CupertinoSliverRefreshControl` 来实现，它的 `builder` 属性，它是一个 `CupertinoSliverRefreshControlBuilder` 类型的属性，它的参数是 `BuildContext`、`RefreshIndicatorMode`、`double`、`double`、`double`，分别代表 `BuildContext`、刷新的状态、下拉的距离、触发刷新的距离、刷新的高度。
 
@@ -1558,7 +1772,7 @@ class MyCustomScrollView extends StatelessWidget {
 
 ![下拉刷新效果](https://i.imgur.com/mq0jWaU.gif)
 
-### 整体布局的领域模型
+## 4.7 整体布局的领域模型
 
 在可以测试整体布局之前，我们需要先把整体布局的领域模型搞清楚。我们首先来回顾一下和布局有关的需求：
 
@@ -1620,7 +1834,7 @@ enum PageStatus {
 
   const PageStatus(this.value);
 }
-class PageLayout extends Equatable {
+class PageLayout {
   final int? id;
   final String title;
   final Platform platform;
@@ -1645,10 +1859,409 @@ class PageLayout extends Equatable {
 }
 ```
 
-### 测试整体布局
-
-我们把之前的布局都放到 `MyCustomScrollView` 中，然后在 `MyHomePage` 中使用 `MyCustomScrollView`。
+然后我们继续考虑如何进行 `Json` 的序列化和反序列化。在前面的章节中，我们已经知道了如何进行 `Json` 的序列化和反序列化，但是在这里，我们需要对 `PageBlock` 进行序列化和反序列化，因为 `PageBlock` 中的 `data` 是一个动态的类型，虽然我们做了泛型，之前的测试中我们是预先知道 `data` 的类型的，但是在这里，我们不知道 `data` 的类型，因为它是一个动态的类型，所以我们需要在 `PageBlock` 引入一个枚举类型 `PageBlockType`，用来标识 `data` 的类型，然后在序列化和反序列化的时候，根据 `PageBlockType` 来进行序列化和反序列化。
 
 ```dart
+/// 页面区块类型
+/// - banner: 轮播图
+/// - imageRow: 图片行
+/// - productRow: 商品行
+/// - waterfall: 瀑布流
+enum PageBlockType {
+  banner('banner'),
+  imageRow('image_row'),
+  productRow('product_row'),
+  waterfall('waterfall'),
+  unknown('unknown');
 
+  final String value;
+  const PageBlockType(this.value);
+}
+class PageBlock<T> {
+  const PageBlock({
+    this.id,
+    required this.title,
+    required this.type,
+    required this.sort,
+    required this.config,
+    required this.data,
+  });
+  final int? id;
+  final String title;
+  final PageBlockType type;
+  final int sort;
+  final BlockConfig config;
+  final List<T> data;
+
+  /// 根据不同的类型，反序列化不同的数据
+  static PageBlock mapPageBlock(Map<String, dynamic> json) {
+    if (json['type'] == PageBlockType.banner.value) {
+      return PageBlock<ImageData>.fromJson(json, ImageData.fromJson);
+    } else if (json['type'] == PageBlockType.imageRow.value) {
+      return PageBlock<ImageData>.fromJson(json, ImageData.fromJson);
+    } else if (json['type'] == PageBlockType.productRow.value) {
+      return PageBlock<Product>.fromJson(json, Product.fromJson);
+    } else if (json['type'] == PageBlockType.waterfall.value) {
+      return PageBlock<Category>.fromJson(json, Category.fromJson);
+    }
+    throw Exception('Unknown PageBlockType');
+  }
+
+  factory PageBlock.fromJson(
+      Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
+    return PageBlock<T>(
+      id: json['id'],
+      title: json['title'],
+      type: PageBlockType.values.firstWhere((e) => e.value == json['type'],
+          orElse: () => PageBlockType.unknown),
+      sort: json['sort'],
+      config: BlockConfig.fromJson(json['config']),
+      data: (json['data'] as List)
+          .map((e) => fromJson(e))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'type': type.value,
+      'sort': sort,
+      'config': config.toJson(),
+      'data': data.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  PageBlock<T> copyWith({
+    int? id,
+    String? title,
+    PageBlockType? type,
+    int? sort,
+    BlockConfig? config,
+    List<T>? data,
+  }) {
+    return PageBlock(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      type: type ?? this.type,
+      sort: sort ?? this.sort,
+      config: config ?? this.config,
+      data: data ?? this.data,
+    );
+  }
+}
+```
+
+进一步的思考就是区块的数据类型，之前我们简单化为 `ImageData` 和 `Product` ，但是其实对于瀑布流来说，我们需要提供的是一个新的类型 `Category` 。我们当然可以按之前的做法，让 `Category` 实现 `Jsonable` 接口。
+
+但 `Jsonable` 到底够不够用？我们先来考虑图片区块，多张图片的情况下，是有顺序的，也就是说哪张图片在第一个位置，哪张图片在第二个位置，这个顺序是有意义的，商品区块类似，多个商品的情况下，也是有顺序的，我们需要引入一个属性 `sort` 。另外如果考虑到以后要修改或者删除某个特定数据的话，每个数据项其实还应该有 `id` ，这样才能够唯一标识某个数据项。所以我们需要一个新的类型来表示这种数据，我们引入一个新的类型 `BlockData` ，它包含了 `id` ，`sort` ，`content` 三个属性，其中 `content` 是一个泛型，表示数据的类型。
+
+```dart
+class BlockData<T> {
+  final int? id;
+  final int sort;
+  final T content;
+
+  BlockData({this.id, required this.sort, required this.content});
+
+  factory BlockData.fromJson(
+      Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
+    return BlockData(
+      id: json['id'],
+      sort: json['sort'],
+      content: fromJson(json['content']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'sort': sort,
+      'content': content,
+    };
+  }
+
+  BlockData<T> copyWith({
+    int? id,
+    int? sort,
+    T? content,
+  }) {
+    return BlockData(
+      id: id ?? this.id,
+      sort: sort ?? this.sort,
+      content: content ?? this.content,
+    );
+  }
+}
+```
+
+而区块的数据类型，我们就可以改为 `List<BlockData<T>>` 了。
+
+```dart
+class PageBlock<T> {
+  const PageBlock({
+    this.id,
+    required this.title,
+    required this.type,
+    required this.sort,
+    required this.config,
+    required this.data,
+  });
+  final int? id;
+  final String title;
+  final PageBlockType type;
+  final int sort;
+  final BlockConfig config;
+  final List<BlockData<T>> data;
+
+  static PageBlock mapPageBlock(Map<String, dynamic> json) {
+    if (json['type'] == PageBlockType.banner.value) {
+      return PageBlock<ImageData>.fromJson(json, ImageData.fromJson);
+    } else if (json['type'] == PageBlockType.imageRow.value) {
+      return PageBlock<ImageData>.fromJson(json, ImageData.fromJson);
+    } else if (json['type'] == PageBlockType.productRow.value) {
+      return PageBlock<Product>.fromJson(json, Product.fromJson);
+    } else if (json['type'] == PageBlockType.waterfall.value) {
+      return PageBlock<Category>.fromJson(json, Category.fromJson);
+    }
+    throw Exception('Unknown PageBlockType');
+  }
+
+  factory PageBlock.fromJson(
+      Map<String, dynamic> json, T Function(Map<String, dynamic>) fromJson) {
+    return PageBlock<T>(
+      id: json['id'],
+      title: json['title'],
+      type: PageBlockType.values.firstWhere((e) => e.value == json['type'],
+          orElse: () => PageBlockType.unknown),
+      sort: json['sort'],
+      config: BlockConfig.fromJson(json['config']),
+      data: (json['data'] as List)
+          .map((e) => BlockData.fromJson(e, fromJson))
+          .toList(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'type': type.value,
+      'sort': sort,
+      'config': config.toJson(),
+      'data': data.map((e) => e.toJson()).toList(),
+    };
+  }
+
+  PageBlock<T> copyWith({
+    int? id,
+    String? title,
+    PageBlockType? type,
+    int? sort,
+    BlockConfig? config,
+    List<BlockData<T>>? data,
+  }) {
+    return PageBlock(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      type: type ?? this.type,
+      sort: sort ?? this.sort,
+      config: config ?? this.config,
+      data: data ?? this.data,
+    );
+  }
+}
+```
+
+在此情况下，我们不需要 `Jsonable` 接口了，请删掉 `Jsonable` 接口和 `Product` ，`ImageData` ，`Category` 类的实现 `Jsonable` 的声明。
+
+改造完 `PageBlock` 后，我们给 `PageLayout` 添加 `fromJson` 方法，同时将 `PageLayout` 的 `blocks` 属性改为 `List<PageBlock>` 。
+
+```dart
+factory PageLayout.fromJson(
+  dynamic json,
+) {
+  final blocks = (json['blocks'] as List<dynamic>).map((e) {
+    if (e['type'] == PageBlockType.productRow.value) {
+      return PageBlock.fromJson(e, Product.fromJson);
+    } else if (e['type'] == PageBlockType.waterfall.value) {
+      return PageBlock.fromJson(e, Category.fromJson);
+    } else if (e['type'] == PageBlockType.imageRow.value) {
+      return PageBlock.fromJson(e, ImageData.fromJson);
+    } else if (e['type'] == PageBlockType.banner.value) {
+      return PageBlock.fromJson(e, ImageData.fromJson);
+    } else {
+      return PageBlock.fromJson(e, (e) => e);
+    }
+  }).toList();
+  /// 排序
+  blocks.sort((a, b) => a.sort.compareTo(b.sort));
+  return PageLayout(
+    id: json['id'] as int?,
+    title: json['title'] as String,
+    platform: Platform.values.firstWhere(
+      (e) => e.value == json['platform'],
+      orElse: () => Platform.app,
+    ),
+    pageType: PageType.values.firstWhere(
+      (e) => e.value == json['pageType'],
+      orElse: () => PageType.home,
+    ),
+    config: PageConfig.fromJson(json['config']),
+    status: PageStatus.values.firstWhere(
+      (e) => e.value == json['status'],
+      orElse: () => PageStatus.draft,
+    ),
+    startTime: json['startTime'] == null
+        ? null
+        : DateTime.parse(json['startTime'] as String),
+    endTime: json['endTime'] == null
+        ? null
+        : DateTime.parse(json['endTime'] as String),
+    blocks: blocks,
+  );
+}
+```
+
+### 4.7.1 测试整体布局
+
+`MyCustomScrollView` 的 `sliver` 属性是希望接受一个 `sliver` 作为可滚动的内容，为什么不是一个列表呢？一个布局不是有多个区块吗？
+
+主要的原因是在页面一级，我们也会有内边距等设置，这其实在 flutter 中等于要求外面会套一层 `SliverPadding`，所以你接受的还是一个 `sliver`，而不是一个列表。但请注意不同平台不一定是这样的，如果使用不同的语言框架在 Web/iOS/Android 上，我们可能会有不同的实现。
+
+在 `app/lib/main.dart` 中，我们在 `MyApp` 中添加如下方法。
+
+```dart
+Widget _buildSliver(
+      BuildContext context, PageLayout layout, List<Product> products) {
+  final blocks = layout.blocks;
+  final pageConfig = layout.config;
+  final horizontalPadding = pageConfig.horizontalPadding ?? 0.0;
+  final verticalPadding = pageConfig.verticalPadding ?? 0.0;
+  final ratio = MediaQuery.of(context).size.width /
+      (pageConfig.baselineScreenWidth ?? 375.0);
+  const errorImage = '';
+  return SliverPadding(
+    padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding, vertical: verticalPadding),
+    sliver: MultiSliver(
+        children: blocks.map((block) {
+      final config = block.config.withRatio(ratio);
+      switch (block.type) {
+        case PageBlockType.banner:
+          final it = block as PageBlock<ImageData>;
+
+          /// SliverToBoxAdapter 可以将一个 Widget 转换成 Sliver
+          return SliverToBoxAdapter(
+            child: BannerWidget(
+              items: it.data.map((di) => di.content).toList(),
+              config: config,
+              errorImage: errorImage,
+              onTap: (link) => debugPrint('$link'),
+            ),
+          );
+        case PageBlockType.imageRow:
+          final it = block as PageBlock<ImageData>;
+          return SliverToBoxAdapter(
+            child: ImageRowWidget(
+              items: it.data.map((di) => di.content).toList(),
+              config: config,
+              errorImage: errorImage,
+              onTap: (link) => debugPrint('$link'),
+            ),
+          );
+        case PageBlockType.productRow:
+          final it = block as PageBlock<Product>;
+          return SliverToBoxAdapter(
+            child: ProductRowWidget(
+              items: it.data.map((di) => di.content).toList(),
+              config: config,
+              errorImage: errorImage,
+              onTap: (product) => debugPrint('$product'),
+              addToCart: (product) => debugPrint('$product'),
+            ),
+          );
+        case PageBlockType.waterfall:
+          final it = block as PageBlock<Category>;
+
+          /// WaterfallWidget 是一个瀑布流的 Widget
+          /// 它本身就是 Sliver，所以不需要再包装一层 SliverToBoxAdapter
+          return WaterfallWidget(
+            products: products,
+            config: config,
+            errorImage: errorImage,
+            onTap: (product) => debugPrint('$product'),
+            addToCart: (product) => debugPrint('$product'),
+          );
+        default:
+          return SliverToBoxAdapter(
+            child: Container(),
+          );
+      }
+    }).toList()),
+  );
+}
+```
+
+这个方法是根据 `PageLayout` 的 `blocks` 属性，生成对应的 `sliver`，并且根据 `PageBlock` 的 `type` 属性，生成对应的 `Widget`。然后外层再包装一层 `SliverPadding`，这样就可以在页面一级设置内边距了。
+
+我们这次可以把数据抽取出来放到一个 `.json` 文件中，然后在代码中读取，我们甚至可以放在 `assets` 目录中，使用异步方式访问。那么我们可以根据这个思路，把 `layout` 和 `products` 也放到 `assets` 目录中，然后在代码中读取，这样就可以把代码简化为：
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(
+      child: FutureBuilder(
+        future: Future.wait([
+          rootBundle.loadString('layout.json'),
+          rootBundle.loadString('products.json'),
+        ]),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          const decoration = BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.blue,
+                Colors.green,
+              ],
+            ),
+          );
+          final layout =
+              PageLayout.fromJson(jsonDecode(snapshot.data!.first));
+          final products = (jsonDecode(snapshot.data!.last) as List)
+              .map((e) => Product.fromJson(e))
+              .toList();
+          final sliver = _buildSliver(context, layout, products);
+          return MyCustomScrollView(
+            decoration: decoration,
+            sliver: sliver,
+            sliverAppBar: SliverAppBar(
+              floating: true,
+              snap: false,
+              pinned: false,
+              systemOverlayStyle: SystemUiOverlayStyle.light,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.notification_important),
+                  onPressed: () => debugPrint('menu clicked'),
+                ),
+              ],
+              flexibleSpace: Container(
+                decoration: decoration,
+              ),
+            ),
+            onRefresh: () async => debugPrint('onRefresh'),
+            onLoadMore: () async => debugPrint('onLoadMore'),
+          );
+        },
+      ),
+    ),
+  );
+}
 ```

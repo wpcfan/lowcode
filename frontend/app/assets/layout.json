@@ -1,0 +1,353 @@
+{
+  "id": 1,
+  "title": "首页布局",
+  "platform": "App",
+  "pageType": "home",
+  "config": {
+    "horizontalPadding": 0,
+    "verticalPadding": 0,
+    "baselineScreenWidth": 400
+  },
+  "blocks": [
+    {
+      "id": 1,
+      "title": "轮播图区块",
+      "type": "banner",
+      "sort": 1,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376,
+        "blockHeight": 180
+      },
+      "data": [
+        {
+          "id": 1,
+          "sort": 1,
+          "content": {
+            "image": "https://images.pexels.com/photos/8101929/pexels-photo-8101929.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image1",
+            "link": { "type": "url", "value": "https://baidu.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 2,
+          "sort": 2,
+          "content": {
+            "image": "https://images.pexels.com/photos/4345107/pexels-photo-4345107.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image2",
+            "link": { "type": "url", "value": "https://google.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 3,
+          "sort": 3,
+          "content": {
+            "image": "https://images.pexels.com/photos/7526590/pexels-photo-7526590.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image3",
+            "link": { "type": "url", "value": "https://bing.com" },
+            "dataType": "image"
+          }
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "一行一图片区块",
+      "type": "image_row",
+      "sort": 2,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376,
+        "blockHeight": 96
+      },
+      "data": [
+        {
+          "id": 4,
+          "sort": 1,
+          "content": {
+            "image": "https://images.pexels.com/photos/5439408/pexels-photo-5439408.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image1",
+            "link": { "type": "url", "value": "https://baidu.com" },
+            "dataType": "image"
+          }
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "一行二图片区块",
+      "type": "image_row",
+      "sort": 3,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376,
+        "blockHeight": 96
+      },
+      "data": [
+        {
+          "id": 5,
+          "sort": 1,
+          "content": {
+            "image": "https://images.pexels.com/photos/3184292/pexels-photo-3184292.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image1",
+            "link": { "type": "url", "value": "https://baidu.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 6,
+          "sort": 2,
+          "content": {
+            "image": "https://images.pexels.com/photos/9352070/pexels-photo-9352070.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image2",
+            "link": { "type": "url", "value": "https://google.com" },
+            "dataType": "image"
+          }
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "一行三图片区块",
+      "type": "image_row",
+      "sort": 4,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376,
+        "blockHeight": 96
+      },
+      "data": [
+        {
+          "id": 7,
+          "sort": 1,
+          "content": {
+            "image": "https://images.pexels.com/photos/13659786/pexels-photo-13659786.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image1",
+            "link": { "type": "url", "value": "https://baidu.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 8,
+          "sort": 2,
+          "content": {
+            "image": "https://images.pexels.com/photos/1161694/pexels-photo-1161694.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image2",
+            "link": { "type": "url", "value": "https://google.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 9,
+          "sort": 3,
+          "content": {
+            "image": "https://images.pexels.com/photos/13551077/pexels-photo-13551077.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load",
+            "title": "image3",
+            "link": { "type": "url", "value": "https://bing.com" },
+            "dataType": "image"
+          }
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "一行滚动图片区块",
+      "type": "image_row",
+      "sort": 5,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376,
+        "blockHeight": 96
+      },
+      "data": [
+        {
+          "id": 10,
+          "sort": 1,
+          "content": {
+            "image": "https://images.pexels.com/photos/3061171/pexels-photo-3061171.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image1",
+            "link": { "type": "url", "value": "https://baidu.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 11,
+          "sort": 2,
+          "content": {
+            "image": "https://images.pexels.com/photos/15961965/pexels-photo-15961965.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image2",
+            "link": { "type": "url", "value": "https://baidu.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 12,
+          "sort": 3,
+          "content": {
+            "image": "https://images.pexels.com/photos/1497529/pexels-photo-1497529.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image3",
+            "link": { "type": "url", "value": "https://baidu.com" },
+            "dataType": "image"
+          }
+        },
+        {
+          "id": 13,
+          "sort": 4,
+          "content": {
+            "image": "https://images.pexels.com/photos/9072343/pexels-photo-9072343.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+            "title": "image4",
+            "link": { "type": "url", "value": "https://google.com" },
+            "dataType": "image"
+          }
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "一行一产品区块",
+      "type": "product_row",
+      "sort": 6,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376,
+        "blockHeight": 120
+      },
+      "data": [
+        {
+          "id": 14,
+          "sort": 1,
+          "content": {
+            "id": 24,
+            "sku": "sku_24",
+            "name": "None 24",
+            "description": "Learn how to use data to make better decisions",
+            "price": "¥240.22",
+            "categories": [
+              {
+                "id": 12,
+                "name": "None",
+                "code": "cat_n",
+                "children": [],
+                "dataType": "category"
+              }
+            ],
+            "images": [
+              "https://images.pexels.com/photos/7034219/pexels-photo-7034219.jpeg"
+            ],
+            "dataType": "product"
+          }
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "一行二产品区块",
+      "type": "product_row",
+      "sort": 7,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376,
+        "blockHeight": 330
+      },
+      "data": [
+        {
+          "id": 15,
+          "sort": 1,
+          "content": {
+            "id": 22,
+            "sku": "sku_22",
+            "name": "None 22",
+            "description": "Learn how to use data to make better decisions",
+            "price": "¥220.0",
+            "categories": [
+              {
+                "id": 12,
+                "name": "None",
+                "code": "cat_n",
+                "children": [],
+                "dataType": "category"
+              }
+            ],
+            "images": [
+              "https://images.pexels.com/photos/6625403/pexels-photo-6625403.jpeg"
+            ],
+            "dataType": "product"
+          }
+        },
+        {
+          "id": 16,
+          "sort": 2,
+          "content": {
+            "id": 21,
+            "sku": "sku_21",
+            "name": "None 21",
+            "description": "Learn how to use data to make better decisions",
+            "price": "¥210.0",
+            "categories": [
+              {
+                "id": 12,
+                "name": "None",
+                "code": "cat_n",
+                "children": [],
+                "dataType": "category"
+              }
+            ],
+            "images": [
+              "https://images.pexels.com/photos/5390114/pexels-photo-5390114.jpeg"
+            ],
+            "dataType": "product"
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "瀑布流区块",
+      "type": "waterfall",
+      "sort": 8,
+      "config": {
+        "horizontalPadding": 12,
+        "verticalPadding": 12,
+        "horizontalSpacing": 4,
+        "verticalSpacing": 4,
+        "blockWidth": 376
+      },
+      "data": [
+        {
+          "id": 17,
+          "sort": 1,
+          "content": {
+            "id": 2,
+            "name": "Computer Science",
+            "code": "cat_c_s",
+            "dataType": "category"
+          }
+        }
+      ]
+    }
+  ],
+  "status": "Published"
+}

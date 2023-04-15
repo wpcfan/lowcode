@@ -1,0 +1,42 @@
+[
+  {
+    "id": 4,
+    "sku": "sku_4",
+    "name": "Data Science 4",
+    "description": "Learn how to use data to make better decisions",
+    "originalPrice": "¥50.00",
+    "price": "¥40.00",
+    "categories": [
+      {
+        "id": 3,
+        "name": "Data Science",
+        "code": "cat_d_s",
+        "children": [],
+        "dataType": "category"
+      }
+    ],
+    "images": [
+      "https://images.pexels.com/photos/11700840/pexels-photo-11700840.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
+    ]
+  },
+  {
+    "id": 5,
+    "sku": "sku_5",
+    "name": "Data Science 5",
+    "description": "Learn how to use data to make better decisions",
+    "originalPrice": "¥60.00",
+    "price": "¥50.00",
+    "categories": [
+      {
+        "id": 3,
+        "name": "Data Science",
+        "code": "cat_d_s",
+        "children": [],
+        "dataType": "category"
+      }
+    ],
+    "images": [
+      "https://images.pexels.com/photos/8042737/pexels-photo-8042737.jpeg?auto=compress&cs=tinysrgb&w=1600&lazy=load"
+    ]
+  }
+]

@@ -916,9 +916,35 @@ class MyApp extends StatelessWidget {
 │       │   │       └── mooc
 │       │   │           └── backend
 │       │   │               ├── BackendApplication.java
+│       │   ├── resources
+│       │   │   ├── application.properties
+│       ├── test
+│       │   └── java
+│       │       └── com
+│       │           └── mooc
+│       │               └── backend
 ```
 
-其中 `build.gradle` 是项目的构建文件，`src/main/java` 是项目的源代码目录，`src/test/java` 是项目的测试代码目录。
+- `build.gradle` 是项目的构建文件
+- `src/main/java` 是项目的源代码目录
+- `src/test/java` 是项目的测试代码目录
+- `src/main/java/com/mooc/backend/BackendApplication.java` 就是项目的入口文件
+- `src/main/resources/application.properties` 是项目的配置文件
+
+```java
+@SpringBootApplication
+public class BackendApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(BackendApplication.class, args);
+    }
+
+}
+```
+
+一个 Spring Boot 项目的入口文件，一般都是一个 `SpringBootApplication` 类，这个类上面有一个 `@SpringBootApplication` 注解，其作用是让 Spring Boot 项目自动扫描当前包及其子包下的所有组件，然后把这些组件注册到 Spring 容器中并完成自动装配。
+
+只要有这个文件，我们就可以运行 Spring Boot 项目了，我们可以在 IDEA 中的 `BackendApplication` 类上面右键，然后选择 `Run BackendApplication`，这样就可以运行 Spring Boot 项目了。
 
 ### 2.2.2 Gradle 介绍
 
@@ -939,8 +965,8 @@ plugins {
 
 group = 'com.mooc'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
-targetCompatibility = '19'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 // 项目依赖版本号定义
 ext {
@@ -993,6 +1019,18 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 ```
+
+对于 `build.gradle` 文件，我们暂时只需要了解以下几点：
+
+- `plugins`：配置项目的插件，比如 `java` 插件，`spring-boot` 插件，`io.spring.dependency-management` 插件等。如果项目想进行 Spring Boot 升级的话，这里的版本号需要更改到对应的版本号。
+- `group`：项目的组织名称。
+- `version`：项目的版本号。
+- `sourceCompatibility`：项目的源码编译版本。
+- `targetCompatibility`：项目的目标编译版本。
+- `ext`：项目的依赖版本号定义。
+- `configurations`：项目的依赖配置，这里我们配置了 `compileOnly` 依赖，这个依赖只在编译时使用，不会打包到最终的 jar 包中。
+- `repositories`：项目的依赖仓库，一般我们都是使用 Maven 中央仓库。
+- `dependencies`：项目的依赖，这里 `implementation` 依赖会被打包到最终的 jar 包中，`runtimeOnly` 依赖只在运行时使用，不会打包到最终的 jar 包中，`compileOnly` 依赖只在编译时使用，不会打包到最终的 jar 包中，`annotationProcessor` 是注解的处理，比如 `lombok`，会根据注解生成代码，依赖只在编译时使用，不会打包到最终的 jar 包中，`testImplementation` 依赖只在测试时使用，不会打包到最终的 jar 包中。
 
 ### 2.2.3 Lombok 介绍
 

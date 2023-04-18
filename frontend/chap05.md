@@ -1,12 +1,18 @@
-# 第五章：App 接口 - 用 Spring Boot 3.x 构建 API
+# 第五章：App 接口 - 用 Spring Boot 3.x 构建动态图片和文件管理 API
 
-在我们在 API 角度实现需求之前，我们需要对一些基础知识做些了解。所以，我们在这一章中，会首先给大家介绍 API 和 HTTP 的基础知识，然后我们会通过实现设计一个图片生成的 API 来让大家了解如何使用 Spring Boot 来开发 RESTful API，包括 API 的参数校验、异常处理、交互式文档等。
+在我们以 API 角度实现需求之前，需要对一些核心知识做些了解。有了这些核心知识，不光在后面我们实现具体需求时，也包括大家在实际工作中会遇到的 Web 层的 80% 的常见问题都会得到解决。
+
+所以，我们在这一章中，会首先给大家介绍 API 和 HTTP 的核心知识，然后我们会通过实现设计一个图片生成的 API，这个 API 是在开发阶段用来方便的生成各种尺寸的占位图的。
+
+通过设计和完善这样一个 API 来让大家了解如何使用 Spring Boot 来开发 RESTful API，包括 API 的参数校验、异常处理、交互式文档、Profile，配置文件和测试的支持等知识点。
+
+最后，我们会使用上述知识创建一个文件管理 API，它会支持单个和多个文件上传，已上传的文件浏览以及删除文件等操作，这个 API 后面我们会在后面章节中的配置图片数据源时使用到。
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-- [第五章：App 接口 - 用 Spring Boot 3.x 构建 API](#第五章app-接口---用-spring-boot-3x-构建-api)
+- [第五章：App 接口 - 用 Spring Boot 3.x 构建动态图片和文件管理 API](#第五章app-接口---用-spring-boot-3x-构建动态图片和文件管理-api)
   - [5.1 API 和 HTTP 基础知识](#51-api-和-http-基础知识)
     - [5.1.1 基础知识：RESTful API 和 HTTP 流程](#511-基础知识restful-api-和-http-流程)
     - [5.1.2 基础知识：HTTP 状态码](#512-基础知识http-状态码)
@@ -35,6 +41,14 @@
   - [5.6.3 Profile](#563-profile)
     - [5.6.4 作业：配置 Profile](#564-作业配置-profile)
   - [5.7 测试的支持](#57-测试的支持)
+  - [5.8 文件管理 API](#58-文件管理-api)
+    - [5.8.1 需求分析](#581-需求分析)
+    - [5.8.2 七牛云](#582-七牛云)
+    - [5.8.3 领域模型](#583-领域模型)
+    - [七牛云配置](#七牛云配置)
+    - [上传文件](#上传文件)
+    - [作业：完成空间文件列表和删除文件功能](#作业完成空间文件列表和删除文件功能)
+    - [上传文件接口](#上传文件接口)
 
 <!-- /code_chunk_output -->
 
@@ -975,3 +989,253 @@ public class ImageControllerTests {
 3. `mockMvc.perform(get("/api/v1/image/{width}", 200))` 表示我们要对 `/api/v1/image/{width}` 这个接口发起一个 `GET` 请求，其中 `{width}` 的值是 `200`。
 4. `andExpect(status().isOk())` 表示我们期望返回的状态码是 `200`。
 5. `andExpect(result -> { ... })` 表示我们期望返回的结果满足一些条件，比如说，我们期望返回的 `Content-Type` 是 `image/png`，我们期望返回的内容长度大于 `0`。
+
+## 5.8 文件管理 API
+
+### 5.8.1 需求分析
+
+- 需求 1.2.3.1：图片行的数据可以配置图片的链接以及点击跳转的链接
+- 需求 1.2.3.2：轮播图的数据可以配置图片的链接以及点击跳转的链接
+
+我们之前的需求中对于涉及图片的地方，要求运营人员可以配置图片链接。理论上说，最简化的设计是提供一个地址的文本输入框即可。但如果我们和运营人员沟通之后，发现他们希望能够直接上传本地图片，可以浏览已经上传的图片资源，也可以删除已上传的图片。这就是一个新增的图片管理需求。
+
+所以对于后端来说，我们的需求是：
+
+- 提供一个 API，可以上传图片，返回图片的 URL
+- 提供一个 API，可以删除图片
+- 提供一个 API，可以获取所有的图片链接
+
+由于这个 API 上传的文件最终会使用在 App 中，所以图片不能保存在服务器本地，而是需要一个类似 CDN 的服务，来保存图片。这样的话，前端对于图片的访问和后端对于文件存储都是经过优化的。这其实是一个隐性的需求：我们需要使用一个 CDN 服务来存储图片。
+
+在我们的课程中，我们给出一个使用 [七牛云](https://www.qiniu.com/) 作为 CDN 服务的方案。
+
+### 5.8.2 七牛云
+
+我们在这里使用七牛云的对象存储服务，来存储我们的图片。七牛云提供了 Java 的 SDK，我们可以使用这个 SDK 来上传图片。需要在 `build.gradle` 文件中添加以下依赖：
+
+```groovy
+ext {
+    qiNiuVersion = '7.13.+' // + 表示使用最新的小版本
+}
+implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
+```
+
+我们如果要使用七牛云的 SDK，需要以下几个参数：
+
+- AccessKey
+- SecretKey
+- Bucket
+- Domain
+
+`AccessKey` 和 `SecretKey` 可以从 **个人中心/密钥管理** 中获得
+
+![图 10](http://ngassets.twigcodes.com/9a6196b3bae6510501547fa3cab8f0e098334f67d1a6e421b6afc83a9f894a84.png)
+
+`Bucket` : 可以从 **对象存储/空间管理** 中选择或新建一个空间，这个空间的名字就是 `Bucket`
+
+![图 11](http://ngassets.twigcodes.com/3b5701eb066ad148d072cfc4cb5a62b263d47f828353b5da918e54b78329422e.png)
+
+`Domain` 就是点击某一空间后，在里面可以绑定一个 CDN 加速域名，这个域名就是 `Domain` , 如果你没有自己的域名，可以使用七牛云提供的临时域名。
+
+![图 12](http://ngassets.twigcodes.com/6f9d9f1e2d2ed03a3ff75534db8d3a76d5f975da2717506b022f0231c6c477dc.png)
+
+### 5.8.3 领域模型
+
+为了更通用，我们把图片看成一个更广泛意义上的文件，所以我们把图片的领域模型定义为 `FileDTO`，它需要至少有以下属性：
+
+- `key`：文件的唯一标识：因为在选择或删除文件的时候，我们需要知道文件的唯一标识，所以这个属性是必须的。
+- `url`：文件的 URL：图片或文件是需要显示或者下载的，所以这个属性是必须的。
+
+```java
+public record FileDTO(String url, String key) {
+}
+```
+
+上面的代码中我们使用了一个新的 Java 语法：`record`，它可以帮助我们快速的定义一个类，它的属性是 `final` 的，同时它还会自动帮我们生成 `getter` 方法。和比较重的 `class` 相比，`record` 更轻量，更适合用来定义一些简单的数据结构。
+
+访问 `record` 的属性，可以使用 `.` 操作符，但注意，`record` 的属性其实是个方法，所以需要加上 `()`：
+
+```java
+FileDTO fileDTO = new FileDTO("http://www.baidu.com", "123");
+System.out.println(fileDTO.url());
+```
+
+### 七牛云配置
+
+在前面我们获得了 4 个七牛云必要的参数，这些参数写死在程序中显然不是一个好的设计，所以我们需要把这些参数放到配置文件中，然后在程序中读取配置文件中的参数。
+
+比如我们希望在 `application.properties` 文件中添加以下配置：
+
+```properties
+qiniu.access-key=xxxx
+qiniu.secret-key=xxxx
+qiniu.bucket=xxxx
+qiniu.domain=xxxx
+```
+
+如果希望我们的属性配置和 Spring Boot 内置的属性配置一样的效果，我们只需要在 `config` 包下创建一个 `QiNiuProperties` 类，然后在这个类上添加 `@ConfigurationProperties(prefix = "qiniu")` 注解即可。
+
+```java
+@Getter
+@Setter
+@Configuration
+@ConfigurationProperties(prefix = "qiniu")
+public class QiNiuProperties {
+    private String accessKey;
+    private String secretKey;
+    private String bucket;
+    private String domain;
+}
+```
+
+- `@ConfigurationProperties` ：这个注解的作用是读取配置文件中的属性，然后把属性值注入到这个类中。而且对于这类注解的类，重新编译后，你在 `properties` 文件中甚至可以出现智能提示。注解中的 `prefix` 属性表示读取配置文件中以 `qiniu` 开头的属性。
+- `@Configuration` ：这个注解的作用是把这个类作为一个配置类，这样的话，我们就可以在其他地方使用 `@Autowired` 注解来注入这个类了。
+- `@Getter` ：这个注解的作用是为这个类自动生成 `getter` 方法。
+- `@Setter` ：这个注解的作用是是为这个类自动生成 `setter` 方法。
+
+如果在七牛云的官方[文档](https://developer.qiniu.com/kodo/1239/java)上，查看例子可以看到上传的示例代码，此外你也可以找到删除文件的和获取空间文件列表的示例代码，但是这些代码都是写死的，我们需要把这些参数从配置文件中读取出来，然后再使用。
+
+通过学习这些示例代码，上传需要一个 `UploadManager`，而列表和删除文件需要一个 `BucketManager`，而这两个实例化时又都需要 `Auth` 的实例和 `Configuration` 的实例，遇到这种需要多个地方需要同样的配置的实例的情况，我们可以使用 `@Bean` 注解来实例化这些对象，然后把这些对象注入到其他类中。
+
+所以我们在 `config` 下创建一个 `QiNiuConfig` 类，然后在这个类中添加以下代码：
+
+```java
+@Configuration
+public class QiNiuConfig {
+    @Bean
+    public Auth auth(QiNiuProperties qiNiuProperties) {
+        return Auth.create(qiNiuProperties.getAccessKey(), qiNiuProperties.getSecretKey());
+    }
+
+    @Bean
+    public com.qiniu.storage.Configuration configuration() {
+        var cfg = new com.qiniu.storage.Configuration(com.qiniu.storage.Region.autoRegion());
+        cfg.useHttpsDomains = false;
+        cfg.resumableUploadAPIVersion = com.qiniu.storage.Configuration.ResumableUploadAPIVersion.V2;
+        return cfg;
+    }
+
+    @Bean
+    public BucketManager bucketManager(com.qiniu.util.Auth auth, com.qiniu.storage.Configuration configuration) {
+        return new BucketManager(auth, configuration);
+    }
+
+    @Bean
+    public UploadManager uploadManager(com.qiniu.storage.Configuration configuration) {
+        return new UploadManager(configuration);
+    }
+}
+```
+
+上面代码中，我们再次使用了 `@Bean` 这个注解，把函数的返回值注入到 Spring 容器中。值得特别指出的是：
+
+- `auth` 函数的参数中，我们使用了 `QiNiuProperties` 类，这个类是我们在前面定义的，它的作用是读取配置文件中的七牛云的配置。而且这个 `QiNiuProperties` 类是通过 `@Configuration` 注解注入到 Spring 容器中的，所以我们可以在这个函数中直接使用。从这点可以体会一下依赖注入的好处。
+- `configuration` 函数中，我们使用了 `com.qiniu.storage.Configuration` 这个类，这个类是七牛云提供的，它的作用是配置七牛云的上传策略，比如上传的域名、上传的区域等等。这个类的构造函数需要一个 `com.qiniu.storage.Region` 类的实例，这个类的作用是配置上传的区域，我们使用 `Region.autoRegion()` 方法来自动选择上传的区域。然后我们把 `useHttpsDomains` 属性设置为 `false`，这样就可以使用 HTTP 协议来上传文件了。断点续传的版本我们设置为 `V2`。
+- `uploadManager` 和 `bucketManager` 函数中，我们使用了 `com.qiniu.storage.BucketManager` 这个类，这个类的作用是管理七牛云的空间，比如删除文件、获取空间文件列表等等。这个类的构造函数需要 `com.qiniu.util.Auth` 类的实例和 `com.qiniu.storage.Configuration` 类的实例，所以我们在这个函数中使用了 `auth` 和 `configuration` 函数的返回值。同样的，由于 `auth` 和 `configuration` 函数的返回值都是通过 `@Bean` 注解注入到 Spring 容器中的，所以我们可以在这个函数中直接使用。
+- 那么为什么对于 `com.qiniu.storage.Configuration` 这种我们要指定它的完全限定名呢？这是因为`com.qiniu.storage.Configuration` 这个类的名字和 `@Configuration` 注解的导入 `org.springframework.context.annotation.Configuration` 相同，所以我们需要指定它的完全限定名。至于其他的类，比如 `com.qiniu.util.Auth` 这个类，就不需要指定它的完全限定名了。
+
+### 上传文件
+
+在 Java 中，一般我们把逻辑封装到一个类中，然后在这个类中定义一些方法，这些方法就是这个类的功能。所以我们在 `services` 包下创建一个 `QiNiuService` 类，然后在这个类中添加以下代码：
+
+```java
+@RequiredArgsConstructor
+@Service
+public class QiniuService {
+
+    private final UploadManager uploadManager;
+    private final Auth auth;
+    @Value("${qiniu.bucket}")
+    private String bucket;
+    @Value("${qiniu.domain}")
+    private String domain;
+    /**
+     * 上传文件
+     *
+     * @param uploadBytes 文件字节数组
+     * @param key         文件名
+     * @return 文件信息
+     */
+    public FileDTO upload(byte[] uploadBytes, String key) {
+        ByteArrayInputStream byteInputStream = new ByteArrayInputStream(uploadBytes);
+        String upToken = auth.uploadToken(bucket);
+        try {
+            // ObjectMapper 是 Jackson 的一个类，用来把 JSON 字符串转换为对象
+            var mapper = new ObjectMapper();
+            // 七牛云 SDK 的上传方法，返回的 response.bodyString() 是一个 JSON 字符串
+            var response = uploadManager.put(byteInputStream, key, upToken, null, null);
+            // 把 JSON 字符串转换为对象
+            var putRet = mapper.readValue(response.bodyString(), com.qiniu.storage.model.DefaultPutRet.class);
+            // 返回文件信息，由于返回的 key 不带域名，所以我们需要拼接上域名
+            return new FileDTO(domain + "/" + putRet.key, putRet.key);
+        } catch (QiniuException | JsonProcessingException e) {
+            e.printStackTrace();
+            throw new CustomException("文件上传错误", e.getMessage(), Errors.FileUploadException.code());
+        }
+    }
+}
+```
+
+1. `@RequiredArgsConstructor` 注解的作用是生成一个包含所有 `final` 和 `@NonNull` 字段的构造函数。Spring 遇到构造的的参数，会去容器中查找是否有这个类型的 Bean，如果有就注入，如果没有就报错。而 `UploadManager` 和 `Auth` 这两个类都是在 `QiNiuConfig` 中以 `@Bean` 注解的形式注册到 Spring 容器中的，所以我们可以在这个类中直接使用。这个写法还等价于下面的代码：
+
+   ```java
+   // 如果不使用 Lombok 提供的 @RequiredArgsConstructor 注解
+   @Service
+   public class QiniuService {
+       private final UploadManager uploadManager;
+       private final Auth auth;
+       // 需要手写构造函数
+       // 且需要在构造函数中使用 @Autowired 注解
+       public QiniuService(@Autowired UploadManager uploadManager, @Autowired Auth auth) {
+           this.uploadManager = uploadManager;
+           this.auth = auth;
+       }
+   }
+   ```
+
+2. `@Value` 注解的作用是从配置文件中读取配置。这里我们读取了 `qiniu.bucket` 和 `qiniu.domain` 这两个配置，分别是七牛云的空间名和域名。这两个配置在前面我们已经在 `application.yml` 中配置好了。当然，我们也可以采用直接把 `QiNiuProperties` 注入的方式，见下面代码。但是这样做的话，我们就需要在 `QiNiuService` 类中使用 `qiNiuProperties.getBucket()` 和 `qiNiuProperties.getDomain()` 来获取配置。
+
+   ```java
+   @RequiredArgsConstructor
+   @Service
+   public class QiniuService {
+       private final UploadManager uploadManager;
+       private final Auth auth;
+       private final QiNiuProperties qiNiuProperties;
+       // ...
+   }
+   ```
+
+3. `@Service` 注解的作用是把这个类注册到 Spring 容器中，这个注解其实和 `@Component` 的作用是一样的。只不过由于 Java 中的最佳实践是程序要分层，所以 `@Service` 表示这个是服务层的。
+
+### 作业：完成空间文件列表和删除文件功能
+
+请参考 [七牛云 SDK 文档](https://developer.qiniu.com/kodo/1239/java) 中的 **删除空间中的文件** 和 **获取空间文件列表** 两节，完成 `QiNiuService` 类中的 `listFiles` 和 `deleteFile` 方法。
+
+### 上传文件接口
+
+在 `rest.admin` 包下创建一个 `FileController` 类，然后在这个类中添加以下代码：
+
+```java
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/admin")
+public class FileController {
+    private final QiniuService qiniuService;
+
+    @PostMapping(value = "/file", consumes = "multipart/form-data")
+    public FileDTO upload(@RequestParam("file") MultipartFile file) {
+        try {
+            return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
+        } catch (IOException e) {
+            throw new CustomException("File Upload error", e.getMessage(), Errors.FileUploadException.code());
+        }
+    }
+}
+```
+
+可以看到在 Spring Boot 中完成一个文件上传的接口是非常简单的
+
+1. 文件上传必须是一个 `POST` 请求，而且请求头中必须包含 `Content-Type: multipart/form-data`，这是因为文件上传是通过 `multipart/form-data` 的方式来传输的。所以我们在 `@PostMapping` 注解中添加了 `consumes` 属性，表示这个接口只接受 `multipart/form-data` 的请求。
+2. 我们需要一个查询参数 `file`，这个参数的类型是 `MultipartFile`，这个类型是 Spring Boot 提供的，用来表示文件上传的文件。我们在方法的参数中添加了 `@RequestParam("file")` 注解，表示这个参数是一个查询参数，而且参数名是 `file`。但它和一般的查询参数不同，它不是放在 URL 中的，而是放在请求体中的。
+3. 在方法体中，我们调用了 `qiniuService.upload` 方法，把文件字节数组和文件名传递给了这个方法。这个方法会返回一个 `FileDTO` 对象，这个对象包含了文件的 URL 和文件名。我们把这个对象返回给前端。

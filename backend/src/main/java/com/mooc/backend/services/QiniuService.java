@@ -9,6 +9,7 @@ import com.qiniu.common.QiniuException;
 import com.qiniu.storage.BucketManager;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.FileInfo;
+import com.qiniu.util.Auth;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,7 @@ import java.util.List;
 public class QiniuService {
     private final UploadManager uploadManager;
     private final BucketManager bucketManager;
-    private final com.qiniu.util.Auth auth;
+    private final Auth auth;
 
     @Value("${qiniu.bucket}")
     private String bucket;
@@ -52,7 +53,7 @@ public class QiniuService {
     }
 
     /**
-     * 列出空间文件列表
+     * 空间文件列表
      *
      * @return 文件列表
      */

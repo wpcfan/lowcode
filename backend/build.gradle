@@ -11,11 +11,11 @@ targetCompatibility = '19'
 
 // 项目依赖版本号定义
 ext {
-    qiNiuVersion = '7.12.1'
-    springdocVersion = '2.1.0'
-    hypersistenceVersion = '3.1.1'
-    testcontainersVersion = '1.17.6'
-    redissonVersion = '3.20.0'
+    qiNiuVersion = '7.13.+'
+    springdocVersion = '2.1.+'
+    hypersistenceVersion = '3.1.+'
+    testcontainersVersion = '1.17.+'
+    redissonVersion = '3.20.+'
     springbootAdminVersion = '3.0.0'
 }
 

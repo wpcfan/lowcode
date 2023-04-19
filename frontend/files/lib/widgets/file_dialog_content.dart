@@ -35,7 +35,10 @@ class FileDialogContent extends StatelessWidget {
         final image = images[index];
 
         /// 非编辑模式下的图片
-        final selectableItem = Image.network(image.url).inkWell(
+        final selectableItem = Image.network(
+          image.url,
+          fit: BoxFit.cover,
+        ).inkWell(
           onTap: () => Navigator.of(context).pop(image),
         );
 

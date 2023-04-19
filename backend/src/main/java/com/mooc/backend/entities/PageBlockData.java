@@ -14,7 +14,7 @@ import org.hibernate.annotations.Type;
 @AllArgsConstructor
 @Entity
 @Table(name = "mooc_page_block_data")
-public class PageBlockDataEntity implements Comparable<PageBlockDataEntity> {
+public class PageBlockData implements Comparable<PageBlockData> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,10 +28,10 @@ public class PageBlockDataEntity implements Comparable<PageBlockDataEntity> {
 
     @ManyToOne
     @JoinColumn(name = "page_block_id")
-    private PageBlockEntity pageBlock;
+    private PageBlock pageBlock;
 
     @Override
-    public int compareTo(PageBlockDataEntity o) {
+    public int compareTo(PageBlockData o) {
         return this.getSort() - o.getSort();
     }
 
@@ -43,7 +43,7 @@ public class PageBlockDataEntity implements Comparable<PageBlockDataEntity> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PageBlockDataEntity other = (PageBlockDataEntity) obj;
+        PageBlockData other = (PageBlockData) obj;
         if (id == null) {
             return other.id == null;
         } else return id.equals(other.id);

@@ -1,9 +1,9 @@
 package com.mooc.backend.repositories;
 
 import com.mooc.backend.dtos.ProductDataDTO;
-import com.mooc.backend.entities.PageBlockDataEntity;
-import com.mooc.backend.entities.PageBlockEntity;
-import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.PageBlock;
+import com.mooc.backend.entities.PageBlockData;
+import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.blocks.BlockConfig;
 import com.mooc.backend.entities.blocks.ImageDTO;
@@ -25,17 +25,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ActiveProfiles("test")
 @DataJpaTest
-public class PageEntityRepositoryTests {
+public class PageLayoutRepositoryTests {
 
     @Autowired
-    private PageEntityRepository pageEntityRepository;
+    private PageLayoutRepository pageLayoutRepository;
     @Autowired
     private TestEntityManager testEntityManager;
 
-    private PageEntity page1;
-    private PageEntity page2;
-    private PageEntity page3;
-    private PageEntity page4;
+    private PageLayout page1;
+    private PageLayout page2;
+    private PageLayout page3;
+    private PageLayout page4;
 
     @BeforeEach
     void beforeEach() {
@@ -65,17 +65,17 @@ public class PageEntityRepositoryTests {
         var rowImageData1 = new ImageDTO(rowImage, "Test Image 1", linkBaidu);
         var rowImageData2 = new ImageDTO(rowImage, "Test Image 2", linkBaidu);
         var rowImageData3 = new ImageDTO(rowImage, "Test Image 3", linkBaidu);
-        var bannerBlockData1 = PageBlockDataEntity.builder()
+        var bannerBlockData1 = PageBlockData.builder()
                 .sort(1)
                 .content(bannerImageData1)
                 .build();
         testEntityManager.persist(bannerBlockData1);
-        var bannerBlockData2 = PageBlockDataEntity.builder()
+        var bannerBlockData2 = PageBlockData.builder()
                 .sort(2)
                 .content(bannerImageData2)
                 .build();
         testEntityManager.persist(bannerBlockData2);
-        var pinnedHeader = PageBlockEntity.builder()
+        var pinnedHeader = PageBlock.builder()
                 .sort(1)
                 .title("Test Pinned Header")
                 .type(BlockType.Banner)
@@ -85,22 +85,22 @@ public class PageEntityRepositoryTests {
         pinnedHeader.addData(bannerBlockData2);
         testEntityManager.persist(pinnedHeader);
 
-        var rowBlockData1 = PageBlockDataEntity.builder()
+        var rowBlockData1 = PageBlockData.builder()
                 .sort(1)
                 .content(rowImageData1)
                 .build();
         testEntityManager.persist(rowBlockData1);
-        var rowBlockData2 = PageBlockDataEntity.builder()
+        var rowBlockData2 = PageBlockData.builder()
                 .sort(2)
                 .content(rowImageData2)
                 .build();
         testEntityManager.persist(rowBlockData2);
-        var rowBlockData3 = PageBlockDataEntity.builder()
+        var rowBlockData3 = PageBlockData.builder()
                 .sort(3)
                 .content(rowImageData3)
                 .build();
         testEntityManager.persist(rowBlockData3);
-        var imageRow = PageBlockEntity.builder()
+        var imageRow = PageBlock.builder()
                 .sort(2)
                 .title("Test Image Row")
                 .type(BlockType.ImageRow)
@@ -120,17 +120,17 @@ public class PageEntityRepositoryTests {
 
         var productBlockData1 = ProductDataDTO.fromEntity(product);
         var productBlockData2 = ProductDataDTO.fromEntity(product);
-        var productData1 = PageBlockDataEntity.builder()
+        var productData1 = PageBlockData.builder()
                 .sort(1)
                 .content(productBlockData1)
                 .build();
         testEntityManager.persist(productData1);
-        var productData2 = PageBlockDataEntity.builder()
+        var productData2 = PageBlockData.builder()
                 .sort(2)
                 .content(productBlockData2)
                 .build();
         testEntityManager.persist(productData2);
-        var productRow = PageBlockEntity.builder()
+        var productRow = PageBlock.builder()
                 .sort(3)
                 .title("Test Product Row")
                 .type(BlockType.ProductRow)
@@ -141,7 +141,7 @@ public class PageEntityRepositoryTests {
         productRow.addData(productData2);
         testEntityManager.persist(productRow);
 
-        page1 = PageEntity.builder()
+        page1 = PageLayout.builder()
                 .pageType(PageType.Home)
                 .platform(Platform.App)
                 .config(pageConfig)
@@ -154,7 +154,7 @@ public class PageEntityRepositoryTests {
 
         testEntityManager.persist(page1);
 
-        page2 = PageEntity.builder()
+        page2 = PageLayout.builder()
                 .pageType(PageType.Home)
                 .platform(Platform.App)
                 .config(pageConfig)
@@ -169,7 +169,7 @@ public class PageEntityRepositoryTests {
 
         testEntityManager.persist(page2);
 
-        page3 = PageEntity.builder()
+        page3 = PageLayout.builder()
                 .pageType(PageType.Category)
                 .platform(Platform.App)
                 .config(pageConfig)
@@ -184,7 +184,7 @@ public class PageEntityRepositoryTests {
 
         testEntityManager.persist(page3);
 
-        page4 = PageEntity.builder()
+        page4 = PageLayout.builder()
                 .pageType(PageType.Category)
                 .platform(Platform.Web)
                 .config(pageConfig)
@@ -207,7 +207,7 @@ public class PageEntityRepositoryTests {
 
     @Test
     public void testFindAll() {
-        var pages = pageEntityRepository.findAll();
+        var pages = pageLayoutRepository.findAll();
 
         assertEquals(4, pages.size());
         assertEquals(PageType.Home, pages.get(0).getPageType());
@@ -226,14 +226,14 @@ public class PageEntityRepositoryTests {
 
     @Test
     public void testFindPublishedPage() throws Exception {
-        var page1 = testEntityManager.find(PageEntity.class, this.page1.getId());
+        var page1 = testEntityManager.find(PageLayout.class, this.page1.getId());
         var now = LocalDateTime.now();
         page1.setStartTime(now.minusDays(1));
         page1.setEndTime(now.plusDays(1));
         page1.setStatus(PageStatus.Published);
         testEntityManager.persist(page1);
 
-        var page2 = testEntityManager.find(PageEntity.class, this.page2.getId());
+        var page2 = testEntityManager.find(PageLayout.class, this.page2.getId());
         page2.setStartTime(now.minusMinutes(59));
         page2.setEndTime(now.plusMinutes(59));
         page2.setStatus(PageStatus.Published);
@@ -242,10 +242,10 @@ public class PageEntityRepositoryTests {
         testEntityManager.flush();
 
         // 从 JPA 返回 Stream 时，需要在事务中执行，而且使用 try-with-resource 语法
-        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.App, PageType.Home)) {
+        try (var stream = pageLayoutRepository.streamPublishedPage(now, Platform.App, PageType.Home)) {
             assertEquals(2, stream.count());
         }
-        try (var stream = pageEntityRepository.streamPublishedPage(now, Platform.App, PageType.Home)) {
+        try (var stream = pageLayoutRepository.streamPublishedPage(now, Platform.App, PageType.Home)) {
             assertEquals(1, stream
                     .peek(p -> System.out.println("Before filter: " + p.getId()))
                     .filter(p -> p.getEndTime().isAfter(now.plusHours(1)))
@@ -256,7 +256,7 @@ public class PageEntityRepositoryTests {
 
     @Test
     void testUpdatePageStatusToArchived() {
-        var page1 = testEntityManager.find(PageEntity.class, this.page1.getId());
+        var page1 = testEntityManager.find(PageLayout.class, this.page1.getId());
         var now = LocalDateTime.now();
         page1.setStartTime(now.minusDays(2));
         page1.setEndTime(now.minusDays(1));
@@ -266,25 +266,25 @@ public class PageEntityRepositoryTests {
         // 因为在 updatePageStatusToDraft() 方法中，我们使用了 @Modifying(flushAutomatically = true)
         testEntityManager.flush();
 
-        var count = pageEntityRepository.updatePageStatusToArchived(now);
+        var count = pageLayoutRepository.updatePageStatusToArchived(now);
         assertEquals(1, count);
 
         // 在执行完上面的 updatePageStatusToDraft() 方法后，`PersistenceContext` 中的缓存会被清空
         // 大家可以尝试一下，如果不设置 `clearAutomatically = true`，那么下面的 `assertEquals` 会失败
-        var result = pageEntityRepository.findById(this.page1.getId());
+        var result = pageLayoutRepository.findById(this.page1.getId());
         assertEquals(PageStatus.Archived, result.get().getStatus());
     }
 
     @Test
     void testCountPublishedTimeConflict() throws Exception {
-        var page1 = testEntityManager.find(PageEntity.class, this.page1.getId());
+        var page1 = testEntityManager.find(PageLayout.class, this.page1.getId());
         var now = LocalDateTime.now();
         page1.setStartTime(now.minusDays(1));
         page1.setEndTime(now.plusDays(1));
         page1.setStatus(PageStatus.Published);
         testEntityManager.persist(page1);
 
-        var page2 = testEntityManager.find(PageEntity.class, this.page2.getId());
+        var page2 = testEntityManager.find(PageLayout.class, this.page2.getId());
         page2.setStartTime(now.minusMinutes(59));
         page2.setEndTime(now.plusMinutes(59));
         page2.setStatus(PageStatus.Draft);
@@ -292,13 +292,13 @@ public class PageEntityRepositoryTests {
 
         testEntityManager.flush();
 
-        var count = pageEntityRepository.countPublishedTimeConflict(now, Platform.App, PageType.Home);
+        var count = pageLayoutRepository.countPublishedTimeConflict(now, Platform.App, PageType.Home);
         assertEquals(1, count);
 
-        var count2 = pageEntityRepository.countPublishedTimeConflict(now, Platform.App, PageType.Category);
+        var count2 = pageLayoutRepository.countPublishedTimeConflict(now, Platform.App, PageType.Category);
         assertEquals(0, count2);
 
-        var count3 = pageEntityRepository.countPublishedTimeConflict(now, Platform.Web, PageType.Home);
+        var count3 = pageLayoutRepository.countPublishedTimeConflict(now, Platform.Web, PageType.Home);
         assertEquals(0, count3);
     }
 }

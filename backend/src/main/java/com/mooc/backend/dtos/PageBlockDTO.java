@@ -1,9 +1,9 @@
 package com.mooc.backend.dtos;
 
-import com.mooc.backend.entities.PageBlockEntity;
+import com.mooc.backend.entities.PageBlock;
 import com.mooc.backend.entities.blocks.BlockConfig;
 import com.mooc.backend.enumerations.BlockType;
-import com.mooc.backend.projections.PageBlockEntityInfo;
+import com.mooc.backend.projections.PageBlockInfo;
 import lombok.Builder;
 import lombok.Value;
 
@@ -25,7 +25,7 @@ public class PageBlockDTO implements Serializable, Comparable<PageBlockDTO> {
     BlockConfig config;
     SortedSet<PageBlockDataDTO> data;
 
-    public static PageBlockDTO fromProjection(PageBlockEntityInfo block) {
+    public static PageBlockDTO fromProjection(PageBlockInfo block) {
         return PageBlockDTO.builder()
                 .id(block.getId())
                 .title(block.getTitle())
@@ -39,7 +39,7 @@ public class PageBlockDTO implements Serializable, Comparable<PageBlockDTO> {
                 .build();
     }
 
-    public static PageBlockDTO fromEntity(PageBlockEntity block) {
+    public static PageBlockDTO fromEntity(PageBlock block) {
         return PageBlockDTO.builder()
                 .id(block.getId())
                 .title(block.getTitle())
@@ -53,8 +53,8 @@ public class PageBlockDTO implements Serializable, Comparable<PageBlockDTO> {
                 .build();
     }
 
-    public PageBlockEntity toEntity() {
-        var pageBlockEntity = PageBlockEntity.builder()
+    public PageBlock toEntity() {
+        var pageBlockEntity = PageBlock.builder()
                 .title(getTitle())
                 .type(getType())
                 .sort(getSort())

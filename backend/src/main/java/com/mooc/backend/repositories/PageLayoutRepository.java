@@ -1,21 +1,21 @@
 package com.mooc.backend.repositories;
 
-import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
-import com.mooc.backend.projections.PageEntityInfo;
+import com.mooc.backend.projections.PageLayoutInfo;
 import org.springframework.data.jpa.repository.*;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, JpaSpecificationExecutor<PageEntity> {
+public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, JpaSpecificationExecutor<PageLayout> {
     @EntityGraph(attributePaths = {"pageBlocks", "pageBlocks.data"})
-    Optional<PageEntity> findById(Long id);
+    Optional<PageLayout> findById(Long id);
 
-    @Query("select p from PageEntity p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
-    Optional<PageEntityInfo> findProjectionById(Long id);
+    @Query("select p from PageLayout p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
+    Optional<PageLayoutInfo> findProjectionById(Long id);
 
     /**
      * 查询所有满足条件的页面
@@ -34,17 +34,17 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      * @return 页面列表
      */
     @Query("""
-    select p from PageEntity p
+    select p from PageLayout p
     where p.status = com.mooc.backend.enumerations.PageStatus.Published
     and p.startTime is not null and p.endTime is not null
     and p.startTime < ?1 and p.endTime > ?1
     and p.platform = ?2
     and p.pageType = ?3
     """)
-    Stream<PageEntity> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
+    Stream<PageLayout> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
 
     @Query("""
-    select count(p) from PageEntity p
+    select count(p) from PageLayout p
     where p.status = com.mooc.backend.enumerations.PageStatus.Published
     and p.startTime is not null and p.endTime is not null
     and p.startTime < ?1 and p.endTime > ?1
@@ -63,7 +63,7 @@ public interface PageEntityRepository extends JpaRepository<PageEntity, Long>, J
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
-    update PageEntity p
+    update PageLayout p
     set p.status = com.mooc.backend.enumerations.PageStatus.Archived
     where p.status = com.mooc.backend.enumerations.PageStatus.Published
     and p.startTime is not null and p.endTime is not null

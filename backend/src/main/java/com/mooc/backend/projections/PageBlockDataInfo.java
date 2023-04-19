@@ -1,11 +1,12 @@
 package com.mooc.backend.projections;
 
+import com.mooc.backend.entities.PageBlockData;
 import com.mooc.backend.entities.blocks.BlockData;
 
 /**
- * A Projection for the {@link com.mooc.backend.entities.PageBlockDataEntity} entity
+ * A Projection for the {@link PageBlockData} entity
  */
-public interface PageBlockDataEntityInfo {
+public interface PageBlockDataInfo {
     Long getId();
 
     Integer getSort();

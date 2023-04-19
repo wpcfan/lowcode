@@ -1,5 +1,6 @@
 package com.mooc.backend.projections;
 
+import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
@@ -9,9 +10,9 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 /**
- * A Projection for the {@link com.mooc.backend.entities.PageEntity} entity
+ * A Projection for the {@link PageLayout} entity
  */
-public interface PageEntityInfo {
+public interface PageLayoutInfo {
     Long getId();
 
     String getTitle();
@@ -22,7 +23,7 @@ public interface PageEntityInfo {
 
     PageConfig getConfig();
 
-    Set<PageBlockEntityInfo> getPageBlocks();
+    Set<PageBlockInfo> getPageBlocks();
 
     LocalDateTime getStartTime();
 

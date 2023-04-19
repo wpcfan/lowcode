@@ -52,6 +52,12 @@
     - [5.8.8 测试上传文件接口](#588-测试上传文件接口)
     - [5.8.9 作业：完成文件列表接口和删除文件接口，并编写单元测试](#589-作业完成文件列表接口和删除文件接口并编写单元测试)
       - [5.8.9.1 Swagger 文档](#5891-swagger-文档)
+  - [5.9 使用前端原型进行集成验证](#59-使用前端原型进行集成验证)
+  - [5.9 App 的接口原型](#59-app-的接口原型)
+    - [5.9.1 领域对象 - 页面布局](#591-领域对象---页面布局)
+      - [5.9.1.1 枚举类型](#5911-枚举类型)
+      - [5.9.1.2 作业：完成页面状态和链接类型的枚举](#5912-作业完成页面状态和链接类型的枚举)
+    - [5.9.2 领域对象 - 页面区块](#592-领域对象---页面区块)
 
 <!-- /code_chunk_output -->
 
@@ -1002,6 +1008,22 @@ public class ImageControllerTests {
 
 我们之前的需求中对于涉及图片的地方，要求运营人员可以配置图片链接。理论上说，最简化的设计是提供一个地址的文本输入框即可。但如果我们和运营人员沟通之后，发现他们希望能够直接上传本地图片，可以浏览已经上传的图片资源，也可以删除已上传的图片。这就是一个新增的图片管理需求。
 
+我们可以结合下面的图片来看看这个需求：
+
+首先，我们需要一个图片管理的页面，这个页面需要有一个上传图片的按钮，然后需要有一个图片列表，这个列表需要有图片的预览图，右上角会有一个 **只读/编辑** 模式切换按钮。在只读模式下，点选图片，图片地址会填充到文本框中。
+
+![只读模式](http://ngassets.twigcodes.com/f53a537136097263387cf2e1eea1776232b80ea3ec969ec9aabff4efa500dd5b.png)
+
+编辑模式下，我们可以删除图片，也可以上传图片。编辑模式下每张图片右上角会有一个复选框，点击复选框，可以选择多张图片，对话框的右上角会出现一个删除按钮，然后点击 **删除** 按钮，可以批量删除图片。
+
+![编辑模式](http://ngassets.twigcodes.com/2a37d65cadfcd43103c9c43178fdb8d3b30614f67effc80bb3db938fb874cddf.png)
+
+![批量删除](http://ngassets.twigcodes.com/bdafbd3d1ca82886f43ace94899c5abe8871e171af987b85dab00f5bd961df7d.png)
+
+点击上传图片按钮，会弹出一个对话框，可以选择本地图片，然后点击 **上传** 按钮，图片会上传到服务器，然后在图片列表中显示。
+
+![上传文件](http://ngassets.twigcodes.com/1539763d80a8c1bffab04f3a8df5d631c2ed108a528e4f51d43bdaf7db936750.png)
+
 所以对于后端来说，我们的需求是：
 
 - 提供一个 API，可以上传图片，返回图片的 URL
@@ -1215,7 +1237,7 @@ public class QiniuService {
 
 ### 5.8.6 作业：完成空间文件列表和删除文件功能
 
-请参考 [七牛云 SDK 文档](https://developer.qiniu.com/kodo/1239/java) 中的 **删除空间中的文件** 和 **获取空间文件列表** 两节，完成 `QiNiuService` 类中的 `listFiles` 和 `deleteFile` 方法。
+请参考 [七牛云 SDK 文档](https://developer.qiniu.com/kodo/1239/java) 中的 **删除空间中的文件** 和 **获取空间文件列表** 两节，完成 `QiNiuService` 类中的 `listFiles` 和 `deleteFile` 方法。此外还要实现一个批量删除的方法 `deleteFiles`。
 
 ### 5.8.7 上传文件接口
 
@@ -1306,6 +1328,7 @@ public class FileControllerTests {
 
 1. 文件列表接口：需要返回一个 `List<FileDTO>` 对象
 2. 删除文件接口：由于 Delete 请求没有请求体，所以我们需要使用 `@PathVariable` 注解来接收请求参数
+3. 批量删除的接口, 由于 `Delete` 请求无法携带 RequestBody，这里不需要对 RESTful 太原教旨主义，可以使用 `PUT` 请求。这里的 `PUT` 请求的请求体是一个 `List<String>` 对象，这个对象包含了所有需要删除的文件的 Key
 
 针对单元测试：
 
@@ -1325,5 +1348,201 @@ public record FileDTO(
         String url,
         @Schema(description = "文件唯一标识", example = "123-abc-123")
         String key) {
+}
+```
+
+## 5.9 使用前端原型进行集成验证
+
+文件的 API 已经完成了，但是我们还没有进行集成验证。在这一节中，我们将使用前端原型进行集成验证。
+
+## 5.9 App 的接口原型
+
+在第三章和第四章中，我们已经完成了 App 的基本功能，但是这些功能都是静态的，没有和后端进行交互。在这一节中，我们将构建 App 的接口原型，这样就可以使用我们的 App 原型进行一个初步集成验证。
+
+### 5.9.1 领域对象 - 页面布局
+
+之前由于已经有了在 App 端的领域对象，所以我们在后端的对象一开始可以利用这些对象来进行构建。但是随着项目的不断迭代，后端的对象可能会和 App 端的对象有所不同。
+
+从 App 的领域对象来看，我们需要以下对应的后端对象：
+
+1. `PageLayout`：页面布局
+2. `PageBlock`：页面区块
+3. `PageBlockData`：页面区块数据
+
+他们之间的关系是：
+
+1. 一个 `PageLayout` 对象可以包含多个 `PageBlock` 对象
+2. 一个 `PageBlock` 对象可以包含多个 `PageBlockData` 对象
+
+我们首先在 `com.mooc.backend` 下新建一个 `entities` 包，我们的领域对象都放在这个包下。在 `entities` 包下新建一个 `PageLayout` 类，代表页面布局：
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageLayout {
+    private Long id;
+    private String title;
+    private Platform platform;
+    private PageType pageType;
+    private PageConfig config;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+    private PageStatus status = PageStatus.Draft;
+    @Builder.Default
+    private Set<PageBlock> pageBlocks = new HashSet<>();
+}
+```
+
+首先注意到，我们使用了 `@Builder` 注解，这是 `Lombok` 提供的一个注解，它可以帮助我们快速构建对象。比如，我们可以使用 `PageLayout.builder().id(1L).title("首页").build()` 来构建一个 `PageLayout` 对象。如果变量有初始值，我们需要使用 `@Builder.Default` 注解来指定初始值。
+
+而 `NoArgsConstructor` 和 `AllArgsConstructor` 注解分别代表无参构造函数和全参构造函数。
+
+`PageLayout` 类有以下属性，分别是：
+
+1. `id`：页面布局的唯一标识
+2. `title`：页面布局的标题
+3. `platform`：页面布局的平台
+4. `pageType`：页面布局的类型
+5. `config`：页面布局的配置
+6. `startTime`：页面布局生效的开始时间
+7. `endTime`：页面布局生效的结束时间
+8. `status`：页面布局的状态
+9. `pageBlocks`：页面布局包含的页面区块
+
+其中 `PageConfig` 是一个简单的 Java Bean，它的代码如下：
+
+```java
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class PageConfig implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+    // 水平内边距
+    private Double horizontalPadding;
+    // 垂直内边距
+    private Double verticalPadding;
+    // 基准屏幕宽度 points 或者 dip
+    private Double baselineScreenWidth;
+}
+```
+
+#### 5.9.1.1 枚举类型
+
+`PageLayout` 的代码中，`Platform`、`PageType`、`PageConfig`、`PageStatus` 都是枚举类型，我们在 `com.mooc.backend` 下新建一个 `enumerations` 包，把这些枚举类型都放在这个包下。
+
+和 `dart` 中的枚举类型非常类似，枚举类型的值默认是整形，从 0 开始，依次递增。
+
+```java
+public enum Platform {
+    App, // 0
+    Web // 1
+}
+```
+
+Java 中的枚举有 `ordinal()` 方法，可以获取枚举类型的值。比如 `Platform.App.ordinal()` 的值就是 0，`Platform.Web.ordinal()` 的值就是 1。
+
+在实际开发中不推荐使用 `ordinal()` 方法，因为这个方法的值是不稳定的，如果我们在枚举类型中添加了一个新的枚举值，那么之前的枚举值的值就会发生变化。
+
+枚举还有 `name()` 方法，可以获取枚举类型的名称。比如 `Platform.App.name()` 的值就是 `App`，`Platform.Web.name()` 的值就是 `Web`。
+
+```java
+public enum PageType {
+    Home("home"),
+    About("about"),
+    Category("category");
+
+    private final String value;
+
+    PageType(String value) {
+        this.value = value;
+    }
+
+    public String getValue() {
+        return value;
+    }
+}
+```
+
+如果我们想要自定义枚举类型的值，我们需要给枚举类型一个构造函数，并且在构造函数中指定枚举类型的值。比如 `PageType` 枚举类型的值是 `home`、`about`、`category`。
+
+我们经常会遇到需要对枚举类型进行序列化和反序列化的情况。比如我们在前端传递一个枚举类型的值给后端，后端需要对这个值进行反序列化，然后根据这个值来做一些业务逻辑。再比如，如果我们需要把枚举值保存到数据库中，那么我们需要对枚举值进行序列化。
+
+那么 Spring Boot 中如何对枚举类型进行序列化和反序列化呢？
+
+默认情况下，Spring Boot 会把枚举类型的值序列化为枚举类型的名称，比如 `Platform.App` 序列化后的值就是 `App`，`Platform.Web` 序列化后的值就是 `Web`。如果是反序列化呢？如果我们传递一个 `App` 给后端，后端会把这个值反序列化为 `Platform.App`。
+
+但如果这个默认的行为不符合我们的需求，我们可以自定义枚举类型的序列化和反序列化的方法。比如我们想要把 `PageType` 枚举类型的值序列化为 `home`、`about`、`category`，那么
+
+我们可以使用 `@JsonCreator` 和 `@JsonValue` 注解：
+
+```java
+public enum PageType {
+    Home("home"),
+    About("about"),
+    Category("category");
+
+    private final String value;
+
+    PageType(String value) {
+        this.value = value;
+    }
+
+    @JsonCreator
+    public static PageType fromValue(String value) {
+        for (PageType pageType : PageType.values()) {
+            if (pageType.value.equals(value)) {
+                return pageType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid PageType value: " + value);
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+}
+```
+
+上面代码中，我们使用 `@JsonCreator` 注解来指定反序列化的方法，使用 `@JsonValue` 注解来指定序列化的方法。
+
+比如 `PageType.Home` 序列化后的值就是 `home`，而如果我们传递一个 `home` 给后端，后端就可以通过 `@JsonCreator` 注解指定的方法来反序列化成 `PageType.Home`。
+
+#### 5.9.1.2 作业：完成页面状态和链接类型的枚举
+
+在 `com.mooc.backend.enumerations` 包下新建 `PageStatus` 和 `LinkType` 两个枚举类型，分别代表页面状态和链接类型。
+
+需求：
+
+1. `PageStatus` 会有 **草稿** ，**发布** 和 **归档** 三种状态，分别对应 `Draft`，`Published` 和 `Archived` 三个枚举值。
+2. `LinkType` 会有 Url 和 Route 两种类型，分别对应 `url` 和 `route` 两个字符串类型的枚举值。而且我们希望序列化和反序列化的时候，枚举值都是小写的。
+
+### 5.9.2 领域对象 - 页面区块
+
+页面区块是页面布局的基本单位，由于区块在后端管理界面上为了运营人员方便识别，需要有一个 `title` 字段。区块
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PageBlock {
+    private Long id;
+    private String title;
+    private BlockType type;
+    private Integer sort;
+    private BlockConfig config;
+    @Builder.Default
+    private Set<PageBlockData> data = new HashSet<>();
 }
 ```

@@ -1,6 +1,6 @@
 package com.mooc.backend.schedules;
 
-import com.mooc.backend.repositories.PageEntityRepository;
+import com.mooc.backend.repositories.PageLayoutRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 //@Component
 public class ScheduledTasks {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-    private final PageEntityRepository pageEntityRepository;
+    private final PageLayoutRepository pageLayoutRepository;
 
     /**
      * 每 5 秒执行一次
@@ -62,6 +62,6 @@ public class ScheduledTasks {
     public void checkOverduePageAndArchive() {
         log.debug("checkOverduePageAndArchive");
         var now = LocalDateTime.now();
-        pageEntityRepository.updatePageStatusToArchived(now);
+        pageLayoutRepository.updatePageStatusToArchived(now);
     }
 }

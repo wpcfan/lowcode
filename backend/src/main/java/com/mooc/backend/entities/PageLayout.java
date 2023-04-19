@@ -30,7 +30,7 @@ import java.util.TreeSet;
 @Cacheable
 @Entity
 @Table(name = "mooc_pages")
-public class PageEntity extends Auditable {
+public class PageLayout extends Auditable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -67,7 +67,7 @@ public class PageEntity extends Auditable {
     @OneToMany(mappedBy = "page", cascade = {CascadeType.ALL}, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private SortedSet<PageBlockEntity> pageBlocks = new TreeSet<>();
+    private SortedSet<PageBlock> pageBlocks = new TreeSet<>();
 
     @Type(JsonType.class)
     @Column(nullable = false, columnDefinition = "json")
@@ -90,22 +90,22 @@ public class PageEntity extends Auditable {
      * 添加一个页面区块
      * 这个方式是 JPA 中常见的双向关联的添加方式，我们会在集合添加子元素的同时，将子元素的父元素设置为当前元素
      *
-     * @param pageBlockEntity
+     * @param pageBlock
      */
-    public void addPageBlock(PageBlockEntity pageBlockEntity) {
-        pageBlocks.add(pageBlockEntity);
-        pageBlockEntity.setPage(this);
+    public void addPageBlock(PageBlock pageBlock) {
+        pageBlocks.add(pageBlock);
+        pageBlock.setPage(this);
     }
 
     /**
      * 删除一个页面区块
      * 这个方式是 JPA 中常见的双向关联的删除方式，我们会在集合删除子元素的同时，将子元素的父元素设置为 null
      *
-     * @param pageBlockEntity
+     * @param pageBlock
      */
-    public void removePageBlock(PageBlockEntity pageBlockEntity) {
-        pageBlocks.remove(pageBlockEntity);
-        pageBlockEntity.setPage(null);
+    public void removePageBlock(PageBlock pageBlock) {
+        pageBlocks.remove(pageBlock);
+        pageBlock.setPage(null);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class PageEntity extends Auditable {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PageEntity other = (PageEntity) obj;
+        PageLayout other = (PageLayout) obj;
         if (id == null) {
             return other.id == null;
         } else return id.equals(other.id);

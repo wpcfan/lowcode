@@ -1,6 +1,6 @@
 package com.mooc.backend.dtos;
 
-import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
@@ -16,8 +16,8 @@ public record CreateOrUpdatePageDTO(
         @Schema(description = "页面类型", example = "home") @NotNull PageType pageType,
         @NotNull @Valid PageConfig config) {
 
-    public PageEntity toEntity() {
-        return PageEntity.builder()
+    public PageLayout toEntity() {
+        return PageLayout.builder()
                 .title(title)
                 .platform(platform)
                 .pageType(pageType)

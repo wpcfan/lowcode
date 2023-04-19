@@ -1,5 +1,6 @@
 package com.mooc.backend.enumerations;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum LinkType {
@@ -12,6 +13,7 @@ public enum LinkType {
         this.value = value;
     }
 
+    @JsonCreator
     public static LinkType fromValue(String value) {
         for (LinkType linkType : LinkType.values()) {
             if (linkType.value.equals(value)) {

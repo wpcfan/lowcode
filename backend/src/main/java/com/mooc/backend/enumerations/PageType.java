@@ -1,5 +1,6 @@
 package com.mooc.backend.enumerations;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum PageType {
@@ -13,6 +14,7 @@ public enum PageType {
         this.value = value;
     }
 
+    @JsonCreator
     public static PageType fromValue(String value) {
         for (PageType pageType : PageType.values()) {
             if (pageType.value.equals(value)) {

@@ -1,7 +1,7 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.repositories.PageBlockEntityRepository;
-import com.mooc.backend.repositories.PageEntityRepository;
+import com.mooc.backend.repositories.PageBlockRepository;
+import com.mooc.backend.repositories.PageLayoutRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,28 +11,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class PageDeleteService {
 
-    private final PageEntityRepository pageEntityRepository;
-    private final PageBlockEntityRepository pageBlockEntityRepository;
+    private final PageLayoutRepository pageLayoutRepository;
+    private final PageBlockRepository pageBlockRepository;
 
     public void deletePage(Long pageId) {
-        pageEntityRepository.deleteById(pageId);
+        pageLayoutRepository.deleteById(pageId);
     }
 
     public void deleteBlock(Long pageId, Long blockId) {
-        pageEntityRepository
+        pageLayoutRepository
                 .findById(pageId)
                 .ifPresent(page -> {
                     page.getPageBlocks().removeIf(block -> block.getId().equals(blockId));
-                    pageEntityRepository.save(page);
+                    pageLayoutRepository.save(page);
                 });
     }
 
     public void deleteData(Long blockId, Long dataId) {
-        pageBlockEntityRepository
+        pageBlockRepository
                 .findById(blockId)
                 .ifPresent(block -> {
                     block.getData().removeIf(data -> data.getId().equals(dataId));
-                    pageBlockEntityRepository.save(block);
+                    pageBlockRepository.save(block);
                 });
     }
 }

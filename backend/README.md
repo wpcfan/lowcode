@@ -2332,7 +2332,7 @@ public Optional<PageEntity> moveBlock(Long pageId, Long blockId, Integer targetS
     return pageEntityRepository.findById(pageId)
             .map(pageEntity -> {
                 var pageBlock = pageEntity.getPageBlocks().stream()
-                        .filter(pageBlockEntity -> pageBlockEntity.getId().equals(blockId))
+                        .filter(pageBlock -> pageBlock.getId().equals(blockId))
                         .findFirst()
                         .orElseThrow(() -> new CustomException("数据不存在", "PageUpdateService#moveBlock", HttpStatus.BAD_REQUEST.value()));
                 var sort = pageBlock.getSort();
@@ -2341,12 +2341,12 @@ public Optional<PageEntity> moveBlock(Long pageId, Long blockId, Integer targetS
                 }
                 if (sort < targetSort) {
                     pageEntity.getPageBlocks().stream()
-                            .filter(pageBlockEntity -> pageBlockEntity.getSort() > sort && pageBlockEntity.getSort() <= targetSort)
-                            .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() - 1));
+                            .filter(pageBlock -> pageBlock.getSort() > sort && pageBlock.getSort() <= targetSort)
+                            .forEach(pageBlock -> pageBlock.setSort(pageBlock.getSort() - 1));
                 } else {
                     pageEntity.getPageBlocks().stream()
-                            .filter(pageBlockEntity -> pageBlockEntity.getSort() < sort && pageBlockEntity.getSort() >= targetSort)
-                            .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() + 1));
+                            .filter(pageBlock -> pageBlock.getSort() < sort && pageBlock.getSort() >= targetSort)
+                            .forEach(pageBlock -> pageBlock.setSort(pageBlock.getSort() + 1));
                 }
                 pageBlock.setSort(targetSort);
                 return pageEntityRepository.save(pageEntity);

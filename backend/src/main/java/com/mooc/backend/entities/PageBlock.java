@@ -18,7 +18,7 @@ import java.util.TreeSet;
 @AllArgsConstructor
 @Entity
 @Table(name = "mooc_page_blocks")
-public class PageBlockEntity implements Comparable<PageBlockEntity> {
+public class PageBlock implements Comparable<PageBlock> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,25 +40,25 @@ public class PageBlockEntity implements Comparable<PageBlockEntity> {
 
     @ManyToOne
     @JoinColumn(name = "page_id")
-    private PageEntity page;
+    private PageLayout page;
 
     @OneToMany(mappedBy = "pageBlock", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @Builder.Default
-    private SortedSet<PageBlockDataEntity> data = new TreeSet<>();
+    private SortedSet<PageBlockData> data = new TreeSet<>();
 
-    public void addData(PageBlockDataEntity pageBlockDataEntity) {
-        data.add(pageBlockDataEntity);
-        pageBlockDataEntity.setPageBlock(this);
+    public void addData(PageBlockData pageBlockData) {
+        data.add(pageBlockData);
+        pageBlockData.setPageBlock(this);
     }
 
-    public void removeData(PageBlockDataEntity pageBlockDataEntity) {
-        data.remove(pageBlockDataEntity);
-        pageBlockDataEntity.setPageBlock(null);
+    public void removeData(PageBlockData pageBlockData) {
+        data.remove(pageBlockData);
+        pageBlockData.setPageBlock(null);
     }
 
     @Override
-    public int compareTo(PageBlockEntity o) {
+    public int compareTo(PageBlock o) {
         return this.getSort() - o.getSort();
     }
 
@@ -70,7 +70,7 @@ public class PageBlockEntity implements Comparable<PageBlockEntity> {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        PageBlockEntity other = (PageBlockEntity) obj;
+        PageBlock other = (PageBlock) obj;
         if (id == null) {
             return other.id == null;
         } else return id.equals(other.id);

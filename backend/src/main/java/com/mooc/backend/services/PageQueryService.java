@@ -1,11 +1,11 @@
 package com.mooc.backend.services;
 
-import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
 import com.mooc.backend.error.CustomException;
-import com.mooc.backend.repositories.PageEntityRepository;
+import com.mooc.backend.repositories.PageLayoutRepository;
 import com.mooc.backend.specifications.PageFilter;
 import com.mooc.backend.specifications.PageSpecs;
 import lombok.RequiredArgsConstructor;
@@ -21,18 +21,18 @@ import java.util.Optional;
 @Service
 public class PageQueryService {
 
-    private final PageEntityRepository pageEntityRepository;
+    private final PageLayoutRepository pageLayoutRepository;
 
-    public PageEntity findById(Long id) {
-        var page = pageEntityRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", Errors.DataNotFoundException.code()));
+    public PageLayout findById(Long id) {
+        var page = pageLayoutRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", Errors.DataNotFoundException.code()));
         return page;
     }
 
 
-    public Page<PageEntity> findSpec(PageFilter filter, Pageable pageable) {
+    public Page<PageLayout> findSpec(PageFilter filter, Pageable pageable) {
         // 函数的 apply 方法，会执行函数的 body
         var specification = PageSpecs.pageSpec.apply(filter);
-        return pageEntityRepository.findAll(specification, pageable);
+        return pageLayoutRepository.findAll(specification, pageable);
     }
 
     /**
@@ -43,14 +43,14 @@ public class PageQueryService {
      * @return 页面
      */
     @Transactional(readOnly = true)
-    public Optional<PageEntity> findPublished(Platform platform, PageType pageType) {
+    public Optional<PageLayout> findPublished(Platform platform, PageType pageType) {
         var now = LocalDateTime.now();
-        try (var stream = pageEntityRepository.streamPublishedPage(now, platform, pageType)) {
+        try (var stream = pageLayoutRepository.streamPublishedPage(now, platform, pageType)) {
             return stream.findFirst();
         }
     }
 
     public boolean existsByTitle(String title) {
-        return pageEntityRepository.countByTitle(title) > 0L;
+        return pageLayoutRepository.countByTitle(title) > 0L;
     }
 }

@@ -1,11 +1,11 @@
 package com.mooc.backend.dtos;
 
-import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
-import com.mooc.backend.projections.PageEntityInfo;
+import com.mooc.backend.projections.PageLayoutInfo;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -40,7 +40,7 @@ public class PageDTO implements Serializable {
 
     private PageStatus status;
 
-    public static PageDTO fromProjection(PageEntityInfo page) {
+    public static PageDTO fromProjection(PageLayoutInfo page) {
         return PageDTO.builder()
                 .id(page.getId())
                 .title(page.getTitle())
@@ -56,7 +56,7 @@ public class PageDTO implements Serializable {
                 .build();
     }
 
-    public static PageDTO fromEntity(PageEntity page) {
+    public static PageDTO fromEntity(PageLayout page) {
         return PageDTO.builder()
                 .id(page.getId())
                 .title(page.getTitle())
@@ -72,8 +72,8 @@ public class PageDTO implements Serializable {
                 .build();
     }
 
-    public PageEntity toEntity() {
-        var pageEntity = PageEntity.builder()
+    public PageLayout toEntity() {
+        var pageEntity = PageLayout.builder()
                 .title(getTitle())
                 .platform(getPlatform())
                 .pageType(getPageType())

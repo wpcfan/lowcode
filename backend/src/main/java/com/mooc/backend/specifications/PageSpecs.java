@@ -1,6 +1,6 @@
 package com.mooc.backend.specifications;
 
-import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.PageLayout;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -19,7 +19,7 @@ public class PageSpecs {
      * 通过 Function 接口，将 PageFilter 对象转换为 Specification 对象
      * 通过 Specification 对象，可以构造动态查询条件
      */
-    public static Function<PageFilter, Specification<PageEntity>> pageSpec = (filter) -> (root, query, builder) -> {
+    public static Function<PageFilter, Specification<PageLayout>> pageSpec = (filter) -> (root, query, builder) -> {
         // root: 代表查询的实体类
         // query: 查询语句
         // builder: 构造查询条件的工具

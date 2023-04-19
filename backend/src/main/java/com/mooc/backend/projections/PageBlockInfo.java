@@ -1,14 +1,15 @@
 package com.mooc.backend.projections;
 
+import com.mooc.backend.entities.PageBlock;
 import com.mooc.backend.entities.blocks.BlockConfig;
 import com.mooc.backend.enumerations.BlockType;
 
 import java.util.Set;
 
 /**
- * A Projection for the {@link com.mooc.backend.entities.PageBlockEntity} entity
+ * A Projection for the {@link PageBlock} entity
  */
-public interface PageBlockEntityInfo {
+public interface PageBlockInfo {
     Long getId();
 
     String getTitle();
@@ -19,5 +20,5 @@ public interface PageBlockEntityInfo {
 
     BlockConfig getConfig();
 
-    Set<PageBlockDataEntityInfo> getData();
+    Set<PageBlockDataInfo> getData();
 }

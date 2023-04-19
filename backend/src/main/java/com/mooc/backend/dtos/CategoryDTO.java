@@ -3,7 +3,6 @@ package com.mooc.backend.dtos;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.entities.Category;
-import com.mooc.backend.entities.PageEntity;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.projections.CategoryInfo;

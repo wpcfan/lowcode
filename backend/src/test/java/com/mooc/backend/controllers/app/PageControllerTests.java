@@ -1,7 +1,7 @@
 package com.mooc.backend.controllers.app;
 
 import com.mooc.backend.config.PageProperties;
-import com.mooc.backend.entities.PageEntity;
+import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
@@ -40,7 +40,7 @@ public class PageControllerTests {
 
     @Test
     void testFindPublished() throws Exception {
-        var page = PageEntity.builder()
+        var page = PageLayout.builder()
                 .id(1L)
                 .title("Page 1")
                 .pageType(PageType.Home)

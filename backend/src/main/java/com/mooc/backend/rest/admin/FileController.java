@@ -5,6 +5,7 @@ import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.error.CustomException;
 import com.mooc.backend.services.QiniuService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,9 @@ public class FileController {
 
     @Operation(summary = "上传一个文件")
     @PostMapping(value = "/file", consumes = "multipart/form-data")
-    public FileDTO upload(@RequestParam("file") MultipartFile file) {
+    public FileDTO upload(
+            @Parameter(description = "文件", required = true)
+            @RequestParam("file") MultipartFile file) {
         try {
             return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
         } catch (IOException e) {
@@ -34,7 +37,9 @@ public class FileController {
 
     @Operation(summary = "上传多个文件")
     @PostMapping(value = "/files", consumes = "multipart/form-data")
-    public List<FileDTO> uploadFiles(@RequestParam("files") List<? extends MultipartFile> files) {
+    public List<FileDTO> uploadFiles(
+            @Parameter(description = "文件集合", required = true)
+            @RequestParam("files") List<? extends MultipartFile> files) {
         return files.stream().map(file -> {
             try {
                 return qiniuService.upload(file.getBytes(), UUID.randomUUID().toString());
@@ -52,7 +57,9 @@ public class FileController {
 
     @Operation(summary = "删除文件")
     @DeleteMapping("/files/{key}")
-    public void deleteFile(@PathVariable String key) {
+    public void deleteFile(
+            @Parameter(description = "文件的唯一标识", required = true)
+            @PathVariable String key) {
         qiniuService.deleteFile(key);
     }
 

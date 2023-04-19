@@ -31,7 +31,7 @@ public class Product extends Auditable {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "original_price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "original_price", precision = 10, scale = 2)
     private BigDecimal originalPrice;
 
     @Column(nullable = false, precision = 10, scale = 2)

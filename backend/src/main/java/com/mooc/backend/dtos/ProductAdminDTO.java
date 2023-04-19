@@ -4,6 +4,7 @@ import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.projections.ProductImageInfo;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 public record ProductAdminDTO(Long id, String sku, String name, String description, BigDecimal originalPrice, BigDecimal price, Set<CategoryDTO> categories,
                               Set<ProductImageInfo> images) implements Serializable {
+    @Serial
     private static final long serialVersionUID = -1;
 
     public static ProductAdminDTO fromEntity(Product product) {

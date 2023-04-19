@@ -7,6 +7,7 @@ import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.json.MathUtils;
 
+import java.io.Serial;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ public record ProductDataDTO(
         Set<CategoryDTO> categories,
         Set<String> images
 ) implements BlockData {
+    @Serial
     private static final long serialVersionUID = -1;
 
     public static ProductDataDTO fromEntity(com.mooc.backend.entities.Product product) {

@@ -4,6 +4,7 @@ import com.mooc.backend.enumerations.LinkType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class Link implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     @Schema(description = "链接类型")
     private LinkType type;

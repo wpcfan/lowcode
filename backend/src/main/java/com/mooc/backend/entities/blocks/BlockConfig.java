@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.extern.jackson.Jacksonized;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Schema(description = "区块配置")
@@ -15,6 +16,7 @@ import java.io.Serializable;
 @Getter
 @EqualsAndHashCode(callSuper = false)
 public class BlockConfig implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     private static final String HEX_COLOR_PATTERN
             = "^#(?:(?:[\\da-f]{3}){1,2}|(?:[\\da-f]{4}){1,2})$";

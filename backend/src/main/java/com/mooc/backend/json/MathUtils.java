@@ -8,6 +8,9 @@ import java.util.Locale;
 public class MathUtils {
 
     public static String formatPrice(BigDecimal price) {
+        if (price == null) {
+            return null;
+        }
         var rounded = price.setScale(2, RoundingMode.HALF_UP);
         var locale = Locale.of("zh", "CN");
         NumberFormat format = NumberFormat.getCurrencyInstance(locale);

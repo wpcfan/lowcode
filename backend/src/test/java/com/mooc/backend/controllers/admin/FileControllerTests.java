@@ -5,6 +5,7 @@ import com.mooc.backend.dtos.FileDTO;
 import com.mooc.backend.rest.admin.FileController;
 import com.mooc.backend.services.QiniuService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,11 +14,14 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 
 @ActiveProfiles("test")
 @Import(PageProperties.class)
@@ -45,5 +49,36 @@ public class FileControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.url").value(fileDto.url()))
                 .andExpect(jsonPath("$.key").value(fileDto.key()));
+    }
+
+    @Test
+    public void testListFiles() throws Exception {
+        // 模拟 QiniuService 的 listFiles 方法，不管传入什么参数，都返回一个空的 List
+        when(qiniuService.listFiles()).thenReturn(List.of());
+        mockMvc.perform(get("/api/v1/admin/files"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+        // 模拟 QiniuService 的 listFiles 方法，不管传入什么参数，都返回一个包含两个元素的 List
+        when(qiniuService.listFiles()).thenReturn(List.of(
+                new FileDTO("https://www.example.com/test1.json", "test1.json"),
+                new FileDTO("https://www.example.com/test2.json", "test2.json")
+        ));
+        mockMvc.perform(get("/api/v1/admin/files"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isNotEmpty())
+                .andExpect(jsonPath("$[0].url").value("https://www.example.com/test1.json"))
+                .andExpect(jsonPath("$[0].key").value("test1.json"))
+                .andExpect(jsonPath("$[1].url").value("https://www.example.com/test2.json"))
+                .andExpect(jsonPath("$[1].key").value("test2.json"));
+    }
+
+    @Test
+    public void testDeleteFile() throws Exception {
+        // 对于 void 方法，可以使用 doNothing().when().method() 的方式来模拟
+        doNothing().when(qiniuService).deleteFile("test.json");
+        mockMvc.perform(delete("/api/v1/admin/files/test.json"))
+                .andExpect(status().isOk());
     }
 }

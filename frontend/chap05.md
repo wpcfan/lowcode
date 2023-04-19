@@ -45,10 +45,13 @@
     - [5.8.1 需求分析](#581-需求分析)
     - [5.8.2 七牛云](#582-七牛云)
     - [5.8.3 领域模型](#583-领域模型)
-    - [七牛云配置](#七牛云配置)
-    - [上传文件](#上传文件)
-    - [作业：完成空间文件列表和删除文件功能](#作业完成空间文件列表和删除文件功能)
-    - [上传文件接口](#上传文件接口)
+    - [5.8.4 七牛云配置](#584-七牛云配置)
+    - [5.8.5 上传文件](#585-上传文件)
+    - [5.8.6 作业：完成空间文件列表和删除文件功能](#586-作业完成空间文件列表和删除文件功能)
+    - [5.8.7 上传文件接口](#587-上传文件接口)
+    - [5.8.8 测试上传文件接口](#588-测试上传文件接口)
+    - [5.8.9 作业：完成文件列表接口和删除文件接口，并编写单元测试](#589-作业完成文件列表接口和删除文件接口并编写单元测试)
+      - [5.8.9.1 Swagger 文档](#5891-swagger-文档)
 
 <!-- /code_chunk_output -->
 
@@ -1060,7 +1063,7 @@ FileDTO fileDTO = new FileDTO("http://www.baidu.com", "123");
 System.out.println(fileDTO.url());
 ```
 
-### 七牛云配置
+### 5.8.4 七牛云配置
 
 在前面我们获得了 4 个七牛云必要的参数，这些参数写死在程序中显然不是一个好的设计，所以我们需要把这些参数放到配置文件中，然后在程序中读取配置文件中的参数。
 
@@ -1134,7 +1137,7 @@ public class QiNiuConfig {
 - `uploadManager` 和 `bucketManager` 函数中，我们使用了 `com.qiniu.storage.BucketManager` 这个类，这个类的作用是管理七牛云的空间，比如删除文件、获取空间文件列表等等。这个类的构造函数需要 `com.qiniu.util.Auth` 类的实例和 `com.qiniu.storage.Configuration` 类的实例，所以我们在这个函数中使用了 `auth` 和 `configuration` 函数的返回值。同样的，由于 `auth` 和 `configuration` 函数的返回值都是通过 `@Bean` 注解注入到 Spring 容器中的，所以我们可以在这个函数中直接使用。
 - 那么为什么对于 `com.qiniu.storage.Configuration` 这种我们要指定它的完全限定名呢？这是因为`com.qiniu.storage.Configuration` 这个类的名字和 `@Configuration` 注解的导入 `org.springframework.context.annotation.Configuration` 相同，所以我们需要指定它的完全限定名。至于其他的类，比如 `com.qiniu.util.Auth` 这个类，就不需要指定它的完全限定名了。
 
-### 上传文件
+### 5.8.5 上传文件
 
 在 Java 中，一般我们把逻辑封装到一个类中，然后在这个类中定义一些方法，这些方法就是这个类的功能。所以我们在 `services` 包下创建一个 `QiNiuService` 类，然后在这个类中添加以下代码：
 
@@ -1165,7 +1168,9 @@ public class QiniuService {
             // 七牛云 SDK 的上传方法，返回的 response.bodyString() 是一个 JSON 字符串
             var response = uploadManager.put(byteInputStream, key, upToken, null, null);
             // 把 JSON 字符串转换为对象
-            var putRet = mapper.readValue(response.bodyString(), com.qiniu.storage.model.DefaultPutRet.class);
+            var putRet = mapper.readValue(
+                response.bodyString(),
+                com.qiniu.storage.model.DefaultPutRet.class);
             // 返回文件信息，由于返回的 key 不带域名，所以我们需要拼接上域名
             return new FileDTO(domain + "/" + putRet.key, putRet.key);
         } catch (QiniuException | JsonProcessingException e) {
@@ -1208,11 +1213,11 @@ public class QiniuService {
 
 3. `@Service` 注解的作用是把这个类注册到 Spring 容器中，这个注解其实和 `@Component` 的作用是一样的。只不过由于 Java 中的最佳实践是程序要分层，所以 `@Service` 表示这个是服务层的。
 
-### 作业：完成空间文件列表和删除文件功能
+### 5.8.6 作业：完成空间文件列表和删除文件功能
 
 请参考 [七牛云 SDK 文档](https://developer.qiniu.com/kodo/1239/java) 中的 **删除空间中的文件** 和 **获取空间文件列表** 两节，完成 `QiNiuService` 类中的 `listFiles` 和 `deleteFile` 方法。
 
-### 上传文件接口
+### 5.8.7 上传文件接口
 
 在 `rest.admin` 包下创建一个 `FileController` 类，然后在这个类中添加以下代码：
 
@@ -1239,3 +1244,86 @@ public class FileController {
 1. 文件上传必须是一个 `POST` 请求，而且请求头中必须包含 `Content-Type: multipart/form-data`，这是因为文件上传是通过 `multipart/form-data` 的方式来传输的。所以我们在 `@PostMapping` 注解中添加了 `consumes` 属性，表示这个接口只接受 `multipart/form-data` 的请求。
 2. 我们需要一个查询参数 `file`，这个参数的类型是 `MultipartFile`，这个类型是 Spring Boot 提供的，用来表示文件上传的文件。我们在方法的参数中添加了 `@RequestParam("file")` 注解，表示这个参数是一个查询参数，而且参数名是 `file`。但它和一般的查询参数不同，它不是放在 URL 中的，而是放在请求体中的。
 3. 在方法体中，我们调用了 `qiniuService.upload` 方法，把文件字节数组和文件名传递给了这个方法。这个方法会返回一个 `FileDTO` 对象，这个对象包含了文件的 URL 和文件名。我们把这个对象返回给前端。
+
+### 5.8.8 测试上传文件接口
+
+我们当然可以直接使用 Swagger 来测试这个接口，这个方式是方便的。
+
+![图 1](http://ngassets.twigcodes.com/bc5710ec593cf083a5772e68162b48dac3e6fb9b1705cf1a60e234d8490e9ca7.png)
+
+点击 file 右边的 **选择文件** 按钮，选择一个文件，然后点击 **Try it out!** 按钮，就可以看到文件上传成功了。
+
+但是这种测试是一次性的，所以我们需要写一个单元测试来测试这个接口。
+
+```java
+@ActiveProfiles("test")
+@WebMvcTest(controllers = {FileController.class})
+public class FileControllerTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockBean
+    private QiniuService qiniuService;
+
+    @Test
+    public void testUpload() throws Exception {
+        // 构造一个 MultiPart 文件
+        MockMultipartFile jsonFile = new MockMultipartFile(
+            "test.json",
+            "",
+            "application/json",
+            "{\"key1\": \"value1\"}".getBytes());
+        var fileDto = new FileDTO("https://www.example.com/test.json", "test.json");
+        // 模拟 QiniuService 的 upload 方法，不管传入什么参数，都返回 fileDto
+        when(qiniuService.upload(any(), any())).thenReturn(fileDto);
+        // 使用 MockMvc 发起文件上传请求
+        mockMvc.perform(multipart("/api/v1/admin/file")
+                        .file("file", jsonFile.getBytes())
+                        .characterEncoding("UTF-8")
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.url").value(fileDto.url()))
+                .andExpect(jsonPath("$.key").value(fileDto.key()));
+    }
+}
+```
+
+1. `@ActiveProfiles("test")` 注解的作用是指定当前测试类使用的配置文件。这里我们指定了 `test` 配置文件，这个配置文件在 `src/test/resources` 目录下。这个配置文件中的配置会覆盖 `application.properties` 中的配置。这里我们指定了 `spring.profiles.active` 的值为 `test`，这个配置的作用是指定当前使用的是测试环境，这样就会使用 `application-test.properties` 这个配置文件。这个配置文件中的配置会覆盖 `application.yml` 和 `application-dev.yml` 中的配置。这里我们指定了 `qiniu.access-key` 和 `qiniu.secret-key` 的值，这样就不会使用 `application-test.yml` 中的配置了。
+2. `@WebMvcTest` 注解的作用是指定当前测试类只测试 `FileController` 这个类。这个注解会自动把 `FileController` 这个类注册到 Spring 容器中，但是它不会把其他的类注册到 Spring 容器中。这样就可以避免测试类中的代码依赖其他类，从而保证测试的独立性。
+3. 对于文件上传请求，我们需要使用 `MockMultipartFile` 来构造一个 `multipart/form-data` 的请求体。这个类的构造方法有三个参数，第一个参数是文件名，第二个参数是文件的内容类型，第三个参数是文件的内容。我们可以使用 `MockMultipartFile` 的 `getBytes()` 方法来获取文件的字节数组。
+4. 由于 `FileController` 依赖 `QiniuService`，所以我们需要使用 `@MockBean` 注解来模拟 `QiniuService` 这个类。这个注解的作用是把 `QiniuService` 这个类注册到 Spring 容器中，但是它不会把这个类的 **实现** 注册到 Spring 容器中，而是使用 Mockito 来模拟这个类的实现。这样就可以避免测试类中的代码依赖其他类，从而保证测试的独立性。具体 Mockito 的使用可以参考 [Mockito 官方文档](https://site.mockito.org/)。
+5. 使用 `when(qiniuService.upload(any(), any())).thenReturn(fileDto);` 语句来模拟 `QiniuService` 的 `upload` 方法，不管传入什么参数，都返回 `fileDto`。
+6. 使用 `MockMvc` 来发起文件上传请求。`MockMvc` 是 Spring Boot 提供的一个测试工具，它可以用来模拟 HTTP 请求。我们可以使用 `MockMvc` 的 `perform` 方法来发起一个 HTTP 请求，这个方法的参数是一个 `RequestBuilder` 对象。`RequestBuilder` 是一个接口，它有很多实现类，比如 `MockHttpServletRequestBuilder`，`MockMultipartHttpServletRequestBuilder` 等。这里我们使用 `MockMultipartHttpServletRequestBuilder` 来构造一个 `multipart/form-data` 的请求。`MockMultipartHttpServletRequestBuilder` 的 `file` 方法可以用来添加一个文件，它的第一个参数是文件的参数名，第二个参数是文件的字节数组。`MockMultipartHttpServletRequestBuilder` 的 `characterEncoding` 方法可以用来设置请求体的编码格式。
+
+对于单元测试的意义，很多同学一开始可能不是很理解。但是随着项目的不断迭代，单元测试的意义就会越来越明显。比如，我们在开发过程中，修改了 `QiniuService` 的实现，但是忘记了修改 `FileController` 中的代码，这样就会导致 `FileController` 中的代码依赖 `QiniuService` 的实现，从而导致测试失败。如果我们有单元测试，那么这个问题就会在开发阶段就暴露出来，这样就可以及时修复这个问题。
+
+另外一个常见的疑问是，我们通过模拟 QiNiuService 的实现来给出预期结果，那么测试的意义是什么呢？这个问题的答案是我们要单独测试 `FileController` 这个类，而不是测试 `QiniuService` 这个类。如果我们要测试 `QiniuService` 这个类，那么我们就不需要模拟 `QiniuService` 的实现了，而是直接使用真实的 `QiniuService` 的实现来测试。这样就可以避免测试类中的代码依赖其他类，从而保证测试的独立性。
+
+### 5.8.9 作业：完成文件列表接口和删除文件接口，并编写单元测试
+
+提示：
+
+1. 文件列表接口：需要返回一个 `List<FileDTO>` 对象
+2. 删除文件接口：由于 Delete 请求没有请求体，所以我们需要使用 `@PathVariable` 注解来接收请求参数
+
+针对单元测试：
+
+1. 在文件列表的测试中，需要考虑列表为空和不为空两种情况
+2. 在删除文件的测试中，由于 `QiniuService` 的 `delete` 方法没有返回值，所以我们需要使用 `doNothing().when(xxx).delete(yyy)` 方法来模拟 `QiniuService` 的 `delete` 方法
+
+#### 5.8.9.1 Swagger 文档
+
+有兴趣的同学可以自行添加 Swagger 文档，但文件列表的 API 由于返回的是 `List<FileDTO>` 对象，这种返回的对象有没有办法文档化呢？
+
+你可以使用 `@Schema` 注解：
+
+```java
+@Schema(name = "FileDTO", description = "文件数据传输对象")
+public record FileDTO(
+        @Schema(description = "文件 URL", example = "https://example.com/123-abc-123")
+        String url,
+        @Schema(description = "文件唯一标识", example = "123-abc-123")
+        String key) {
+}
+```

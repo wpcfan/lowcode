@@ -6,16 +6,18 @@ import com.mooc.backend.projections.PageBlockDataEntityInfo;
 import lombok.Builder;
 import lombok.Value;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Value
 @Builder
 
 public class PageBlockDataDTO implements Serializable, Comparable<PageBlockDataDTO> {
+    @Serial
     private static final long serialVersionUID = -1;
-    private Long id;
-    private Integer sort;
-    private BlockData content;
+    Long id;
+    Integer sort;
+    BlockData content;
 
     public static PageBlockDataDTO fromProjection(PageBlockDataEntityInfo data) {
         return PageBlockDataDTO.builder()

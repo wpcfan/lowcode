@@ -9,6 +9,7 @@ import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.projections.CategoryInfo;
 import lombok.*;
 
+import java.io.Serial;
 import java.util.*;
 
 @JsonDeserialize(as = CategoryDTO.class)
@@ -18,6 +19,7 @@ import java.util.*;
 @AllArgsConstructor
 public class CategoryDTO implements BlockData, Comparable<CategoryDTO> {
 
+    @Serial
     private static final long serialVersionUID = -1;
     private Long id;
     private String name;

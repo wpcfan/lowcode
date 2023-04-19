@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.With;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
@@ -26,17 +27,18 @@ import java.util.stream.Collectors;
 @Value
 @Builder
 public class ProductDTO implements Serializable {
+    @Serial
     private static final long serialVersionUID = -1;
-    private Long id;
-    private String sku;
-    private String name;
-    private String description;
+    Long id;
+    String sku;
+    String name;
+    String description;
     @JsonSerialize(using = BigDecimalSerializer.class)
-    private BigDecimal originalPrice;
+    BigDecimal originalPrice;
     @JsonSerialize(using = BigDecimalSerializer.class)
-    private BigDecimal price;
-    private Set<CategoryDTO> categories;
-    private Set<String> images;
+    BigDecimal price;
+    Set<CategoryDTO> categories;
+    Set<String> images;
 
     public static ProductDTO fromProjection(ProductInfo product) {
         return ProductDTO.builder()

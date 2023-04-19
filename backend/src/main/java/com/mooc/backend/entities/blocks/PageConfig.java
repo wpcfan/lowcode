@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -20,6 +21,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 public class PageConfig implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
     // 水平内边距
     @Schema(description = "水平内边距", example = "0.0")

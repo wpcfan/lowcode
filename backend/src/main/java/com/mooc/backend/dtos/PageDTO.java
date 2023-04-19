@@ -9,6 +9,7 @@ import com.mooc.backend.projections.PageEntityInfo;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -18,6 +19,7 @@ import java.util.TreeSet;
 @Getter
 @Builder
 public class PageDTO implements Serializable {
+    @Serial
     private static final long serialVersionUID = -1;
     private Long id;
     private String title;

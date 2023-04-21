@@ -60,11 +60,6 @@
       - [5.9.4.1 客户端访问 API](#5941-客户端访问-api)
       - [5.9.4.2 状态管理](#5942-状态管理)
       - [5.9.4.3 使用 flutter_bloc](#5943-使用-flutter_bloc)
-  - [5.9 App 的接口原型](#59-app-的接口原型)
-    - [5.9.1 领域对象 - 页面布局](#591-领域对象---页面布局)
-      - [5.9.1.1 枚举类型](#5911-枚举类型)
-      - [5.9.1.2 作业：完成页面状态和链接类型的枚举](#5912-作业完成页面状态和链接类型的枚举)
-    - [5.9.2 领域对象 - 页面区块](#592-领域对象---页面区块)
 
 <!-- /code_chunk_output -->
 
@@ -2014,6 +2009,8 @@ class FileDto {
 
 首先我们需要定义一个 `FileState` 定义文件状态，怎么理解 `State` 呢？我们可以把 `State` 理解成一个状态机，它有一个初始状态，然后通过一系列的操作，最终会变成一个新的状态。每个状态都是一个不可变的对象，我们可以通过 `copyWith` 方法来创建一个新的状态。
 
+封装状态的时候，是以页面为单位还是某一组件为单位呢？这个就看业务的复杂度，如果一个页面承载的状态比较多，那么我们拆分成几个组件，每个组件有自己的状态。如果一个页面承载的状态比较少，那么我们可以把状态封装在页面中。
+
 ```dart
 /// 文件状态
 class FileState extends Equatable {
@@ -2068,7 +2065,9 @@ class FileState extends Equatable {
 }
 ```
 
-然后我们需要定义一个 `FileEvent` 来管理图片浏览对话框的事件，`Event` 是用来触发状态变化的，我们可以通过 `Event` 来触发状态的变化。
+然后我们需要定义一个 `FileEvent` 来管理图片浏览对话框的事件，`Event` 是用来通知 `Bloc` 做出相应的操作的，比如加载文件列表、上传文件、删除文件等。
+
+通常来说，如果你在界面上的某个操作，如果它会导致状态的改变，那么这个操作就是一个 `Event`。
 
 ```dart
 abstract class FileEvent extends Equatable {}
@@ -2126,6 +2125,8 @@ class FileEventToggleSelected extends FileEvent {
 ```
 
 最后我们需要定义一个 `FileBloc` 来进行状态管理，在这里面，我们监听 `Event`，然后根据 `Event` 来触发状态的变化。
+
+我们使用 `on` 方法来监听 `Event`，然后根据 `Event` 来触发状态的变化。 `on` 方法的第一个参数是 `Event`，第二个参数是一个回调函数，它接收两个参数，第一个参数是 `Event`，第二个参数是一个 `Emitter`，它可以用来触发状态的变化。
 
 ```dart
 /// 处理文件上传、删除、加载等事件
@@ -2229,7 +2230,11 @@ class FileBloc extends Bloc<FileEvent, FileState> {
 }
 ```
 
+可以把状态的变化想象成一个管道，每次有新的状态变化，就会通过这个管道， `emit` 方法用来发射一个新的状态到这个管道。
+
 #### 5.9.4.3 使用 flutter_bloc
+
+那么我们已经定义了 `State` , `Event` 和 `Bloc` ，这几者之间的关系，简单来说，每个 `Event` 触发 `Bloc` 进行一些业务逻辑处理，然后向流中发射一个新的 `State`。
 
 典型的一个 `flutter_bloc` 的使用流程是这样的：
 
@@ -2243,14 +2248,21 @@ class ImageExplorer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    /// 使用 MultiRepositoryProvider 把必要的类在容器中注册，比如 Repository
+    /// 注册 Repository 到容器
+    /// MultiRepositoryProvider 支持多个 Repository
     return MultiRepositoryProvider(
       providers: _buildRepositoryProviders,
-      ///
+      /// 注册 Bloc 到容
+      /// MultiBlocProvider 支持多个 Bloc
       child: MultiBlocProvider(
         providers: _buildBlocProviders,
+        /// 使用 BlocBuilder 来构建 UI
+        /// BlocBuilder 会监听 Bloc 的状态变化，然后根据状态变化来构建 UI
         child: BlocBuilder<FileBloc, FileState>(
           builder: (context, state) {
+            /// 这里 state 就是 FileState
+            /// 由于每个新的状态都会导致这个 UI 重新构建
+            /// 所以下面需要根据不同的状态来构建不同的 UI
             if (state.loading) {
               return const CircularProgressIndicator().center();
             }
@@ -2271,7 +2283,11 @@ class ImageExplorer extends StatelessWidget {
             final title = FileDialogTitle(
               editable: state.editable,
               selectedKeys: state.selectedKeys,
+              /// 切换编辑模式的时候
+              /// 会触发 FileEventToggleEditable 事件
+              /// 我们可以通过 bloc.add 来发射这个事件
               onEditableChanged: (value) => bloc.add(FileEventToggleEditable()),
+              /// 删除图片的时候发送 FileEventDelete 事件
               onDelete: () => bloc.add(FileEventDelete()),
               onUpload: () => _uploadImages(bloc),
             );
@@ -2279,6 +2295,7 @@ class ImageExplorer extends StatelessWidget {
               images: images,
               editable: state.editable,
               selectedKeys: state.selectedKeys,
+              /// 选择图片的时候发送 FileEventToggleSelected 事件
               onSelected: (key) => bloc.add(FileEventToggleSelected(key)),
             );
             final actions = [
@@ -2346,193 +2363,3 @@ class ImageExplorer extends StatelessWidget {
 在 `ImageExplorer` 中，我们使用了 `BlocBuilder` 来构建 UI，它的作用是根据 `Bloc` 的 `Stream` 来构建 UI，当 `Bloc` 的状态发生变化时，`BlocBuilder` 会重新构建 UI。
 
 在 `BlocBuilder` 中，我们使用了 `context.read<FileBloc>()` 来获取 `Bloc`，这样在异步操作中，就不用关心上下文是否发生变化。
-
-## 5.9 App 的接口原型
-
-### 5.9.1 领域对象 - 页面布局
-
-之前由于已经有了在 App 端的领域对象，所以我们在后端的对象一开始可以利用这些对象来进行构建。但是随着项目的不断迭代，后端的对象可能会和 App 端的对象有所不同。
-
-从 App 的领域对象来看，我们需要以下对应的后端对象：
-
-1. `PageLayout`：页面布局
-2. `PageBlock`：页面区块
-3. `PageBlockData`：页面区块数据
-
-他们之间的关系是：
-
-1. 一个 `PageLayout` 对象可以包含多个 `PageBlock` 对象
-2. 一个 `PageBlock` 对象可以包含多个 `PageBlockData` 对象
-
-我们首先在 `com.mooc.backend` 下新建一个 `entities` 包，我们的领域对象都放在这个包下。在 `entities` 包下新建一个 `PageLayout` 类，代表页面布局：
-
-```java
-@Getter
-@Setter
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PageLayout {
-    private Long id;
-    private String title;
-    private Platform platform;
-    private PageType pageType;
-    private PageConfig config;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private PageStatus status = PageStatus.Draft;
-    @Builder.Default
-    private Set<PageBlock> pageBlocks = new HashSet<>();
-}
-```
-
-首先注意到，我们使用了 `@Builder` 注解，这是 `Lombok` 提供的一个注解，它可以帮助我们快速构建对象。比如，我们可以使用 `PageLayout.builder().id(1L).title("首页").build()` 来构建一个 `PageLayout` 对象。如果变量有初始值，我们需要使用 `@Builder.Default` 注解来指定初始值。
-
-而 `NoArgsConstructor` 和 `AllArgsConstructor` 注解分别代表无参构造函数和全参构造函数。
-
-`PageLayout` 类有以下属性，分别是：
-
-1. `id`：页面布局的唯一标识
-2. `title`：页面布局的标题
-3. `platform`：页面布局的平台
-4. `pageType`：页面布局的类型
-5. `config`：页面布局的配置
-6. `startTime`：页面布局生效的开始时间
-7. `endTime`：页面布局生效的结束时间
-8. `status`：页面布局的状态
-9. `pageBlocks`：页面布局包含的页面区块
-
-其中 `PageConfig` 是一个简单的 Java Bean，它的代码如下：
-
-```java
-@Getter
-@Setter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@EqualsAndHashCode(callSuper = false)
-public class PageConfig implements Serializable {
-    @Serial
-    private static final long serialVersionUID = 1L;
-    // 水平内边距
-    private Double horizontalPadding;
-    // 垂直内边距
-    private Double verticalPadding;
-    // 基准屏幕宽度 points 或者 dip
-    private Double baselineScreenWidth;
-}
-```
-
-#### 5.9.1.1 枚举类型
-
-`PageLayout` 的代码中，`Platform`、`PageType`、`PageConfig`、`PageStatus` 都是枚举类型，我们在 `com.mooc.backend` 下新建一个 `enumerations` 包，把这些枚举类型都放在这个包下。
-
-和 `dart` 中的枚举类型非常类似，枚举类型的值默认是整形，从 0 开始，依次递增。
-
-```java
-public enum Platform {
-    App, // 0
-    Web // 1
-}
-```
-
-Java 中的枚举有 `ordinal()` 方法，可以获取枚举类型的值。比如 `Platform.App.ordinal()` 的值就是 0，`Platform.Web.ordinal()` 的值就是 1。
-
-在实际开发中不推荐使用 `ordinal()` 方法，因为这个方法的值是不稳定的，如果我们在枚举类型中添加了一个新的枚举值，那么之前的枚举值的值就会发生变化。
-
-枚举还有 `name()` 方法，可以获取枚举类型的名称。比如 `Platform.App.name()` 的值就是 `App`，`Platform.Web.name()` 的值就是 `Web`。
-
-```java
-public enum PageType {
-    Home("home"),
-    About("about"),
-    Category("category");
-
-    private final String value;
-
-    PageType(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
-}
-```
-
-如果我们想要自定义枚举类型的值，我们需要给枚举类型一个构造函数，并且在构造函数中指定枚举类型的值。比如 `PageType` 枚举类型的值是 `home`、`about`、`category`。
-
-我们经常会遇到需要对枚举类型进行序列化和反序列化的情况。比如我们在前端传递一个枚举类型的值给后端，后端需要对这个值进行反序列化，然后根据这个值来做一些业务逻辑。再比如，如果我们需要把枚举值保存到数据库中，那么我们需要对枚举值进行序列化。
-
-那么 Spring Boot 中如何对枚举类型进行序列化和反序列化呢？
-
-默认情况下，Spring Boot 会把枚举类型的值序列化为枚举类型的名称，比如 `Platform.App` 序列化后的值就是 `App`，`Platform.Web` 序列化后的值就是 `Web`。如果是反序列化呢？如果我们传递一个 `App` 给后端，后端会把这个值反序列化为 `Platform.App`。
-
-但如果这个默认的行为不符合我们的需求，我们可以自定义枚举类型的序列化和反序列化的方法。比如我们想要把 `PageType` 枚举类型的值序列化为 `home`、`about`、`category`，那么
-
-我们可以使用 `@JsonCreator` 和 `@JsonValue` 注解：
-
-```java
-public enum PageType {
-    Home("home"),
-    About("about"),
-    Category("category");
-
-    private final String value;
-
-    PageType(String value) {
-        this.value = value;
-    }
-
-    @JsonCreator
-    public static PageType fromValue(String value) {
-        for (PageType pageType : PageType.values()) {
-            if (pageType.value.equals(value)) {
-                return pageType;
-            }
-        }
-        throw new IllegalArgumentException("Invalid PageType value: " + value);
-    }
-
-    @JsonValue
-    public String getValue() {
-        return value;
-    }
-}
-```
-
-上面代码中，我们使用 `@JsonCreator` 注解来指定反序列化的方法，使用 `@JsonValue` 注解来指定序列化的方法。
-
-比如 `PageType.Home` 序列化后的值就是 `home`，而如果我们传递一个 `home` 给后端，后端就可以通过 `@JsonCreator` 注解指定的方法来反序列化成 `PageType.Home`。
-
-#### 5.9.1.2 作业：完成页面状态和链接类型的枚举
-
-在 `com.mooc.backend.enumerations` 包下新建 `PageStatus` 和 `LinkType` 两个枚举类型，分别代表页面状态和链接类型。
-
-需求：
-
-1. `PageStatus` 会有 **草稿** ，**发布** 和 **归档** 三种状态，分别对应 `Draft`，`Published` 和 `Archived` 三个枚举值。
-2. `LinkType` 会有 Url 和 Route 两种类型，分别对应 `url` 和 `route` 两个字符串类型的枚举值。而且我们希望序列化和反序列化的时候，枚举值都是小写的。
-
-### 5.9.2 领域对象 - 页面区块
-
-页面区块是页面布局的基本单位，由于区块在后端管理界面上为了运营人员方便识别，需要有一个 `title` 字段。区块
-
-```java
-@Getter
-@Setter
-@ToString
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PageBlock {
-    private Long id;
-    private String title;
-    private BlockType type;
-    private Integer sort;
-    private BlockConfig config;
-    @Builder.Default
-    private Set<PageBlockData> data = new HashSet<>();
-}
-```

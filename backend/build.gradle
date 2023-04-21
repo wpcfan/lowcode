@@ -6,8 +6,8 @@ plugins {
 
 group = 'com.mooc'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '19'
-targetCompatibility = '19'
+sourceCompatibility = '20'
+targetCompatibility = '20'
 
 // 项目依赖版本号定义
 ext {
@@ -16,7 +16,7 @@ ext {
     hypersistenceVersion = '3.1.+'
     testcontainersVersion = '1.17.+'
     redissonVersion = '3.20.+'
-    springbootAdminVersion = '3.0.0'
+    springbootAdminVersion = '3.0.+'
 }
 
 configurations {

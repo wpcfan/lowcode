@@ -1,6 +1,12 @@
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 
+/// 文件对话框标题
+/// [editable] 是否可编辑
+/// [selectedKeys] 选中的文件
+/// [onEditableChanged] 可编辑状态改变回调
+/// [onUpload] 上传回调
+/// [onDelete] 删除回调
 class FileDialogTitle extends StatelessWidget {
   const FileDialogTitle({
     super.key,

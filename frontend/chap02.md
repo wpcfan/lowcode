@@ -334,7 +334,7 @@ dependencies:
   # 版本号规则：https://dart.dev/tools/pub/dependencies#version-constraints
   # 版本限定规则： ^1.2.3 相当于 >=1.2.3 <2.0.0
   # 路由
-  go_router: ^6.5.5
+  go_router: ^6.5.7
   # 状态管理
   flutter_bloc: ^8.1.2
 
@@ -437,7 +437,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.2
   equatable: ^2.0.5
-  go_router: ^6.5.5
+  go_router: ^6.5.7
 
   common:
     path: ../common

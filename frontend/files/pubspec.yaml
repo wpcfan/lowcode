@@ -16,8 +16,8 @@ dependencies:
   # 对象比较
   equatable: ^2.0.5
   # 图片选择器
-  image_picker: ^0.8.6+4
-  image_picker_for_web: ^2.1.11
+  image_picker: ^0.8.7+3
+  image_picker_for_web: ^3.0.0+1
   nested: ^1.0.0
 
   common:

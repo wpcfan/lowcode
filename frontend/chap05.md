@@ -53,6 +53,13 @@
     - [5.8.9 作业：完成文件列表接口和删除文件接口，并编写单元测试](#589-作业完成文件列表接口和删除文件接口并编写单元测试)
       - [5.8.9.1 Swagger 文档](#5891-swagger-文档)
   - [5.9 使用前端原型进行集成验证](#59-使用前端原型进行集成验证)
+    - [5.9.1 页面构成](#591-页面构成)
+    - [5.9.2 顶部标题栏](#592-顶部标题栏)
+    - [5.9.3 图片网格](#593-图片网格)
+    - [5.9.4 构建图片浏览对话框](#594-构建图片浏览对话框)
+      - [5.9.4.1 客户端访问 API](#5941-客户端访问-api)
+      - [5.9.4.2 状态管理](#5942-状态管理)
+      - [5.9.4.3 使用 flutter_bloc](#5943-使用-flutter_bloc)
   - [5.9 App 的接口原型](#59-app-的接口原型)
     - [5.9.1 领域对象 - 页面布局](#591-领域对象---页面布局)
       - [5.9.1.1 枚举类型](#5911-枚举类型)
@@ -1355,9 +1362,992 @@ public record FileDTO(
 
 文件的 API 已经完成了，但是我们还没有进行集成验证。在这一节中，我们将使用前端原型进行集成验证。
 
-## 5.9 App 的接口原型
+根据 5.8.1 中的需求分析，我们需要实现以下功能：
 
-在第三章和第四章中，我们已经完成了 App 的基本功能，但是这些功能都是静态的，没有和后端进行交互。在这一节中，我们将构建 App 的接口原型，这样就可以使用我们的 App 原型进行一个初步集成验证。
+1. 一个用于显示文件列表的页面，网格布局，每个网格显示一个文件的缩略图
+2. 列表页面右上方有一个切换 **只读/编辑** 模式的按钮
+3. 编辑模式下，每个网格右上角有一个复选框，用于选择文件
+4. 编辑模式下，右上角有一个删除按钮，用于删除选中的文件
+5. 编辑模式下，左下角有一个全选按钮，用于全选/取消全选
+6. 编辑模式下，再次点击 **只读/编辑** 按钮，可以退出编辑模式
+7. 只读模式下， **只读/编辑** 按钮的图标为编辑图标，点击后进入编辑模式，图标变为只读图标
+8. 编辑模式下，右上角多一个上传按钮，点击后进入上传页面
+9. 选择文件上传后，自动返回文件列表页面，文件列表页面会自动刷新
+
+由于这是一个相对独立的组件，我们将在一个单独的模块 `files` 中进行开发。
+
+### 5.9.1 页面构成
+
+我们先来看一下列表页面的原型：
+
+![图 17](http://ngassets.twigcodes.com/61665dd63d1e539aaa8042af71a74ffffb14b432b9da552f4e4d8c1e23580de9.png)
+
+我们可以将页面分为三部分
+
+1. 顶部标题栏
+2. 图片网格
+3. 底部工具栏
+
+我们的目标是做一个对话框来实现这个组件
+
+```dart
+final title = ...;
+final content = ...;
+final actions = [
+  TextButton(
+    onPressed: () => Navigator.of(context).pop(),
+    child: const Text('取消'),
+  ),
+];
+return AlertDialog(
+  title: title,
+  content: content,
+  actions: actions,
+);
+```
+
+所以底部工具栏其实就是对话框的 `actions` 部分，我们可以先不考虑这部分。
+
+### 5.9.2 顶部标题栏
+
+顶部标题栏我们希望设计成一个 `Row`，左边是一个 `Text`，右边是一组 `IconButton`。
+
+这个组件本身不处理具体的事件，而是将事件传递给父组件，所以我们将这个组件设计成一个 `StatelessWidget`。
+
+```dart
+/// 文件对话框标题
+/// [editable] 是否可编辑
+/// [selectedKeys] 选中的文件
+/// [onEditableChanged] 可编辑状态改变回调
+/// [onUpload] 上传回调
+/// [onDelete] 删除回调
+class FileDialogTitle extends StatelessWidget {
+  const FileDialogTitle({
+    super.key,
+    required this.editable,
+    required this.selectedKeys,
+    required this.onEditableChanged,
+    required this.onUpload,
+    required this.onDelete,
+  });
+  final bool editable;
+  final List<String> selectedKeys;
+  final void Function(bool) onEditableChanged;
+  final void Function() onUpload;
+  final void Function() onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    /// 编辑按钮
+    final editableIcon = Icon(editable ? Icons.lock : Icons.lock_open).inkWell(
+      onTap: () => onEditableChanged(!editable),
+    );
+
+    /// 上传按钮
+    final uploadIcon = const Icon(Icons.upload_file).inkWell(
+      onTap: onUpload,
+    );
+
+    /// 删除按钮
+    final deleteIcon = const Icon(Icons.delete).inkWell(
+      onTap: () async {
+        if (selectedKeys.isEmpty) {
+          return;
+        }
+        final cancelButton = TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('取消'),
+        );
+        final confirmButton = TextButton(
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text('确定'),
+        );
+        final result = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('删除图片'),
+            content: const Text('确定要删除这些图片吗？'),
+            actions: [cancelButton, confirmButton],
+          ),
+        );
+        if (result ?? false) {
+          onDelete();
+        }
+      },
+    );
+    return [
+      const Text('图片资源'),
+      const Spacer(),
+      editableIcon,
+      if (editable) uploadIcon,
+      if (editable && selectedKeys.isNotEmpty) deleteIcon,
+    ].toRow();
+  }
+}
+```
+
+### 5.9.3 图片网格
+
+图片网格我们希望设计成一个 `GridView`，每个网格显示一个文件的缩略图。
+
+```dart
+/// 文件对话框内容
+/// [images] 文件列表
+/// [editable] 是否可编辑
+/// [selectedKeys] 选中的文件 key 列表
+/// [onSelected] 选中文件的回调
+class FileDialogContent extends StatelessWidget {
+  const FileDialogContent({
+    super.key,
+    required this.images,
+    required this.editable,
+    required this.selectedKeys,
+    required this.onSelected,
+  });
+  final List<FileDto> images;
+  final bool editable;
+  final List<String> selectedKeys;
+  final void Function(String) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    /// 使用 GridView 显示图片
+    return GridView.builder(
+      shrinkWrap: true,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+      ),
+      itemCount: images.length,
+      itemBuilder: (context, index) {
+        final image = images[index];
+
+        /// 非编辑模式下的图片
+        final selectableItem = Image.network(
+          image.url,
+          fit: BoxFit.cover,
+        ).inkWell(
+          onTap: () => Navigator.of(context).pop(image),
+        );
+
+        /// 编辑模式下的图片
+        final editableItem = _buildEditableItem(image);
+        /// 根据是否可编辑返回不同的组件
+        return editable ? editableItem : selectableItem;
+      },
+    ).constrained(
+      width: 400,
+      height: 600,
+    );
+  }
+
+  /// 构建可编辑状态下的图片
+  Widget _buildEditableItem(FileDto image) {
+    final checkedIcon = Icon(selectedKeys.contains(image.key)
+            ? Icons.check_box
+            : Icons.check_box_outline_blank)
+        .inkWell(
+          onTap: () => onSelected(image.key),
+        )
+        .positioned(
+          top: 0,
+          right: 0,
+        );
+    return [Image.network(image.url), checkedIcon].toStack();
+  }
+}
+```
+
+上面的代码中，我们使用了 `GridView` 来显示图片，但是这个组件默认是无限高度的，所以我们需要使用 `shrinkWrap` 属性来限制高度。
+
+### 5.9.4 构建图片浏览对话框
+
+#### 5.9.4.1 客户端访问 API
+
+在客户端访问 API，我们可以使用 `dio` 这个库，它是一个 `http` 请求库，它的使用方法和 `axios` 类似。
+
+```dart
+/// 使用 dio 发送请求
+final dio = Dio();
+/// 获取文件列表
+Future<List<FileDto>> getFiles() async {
+  final response = await dio.get('/api/files');
+  return (response.data as List).map((e) => FileDto.fromJson(e)).toList();
+}
+```
+
+但是我们并不是想直接在 `file` 这个包当中使用 `dio` 。我们打算利用 `Repository` 这个模式来管理 API 的访问。
+
+那么什么是 `Repository` 呢？`Repository` 是一个管理数据的类，它的作用是从数据源获取数据，然后将数据转换成我们需要的格式，最后将数据返回给调用者。在我们的项目中，我们的数据源就是 API，所以我们的 `Repository` 就是用来管理 API 的访问的。
+
+对于比较简单的 `Repository` 我们当然可以直接使用 `dio`:
+
+```dart
+class FileRepository {
+  final String baseUrl;
+  final Dio client;
+
+  FileRepository({
+    Dio? client,
+    this.baseUrl = '',
+  }) : client = client ?? FileClient();
+
+  Future<List<FileDto>> getFiles() async {
+    final response = await client.get('/files');
+    return (response.data as List).map((e) => FileDto.fromJson(e)).toList();
+  }
+}
+```
+
+但实际工作中，我们经常会发现需要对网络层进行一些封装，比如添加一些公共的请求头，添加一些公共的请求参数，添加一些公共的错误处理逻辑等等。这些逻辑我们不希望在每个 `Repository` 中都重复写一遍，所以我们可以将这些逻辑抽离出来，放到一个单独的包中，这就是 `netwokring` 包。
+
+对于文件上传来说，它需要的请求头是和一般的请求不一样的，所以我们需要对 `dio` 进行一些封装，这样我们就可以在 `networking` 包中创建一个 `FileClient` 来管理文件上传的 API。
+
+```dart
+class FileClient extends Dio {
+  FileClient() {
+    options.baseUrl = 'http://localhost:3000';
+    options.headers['Content-Type'] = 'multipart/form-data';
+  }
+}
+```
+
+当然，我们在这个 `FileClient` 还可以添加一些拦截器，比如日志的拦截器，这有助于我们调试。
+
+```dart
+class FileClient extends Dio {
+  FileClient() {
+    options.baseUrl = 'http://localhost:3000';
+    options.headers['Content-Type'] = 'multipart/form-data';
+    interceptors.add(PrettyDioLogger());
+  }
+}
+```
+
+此外，还记得我们之前对于后端的异常做了统一处理吗？我们可以在这里添加一个拦截器，来处理后端返回的异常。由于后端异常会遵循 RFC7807 标准，所以我们可以定义一个 `Problem` 类来表示后端返回的异常。
+
+```dart
+class Problem {
+  final String? title;
+  final String? detail;
+  final String? instance;
+  final int? status;
+  final String? type;
+  final int? code;
+  final String? ua;
+  final String? locale;
+
+  Problem({
+    this.title,
+    this.detail,
+    this.instance,
+    this.status,
+    this.type,
+    this.code,
+    this.ua,
+    this.locale,
+  });
+
+  factory Problem.fromJson(Map<String, dynamic> json) {
+    return Problem(
+      title: json['title'],
+      detail: json['detail'],
+      instance: json['instance'],
+      status: json['status'],
+      type: json['type'],
+      code: json['code'],
+      ua: json['ua'],
+      locale: json['locale'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'detail': detail,
+      'instance': instance,
+      'status': status,
+      'type': type,
+      'code': code,
+      'ua': ua,
+      'locale': locale,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'Problem{title: $title, detail: $detail, instance: $instance, status: $status, type: $type, code: $code, ua: $ua, locale: $locale}';
+  }
+
+  Problem copyWith({
+    String? title,
+    String? detail,
+    String? instance,
+    int? status,
+    String? type,
+    int? code,
+    String? ua,
+    String? locale,
+  }) {
+    return Problem(
+      title: title ?? this.title,
+      detail: detail ?? this.detail,
+      instance: instance ?? this.instance,
+      status: status ?? this.status,
+      type: type ?? this.type,
+      code: code ?? this.code,
+      ua: ua ?? this.ua,
+      locale: locale ?? this.locale,
+    );
+  }
+}
+```
+
+然后我们就可以在拦截器中处理后端返回的异常了。
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+import 'problem.dart';
+
+/// 自定义的 Dio 实例，用于访问文件接口
+/// 该实例会自动添加日志拦截器和错误拦截器
+/// 该实例会自动添加 Content-Type 和 Accept 头
+/// 该实例会自动将后台返回的 Problem 对象转换为 DioError
+class FileClient with DioMixin implements Dio {
+  static final FileClient _instance = FileClient._();
+  factory FileClient() => _instance;
+
+  FileClient._() {
+    options = BaseOptions(
+      baseUrl: 'http://localhost:8080/api/v1/admin',
+      connectTimeout: const Duration(seconds: 5), /// 连接超时时间
+      receiveTimeout: const Duration(seconds: 5), /// 接收超时时间
+      headers: Map.from({
+        /// 文件上传需要使用 multipart/form-data
+        'Content-Type': 'multipart/form-data',
+        'Accept': 'application/json',
+      }),
+    );
+    /// 设置 HttpClientAdapter
+    httpClientAdapter = HttpClientAdapter();
+    /// 添加日志拦截器
+    interceptors.add(PrettyDioLogger());
+    /// 添加自定义的错误拦截器
+    /// 这个拦截器是拦截 Response 的, 如果后端返回的是 Problem 对象
+    /// 那么就会将 Problem 对象转换为 DioError
+    interceptors.add(InterceptorsWrapper(
+      onError: (e, handler) {
+        if (e.response?.data != null) {
+          final problem = Problem.fromJson(e.response?.data);
+          return handler.reject(DioError(
+            requestOptions: e.requestOptions,
+            error: problem,
+            type: DioErrorType.badResponse,
+            message: problem.title,
+          ));
+        }
+        return handler.next(e);
+      },
+    ));
+  }
+}
+```
+
+类似的，我们对于文件管理类的 API 也可以创建一个 `FileAdminClient` 来管理，但文件管理类的请求和其他运营后台需要的请求没有什么差别，所以可以创建一个 `AdminClient`。
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+import 'problem.dart';
+
+/// 自定义的 Dio 实例，用于访问后台管理接口
+/// 该实例会自动添加日志拦截器和错误拦截器
+/// 该实例会自动添加 Content-Type 和 Accept 头
+/// 该实例会自动将后台返回的 Problem 对象转换为 DioError
+///
+/// DioMixin 是一个 Mixin，它会自动实现 Dio 的所有方法
+/// Mixin 的好处是可以在不改变原有类的情况下，为类添加新的功能
+/// 具体的实现原理可以参考：https://dart.dev/guides/language/language-tour#mixins
+class AdminClient with DioMixin implements Dio {
+  /// 单例模式，禁止外部创建实例
+  static final AdminClient _instance = AdminClient._();
+
+  /// 工厂构造函数，返回单例
+  factory AdminClient() => _instance;
+
+  /// 私有构造函数，禁止外部创建实例
+  AdminClient._() {
+    /// 配置参数
+    options = BaseOptions(
+      /// 后台管理接口的基础 URL
+      baseUrl: 'http://localhost:8080/api/v1/admin',
+
+      /// 添加 Content-Type 和 Accept 头
+      headers: Map.from({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }),
+    );
+
+    /// 添加 HttpClientAdapter, 用于发送 HTTP 请求
+    httpClientAdapter = HttpClientAdapter();
+
+    /// 添加日志拦截器
+    interceptors.add(PrettyDioLogger());
+
+    /// 添加错误拦截器
+    /// InterceptorsWrapper 是一个拦截器包装器，它可以包装多个拦截器
+    /// 可以处理 onError, onRequest, onResponse 事件
+    interceptors.add(InterceptorsWrapper(
+      onError: (e, handler) {
+        if (e.response?.data != null) {
+          final problem = Problem.fromJson(e.response?.data);
+          return handler.reject(DioError(
+            requestOptions: e.requestOptions,
+            error: problem,
+            type: DioErrorType.badResponse,
+            message: problem.title,
+          ));
+        }
+        return handler.next(e);
+      },
+    ));
+  }
+}
+```
+
+上面代码中，我们使用了 `DioCacheInterceptor` 来实现缓存功能，它需要传入一个 `DioCacheOptions` 对象来配置缓存的选项。
+
+```dart
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+
+/// 全局缓存配置
+final cacheOptions = CacheOptions(
+  // 必选参数，默认缓存存储器
+  store: MemCacheStore(),
+
+  /// 所有下面的参数都是可选的
+
+  /// 缓存策略，默认为 CachePolicy.request
+  /// - CachePolicy.request: 如果缓存可用并且未过期，则使用缓存，否则从服务器获取响应并缓存
+  /// - CachePolicy.forceCache: 当 Server 没有缓存的响应头时，强制使用缓存，也就是缓存每次成功的 GET 请求
+  /// - CachePolicy.refresh: 不论缓存是否可用，都从服务器获取响应并根据响应头缓存
+  /// - CachePolicy.refreshForceCache: 无论 Server 是否有缓存响应头，都从服务器获取响应并缓存
+  /// - CachePolicy.noCache: 不使用缓存，每次都从服务器获取响应并根据响应头缓存
+  policy: CachePolicy.forceCache,
+
+  /// 例外状态码，当请求失败时，如果状态码在此列表中，则不使用缓存
+  hitCacheOnErrorExcept: [401, 403],
+
+  /// 覆盖 HTTP 响应头中的 max-age 字段，用于指定缓存的有效期
+  /// 默认为 null，表示使用 HTTP 响应头中的 max-age 字段
+  maxStale: const Duration(minutes: 10),
+
+  /// 缓存优先级，默认为 CachePriority.normal
+  priority: CachePriority.normal,
+
+  /// 加密器，默认为 null，表示不加密
+  cipher: null,
+
+  /// 缓存键生成器，默认为 CacheOptions.defaultCacheKeyBuilder
+  keyBuilder: CacheOptions.defaultCacheKeyBuilder,
+
+  /// 是否允许缓存 Post 请求，默认为 false
+  /// 当设置为 true 时，建议改写 keyBuilder，以避免缓存多个不同的 POST 请求
+  allowPostMethod: false,
+);
+```
+
+封装了 `FileClient` 和 `AppClient` 之后，我们就可以在 `networking\networking.dart` 中导出这两个类了。
+
+```dart
+export 'file_client.dart';
+export 'admin_client.dart';
+```
+
+然后就可以在 `repositories/lib` 下创建 `file_upload_repository.dart` 和 `file_admin_repository.dart` 两个文件，分别用来管理上传文件和管理文件的 API。
+
+```dart
+class FileUploadRepository {
+  final String baseUrl;
+  final Dio client;
+
+  FileUploadRepository({
+    Dio? client,
+    this.baseUrl = '',
+  }) : client = client ?? FileClient();
+
+  Future<FileDto> uploadFile(UploadFile file) async {
+    debugPrint('FileUploadRepository.upload($file)');
+
+    final res = await client.post('/file', data: {
+      'file': MultipartFile.fromBytes(
+        file.file,
+        filename: file.name,
+      ),
+    });
+    if (res.data is! Map) {
+      throw Exception(
+          'FileUploadRepository.upload($file) - failed, res.data is not Map');
+    }
+
+    debugPrint('FileUploadRepository.upload($file) - success');
+    final json = res.data as Map<String, dynamic>;
+    final fileDto = FileDto.fromJson(json);
+    return fileDto;
+  }
+
+  Future<List<FileDto>> uploadFiles(List<UploadFile> files) async {
+    debugPrint('FileUploadRepository.upload($files)');
+
+    FormData formData = FormData();
+    for (var i = 0; i < files.length; i++) {
+      formData.files.add(MapEntry(
+          "files",
+          MultipartFile.fromBytes(
+            files[i].file,
+            filename: files[i].name,
+          )));
+    }
+    final res = await client.post('/files', data: formData);
+    if (res.data is! List) {
+      throw Exception(
+          'FileUploadRepository.upload($files) - failed, res.data is not List');
+    }
+
+    debugPrint('FileUploadRepository.upload($files) - success');
+    final json = res.data as List<dynamic>;
+    final fileDtos = json.map((e) => FileDto.fromJson(e)).toList();
+    return fileDtos;
+  }
+}
+```
+
+上面代码中，我们封装了两个方法，一个是上传单个文件，一个是上传多个文件。
+
+然后对于文件管理的 API，我们可以在 `file_admin_repository.dart` 中封装，这里使用了 `AdminClient` 。
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:networking/networking.dart';
+
+class FileAdminRepository {
+  final String baseUrl;
+  final Dio client;
+
+  FileAdminRepository({
+    Dio? client,
+    this.baseUrl = '/files',
+  }) : client = client ?? AdminClient();
+
+  Future<List<FileDto>> getFiles() async {
+    final url = baseUrl;
+    final res = await client.get(url);
+    if (res.data is! List) {
+      throw Exception(
+          'FileAdminRepository.getFiles() - failed, res.data is not List');
+    }
+
+    final json = res.data as List;
+    final files = json.map((e) => FileDto.fromJson(e)).toList();
+    return files;
+  }
+
+  Future<void> deleteFile(String key) async {
+    final url = '$baseUrl/$key';
+    await client.delete(url);
+  }
+
+  Future<void> deleteFiles(List<String> keys) async {
+    final url = baseUrl;
+    await client.put(url, data: keys);
+  }
+}
+
+class FileDto {
+  final String key;
+  final String url;
+
+  FileDto({
+    required this.key,
+    required this.url,
+  });
+
+  factory FileDto.fromJson(Map<String, dynamic> json) {
+    return FileDto(
+      key: json['key'],
+      url: json['url'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'key': key,
+      'url': url,
+    };
+  }
+}
+```
+
+在这里，我们封装了三个方法，分别是获取文件列表、删除单个文件和删除多个文件。你可以看到和后端 API 类似的，对于不同的 HTTP 方法， `dio` 也提供了对应的方法，比如 `get`、`post`、`put`、`delete` 等。
+
+#### 5.9.4.2 状态管理
+
+由于这个图片浏览对话框的状态很多，这里我们给大家介绍一个 flutter 的状态管理框架 - `flutter_bloc` 。
+
+`flutter_bloc` 是一个状态管理框架，它的核心思想是将状态抽象成一个个的 `Bloc`，每个 `Bloc` 只负责管理一个状态，然后通过 `Stream` 来将状态传递给 `Widget`。如果你熟悉 `Redux` 的话，那么你会发现 `flutter_bloc` 和 `Redux` 的思想是非常相似的。
+
+我们可以通过 `flutter_bloc` 来管理图片浏览对话框的状态，这样我们就可以将状态和 UI 分离开来，让代码更加清晰。
+
+我们可以用一个图来表示 `BLoC` 的流程：
+
+![图 19](http://ngassets.twigcodes.com/f5b7576daa2382c738a33ea86723955f50910da9ca4db6ef855f2942b91f77c5.png)
+
+1. 初始状态： `FileState`
+2. 加载文件列表： `FileState` -> `FileState`，`loading` 为 `true`
+3. 加载成功： `FileState` -> `FileState`，`loading` 为 `false`，`files` 为加载的文件列表，`error` 为空
+4. 加载失败： `FileState` -> `FileState`，`loading` 为 `false`，`files` 为空，`error` 为错误信息
+
+首先我们需要定义一个 `FileState` 定义文件状态，怎么理解 `State` 呢？我们可以把 `State` 理解成一个状态机，它有一个初始状态，然后通过一系列的操作，最终会变成一个新的状态。每个状态都是一个不可变的对象，我们可以通过 `copyWith` 方法来创建一个新的状态。
+
+```dart
+/// 文件状态
+class FileState extends Equatable {
+  /// 文件列表
+  final List<FileDto> files;
+
+  /// 是否正在加载文件列表
+  final bool loading;
+
+  /// 是否正在上传文件
+  final bool uploading;
+
+  /// 错误信息
+  final String error;
+
+  /// 是否处于编辑模式
+  final bool editable;
+
+  /// 选中的文件
+  final List<String> selectedKeys;
+
+  const FileState({
+    this.files = const [],
+    this.uploading = false,
+    this.loading = false,
+    this.error = '',
+    this.editable = false,
+    this.selectedKeys = const [],
+  });
+
+  @override
+  List<Object?> get props =>
+      [files, uploading, loading, error, editable, selectedKeys];
+
+  FileState copyWith({
+    List<FileDto>? files,
+    bool? uploading,
+    bool? loading,
+    String? error,
+    bool? editable,
+    List<String>? selectedKeys,
+  }) {
+    return FileState(
+      files: files ?? this.files,
+      uploading: uploading ?? this.uploading,
+      loading: loading ?? this.loading,
+      error: error ?? this.error,
+      editable: editable ?? this.editable,
+      selectedKeys: selectedKeys ?? this.selectedKeys,
+    );
+  }
+}
+```
+
+然后我们需要定义一个 `FileEvent` 来管理图片浏览对话框的事件，`Event` 是用来触发状态变化的，我们可以通过 `Event` 来触发状态的变化。
+
+```dart
+abstract class FileEvent extends Equatable {}
+
+/// 加载文件列表
+class FileEventLoad extends FileEvent {
+  FileEventLoad() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// 上传文件
+class FileEventUpload extends FileEvent {
+  FileEventUpload(this.file) : super();
+  final UploadFile file;
+
+  @override
+  List<Object?> get props => [file];
+}
+
+/// 上传多个文件
+class FileEventUploadMultiple extends FileEvent {
+  FileEventUploadMultiple(this.files) : super();
+  final List<UploadFile> files;
+
+  @override
+  List<Object?> get props => [files];
+}
+
+/// 删除文件
+class FileEventDelete extends FileEvent {
+  FileEventDelete() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// 切换编辑模式
+class FileEventToggleEditable extends FileEvent {
+  FileEventToggleEditable() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// 切换选中状态
+class FileEventToggleSelected extends FileEvent {
+  FileEventToggleSelected(this.key) : super();
+  final String key;
+
+  @override
+  List<Object?> get props => [key];
+}
+```
+
+最后我们需要定义一个 `FileBloc` 来进行状态管理，在这里面，我们监听 `Event`，然后根据 `Event` 来触发状态的变化。
+
+```dart
+/// 处理文件上传、删除、加载等事件
+class FileBloc extends Bloc<FileEvent, FileState> {
+  final FileUploadRepository fileRepo;
+  final FileAdminRepository fileAdminRepo;
+
+  FileBloc({
+    required this.fileRepo,
+    required this.fileAdminRepo,
+  }) : super(const FileState()) {
+    /// 监听事件
+    on<FileEventUpload>(_onFileEventUpload);
+    on<FileEventUploadMultiple>(_onFileEventUploadMultiple);
+    on<FileEventLoad>(_onFileEventLoad);
+    on<FileEventDelete>(_onFileEventDelete);
+    on<FileEventToggleEditable>(_onFileEventToggleEditable);
+    on<FileEventToggleSelected>(_onFileEventToggleSelected);
+  }
+
+  /// 选择文件
+  void _onFileEventToggleSelected(
+      FileEventToggleSelected event, Emitter<FileState> emit) {
+    if (state.selectedKeys.contains(event.key)) {
+      emit(state.copyWith(
+          selectedKeys:
+              state.selectedKeys.where((e) => e != event.key).toList()));
+    } else {
+      emit(state.copyWith(selectedKeys: [...state.selectedKeys, event.key]));
+    }
+  }
+
+  /// 切换编辑模式
+  void _onFileEventToggleEditable(
+      FileEventToggleEditable event, Emitter<FileState> emit) {
+    emit(state.copyWith(editable: !state.editable));
+  }
+
+  /// 删除文件
+  void _onFileEventDelete(
+      FileEventDelete event, Emitter<FileState> emit) async {
+    emit(state.copyWith(loading: true));
+    try {
+      await fileAdminRepo.deleteFiles(state.selectedKeys);
+      emit(state.copyWith(
+        files: state.files
+            .where((e) => !state.selectedKeys.contains(e.key))
+            .toList(),
+        selectedKeys: [],
+      ));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    } finally {
+      emit(state.copyWith(loading: false));
+    }
+  }
+
+  /// 加载文件
+  void _onFileEventLoad(FileEventLoad event, Emitter<FileState> emit) async {
+    emit(state.copyWith(loading: true));
+    try {
+      final files = await fileAdminRepo.getFiles();
+      emit(state.copyWith(files: files));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    } finally {
+      emit(state.copyWith(loading: false));
+    }
+  }
+
+  /// 上传多个文件
+  void _onFileEventUploadMultiple(
+      FileEventUploadMultiple event, Emitter<FileState> emit) async {
+    emit(state.copyWith(uploading: true));
+    try {
+      final files = await fileRepo.uploadFiles(event.files);
+      emit(state.copyWith(files: [
+        ...files,
+        ...state.files,
+      ]));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    } finally {
+      emit(state.copyWith(uploading: false));
+    }
+  }
+
+  /// 上传单个文件
+  void _onFileEventUpload(
+      FileEventUpload event, Emitter<FileState> emit) async {
+    emit(state.copyWith(uploading: true));
+    try {
+      final file = await fileRepo.uploadFile(event.file);
+      emit(state.copyWith(files: [...state.files, file]));
+    } catch (e) {
+      emit(state.copyWith(error: e.toString()));
+    } finally {
+      emit(state.copyWith(uploading: false));
+    }
+  }
+}
+```
+
+#### 5.9.4.3 使用 flutter_bloc
+
+典型的一个 `flutter_bloc` 的使用流程是这样的：
+
+1. 定义一个 `Bloc`，它负责管理状态
+2. 定义一个 `BlocBuilder`，它负责构建 UI
+3. 在 `BlocBuilder` 中使用 `Bloc` 的 `Stream` 来获取状态
+
+```dart
+class ImageExplorer extends StatelessWidget {
+  const ImageExplorer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    /// 使用 MultiRepositoryProvider 把必要的类在容器中注册，比如 Repository
+    return MultiRepositoryProvider(
+      providers: _buildRepositoryProviders,
+      ///
+      child: MultiBlocProvider(
+        providers: _buildBlocProviders,
+        child: BlocBuilder<FileBloc, FileState>(
+          builder: (context, state) {
+            if (state.loading) {
+              return const CircularProgressIndicator().center();
+            }
+
+            if (state.error.isNotEmpty) {
+              return Text(state.error).center();
+            }
+
+            if (state.files.isEmpty) {
+              return const Text('没有图片资源').center();
+            }
+
+            /// 由于在异步操作中，往往上下文会发生变化，所以需要在这里先把 bloc 拿出来
+            /// 在下面的回调中使用，这样就不用关心上下文是否发生变化，如果每次都使用 context.read<FileBloc>()
+            /// 那么在异步操作中，就会报错
+            final bloc = context.read<FileBloc>();
+            final images = state.files;
+            final title = FileDialogTitle(
+              editable: state.editable,
+              selectedKeys: state.selectedKeys,
+              onEditableChanged: (value) => bloc.add(FileEventToggleEditable()),
+              onDelete: () => bloc.add(FileEventDelete()),
+              onUpload: () => _uploadImages(bloc),
+            );
+            final content = FileDialogContent(
+              images: images,
+              editable: state.editable,
+              selectedKeys: state.selectedKeys,
+              onSelected: (key) => bloc.add(FileEventToggleSelected(key)),
+            );
+            final actions = [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('取消'),
+              ),
+            ];
+            return AlertDialog(
+              title: title,
+              content: content,
+              actions: actions,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Future<void> _uploadImages(FileBloc bloc) async {
+    final picker = ImagePicker();
+    /// 跳出选择图片的对话框，等待用户选择图片
+    final pickedImages = await picker.pickMultiImage();
+
+    final List<UploadFile> images = [];
+    for (var image in pickedImages) {
+      final bytes = await image.readAsBytes();
+      images.add(UploadFile(
+        name: image.name,
+        file: bytes,
+      ));
+    }
+
+    if (images.isNotEmpty) {
+      bloc.add(FileEventUploadMultiple(images));
+    }
+  }
+
+  List<SingleChildWidget> get _buildBlocProviders {
+    return [
+      BlocProvider<FileBloc>(
+        create: (context) => FileBloc(
+          fileRepo: context.read<FileUploadRepository>(),
+          fileAdminRepo: context.read<FileAdminRepository>(),
+        )..add(FileEventLoad()),
+      ),
+    ];
+  }
+
+  List<SingleChildWidget> get _buildRepositoryProviders {
+    return [
+      RepositoryProvider<FileUploadRepository>(
+        create: (context) => FileUploadRepository(),
+      ),
+      RepositoryProvider<FileAdminRepository>(
+        create: (context) => FileAdminRepository(),
+      ),
+    ];
+  }
+}
+```
+
+上面代码中，我们在 `ImageExplorer` 中使用了 `MultiBlocProvider` 和 `MultiRepositoryProvider` 来注册 `Bloc` 和 `Repository`，这样在 `ImageExplorer` 中的子组件中就可以直接使用 `context.read` 来获取 `Bloc` 和 `Repository`。
+
+在 `ImageExplorer` 中，我们使用了 `BlocBuilder` 来构建 UI，它的作用是根据 `Bloc` 的 `Stream` 来构建 UI，当 `Bloc` 的状态发生变化时，`BlocBuilder` 会重新构建 UI。
+
+在 `BlocBuilder` 中，我们使用了 `context.read<FileBloc>()` 来获取 `Bloc`，这样在异步操作中，就不用关心上下文是否发生变化。
+
+## 5.9 App 的接口原型
 
 ### 5.9.1 领域对象 - 页面布局
 

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
-import 'package:networking/networking.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+import 'problem.dart';
 
 /// 自定义的 Dio 实例，用于访问文件接口
 /// 该实例会自动添加日志拦截器和错误拦截器

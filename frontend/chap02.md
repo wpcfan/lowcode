@@ -26,6 +26,9 @@
     - [2.2.2 Gradle 介绍](#222-gradle-介绍)
     - [2.2.3 Lombok 介绍](#223-lombok-介绍)
     - [2.2.4 IDEA 插件安装](#224-idea-插件安装)
+  - [2.3 常见环境错误](#23-常见环境错误)
+    - [2.3.1 IDEA 中的错误](#231-idea-中的错误)
+      - [Unsupported class file major version 64](#unsupported-class-file-major-version-64)
 
 <!-- /code_chunk_output -->
 
@@ -1128,3 +1131,15 @@ class User {
 JPABuddy：JPABuddy 是一个 IDEA 插件，它可以帮助我们生成 JPA 实体类。在 IDEA 的设置中点击 `Plugins`，然后搜索 `JPABuddy`，点击 `Install` 安装即可。
 
 ![图 3](http://ngassets.twigcodes.com/732fcc8366d5aa39e137505b062a78126c149a141c3de0664f186dcfbc902d60.png)
+
+## 2.3 常见环境错误
+
+### 2.3.1 IDEA 中的错误
+
+#### Unsupported class file major version 64
+
+如果在 IDEA 中出现 `Unsupported class file major version 64` 错误，这是因为 IDEA 默认使用的 `Gradle JVM` 不是 Java 17，我们需要修改 `Gradle JVM` 的版本。注意不管你代码中使用的 Java 版本是什么，对于 Spring Boot 3.0.x 项目来说，gradle 的版本都必须是 Java 17。
+
+点击 `File` -> `Settings` -> `Build, Execution, Deployment` -> `Build Tools` -> `Gradle`，然后修改 `Gradle JVM` 的版本为 Java 17 即可。
+
+![图 4](http://ngassets.twigcodes.com/24d831b8b98448d0c4943293f0e8abe920a16b614f91b60382e5ce50f1b735a7.png)

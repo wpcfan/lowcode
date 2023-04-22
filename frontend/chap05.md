@@ -8,6 +8,8 @@
 
 最后，我们会使用上述知识创建一个文件管理 API，它会支持单个和多个文件上传，已上传的文件浏览以及删除文件等操作，这个 API 后面我们会在后面章节中的配置图片数据源时使用到。
 
+本章的代码在 `chap05` 目录下。
+
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
@@ -27,7 +29,7 @@
     - [5.3.3 作业：添加其他参数的校验](#533-作业添加其他参数的校验)
   - [5.4. Swagger 交互式文档](#54-swagger-交互式文档)
     - [5.4.1. 配置 Swagger 文档](#541-配置-swagger-文档)
-    - [5.4.2 作业：给 API 添加描述和参数描述](#542-作业给-api-添加描述和参数描述)
+    - [5.4.3 作业：给 API 添加描述和参数描述](#543-作业给-api-添加描述和参数描述)
   - [5.5 异常处理](#55-异常处理)
     - [5.5.1 自定义异常](#551-自定义异常)
     - [5.5.2 全局异常处理](#552-全局异常处理)
@@ -670,7 +672,30 @@ public ResponseEntity<byte[]> generateImage(
 
 ![图 7](http://ngassets.twigcodes.com/4d15ac1365e72c2db6c9ff0aefdbef8b5659e927a2722ace41cc69c07034bd23.png)
 
-### 5.4.2 作业：给 API 添加描述和参数描述
+Swagger 文档对开发阶段是非常有帮助的，但是一般在生产模式我们不希望 Swagger 文档对外开放，所以我们需要全局禁用 Swagger 文档，仅在 `dev` 模式下开放。所以在 `application.properties` 中添加如下配置：
+
+```properties
+# Springdoc
+springdoc.api-docs.enabled=false
+springdoc.swagger-ui.enabled=false
+```
+
+然后在 `application-dev.properties` 中添加如下配置：
+
+```properties
+# Springdoc
+springdoc.api-docs.enabled=true
+springdoc.swagger-ui.enabled=true
+springdoc.swagger-ui.path=/swagger-ui.html
+```
+
+你可以分别试一下这两种模式下的 Swagger 文档。一般 IDEA 中，我们可以通过编辑配置来切换不同的模式。
+
+![图 21](http://ngassets.twigcodes.com/f135828e1fe0be267ce2b471d98391f2b300c146aa8df1b53876e30452efd1fc.png)
+
+应该在 `prod` 模式下，你无法访问到 Swagger 文档了。
+
+### 5.4.3 作业：给 API 添加描述和参数描述
 
 请按我们之前的方式，给 `ImageController` 中的所有 API 添加描述和参数描述。
 
@@ -1236,6 +1261,31 @@ public class QiniuService {
    ```
 
 3. `@Service` 注解的作用是把这个类注册到 Spring 容器中，这个注解其实和 `@Component` 的作用是一样的。只不过由于 Java 中的最佳实践是程序要分层，所以 `@Service` 表示这个是服务层的。
+
+4. 我们对于异常进行捕获，并抛出自定义的异常，这样在前端就可以通过异常的 code 来判断是哪种异常，然后给出相应的提示。这里值得指出的是我们构建了一个枚举类型 `Errors`，用来存放所有的异常代码，防止出现魔法数字，同时也方便我们对异常进行统一管理:
+
+   ```java
+   package com.mooc.backend.enumerations;
+
+   public enum Errors {
+       ConstraintViolationException(40001),
+       DataNotFoundException(40002),
+       DataAlreadyExistsException(40003),
+       FileUploadException(40010),
+       FileDeleteException(40011),
+       ;
+
+       private final int code;
+
+       Errors(int code) {
+           this.code = code;
+       }
+
+       public int code() {
+           return code;
+       }
+   }
+   ```
 
 ### 5.8.6 作业：完成空间文件列表和删除文件功能
 

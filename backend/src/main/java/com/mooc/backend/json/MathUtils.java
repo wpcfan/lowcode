@@ -12,7 +12,7 @@ public class MathUtils {
             return null;
         }
         var rounded = price.setScale(2, RoundingMode.HALF_UP);
-        var locale = Locale.of("zh", "CN");
+        var locale = Locale.CHINA;
         NumberFormat format = NumberFormat.getCurrencyInstance(locale);
         return format.format(rounded);
     }

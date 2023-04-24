@@ -3,7 +3,6 @@ package com.mooc.backend.entities.blocks;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
-import lombok.extern.jackson.Jacksonized;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,7 +11,6 @@ import java.io.Serializable;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Jacksonized
 @Getter
 @EqualsAndHashCode(callSuper = false)
 public class BlockConfig implements Serializable {

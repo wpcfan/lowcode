@@ -30,6 +30,9 @@
     - [6.3.2 作业：完成区块数据，产品和类别等实体类](#632-作业完成区块数据产品和类别等实体类)
   - [6.4 生成数据库表](#64-生成数据库表)
     - [6.4.1 自动创建数据库表](#641-自动创建数据库表)
+    - [6.4.2 手动创建数据库表](#642-手动创建数据库表)
+      - [6.4.2.1 使用 Docker 启动 MySQL 数据库](#6421-使用-docker-启动-mysql-数据库)
+      - [6.4.2.2 使用 JPA Buddy 插件生成数据库表](#6422-使用-jpa-buddy-插件生成数据库表)
 
 <!-- /code_chunk_output -->
 
@@ -78,11 +81,8 @@ runtimeOnly 'com.mysql:mysql-connector-j'
 ### 6.2.2 页面区块
 
 1. 页面区块是页面布局的组成部分，一个页面布局可以由多个页面区块组成，每个页面区块都有一个 `type` 属性，这个 `type` 属性是一个枚举类型，我们从前面的章节中可以知道，这个类型的值可以有 `Banner`, `ImageRow`, `ProductRow` 和 `Waterfall` 。
-
 2. 由于运营人员可以调整区块的顺序，所以我们需要有一个 `sort` 属性，这个属性是一个整数，它代表了区块在页面中的顺序。
-
 3. 页面区块本身也需要有一个 `config` 属性，这个 `config` 最好有一定的扩展性，暂时我们希望它至少包含区块的水平内边距，垂直内边距，水平间距，垂直间距，区块宽度，区块高度，区块背景色，边框颜色，边框宽度等。
-
 4. 页面区块需要包含多个数据项，所以我们需要有一个 `data` 属性，这个属性是一个集合，集合中的元素是数据项。
 
 ### 6.2.3 数据项
@@ -165,10 +165,34 @@ public class PageLayout {
     @Column(nullable = false)
     @Builder.Default
     private PageStatus status = PageStatus.Draft;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PageLayout other = (PageLayout) obj;
+        if (id == null) {
+            return other.id == null;
+        } else return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
 }
 ```
 
 首先，我们使用了 `@Entity` 注解来标识这是一个实体类，然后我们使用 `@Table` 注解来指定这个实体类对应的数据库表，这里我们指定了表名为 `mooc_pages`。注意我们其实可以不使用 `@Table` 注解，因为默认情况下实体类的名称就是数据库表的名称，但是很多情况下，公司对于表名会有一些要求，所以我们还是使用 `@Table` 注解来指定实体类对应的数据库表。
+
+对于不熟悉 Java 的同学，有必要说一下 `equals` 和 `hashCode` 方法，这两个方法是用来判断两个对象是否相等的，如果两个对象相等，那么它们的 `hashCode` 方法返回的值也是相等的。这两个方法是由 `Object` 类提供的，但是我们在这里重写了这两个方法，这是因为对于实体类来说，我们通常会使用它的 `id` 来判断两个实体类是否相等，所以我们在这里重写了这两个方法，让它们使用 `id` 来判断两个实体类是否相等。而 `hashCode` 方法中采用 `31` 这个数字是因为它是一个质数，这样可以减少哈希碰撞的概率。总之 JPA 的实体类基本都需要重写这两个方法，重写的方式也是一样的。
 
 然后我们使用 `@Id` 注解来标识这个实体类的主键，用 `@GeneratedValue` 注解来指定主键的生成策略，这里我们使用 `GenerationType.IDENTITY` 来指定主键的生成策略，这样主键就会自增。
 
@@ -182,6 +206,13 @@ public class PageLayout {
 4. `columnDefinition`：字段的定义
 
 我们还可以使用 `@Enumerated` 注解来指定枚举类型的字段，比如说 `platform` 和 `pageType` 就是枚举类型的字段，这里我们使用 `EnumType.STRING` 来指定它们的类型，在数据库中就会以字符串的形式存储枚举类型的字段。
+
+| 枚举类型映射方式 | 说明                                                                        |
+| ---------------- | --------------------------------------------------------------------------- |
+| ORDINAL          | 默认值，使用枚举的序数来映射枚举类型，比如：`PageStatus.Draft` 映射为 `0`。 |
+| STRING           | 使用枚举的名称来映射枚举类型，比如：`PageStatus.Draft` 映射为 `Draft`。     |
+
+一般来说，我们会采用 `STRING` 策略来映射枚举类型，这样可以避免枚举类型的值发生变化时，数据库中的值也会发生变化。
 
 `@Temporal` 注解用来指定日期类型的字段，比如说 `startTime` 和 `endTime` 就是日期类型的字段，这里我们使用 `TemporalType.TIMESTAMP` 来指定它们的类型，在数据库中就会以时间戳的形式存储日期类型的字段。
 
@@ -270,7 +301,7 @@ public enum PageStatus {
 
 这个枚举类型是自定义了构造函数的，它有三个值，`Draft`、`Published` 和 `Archived`，这三个值都有一个 `value` 属性，这个 `value` 属性就是枚举类型的名称，比如说 `PageStatus.Draft` 的 `value` 就是 `草稿`。
 
-但这带来另一个问题，如果我们在序列化的时候，想使用 `value` 而不是 `name`，那么我们就需要自定义序列化和反序列化的逻辑，这里我们使用 `@JsonCreator` 和 `@JsonValue` 来实现自定义序列化和反序列化的逻辑，如下所示：
+上面的 `PageStatus` 枚举类型在序列化的时候，会使用 `name` 来表示枚举类型，比如说 `PageStatus.Draft` 的 `name` 就是 `Draft`，但这带来另一个问题，如果我们在序列化的时候，想使用 `value` 而不是 `name`，那么我们就需要自定义序列化和反序列化的逻辑，这里我们使用 `@JsonCreator` 和 `@JsonValue` 来实现自定义序列化和反序列化的逻辑，如下所示：
 
 ```java
 public enum PageType {
@@ -325,6 +356,20 @@ ALTER TABLE mooc_pages
     ADD CONSTRAINT uc_mooc_pages_title UNIQUE (title);
 ```
 
+在 Spring Data JPA 中，实体类属性类型和数据库字段类型的映射关系如下：
+
+| 实体类属性类型 | 数据库字段类型 |
+| -------------- | -------------- |
+| String         | VARCHAR        |
+| Integer        | INT            |
+| Long           | BIGINT         |
+| Float          | FLOAT          |
+| Double         | DOUBLE         |
+| BigDecimal     | DECIMAL        |
+| Boolean        | BIT            |
+| Date           | DATETIME       |
+| byte[]         | BLOB           |
+
 ### 6.3.1 JPA Buddy 插件
 
 在第二章，我们介绍了 `JPA Buddy` 插件，这个插件可以帮助我们生成实体类对应的数据库表结构，事实上，我们几乎可以不手动编写实体类，只需要通过 `JPA Buddy` 插件来生成实体类，然后再根据实体类来生成数据库表结构。
@@ -356,6 +401,15 @@ public class PageBlock {
 
 }
 ```
+
+在 `@GeneratedValue` 注解中，我们可以设置 `strategy` 属性来指定主键生成策略，比如：
+
+| 主键生成策略 | 说明                                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------ |
+| AUTO         | 主键由程序控制，是默认选项，不设置就是这个策略。                                           |
+| IDENTITY     | 主键由数据库自动生成（主要是自动增长型）                                                   |
+| SEQUENCE     | 通过数据库的序列产生主键，通过 `@SequenceGenerator` 注解指定序列名，MySql 不支持这种方式。 |
+| TABLE        | 通过特定的数据库表产生主键。                                                               |
 
 然后我们可以通过 `JPA Designer` 面板来添加实体类的其他属性
 
@@ -439,7 +493,6 @@ public class PageBlock {
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Jacksonized
 @Getter
 @EqualsAndHashCode(callSuper = false)
 public class BlockConfig implements Serializable {
@@ -509,7 +562,7 @@ public class PageBlock {
 
 ### 6.3.2 作业：完成区块数据，产品和类别等实体类
 
-请使用 `JPA Designer` 完成 `PageBlockData`， `Product`， `Category` 等实体类的设计，类之间的关系暂时不需要考虑，表名前缀都是 `mooc_`。
+请使用 `JPA Designer` 完成 `PageBlockData`， `Product`， `Category` 等实体类的设计，类之间的关系暂时不需要考虑，表名前缀都是 `mooc_`。暂时不需要考虑 `Auditable` 接口，这个是审计接口，我们后面会讲到。
 
 其中类的设计请参考下图
 
@@ -575,8 +628,112 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 ![图 17](http://ngassets.twigcodes.com/32586174545312e1d29b2e0365569696044eca1e80f0e85b409fd46bdc7bd2b4.png)
 
-这个脚本可以通过 `JPA Structure` 面板中，右键点击 `PageLayout` 实体类，选择 `Show DDL...` 来生成。
+点击 `Connect` 按钮，可以看到数据库中已经有了 `mooc_page_layout`，`mooc_page_block`，`mooc_page_block_data` 等表。
+
+![图 18](http://ngassets.twigcodes.com/d1368f60966cf95e4389c1fd7695af3c84ea42f64478ceb132a6d22c1ef57439.png)
+
+### 6.4.2 手动创建数据库表
+
+如果我们不想使用 Spring Data JPA 自动创建数据库表，这个地方，我们就使用一种更流行的数据库 MySQL ，我们可以使用 `JPA Structure` 面板来生成数据库表的创建语句，然后手动执行这些语句来创建数据库表。
+
+#### 6.4.2.1 使用 Docker 启动 MySQL 数据库
+
+首先我们需要一个 `docker-compose.yml` 文件，用来启动 MySQL 数据库，如下所示：
+
+```yaml
+version: "3.7"
+
+services:
+  # MySQL 服务
+  mysql:
+    # 使用 mysql 8.x 镜像
+    image: mysql:8
+    # 容器名称
+    container_name: mysql
+    # 重启策略
+    restart: always
+    # 环境变量
+    environment:
+      MYSQL_ROOT_PASSWORD: root # 设置 root 用户的密码
+      MYSQL_DATABASE: low_code # 创建默认数据库，数据库名为 low_code
+      MYSQL_USER: user # 创建默认用户，用户名为 user
+      MYSQL_PASSWORD: password # 设置默认用户的密码
+    ports:
+      - "3306:3306" # host:container
+    # 挂载数据卷
+    volumes:
+      - mysql:/var/lib/mysql # 将容器中的 /var/lib/mysql 目录挂载到宿主机的 mysql 目录下
+  # Adminer 服务，用于管理 MySQL 数据库
+  adminer:
+    # 不加版本号，使用 adminer 的最新镜像
+    image: adminer
+    container_name: adminer
+    # 重启策略
+    restart: always
+    ports:
+      - "8081:8080" # host:container
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql # 设置 Adminer 默认连接的数据库服务器为 mysql，即上面的 MySQL 服务
+# 数据卷
+volumes:
+  # 数据卷名称
+  mysql:
+    # 数据卷驱动
+    driver: local
+```
+
+点击 `services` 左边的启动按钮，就可以启动 MySQL 数据库了。
+
+![图 22](http://ngassets.twigcodes.com/cb84997d8a4069cebd75e86dcef5b0621dfd7289966e557ee9dd0b2ca553fc8e.png)
+
+#### 6.4.2.2 使用 JPA Buddy 插件生成数据库表
+
+这个脚本可以通过 `JPA Structure` 面板中。
 
 ![图 4](http://ngassets.twigcodes.com/6650c5cc973b48b0ee0988aff6449db8297cc19e14b250f949659d394a7156fa.png)
 
+右键点击 `PageLayout` 实体类，选择 `Show DDL...` 来生成
+
 ![图 3](http://ngassets.twigcodes.com/7659d3bd31c571501c6e0382592e554d68e9d92fba3a30adb6ea57d0dd582fbe.png)
+
+然后选择 `DB Type` 为 `MySQL`，然后点击 `OK` 按钮，就可以生成数据库表的创建语句。
+
+![图 19](http://ngassets.twigcodes.com/e204adc1108bd0bea5435ebce0cb4d24d5b3bf68bd9819d50b65f0f4ca9bcb71.png)
+
+```sql
+CREATE TABLE mooc_pages
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    title      VARCHAR(100)          NOT NULL,
+    platform   VARCHAR(255)          NOT NULL,
+    page_type  VARCHAR(255)          NOT NULL,
+    config     JSON                  NOT NULL,
+    start_time datetime              NULL,
+    end_time   datetime              NULL,
+    status     VARCHAR(255)          NOT NULL,
+    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_pages
+    ADD CONSTRAINT uc_mooc_pages_title UNIQUE (title);
+```
+
+拷贝这个脚本，然后在 `JPA Structure` 面板中右键点击 `DB connections`，选择 `New` -> `DB Connection`。
+
+![图 20](http://ngassets.twigcodes.com/264cfb41bdf6320ea50da78ad76b931ca73da482ed018f178e80fda733f59f75.png)
+
+然后在弹出的对话框中，选择 `MySQL`，然后在 `用户` 输入框填写 `user`，在 `密码` 输入框填写 `password`，数据库填写 `low_code`，然后点击 `OK` 按钮。
+
+![图 21](http://ngassets.twigcodes.com/aaabefbf332ff61d9034aca415cd04dc08f7b01c4c1b087c29385c97222290d8.png)
+
+然后在右侧的 `数据库` 面板中，就可以看到 `low_code` 数据库了。
+
+![图 23](http://ngassets.twigcodes.com/2fbc3a593825e88db18541c197ecf093fa5f5a50f478097cde846dbacb0189b6.png)
+
+然后右键点击 `low_code` 数据库，选择 `新建` -> `查询控制台`。
+
+![图 24](http://ngassets.twigcodes.com/34177a39a410eec3035c2fd63181ceb6e12ceedcf4b1004104d63dca6b297cb7.png)
+
+点击执行，即可创建数据库表。
+
+![图 25](http://ngassets.twigcodes.com/70ca5cef30f72c3bf7d8da9978f1f5febbd73ef07be58855c3e506d4562be5ed.png)

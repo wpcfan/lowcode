@@ -1,11 +1,10 @@
-package com.mooc.backend.controllers.app;
+package com.mooc.backend.rest.app;
 
 import com.mooc.backend.config.PageProperties;
 import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
-import com.mooc.backend.rest.app.PageController;
 import com.mooc.backend.services.PageQueryService;
 import com.mooc.backend.services.ProductQueryService;
 import org.junit.jupiter.api.Test;

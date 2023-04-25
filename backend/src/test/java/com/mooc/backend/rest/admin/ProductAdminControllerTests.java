@@ -1,9 +1,8 @@
-package com.mooc.backend.controllers.admin;
+package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.config.PageProperties;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.Product;
-import com.mooc.backend.rest.admin.ProductAdminController;
 import com.mooc.backend.services.ProductAdminService;
 import com.mooc.backend.services.ProductQueryService;
 import com.mooc.backend.services.QiniuService;

@@ -1,4 +1,4 @@
-package com.mooc.backend.controllers.app;
+package com.mooc.backend.rest.app;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -17,15 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.Product;
-import com.mooc.backend.rest.app.ProductController;
 import com.mooc.backend.services.ProductQueryService;
 
 @ActiveProfiles("test")

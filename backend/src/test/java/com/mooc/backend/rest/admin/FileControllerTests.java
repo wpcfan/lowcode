@@ -1,11 +1,9 @@
-package com.mooc.backend.controllers.admin;
+package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.config.PageProperties;
 import com.mooc.backend.dtos.FileDTO;
-import com.mooc.backend.rest.admin.FileController;
 import com.mooc.backend.services.QiniuService;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

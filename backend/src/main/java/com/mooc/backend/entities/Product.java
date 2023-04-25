@@ -1,10 +1,7 @@
 package com.mooc.backend.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -14,7 +11,9 @@ import java.util.Set;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "mooc_products")
 public class Product extends Auditable {
@@ -49,10 +48,6 @@ public class Product extends Auditable {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private Set<ProductImage> images = new HashSet<>();
-
-    public static ProductBuilder builder() {
-        return new ProductBuilder();
-    }
 
     public void addCategory(Category category) {
         categories.add(category);
@@ -106,62 +101,4 @@ public class Product extends Auditable {
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         return result;
     }
-
-    public static class ProductBuilder {
-        private String sku;
-        private String name;
-        private String description;
-        private BigDecimal originalPrice;
-        private BigDecimal price;
-        private Set<Category> categories = new HashSet<>();
-        private Set<ProductImage> images = new HashSet<>();
-
-        public ProductBuilder sku(String sku) {
-            this.sku = sku;
-            return this;
-        }
-
-        public ProductBuilder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public ProductBuilder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public ProductBuilder originalPrice(BigDecimal originalPrice) {
-            this.originalPrice = originalPrice;
-            return this;
-        }
-
-        public ProductBuilder price(BigDecimal price) {
-            this.price = price;
-            return this;
-        }
-
-        public ProductBuilder categories(Set<Category> categories) {
-            this.categories = categories;
-            return this;
-        }
-
-        public ProductBuilder images(Set<ProductImage> images) {
-            this.images = images;
-            return this;
-        }
-
-        public Product build() {
-            Product product = new Product();
-            product.setSku(sku);
-            product.setName(name);
-            product.setDescription(description);
-            product.setOriginalPrice(originalPrice);
-            product.setPrice(price);
-            product.setCategories(categories);
-            product.setImages(images);
-            return product;
-        }
-    }
-
 }

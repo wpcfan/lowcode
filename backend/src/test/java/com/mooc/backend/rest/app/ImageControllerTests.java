@@ -1,7 +1,6 @@
-package com.mooc.backend.controllers.app;
+package com.mooc.backend.rest.app;
 
 import com.mooc.backend.config.PageProperties;
-import com.mooc.backend.rest.app.ImageController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

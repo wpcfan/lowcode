@@ -33,6 +33,15 @@
     - [6.4.2 手动创建数据库表](#642-手动创建数据库表)
       - [6.4.2.1 使用 Docker 启动 MySQL 数据库](#6421-使用-docker-启动-mysql-数据库)
       - [6.4.2.2 使用 JPA Buddy 插件生成数据库表](#6422-使用-jpa-buddy-插件生成数据库表)
+  - [6.5 对象关系](#65-对象关系)
+    - [6.5.1 一对多](#651-一对多)
+    - [6.5.2 多对多](#652-多对多)
+    - [6.5.3 维护方和被维护方](#653-维护方和被维护方)
+    - [6.5.4 作业：实现商品和商品图片的关系](#654-作业实现商品和商品图片的关系)
+    - [6.5.5 JPA 实体类测试](#655-jpa-实体类测试)
+    - [6.5.6 集合类型的选择](#656-集合类型的选择)
+    - [6.5.7 测试验证顺序存储和读取](#657-测试验证顺序存储和读取)
+    - [6.5.8 作业：改造 PageBlockData](#658-作业改造-pageblockdata)
 
 <!-- /code_chunk_output -->
 
@@ -737,3 +746,520 @@ ALTER TABLE mooc_pages
 点击执行，即可创建数据库表。
 
 ![图 25](http://ngassets.twigcodes.com/70ca5cef30f72c3bf7d8da9978f1f5febbd73ef07be58855c3e506d4562be5ed.png)
+
+## 6.5 对象关系
+
+### 6.5.1 一对多
+
+在 Spring Data JPA 中，我们可以使用 `@ManyToOne`、`@OneToOne`、`@OneToMany`、`@ManyToMany` 注解来标注实体类之间的关联关系。
+
+我们先来看一个例子， `PageLayout` 和 `PageBlock` 是一对多的关系，一个页面可以有多个区块，一个区块只能属于一个页面。
+
+那么在 `PageLayout` 中可以定义一个 `Set<PageBlock>` 类型的属性 ` pageBlocks`
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "mooc_pages")
+public class PageLayout {
+    // ...
+    // 一对多，对于有初始值的属性，在有 @Builder 注解的类中
+    // 需要使用 @Builder.Default 注解
+    @OneToMany(mappedBy = "page")
+    @ToString.Exclude
+    @Builder.Default
+    private Set<PageBlock> pageBlocks = new HashSet<>();
+    // ...
+}
+```
+
+在 `PageBlock` 中可以定义 `PageLayout` 类型的元素 `page`，但是这里关系是反过来的，所以需要使用 `@ManyToOne` 注解来标注。
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "mooc_page_blocks")
+public class PageBlock {
+    // ...
+    @ManyToOne
+    @JoinColumn(name = "page_id")
+    private PageLayout page;
+    // ...
+}
+```
+
+可以看到一般来说定义关系的时候，都是在多的一方定义一个一的一方的类型的元素，然后在一的一方定义一个多的一方的类型的集合。在 `@OneToMany(mappedBy = "page")` 中，`mappedBy` 表示的是多的一方也就是 `PageBlock` 中的 `page`。在 `PageBlock` 中的 `page` 属性的 `@JoinColumn(name = "page_id")` 表示的是在 `PageBlock` 表中的 `page_id` 列是外键，指向 `PageLayout` 表中的 `id` 列。
+
+如果这时候，我们看一下生成的 `sql` ，可以看到 `PageBlock` 表中有 `page_id` 列，而且是外键引用了 `mooc_pages` 的 `id`。
+
+```sql
+CREATE TABLE mooc_page_blocks
+(
+    id      BIGINT AUTO_INCREMENT NOT NULL,
+    title   VARCHAR(255)          NOT NULL,
+    type    VARCHAR(255)          NOT NULL,
+    sort    INT                   NOT NULL,
+    config  JSON                  NOT NULL,
+    page_id BIGINT                NULL,
+    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_page_blocks
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
+```
+
+接下来我们可以同样定义 `PageBlock` 和 `PageBlockData` 之间的关系，`PageBlock` 和 `PageBlockData` 是一对多的关系，一个区块可以有多个数据项。
+
+首先在 `PageBlock` 中定义一个 `Set<PageBlockData>` 类型的属性 `data`
+
+```java
+public class PageBlock {
+    // ...
+    @OneToMany(mappedBy = "pageBlock")
+    @ToString.Exclude
+    @Builder.Default
+    private Set<PageBlockData> data = new HashSet<>();
+    // ...
+}
+```
+
+然后在 `PageBlockData` 中定义一个 `PageBlock` 类型的属性 `pageBlock`，同样的，由于这里关系是反过来的，所以需要使用 `@ManyToOne` 注解来标注。
+
+```java
+public class PageBlockData {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Integer sort;
+
+    @Type(JsonType.class)
+    @Column(nullable = false, columnDefinition = "json")
+    private BlockData content;
+
+    @ManyToOne
+    @JoinColumn(name = "page_block_id")
+    private PageBlock pageBlock;
+    // ...
+}
+```
+
+如果要是自身的引用，比如 `Category` 和 `Category` 之间的关系，那么可以定义一个 `Category` 类型的属性 `parent`，然后在 `Category` 中定义一个 `Set<Category>` 类型的属性 `children`。
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "mooc_categories")
+public class Category extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String code;
+
+    @Column(nullable = false)
+    private String name;
+
+    @ManyToOne
+    // @JoinColumn 这个注解是用来指定外键的
+    // 如果不指定，会默认使用外键名为：实体名_主键名
+    // @JoinColumn(name = "parent_id")
+    private Category parent;
+
+    @OneToMany(mappedBy = "parent")
+    @ToString.Exclude
+    @Builder.Default
+    private Set<Category> children = new HashSet<>();
+
+    // ...
+}
+```
+
+### 6.5.2 多对多
+
+`Category` 和 `Product` 是多对多的关系，一个分类可以有多个产品，一个产品可以属于多个分类。那么对于这种情况我们怎么处理呢？
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "mooc_products")
+public class Product extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String sku;
+
+    @Column(nullable = false, length = 100)
+    private String name;
+
+    @Column(nullable = false)
+    private String description;
+
+    @Column(name = "original_price", precision = 10, scale = 2)
+    private BigDecimal originalPrice;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
+
+    /**
+     * 定义多对多关系
+     */
+    @ManyToMany
+    @JoinTable(
+            name = "mooc_product_categories",
+            joinColumns = @JoinColumn(name = "product_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id")
+    )
+    @ToString.Exclude
+    @Builder.Default
+    private Set<Category> categories = new HashSet<>();
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Product other = (Product) obj;
+        if (id == null) {
+            return other.id == null;
+        } else return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+}
+```
+
+`@ManyToMany` 表示多对多的关系，`@JoinTable` 表示中间表的定义，`joinColumns` 表示的是当前实体在中间表中的外键，`inverseJoinColumns` 表示的是另一个实体在中间表中的外键。在这个例子中，`Product` 在中间表中的外键是 `product_id`，`Category` 在中间表中的外键是 `category_id`。
+
+在 `Category` 中，`products` 属性其实是可选的，因为我们在 `Product` 中已经定义了关系，所以在 `Category` 中可以不用有这个属性。
+
+当然如果你确实有这个需求，比如说在编辑类别的时候，可以列出全部产品，那可以有这个属性，但一般来说一个类别下的产品会很多，每次查询都关联出来产品列表，其实不是很好。我们其实可以通过查询指定类别的产品来实现这个功能，后面我们讲到 Repository 的时候会讲到。
+
+如果需要 `Category` 中有 `products` 属性，那么可以这样定义：
+
+```java
+public class Category {
+    @ManyToMany(mappedBy = "categories")
+    @ToString.Exclude
+    @Builder.Default
+    private Set<Product> products = new HashSet<>();
+}
+```
+
+`@ManyToMany` 中的 `mappedBy` 是另一个实体 是 `Product` 中的 `categories` 属性。
+
+### 6.5.3 维护方和被维护方
+
+在上面的例子中，我们可以看到，`Product` 和 `Category` 是多对多的关系，那么在这个关系中，`Product` 是维护方，`Category` 是被维护方。那么什么是维护方，什么是被维护方呢？
+
+在 JPA 中，实体类之间的关系可以分为双向关系和单向关系。双向关系中，两个实体类都可以访问对方，而单向关系中，只有一个实体类可以访问另一个实体类。在双向关系中，我们需要确定关系的维护方（owning side）和被维护方（inverse side）。关系的维护方负责更新数据库中的外键值，而被维护方则不负责更新。
+
+确定关系的维护方时，可以遵循以下原则：
+
+对于 `@OneToOne` 和 `@ManyToMany` 关系，通常可以任意选择一方作为关系的维护方。在这种情况下，选择哪一方作为维护方主要取决于业务逻辑和实际需求。
+
+对于 `@OneToMany` 和 `@ManyToOne` 关系，通常将多方（即包含 `@ManyToOne` 注解的实体类）作为关系的维护方。这是因为在多对一关系中，多方实体类中的外键列用于引用一方实体类的主键，因此多方实体类需要负责更新外键值。
+
+在双向关系中，关系的维护方使用 `@JoinColumn` 注解来指定外键列名，而被维护方则使用 `mappedBy` 属性来指定关系的维护方。例如，在 `PageLayout` 和 `PageBlock` 的关系中，`PageBlock` 是关系的维护方，因此在 `PageBlock` 中使用 `@JoinColumn` 注解来指定外键列名，而在 `PageLayout` 中使用 `mappedBy` 属性来指定关系的维护方。
+
+```java
+@Entity
+@Table(name = "mooc_pages")
+public class Author {
+    // ...
+
+    @OneToMany(mappedBy = "page")
+    private Set<PageBlock> pageBlocks = new HashSet<>();
+}
+
+@Entity
+@Table(name = "mooc_page_blocks")
+public class PageBlock {
+    // ...
+
+    @ManyToOne
+    @JoinColumn(name = "page_id")
+    private PageLayout page;
+}
+```
+
+### 6.5.4 作业：实现商品和商品图片的关系
+
+商品和商品图片是一对多的关系，一个商品可以有多个商品图片，一个商品图片只能属于一个商品。商品图片的基础信息如下：
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "mooc_product_images")
+public class ProductImage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        ProductImage other = (ProductImage) obj;
+        if (id == null) {
+            return other.id == null;
+        } else return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+}
+```
+
+请改造 `Product` 和 `ProductImage` 的关系，使得 `Product` 和 `ProductImage` 之间可以建立一对多的关系。
+
+### 6.5.5 JPA 实体类测试
+
+我们还没有写 JPA Repository，但是我们可以先写一个 JPA 实体类测试，来验证我们的实体类是否正确。
+
+```java
+@SpringBootTest
+public class JpaEntityTest {
+    @Autowired
+    private EntityManager entityManager;
+
+    @Test
+    void testJpaEntities() {
+        Product product = Product.builder()
+                .sku("sku_001")
+                .name("iPhone 12")
+                .description("Apple iPhone 12")
+                .price(BigDecimal.valueOf(6999))
+                .build();
+        ProductImage productImage = ProductImage.builder()
+                .imageUrl("https://example.com/iphone12.jpg")
+                .build();
+        productImage.setProduct(product);
+        product.getImages().add(productImage);
+
+        entityManager.persist(product);
+        entityManager.persist(productImage);
+
+        entityManager.flush();
+
+        var foundProduct = entityManager.find(Product.class, product.getId());
+        assertEquals(product, foundProduct);
+    }
+}
+```
+
+需要介绍一下 `EntityManager`，它是 JPA 的核心接口，用于管理实体类和数据库之间的映射关系。我们可以通过 `EntityManager` 的 `persist` 方法来将实体类保存到数据库中，通过 `find` 方法来从数据库中查询实体类。`flush` 方法用于将实体类的变更同步到数据库中。
+
+我们分别将 `product` 和 `productImage` 保存到数据库中，然后通过 `find` 方法来查询 `product`，并验证查询结果是否正确。
+
+值得说明的是
+
+- 我们在 `productImage` 中设置了 `product`，并将 `productImage` 添加到 `product` 的 `images` 集合中，这是为了建立 `product` 和 `productImage` 之间的关系。可能你会问，是否两边都要设置呢？仅仅从数据库的角度来看，答案是不需要，因为我们在 `ProductImage` 中使用了 `@ManyToOne` 注解，这意味着 `ProductImage` 是关系的维护方，因此我们只需要在 `ProductImage` 中设置 `product` 即可，因为维护方负责更新数据库中的外键值。为了保持对象模型的一致性，建议在保存时分别给两个实体类添加关联关系。
+
+- 我们对于关系的维护方和被维护方的选择，我们选择了 `productImage` 作为关系的维护方，因此我们先保存 `product`，再保存 `productImage`。
+
+![图 26](http://ngassets.twigcodes.com/a270cbb78da8d2da0accfe79d2db72fd794ec4a60b7580a888c454fcc4a89e9b.png)
+
+这提示我们，在方法中我们使用了 `entityManager.persist` 方法，但没有使用事务，所以我们需要在测试类或者测试方法上添加 `@Transactional` 注解。
+
+```java
+@SpringBootTest
+class BackendApplicationTests {
+    @Autowired
+    private EntityManager entityManager;
+
+    @Test
+    @Transactional
+    void testJpaEntities() {
+        Product product = Product.builder()
+                .sku("sku_001")
+                .name("iPhone 12")
+                .description("Apple iPhone 12")
+                .price(BigDecimal.valueOf(6999))
+                .build();
+        ProductImage productImage = ProductImage.builder()
+                .imageUrl("https://example.com/iphone12.jpg")
+                .build();
+        // 写入外键，维护关系
+        productImage.setProduct(product);
+        // 为了保证数据一致，与数据库本身变化无关
+        product.getImages().add(productImage);
+
+        entityManager.persist(product);
+        entityManager.persist(productImage);
+
+        entityManager.flush();
+
+        var foundProduct = entityManager.find(Product.class, product.getId());
+        assertEquals(product, foundProduct);
+    }
+
+}
+```
+
+### 6.5.6 集合类型的选择
+
+在构建实体关系的时候，我们经常会遇到一对多的关系，比如一个商品可以有多个商品图片，一个商品图片只能属于一个商品。在这种情况下，我们可以使用 `Set` 或者 `List` 来表示一对多的关系。
+
+一般而言， `Set` 的性能要优于 `List`，因为
+
+1. `Set` 是基于哈希表实现的，而 `List` 是基于数组实现的。
+
+2. 而且不能忽略的是 `Set` 生成的 `SQL` 语句比 `List` 生成的 `SQL` 更高效。
+
+但 `Set` 不能保证元素的顺序，如果我们需要保证元素的顺序，那么我们可以使用 `SortedSet`，它可以保证元素的顺序。
+
+```java
+@Entity
+@Table(name = "mooc_pages")
+public class PageLayout {
+    // ...
+    @OneToMany(mappedBy = "page")
+    @ToString.Exclude
+    @Builder.Default
+    private SortedSet<PageBlock> pageBlocks = new TreeSet<>();
+}
+```
+
+但这样的话，要求 `PageBlock` 实现 `Comparable<PageBlock>` 接口。
+
+```java
+@Entity
+@Table(name = "mooc_page_blocks")
+public class PageBlock implements Comparable<PageBlock> {
+    // ...
+    @Override
+    public int compareTo(PageBlock o) {
+        return this.getSort() - o.getSort();
+    }
+}
+```
+
+这样的话，我们就可以保证 `PageBlock` 的顺序了。
+
+### 6.5.7 测试验证顺序存储和读取
+
+我们可以写一个测试来验证顺序存储和读取。
+
+```java
+@SpringBootTest
+class BackendApplicationTests {
+    @Autowired
+    private EntityManager entityManager;
+
+    @Test
+    @Transactional
+    void testSetOrder() {
+        var pageConfig = PageConfig.builder()
+                .baselineScreenWidth(400.0)
+                .horizontalPadding(12.0)
+                .verticalPadding(12.0)
+                .build();
+        PageLayout pageLayout = PageLayout.builder()
+                .title("首页")
+                .pageType(PageType.Home)
+                .platform(Platform.App)
+                .status(PageStatus.Draft)
+                .config(pageConfig)
+                .build();
+        var blockConfig = BlockConfig.builder()
+                .horizontalPadding(12.0)
+                .verticalPadding(12.0)
+                .blockWidth(375.0)
+                .blockHeight(200.0)
+                .horizontalSpacing(0.0)
+                .verticalSpacing(0.0)
+                .build();
+        PageBlock pageBlock1 = PageBlock.builder()
+                .title("轮播图")
+                .type(BlockType.Banner)
+                .config(blockConfig)
+                .sort(2) // 此处顺序为 2
+                .build();
+        PageBlock pageBlock2 = PageBlock.builder()
+                .title("商品列表")
+                .type(BlockType.ProductRow)
+                .config(blockConfig)
+                .sort(1) // 此处顺序为 1
+                .build();
+
+        pageBlock1.setPage(pageLayout);
+        pageBlock2.setPage(pageLayout);
+        // 先添加顺序为 2 的 pageBlock1，再添加顺序为 1 的 pageBlock2
+        pageLayout.getPageBlocks().add(pageBlock1);
+        pageLayout.getPageBlocks().add(pageBlock2);
+        entityManager.persist(pageLayout);
+        entityManager.persist(pageBlock1);
+        entityManager.persist(pageBlock2);
+
+        entityManager.flush();
+
+        var foundPageLayout = entityManager.find(PageLayout.class, pageLayout.getId());
+        assertEquals(pageLayout, foundPageLayout);
+        assertEquals(2, foundPageLayout.getPageBlocks().size());
+        // 第一个元素的顺序为 1
+        assertEquals(pageBlock2, foundPageLayout.getPageBlocks().iterator().next());
+    }
+
+}
+```
+
+上面代码中，我们先添加顺序为 2 的 `pageBlock1`，再添加顺序为 1 的 `pageBlock2`，但是在读取的时候，我们发现第一个元素的顺序为 1，这说明 `SortedSet` 会自动帮我们排序。
+
+### 6.5.8 作业：改造 PageBlockData
+
+同样的，区块的数据项也是有顺序的
+
+1. 改造 `PageBlock` 中的 `data` 类型
+
+2. 让 `PageBlockData` 实现 `Comparable<PageBlockData>` 接口

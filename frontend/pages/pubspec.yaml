@@ -13,7 +13,7 @@ dependencies:
     sdk: flutter
   flutter_bloc: ^8.1.2
   equatable: ^2.0.5
-  go_router: ^6.5.7
+  go_router: ^7.0.0
 
   common:
     path: ../common

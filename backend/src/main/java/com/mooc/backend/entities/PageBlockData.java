@@ -1,5 +1,6 @@
 package com.mooc.backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mooc.backend.entities.blocks.BlockData;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
@@ -26,6 +27,7 @@ public class PageBlockData implements Comparable<PageBlockData> {
     @Column(nullable = false, columnDefinition = "json")
     private BlockData content;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "page_block_id")
     private PageBlock pageBlock;

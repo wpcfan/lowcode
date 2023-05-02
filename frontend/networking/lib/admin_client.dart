@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:networking/custom_exception_interceptor.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
-
-import 'problem.dart';
 
 /// 自定义的 Dio 实例，用于访问后台管理接口
 /// 该实例会自动添加日志拦截器和错误拦截器
@@ -41,19 +40,6 @@ class AdminClient with DioMixin implements Dio {
     /// 添加错误拦截器
     /// InterceptorsWrapper 是一个拦截器包装器，它可以包装多个拦截器
     /// 可以处理 onError, onRequest, onResponse 事件
-    interceptors.add(InterceptorsWrapper(
-      onError: (e, handler) {
-        if (e.response?.data != null) {
-          final problem = Problem.fromJson(e.response?.data);
-          return handler.reject(DioError(
-            requestOptions: e.requestOptions,
-            error: problem,
-            type: DioErrorType.badResponse,
-            message: problem.title,
-          ));
-        }
-        return handler.next(e);
-      },
-    ));
+    interceptors.add(CustomExceptionInterceptor());
   }
 }

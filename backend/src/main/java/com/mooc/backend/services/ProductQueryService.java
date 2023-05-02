@@ -11,6 +11,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -32,7 +33,7 @@ public class ProductQueryService {
     }
 
     @Transactional(readOnly = true)
-    public Stream<Product> findByIds(Iterable<Long> ids) {
+    public Stream<Product> findByIds(Collection<Long> ids) {
         return productRepository.findByIdIn(ids);
     }
 }

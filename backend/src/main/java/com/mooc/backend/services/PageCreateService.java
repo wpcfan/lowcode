@@ -29,8 +29,7 @@ public class PageCreateService {
     private final PageBlockDataRepository pageBlockDataRepository;
 
     public PageLayout createPage(CreateOrUpdatePageDTO page) {
-        var pageEntity = pageLayoutRepository.save(page.toEntity());
-        return pageEntity;
+        return pageLayoutRepository.save(page.toEntity());
     }
 
     public PageLayout addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
@@ -66,8 +65,7 @@ public class PageCreateService {
                 .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() + 1));
         var blockEntity = insertPageBlockDTO.toEntity();
         pageEntity.addPageBlock(blockEntity);
-        var savedPageEntity = pageLayoutRepository.save(pageEntity);
-        return savedPageEntity;
+        return pageLayoutRepository.save(pageEntity);
     }
 
     public PageBlockData addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {

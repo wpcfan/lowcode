@@ -10,6 +10,8 @@ import com.mooc.backend.entities.blocks.ImageDTO;
 import com.mooc.backend.entities.blocks.Link;
 import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.*;
+import com.mooc.backend.specifications.PageFilter;
+import com.mooc.backend.specifications.PageSpecs;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,7 +32,7 @@ public class PageLayoutRepositoryTests {
     @Autowired
     private PageLayoutRepository pageLayoutRepository;
     @Autowired
-    private TestEntityManager testEntityManager;
+    private TestEntityManager entityManager;
 
     private PageLayout page1;
     private PageLayout page2;
@@ -69,12 +71,12 @@ public class PageLayoutRepositoryTests {
                 .sort(1)
                 .content(bannerImageData1)
                 .build();
-        testEntityManager.persist(bannerBlockData1);
+        entityManager.persist(bannerBlockData1);
         var bannerBlockData2 = PageBlockData.builder()
                 .sort(2)
                 .content(bannerImageData2)
                 .build();
-        testEntityManager.persist(bannerBlockData2);
+        entityManager.persist(bannerBlockData2);
         var pinnedHeader = PageBlock.builder()
                 .sort(1)
                 .title("Test Pinned Header")
@@ -83,23 +85,23 @@ public class PageLayoutRepositoryTests {
                 .build();
         pinnedHeader.addData(bannerBlockData1);
         pinnedHeader.addData(bannerBlockData2);
-        testEntityManager.persist(pinnedHeader);
+        entityManager.persist(pinnedHeader);
 
         var rowBlockData1 = PageBlockData.builder()
                 .sort(1)
                 .content(rowImageData1)
                 .build();
-        testEntityManager.persist(rowBlockData1);
+        entityManager.persist(rowBlockData1);
         var rowBlockData2 = PageBlockData.builder()
                 .sort(2)
                 .content(rowImageData2)
                 .build();
-        testEntityManager.persist(rowBlockData2);
+        entityManager.persist(rowBlockData2);
         var rowBlockData3 = PageBlockData.builder()
                 .sort(3)
                 .content(rowImageData3)
                 .build();
-        testEntityManager.persist(rowBlockData3);
+        entityManager.persist(rowBlockData3);
         var imageRow = PageBlock.builder()
                 .sort(2)
                 .title("Test Image Row")
@@ -109,14 +111,14 @@ public class PageLayoutRepositoryTests {
         imageRow.addData(rowBlockData1);
         imageRow.addData(rowBlockData2);
         imageRow.addData(rowBlockData3);
-        testEntityManager.persist(imageRow);
+        entityManager.persist(imageRow);
 
         var product = new Product();
         product.setSku("Test SKU");
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
-        testEntityManager.persist(product);
+        entityManager.persist(product);
 
         var productBlockData1 = ProductDataDTO.fromEntity(product);
         var productBlockData2 = ProductDataDTO.fromEntity(product);
@@ -124,12 +126,12 @@ public class PageLayoutRepositoryTests {
                 .sort(1)
                 .content(productBlockData1)
                 .build();
-        testEntityManager.persist(productData1);
+        entityManager.persist(productData1);
         var productData2 = PageBlockData.builder()
                 .sort(2)
                 .content(productBlockData2)
                 .build();
-        testEntityManager.persist(productData2);
+        entityManager.persist(productData2);
         var productRow = PageBlock.builder()
                 .sort(3)
                 .title("Test Product Row")
@@ -139,7 +141,7 @@ public class PageLayoutRepositoryTests {
 
         productRow.addData(productData1);
         productRow.addData(productData2);
-        testEntityManager.persist(productRow);
+        entityManager.persist(productRow);
 
         page1 = PageLayout.builder()
                 .pageType(PageType.Home)
@@ -152,7 +154,7 @@ public class PageLayoutRepositoryTests {
         page1.addPageBlock(imageRow);
         page1.addPageBlock(productRow);
 
-        testEntityManager.persist(page1);
+        entityManager.persist(page1);
 
         page2 = PageLayout.builder()
                 .pageType(PageType.Home)
@@ -167,7 +169,7 @@ public class PageLayoutRepositoryTests {
         page2.addPageBlock(productRow);
         page2.addPageBlock(productRow);
 
-        testEntityManager.persist(page2);
+        entityManager.persist(page2);
 
         page3 = PageLayout.builder()
                 .pageType(PageType.Category)
@@ -182,7 +184,7 @@ public class PageLayoutRepositoryTests {
         page3.addPageBlock(productRow);
         page3.addPageBlock(productRow);
 
-        testEntityManager.persist(page3);
+        entityManager.persist(page3);
 
         page4 = PageLayout.builder()
                 .pageType(PageType.Category)
@@ -196,13 +198,13 @@ public class PageLayoutRepositoryTests {
         page4.addPageBlock(imageRow);
         page4.addPageBlock(productRow);
 
-        testEntityManager.persist(page4);
-        testEntityManager.flush();
+        entityManager.persist(page4);
+        entityManager.flush();
     }
 
     @AfterEach
     void afterEach() {
-        testEntityManager.clear();
+        entityManager.clear();
     }
 
     @Test
@@ -226,20 +228,20 @@ public class PageLayoutRepositoryTests {
 
     @Test
     public void testFindPublishedPage() throws Exception {
-        var page1 = testEntityManager.find(PageLayout.class, this.page1.getId());
+        var page1 = entityManager.find(PageLayout.class, this.page1.getId());
         var now = LocalDateTime.now();
         page1.setStartTime(now.minusDays(1));
         page1.setEndTime(now.plusDays(1));
         page1.setStatus(PageStatus.Published);
-        testEntityManager.persist(page1);
+        entityManager.persist(page1);
 
-        var page2 = testEntityManager.find(PageLayout.class, this.page2.getId());
+        var page2 = entityManager.find(PageLayout.class, this.page2.getId());
         page2.setStartTime(now.minusMinutes(59));
         page2.setEndTime(now.plusMinutes(59));
         page2.setStatus(PageStatus.Published);
-        testEntityManager.persist(page2);
+        entityManager.persist(page2);
 
-        testEntityManager.flush();
+        entityManager.flush();
 
         // 从 JPA 返回 Stream 时，需要在事务中执行，而且使用 try-with-resource 语法
         try (var stream = pageLayoutRepository.streamPublishedPage(now, Platform.App, PageType.Home)) {
@@ -256,15 +258,15 @@ public class PageLayoutRepositoryTests {
 
     @Test
     void testUpdatePageStatusToArchived() {
-        var page1 = testEntityManager.find(PageLayout.class, this.page1.getId());
+        var page1 = entityManager.find(PageLayout.class, this.page1.getId());
         var now = LocalDateTime.now();
         page1.setStartTime(now.minusDays(2));
         page1.setEndTime(now.minusDays(1));
         page1.setStatus(PageStatus.Published);
-        testEntityManager.persist(page1);
+        entityManager.persist(page1);
         // 即使我们不加这一行，也会在下面的 updatePageStatusToDraft() 方法中自动 flush
         // 因为在 updatePageStatusToDraft() 方法中，我们使用了 @Modifying(flushAutomatically = true)
-        testEntityManager.flush();
+        entityManager.flush();
 
         var count = pageLayoutRepository.updatePageStatusToArchived(now);
         assertEquals(1, count);
@@ -277,20 +279,20 @@ public class PageLayoutRepositoryTests {
 
     @Test
     void testCountPublishedTimeConflict() throws Exception {
-        var page1 = testEntityManager.find(PageLayout.class, this.page1.getId());
+        var page1 = entityManager.find(PageLayout.class, this.page1.getId());
         var now = LocalDateTime.now();
         page1.setStartTime(now.minusDays(1));
         page1.setEndTime(now.plusDays(1));
         page1.setStatus(PageStatus.Published);
-        testEntityManager.persist(page1);
+        entityManager.persist(page1);
 
-        var page2 = testEntityManager.find(PageLayout.class, this.page2.getId());
+        var page2 = entityManager.find(PageLayout.class, this.page2.getId());
         page2.setStartTime(now.minusMinutes(59));
         page2.setEndTime(now.plusMinutes(59));
         page2.setStatus(PageStatus.Draft);
-        testEntityManager.persist(page2);
+        entityManager.persist(page2);
 
-        testEntityManager.flush();
+        entityManager.flush();
 
         var count = pageLayoutRepository.countPublishedTimeConflict(now, Platform.App, PageType.Home);
         assertEquals(1, count);
@@ -300,5 +302,103 @@ public class PageLayoutRepositoryTests {
 
         var count3 = pageLayoutRepository.countPublishedTimeConflict(now, Platform.Web, PageType.Home);
         assertEquals(0, count3);
+    }
+
+    @Test
+    void testPageSpecQuery() {
+        var now = LocalDateTime.now();
+        var pageConfig = PageConfig.builder()
+                .baselineScreenWidth(375.0)
+                .horizontalPadding(16.0)
+                .build();
+
+        var page1 = PageLayout.builder()
+                .pageType(PageType.About)
+                .platform(Platform.App)
+                .status(PageStatus.Published)
+                .config(pageConfig)
+                .title("Test Page_1")
+                .startTime(now.minusDays(1))
+                .endTime(now.plusDays(1))
+                .build();
+
+        var page2 = PageLayout.builder()
+                .pageType(PageType.About)
+                .platform(Platform.App)
+                .status(PageStatus.Published)
+                .config(pageConfig)
+                .title("Page 2")
+                .startTime(now.minusMinutes(59))
+                .endTime(now.plusMinutes(59))
+                .build();
+
+        var page3 = PageLayout.builder()
+                .pageType(PageType.About)
+                .platform(Platform.App)
+                .status(PageStatus.Draft)
+                .config(pageConfig)
+                .title("Page 3")
+                .startTime(now.minusMinutes(59))
+                .endTime(now.plusMinutes(59))
+                .build();
+
+        var page4 = PageLayout.builder()
+                .pageType(PageType.About)
+                .platform(Platform.Web)
+                .status(PageStatus.Published)
+                .config(pageConfig)
+                .title("Page 4")
+                .startTime(now.minusMinutes(59))
+                .endTime(now.plusMinutes(59))
+                .build();
+
+        var page5 = PageLayout.builder()
+                .pageType(PageType.About)
+                .platform(Platform.App)
+                .status(PageStatus.Published)
+                .config(pageConfig)
+                .title("Page 5")
+                .startTime(now.minusMinutes(59))
+                .endTime(now.plusMinutes(59))
+                .build();
+
+        entityManager.persist(page1);
+        entityManager.persist(page2);
+        entityManager.persist(page3);
+        entityManager.persist(page4);
+        entityManager.persist(page5);
+
+        entityManager.flush();
+
+        var pageFilter = new PageFilter(
+                "Test",
+                Platform.App,
+                PageType.About,
+                PageStatus.Published,
+                now.minusDays(2),
+                now,
+                now,
+                now.plusDays(2)
+        );
+        var spec = PageSpecs.pageSpec.apply(pageFilter);
+
+        var pages = pageLayoutRepository.findAll(spec);
+        assertEquals(1, pages.size());
+        assertEquals(page1.getId(), pages.get(0).getId());
+
+        pageFilter = new PageFilter(
+                null,
+                Platform.App,
+                PageType.About,
+                PageStatus.Published,
+                null,
+                null,
+                null,
+                null
+        );
+        spec = PageSpecs.pageSpec.apply(pageFilter);
+
+        pages = pageLayoutRepository.findAll(spec);
+        assertEquals(3, pages.size());
     }
 }

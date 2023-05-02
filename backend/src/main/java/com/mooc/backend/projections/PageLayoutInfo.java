@@ -1,5 +1,6 @@
 package com.mooc.backend.projections;
 
+import com.mooc.backend.entities.PageBlock;
 import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.PageStatus;
@@ -23,7 +24,7 @@ public interface PageLayoutInfo {
 
     PageConfig getConfig();
 
-    Set<PageBlockInfo> getPageBlocks();
+    Set<PageBlock> getPageBlocks();
 
     LocalDateTime getStartTime();
 

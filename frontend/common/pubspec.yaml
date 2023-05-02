@@ -1,6 +1,7 @@
 name: common
 description: 公共模块，有公共的扩展类和一些基础的组件
 version: 0.0.1
+publish_to: "none"
 homepage: https://imooc.com
 
 environment:

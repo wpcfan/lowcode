@@ -43,10 +43,12 @@ public class Product extends Auditable {
             inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id")
     )
     @ToString.Exclude
+    @Builder.Default
     private Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @Builder.Default
     private Set<ProductImage> images = new HashSet<>();
 
     public void addCategory(Category category) {

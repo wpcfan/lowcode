@@ -1,18 +1,17 @@
 package com.mooc.backend.dtos;
 
+import com.mooc.backend.entities.PageBlock;
 import com.mooc.backend.entities.PageLayout;
 import com.mooc.backend.entities.blocks.PageConfig;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
 import com.mooc.backend.enumerations.Platform;
-import com.mooc.backend.projections.PageLayoutInfo;
 import lombok.Builder;
 import lombok.Getter;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -27,7 +26,7 @@ public class PageDTO implements Serializable {
     private PageType pageType;
     private PageConfig config;
     @Builder.Default
-    private SortedSet<PageBlockDTO> blocks = new TreeSet<>();
+    private SortedSet<PageBlock> blocks = new TreeSet<>();
     /**
      * 页面启用时间，只有在启用时间之后，且处于已发布状态下才会显示给用户
      */
@@ -40,22 +39,6 @@ public class PageDTO implements Serializable {
 
     private PageStatus status;
 
-    public static PageDTO fromProjection(PageLayoutInfo page) {
-        return PageDTO.builder()
-                .id(page.getId())
-                .title(page.getTitle())
-                .platform(page.getPlatform())
-                .pageType(page.getPageType())
-                .config(page.getConfig())
-                .blocks(page.getPageBlocks().stream()
-                        .map(PageBlockDTO::fromProjection)
-                        .collect(TreeSet::new, Set::add, Set::addAll))
-                .startTime(page.getStartTime())
-                .endTime(page.getEndTime())
-                .status(page.getStatus())
-                .build();
-    }
-
     public static PageDTO fromEntity(PageLayout page) {
         return PageDTO.builder()
                 .id(page.getId())
@@ -63,9 +46,7 @@ public class PageDTO implements Serializable {
                 .platform(page.getPlatform())
                 .pageType(page.getPageType())
                 .config(page.getConfig())
-                .blocks(page.getPageBlocks().stream()
-                        .map(PageBlockDTO::fromEntity)
-                        .collect(TreeSet::new, Set::add, Set::addAll))
+                .blocks(page.getPageBlocks())
                 .startTime(page.getStartTime())
                 .endTime(page.getEndTime())
                 .status(page.getStatus())
@@ -73,13 +54,12 @@ public class PageDTO implements Serializable {
     }
 
     public PageLayout toEntity() {
-        var pageEntity = PageLayout.builder()
+        return PageLayout.builder()
                 .title(getTitle())
                 .platform(getPlatform())
                 .pageType(getPageType())
                 .config(getConfig())
+                .pageBlocks(getBlocks())
                 .build();
-        getBlocks().forEach(block -> pageEntity.addPageBlock(block.toEntity()));
-        return pageEntity;
     }
 }

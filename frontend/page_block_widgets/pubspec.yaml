@@ -1,8 +1,8 @@
 name: page_block_widgets
 description: 页面区块组件
 version: 0.0.1
-homepage: https://imooc.com
 publish_to: "none"
+homepage: https://imooc.com
 
 environment:
   sdk: ">=2.19.4 <3.0.0"

@@ -1,5 +1,3 @@
-part of 'page_block.dart';
-
 class PageConfig {
   const PageConfig({
     this.horizontalPadding,

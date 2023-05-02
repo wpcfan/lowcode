@@ -1,5 +1,6 @@
 package com.mooc.backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mooc.backend.entities.blocks.BlockConfig;
 import com.mooc.backend.enumerations.BlockType;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
@@ -38,6 +39,7 @@ public class PageBlock implements Comparable<PageBlock> {
     @ToString.Exclude
     private BlockConfig config;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "page_id")
     private PageLayout page;

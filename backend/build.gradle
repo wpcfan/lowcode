@@ -6,8 +6,8 @@ plugins {
 
 group = 'com.mooc'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
-targetCompatibility = '17'
+sourceCompatibility = '20'
+targetCompatibility = '20'
 
 // 项目依赖版本号定义
 ext {
@@ -16,7 +16,6 @@ ext {
     hypersistenceVersion = '3.1.+'
     testcontainersVersion = '1.17.+'
     redissonVersion = '3.20.+'
-    springbootAdminVersion = '3.0.+'
 }
 
 configurations {
@@ -39,8 +38,6 @@ dependencies {
     implementation "org.redisson:redisson-hibernate-6:${redissonVersion}"
     implementation "org.redisson:redisson-spring-boot-starter:${redissonVersion}"
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
-    implementation "de.codecentric:spring-boot-admin-starter-server:${springbootAdminVersion}"
-    implementation "de.codecentric:spring-boot-admin-starter-client:${springbootAdminVersion}"
     implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'

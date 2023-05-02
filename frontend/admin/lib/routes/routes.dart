@@ -26,7 +26,7 @@ final routes = <RouteBase>[
           GoRoute(
             path: ':id',
             builder: (context, state) {
-              final id = int.parse(state.params['id']!);
+              final id = int.parse(state.pathParameters['id']!);
               return CanvasPage(
                 id: id,
                 scaffoldKey: innerScaffoldKey,

@@ -1,4 +1,6 @@
-part of 'page_block.dart';
+import 'package:equatable/equatable.dart';
+
+import 'enumerations.dart';
 
 class MyLink extends Equatable {
   const MyLink({

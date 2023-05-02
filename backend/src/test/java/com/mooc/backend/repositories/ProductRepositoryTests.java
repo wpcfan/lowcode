@@ -9,8 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.TestPropertySource;
 
 import com.mooc.backend.entities.Category;
@@ -26,7 +25,7 @@ public class ProductRepositoryTests {
     private ProductRepository productRepository;
 
     @Autowired
-    private TestEntityManager testEntityManager;
+    private TestEntityManager entityManager;
 
     @Test
     public void testFindAll() {
@@ -35,8 +34,8 @@ public class ProductRepositoryTests {
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
-        testEntityManager.persist(product);
-        testEntityManager.flush();
+        entityManager.persist(product);
+        entityManager.flush();
 
         var products = productRepository.findAll();
 
@@ -50,8 +49,8 @@ public class ProductRepositoryTests {
         product2.setName("Test Product 2");
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
-        testEntityManager.persist(product2);
-        testEntityManager.flush();
+        entityManager.persist(product2);
+        entityManager.flush();
 
         products = productRepository.findAll();
 
@@ -69,16 +68,24 @@ public class ProductRepositoryTests {
         var category = new Category();
         category.setCode("cat_one");
         category.setName("Test Category");
-        testEntityManager.persist(category);
+        entityManager.persist(category);
 
-        var product = new Product();
-        product.setSku("test_sku");
-        product.setName("Test Product");
-        product.setDescription("Test Description");
-        product.setPrice(BigDecimal.valueOf(10000));
-        product.getCategories().add(category);
-        testEntityManager.persist(product);
-        testEntityManager.flush();
+        var product1 = new Product();
+        product1.setSku("test_sku");
+        product1.setName("Test Product");
+        product1.setDescription("Test Description");
+        product1.setPrice(BigDecimal.valueOf(10000));
+        product1.getCategories().add(category);
+
+        var product2 = new Product();
+        product2.setSku("test_sku_2");
+        product2.setName("Test Product 2");
+        product2.setDescription("Test Description 2");
+        product2.setPrice(BigDecimal.valueOf(10100));
+
+        entityManager.persist(product1);
+        entityManager.persist(product2);
+        entityManager.flush();
 
         var products = productRepository.findByCategoriesId(category.getId());
 
@@ -93,7 +100,7 @@ public class ProductRepositoryTests {
         var category = new Category();
         category.setCode("cat_one");
         category.setName("Test Category");
-        testEntityManager.persist(category);
+        entityManager.persist(category);
 
         var product = new Product();
         product.setSku("test_sku");
@@ -101,7 +108,7 @@ public class ProductRepositoryTests {
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
         product.getCategories().add(category);
-        testEntityManager.persist(product);
+        entityManager.persist(product);
 
         var product2 = new Product();
         product2.setSku("test_sku_2");
@@ -109,8 +116,8 @@ public class ProductRepositoryTests {
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
         product2.getCategories().add(category);
-        testEntityManager.persist(product2);
-        testEntityManager.flush();
+        entityManager.persist(product2);
+        entityManager.flush();
 
         var products = productRepository.findProductDTOsByCategoriesId(category.getId());
 
@@ -125,10 +132,10 @@ public class ProductRepositoryTests {
         var category2 = new Category();
         category2.setCode("cat_two");
         category2.setName("Test Category 2");
-        testEntityManager.persist(category2);
+        entityManager.persist(category2);
         product.getCategories().add(category2);
-        testEntityManager.persist(product);
-        testEntityManager.flush();
+        entityManager.persist(product);
+        entityManager.flush();
 
         products = productRepository.findProductDTOsByCategoriesId(category2.getId());
 
@@ -145,23 +152,23 @@ public class ProductRepositoryTests {
         product.setName("Test Product");
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
-        testEntityManager.persist(product);
+        entityManager.persist(product);
 
         var product2 = new Product();
         product2.setSku("test_sku_2");
         product2.setName("Test Product 2");
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
-        testEntityManager.persist(product2);
+        entityManager.persist(product2);
 
         var product3 = new Product();
         product3.setSku("test_sku_3");
         product3.setName("Another Product 3");
         product3.setDescription("Test Description 3");
         product3.setPrice(BigDecimal.valueOf(10200));
-        testEntityManager.persist(product3);
+        entityManager.persist(product3);
 
-        testEntityManager.flush();
+        entityManager.flush();
 
         var products = productRepository.findByNameLikeOrderByIdDesc("%Test%");
 
@@ -179,7 +186,7 @@ public class ProductRepositoryTests {
         var category = new Category();
         category.setCode("cat_one");
         category.setName("Test Category");
-        testEntityManager.persist(category);
+        entityManager.persist(category);
 
         var product = new Product();
         product.setSku("test_sku");
@@ -187,7 +194,7 @@ public class ProductRepositoryTests {
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
         product.getCategories().add(category);
-        testEntityManager.persist(product);
+        entityManager.persist(product);
 
         var product2 = new Product();
         product2.setSku("test_sku_2");
@@ -195,7 +202,7 @@ public class ProductRepositoryTests {
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
         product2.getCategories().add(category);
-        testEntityManager.persist(product2);
+        entityManager.persist(product2);
 
         var product3 = new Product();
         product3.setSku("test_sku_3");
@@ -203,12 +210,15 @@ public class ProductRepositoryTests {
         product3.setDescription("Test Description 3");
         product3.setPrice(BigDecimal.valueOf(10200));
         product3.getCategories().add(category);
-        testEntityManager.persist(product3);
+        entityManager.persist(product3);
 
-        testEntityManager.flush();
+        entityManager.flush();
 
         try (var stream = productRepository.streamByNameLikeIgnoreCaseAndCategoriesCode("%test%", "cat_one")) {
-            var products = stream.toList();
+            var products = stream
+                    .peek(productDTO -> System.out.println(productDTO.getName()))
+                    .toList();
+
             assertEquals(2, products.size());
             assertEquals("Test Product", products.get(0).getName());
             assertEquals("Test Description", products.get(0).getDescription());
@@ -225,8 +235,7 @@ public class ProductRepositoryTests {
         var category = new Category();
         category.setCode("cat_one");
         category.setName("Test Category");
-        // 在没有指定 CascadeType 的情况下，需要手动保存关联对象
-        testEntityManager.persist(category);
+        entityManager.persist(category);
 
         var product = new Product();
         product.setSku("test_sku");
@@ -234,7 +243,7 @@ public class ProductRepositoryTests {
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
         product.addCategory(category);
-        testEntityManager.persist(product);
+        entityManager.persist(product);
 
         var product2 = new Product();
         product2.setSku("test_sku_2");
@@ -242,20 +251,24 @@ public class ProductRepositoryTests {
         product2.setDescription("Test Description 2");
         product2.setPrice(BigDecimal.valueOf(10100));
         product2.getCategories().add(category);
-        testEntityManager.persist(product2);
+        entityManager.persist(product2);
 
-        testEntityManager.flush();
+        var product3 = new Product();
+        product3.setSku("test_sku_3");
+        product3.setName("Another Product 3");
+        product3.setDescription("Test Description 3");
+        product3.setPrice(BigDecimal.valueOf(10200));
+        product3.getCategories().add(category);
+        entityManager.persist(product3);
+
+        entityManager.flush();
 
         Product productQuery = new Product();
         productQuery.setName("Test");
-        Category categoryQuery = new Category();
-        categoryQuery.setName("Test");
-        productQuery.getCategories().add(categoryQuery);
 
         ExampleMatcher matcher = ExampleMatcher.matching()
                 .withIgnoreCase("name")
-                .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.startsWith())
-                .withMatcher("categories.name", ExampleMatcher.GenericPropertyMatchers.contains());
+                .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.startsWith());
 
         Example<Product> example = Example.of(productQuery, matcher);
 
@@ -277,9 +290,9 @@ public class ProductRepositoryTests {
         product.setDescription("Test Description");
         product.setPrice(BigDecimal.valueOf(10000));
         product.addImage(productImage);
-        testEntityManager.persist(product);
+        entityManager.persist(product);
 
-        testEntityManager.flush();
+        entityManager.flush();
 
         var matched = productRepository.findById(product.getId());
 
@@ -287,5 +300,89 @@ public class ProductRepositoryTests {
         assertEquals("Test Description", matched.get().getDescription());
         assertEquals(BigDecimal.valueOf(10000), matched.get().getPrice());
         assertTrue(matched.get().getImages().stream().anyMatch(image -> image.getImageUrl().equals(imageUrl)));
+    }
+
+    @Test
+    void testPageableQuery() {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Test Category");
+        entityManager.persist(category);
+
+        var product = new Product();
+        product.setSku("test_sku");
+        product.setName("Test Product");
+        product.setDescription("Test Description");
+        product.setPrice(BigDecimal.valueOf(10000));
+        product.addCategory(category);
+        entityManager.persist(product);
+
+        var product2 = new Product();
+        product2.setSku("test_sku_2");
+        product2.setName("Test Product 2");
+        product2.setDescription("Test Description 2");
+        product2.setPrice(BigDecimal.valueOf(10100));
+        product2.getCategories().add(category);
+        entityManager.persist(product2);
+
+        var product3 = new Product();
+        product3.setSku("test_sku_3");
+        product3.setName("Another Product 3");
+        product3.setDescription("Test Description 3");
+        product3.setPrice(BigDecimal.valueOf(10200));
+        product3.getCategories().add(category);
+        entityManager.persist(product3);
+
+        entityManager.flush();
+
+        var pageable = PageRequest.of(0, 2, Sort.by("name").descending());
+        var products = productRepository.findAll(pageable);
+
+        assertEquals(2, products.getNumberOfElements());
+        assertEquals(3, products.getTotalElements());
+        assertEquals(2, products.getTotalPages());
+        assertEquals("Test Product 2", products.getContent().get(0).getName());
+        assertEquals("Test Product", products.getContent().get(1).getName());
+    }
+
+    @Test
+    void testSliceQuery() {
+        var category = new Category();
+        category.setCode("cat_one");
+        category.setName("Test Category");
+        entityManager.persist(category);
+
+        var product = new Product();
+        product.setSku("test_sku");
+        product.setName("Test Product");
+        product.setDescription("Test Description");
+        product.setPrice(BigDecimal.valueOf(10000));
+        product.addCategory(category);
+        entityManager.persist(product);
+
+        var product2 = new Product();
+        product2.setSku("test_sku_2");
+        product2.setName("Test Product 2");
+        product2.setDescription("Test Description 2");
+        product2.setPrice(BigDecimal.valueOf(10100));
+        product2.getCategories().add(category);
+        entityManager.persist(product2);
+
+        var product3 = new Product();
+        product3.setSku("test_sku_3");
+        product3.setName("Another Product 3");
+        product3.setDescription("Test Description 3");
+        product3.setPrice(BigDecimal.valueOf(10200));
+        product3.getCategories().add(category);
+        entityManager.persist(product3);
+
+        entityManager.flush();
+
+        var pageable = PageRequest.of(0, 2, Sort.by("name").descending());
+        Slice<Product> products = productRepository.findAll(pageable);
+
+        assertEquals(2, products.getNumberOfElements());
+        assertEquals("Test Product 2", products.getContent().get(0).getName());
+        assertEquals("Test Product", products.getContent().get(1).getName());
     }
 }

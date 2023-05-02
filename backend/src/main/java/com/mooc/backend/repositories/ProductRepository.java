@@ -7,6 +7,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -29,5 +30,5 @@ public interface ProductRepository extends JpaRepository<Product, Long>, CustomP
     @EntityGraph(attributePaths = {"categories", "images"})
     Slice<ProductInfo> findPageableByCategoriesId(Long id, Pageable pageable);
 
-    Stream<Product> findByIdIn(Iterable<Long> ids);
+    Stream<Product> findByIdIn(Collection<Long> id);
 }

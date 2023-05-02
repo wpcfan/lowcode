@@ -1,6 +1,8 @@
 package com.mooc.backend.rest.admin;
 
 import com.mooc.backend.dtos.*;
+import com.mooc.backend.entities.PageBlock;
+import com.mooc.backend.entities.PageBlockData;
 import com.mooc.backend.enumerations.Errors;
 import com.mooc.backend.enumerations.PageStatus;
 import com.mooc.backend.enumerations.PageType;
@@ -25,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Tag(name = "页面管理", description = "添加、修改、删除、查询页面，发布页面，撤销发布页面，添加区块，删除区块，修改区块，添加区块数据，删除区块数据，修改区块数据")
@@ -132,13 +133,13 @@ public class PageAdminController {
 
     @Operation(summary = "修改页面区块")
     @PutMapping("/{id}/blocks/{blockId}")
-    public PageBlockDTO updateBlock(
+    public PageBlock updateBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @RequestBody CreateOrUpdatePageBlockDTO block) {
         log.debug("update block: id = {}, blockId = {}, block = {}", id, blockId, block);
         checkPageStatus(id);
-        return PageBlockDTO.fromEntity(pageUpdateService.updateBlock(blockId, block));
+        return pageUpdateService.updateBlock(blockId, block);
     }
 
     @Operation(summary = "删除页面区块")
@@ -164,38 +165,36 @@ public class PageAdminController {
 
     @Operation(summary = "批量添加页面区块数据")
     @PostMapping("/{id}/blocks/{blockId}/data/batch")
-    public List<PageBlockDataDTO> addDataBatch(
+    public List<PageBlockData> addDataBatch(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @RequestBody List<CreateOrUpdatePageBlockDataDTO> data) {
         log.debug("add data: id = {}, blockId = {}, data = {}", id, blockId, data);
         checkPageStatus(id);
-        return pageCreateService.addDataToBlockBatch(blockId, data).stream()
-                .map(PageBlockDataDTO::fromEntity)
-                .collect(Collectors.toList());
+        return pageCreateService.addDataToBlockBatch(blockId, data);
     }
 
     @Operation(summary = "添加页面区块数据")
     @PostMapping("/{id}/blocks/{blockId}/data")
-    public PageBlockDataDTO addData(
+    public PageBlockData addData(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @RequestBody CreateOrUpdatePageBlockDataDTO data) {
         log.debug("add data: id = {}, blockId = {}, data = {}", id, blockId, data);
         checkPageStatus(id);
-        return PageBlockDataDTO.fromEntity(pageCreateService.addDataToBlock(blockId, data));
+        return pageCreateService.addDataToBlock(blockId, data);
     }
 
     @Operation(summary = "修改页面区块数据")
     @PutMapping("/{id}/blocks/{blockId}/data/{dataId}")
-    public PageBlockDataDTO updateData(
+    public PageBlockData updateData(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
             @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
             @Parameter(description = "页面区块数据 id", name = "dataId") @PathVariable Long dataId,
             @RequestBody CreateOrUpdatePageBlockDataDTO data) {
         log.debug("update data: id = {}, blockId = {}, dataId = {}, data = {}", id, blockId, dataId, data);
         checkPageStatus(id);
-        return PageBlockDataDTO.fromEntity(pageUpdateService.updateData(dataId, data));
+        return pageUpdateService.updateData(dataId, data);
     }
 
     @Operation(summary = "删除页面区块数据")

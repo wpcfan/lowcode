@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
-import 'problem.dart';
+import 'custom_exception_interceptor.dart';
 
 /// 自定义的 Dio 实例，用于访问文件接口
 /// 该实例会自动添加日志拦截器和错误拦截器
@@ -24,19 +24,6 @@ class FileClient with DioMixin implements Dio {
     );
     httpClientAdapter = HttpClientAdapter();
     interceptors.add(PrettyDioLogger());
-    interceptors.add(InterceptorsWrapper(
-      onError: (e, handler) {
-        if (e.response?.data != null) {
-          final problem = Problem.fromJson(e.response?.data);
-          return handler.reject(DioError(
-            requestOptions: e.requestOptions,
-            error: problem,
-            type: DioErrorType.badResponse,
-            message: problem.title,
-          ));
-        }
-        return handler.next(e);
-      },
-    ));
+    interceptors.add(CustomExceptionInterceptor());
   }
 }

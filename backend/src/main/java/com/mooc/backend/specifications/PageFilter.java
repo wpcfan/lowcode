@@ -15,4 +15,5 @@ public record PageFilter(
         LocalDateTime startDateTo,
         LocalDateTime endDateFrom,
         LocalDateTime endDateTo) {
+
 }

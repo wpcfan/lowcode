@@ -1,4 +1,6 @@
-part of 'page_block.dart';
+import 'package:equatable/equatable.dart';
+
+import 'my_link.dart';
 
 class ImageData extends Equatable {
   const ImageData({

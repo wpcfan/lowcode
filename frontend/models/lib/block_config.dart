@@ -1,4 +1,5 @@
-part of 'page_block.dart';
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
 
 class BlockConfig {
   final double? horizontalPadding;

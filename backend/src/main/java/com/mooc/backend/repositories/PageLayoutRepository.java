@@ -43,6 +43,14 @@ public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, J
     """)
     Stream<PageLayout> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
 
+    /**
+     * 计算指定时间、平台、页面类型的页面数量
+     * 用于判断是否存在时间冲突的页面布局
+     * @param time
+     * @param platform
+     * @param pageType
+     * @return
+     */
     @Query("""
     select count(p) from PageLayout p
     where p.status = com.mooc.backend.enumerations.PageStatus.Published
@@ -61,7 +69,7 @@ public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, J
      * @param currentTime 当前时间
      * @return 修改的记录数
      */
-    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Modifying
     @Query("""
     update PageLayout p
     set p.status = com.mooc.backend.enumerations.PageStatus.Archived

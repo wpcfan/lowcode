@@ -30,18 +30,25 @@
     - [6.3.2 作业：完成区块数据，产品和类别等实体类](#632-作业完成区块数据产品和类别等实体类)
   - [6.4 生成数据库表](#64-生成数据库表)
     - [6.4.1 自动创建数据库表](#641-自动创建数据库表)
+      - [6.4.1.1 Spring Data Jpa 自动建表](#6411-spring-data-jpa-自动建表)
+      - [6.4.1.2 使用 Flyway 管理数据库版本](#6412-使用-flyway-管理数据库版本)
     - [6.4.2 手动创建数据库表](#642-手动创建数据库表)
       - [6.4.2.1 使用 Docker 启动 MySQL 数据库](#6421-使用-docker-启动-mysql-数据库)
       - [6.4.2.2 使用 JPA Buddy 插件生成数据库表](#6422-使用-jpa-buddy-插件生成数据库表)
   - [6.5 对象关系](#65-对象关系)
-    - [6.5.1 一对多](#651-一对多)
-    - [6.5.2 多对多](#652-多对多)
+    - [6.5.1 一对多：布局/区块/数据](#651-一对多布局区块数据)
+    - [6.5.2 多对多：类目和商品](#652-多对多类目和商品)
     - [6.5.3 维护方和被维护方](#653-维护方和被维护方)
     - [6.5.4 作业：实现商品和商品图片的关系](#654-作业实现商品和商品图片的关系)
     - [6.5.5 JPA 实体类测试](#655-jpa-实体类测试)
+    - [6.5.5.1 作业：为实体类添加关系维护方法](#6551-作业为实体类添加关系维护方法)
     - [6.5.6 集合类型的选择](#656-集合类型的选择)
     - [6.5.7 测试验证顺序存储和读取](#657-测试验证顺序存储和读取)
     - [6.5.8 作业：改造 PageBlockData](#658-作业改造-pageblockdata)
+  - [6.6 审计字段](#66-审计字段)
+  - [6.7 综合实战：给 APP 首页构建 API](#67-综合实战给-app-首页构建-api)
+    - [6.7.1 作业：完成 `CategoryDTO` 和 `ProductDTO` 的定义](#671-作业完成-categorydto-和-productdto-的定义)
+    - [6.7.2 作业：完成 `ProductQueryService` 和 `ProductController`](#672-作业完成-productqueryservice-和-productcontroller)
 
 <!-- /code_chunk_output -->
 
@@ -581,6 +588,8 @@ public class PageBlock {
 
 ### 6.4.1 自动创建数据库表
 
+#### 6.4.1.1 Spring Data Jpa 自动建表
+
 Spring Data JPA 会根据实体类自动生成数据库表，但是我们需要在 `application.properties` 中配置数据库连接信息，如下所示：
 
 ```properties
@@ -640,6 +649,237 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 点击 `Connect` 按钮，可以看到数据库中已经有了 `mooc_page_layout`，`mooc_page_block`，`mooc_page_block_data` 等表。
 
 ![图 18](http://ngassets.twigcodes.com/d1368f60966cf95e4389c1fd7695af3c84ea42f64478ceb132a6d22c1ef57439.png)
+
+#### 6.4.1.2 使用 Flyway 管理数据库版本
+
+Flyway 是一个开源的数据库版本管理工具，它可以帮助我们管理数据库的版本，可以帮助我们在不同的环境中，自动创建数据库表，自动更新数据库表结构。
+
+SpringBoot 对 Flyway 提供了开箱即用的支持，我们可以在 `build.gradle` 中添加 Flyway 的依赖。
+
+```groovy
+implementation 'org.flywaydb:flyway-core'
+implementation 'org.flywaydb:flyway-mysql'
+```
+
+然后在 `application.properties` 文件中添加 Flyway 的配置，当然还是先禁用，我们仅在开发模式下启用：
+
+```properties
+# 数据初始化设置
+spring.sql.init.mode=never
+spring.flyway.enabled=false
+```
+
+然后在 `application-dev.properties` 文件中启用 Flyway：
+
+```properties
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration/h2
+spring.flyway.baseline-on-migrate=true
+```
+
+在 `application-prod.properties` 文件中启用 Flyway：
+
+```properties
+# 数据初始化设置
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration/mysql
+spring.flyway.baseline-on-migrate=true
+```
+
+在上面的配置中，我们使用了 `spring.flyway.enabled` 属性来启用 Flyway，然后使用了 `spring.flyway.locations` 属性来指定 Flyway 的脚本路径，这个路径是 `resources/db/migration`。
+`spring.flyway.baseline-on-migrate` 属性来指定在对一个非空数据库执行迁移时，是否应该执行基线。这个属性对于初次部署到生产数据库时非常有用，因为生产库往往都是需要特殊权限预先建立的，而且往往是非空的，这时候我们就可以使用这个属性来指定 Flyway 在对一个非空数据库执行迁移时，是否应该执行基线。
+
+在 `resources/db/migration` 目录下，我们创建两个子目录 `h2` 和 `mysql` ，这意味着我们需要支持两种数据库，一种是 H2，一种是 MySQL。
+
+我们可以创建一个初始化脚本，比如 `V1.0__schema.sql`，这个脚本可以通过 JpaBuddy 来导出，`H2` 版本的内容如下：
+
+```sql
+CREATE TABLE mooc_categories
+(
+    id        BIGINT AUTO_INCREMENT NOT NULL,
+    code      VARCHAR(255)          NOT NULL,
+    name      VARCHAR(255)          NOT NULL,
+    parent_id BIGINT,
+    created_at datetime             NULL,
+    updated_at datetime             NULL,
+    CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT FK_MOOC_CATEGORIES_ON_PARENT FOREIGN KEY (parent_id) REFERENCES mooc_categories (id);
+
+CREATE TABLE mooc_product_categories
+(
+    category_id BIGINT NOT NULL,
+    product_id  BIGINT NOT NULL,
+    CONSTRAINT pk_mooc_product_categories PRIMARY KEY (category_id, product_id)
+);
+
+CREATE TABLE mooc_products
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    name        VARCHAR(100)          NOT NULL,
+    description VARCHAR(255)          NOT NULL,
+    price       DECIMAL(10,2)         NOT NULL,
+    created_at  datetime              NULL,
+    updated_at  datetime              NULL,
+    CONSTRAINT pk_mooc_products PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_category FOREIGN KEY (category_id) REFERENCES mooc_categories (id);
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_product FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_product_images
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    image_url  VARCHAR(255)          NOT NULL,
+    product_id BIGINT                NULL,
+    created_at datetime              NULL,
+    updated_at datetime              NULL,
+    CONSTRAINT pk_mooc_product_images PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_product_images
+    ADD CONSTRAINT FK_MOOC_PRODUCT_IMAGES_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_pages
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at datetime              NULL,
+    updated_at datetime              NULL,
+    platform   VARCHAR(255)          NOT NULL,
+    page_type  VARCHAR(255)          NOT NULL,
+    config     JSON                  NOT NULL,
+    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
+);
+
+CREATE TABLE mooc_page_blocks
+(
+    id      BIGINT AUTO_INCREMENT NOT NULL,
+    title   VARCHAR(255)          NOT NULL,
+    type    VARCHAR(255)          NOT NULL,
+    sort    INT                   NOT NULL,
+    config  JSON                  NOT NULL,
+    page_id BIGINT                NULL,
+    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_page_blocks
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
+
+CREATE TABLE mooc_page_block_data
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL,
+    sort          INT                   NOT NULL,
+    content       JSON                  NOT NULL,
+    page_block_id BIGINT                NULL,
+    CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_page_block_data
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCK_DATA_ON_PAGE_BLOCK FOREIGN KEY (page_block_id) REFERENCES mooc_page_blocks (id);
+```
+
+MySQL 版本的内容如下：
+
+```sql
+CREATE TABLE mooc_categories
+(
+    id        BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
+    code      VARCHAR(255)          NOT NULL    COMMENT '分类编码',
+    name      VARCHAR(255)          NOT NULL    COMMENT '分类名称',
+    parent_id BIGINT                            COMMENT '父级分类',
+    created_at datetime             NULL        COMMENT '创建时间',
+    updated_at datetime             NULL        COMMENT '更新时间',
+    CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
+) COMMENT '分类表';
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT FK_MOOC_CATEGORIES_ON_PARENT FOREIGN KEY (parent_id) REFERENCES mooc_categories (id);
+
+CREATE TABLE mooc_product_categories
+(
+    category_id BIGINT NOT NULL     COMMENT '分类ID',
+    product_id  BIGINT NOT NULL     COMMENT '产品ID',
+    CONSTRAINT pk_mooc_product_categories PRIMARY KEY (category_id, product_id)
+) COMMENT '产品分类关联表';
+
+CREATE TABLE mooc_products
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
+    name          VARCHAR(100)          NOT NULL    COMMENT '产品名称',
+    `description` VARCHAR(255)          NOT NULL    COMMENT '产品描述',
+    price         DECIMAL(10,2)         NOT NULL    COMMENT '产品价格',
+    created_at    datetime              NULL        COMMENT '创建时间',
+    updated_at    datetime              NULL        COMMENT '更新时间',
+    CONSTRAINT pk_mooc_products PRIMARY KEY (id)
+) COMMENT '产品表';
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_category FOREIGN KEY (category_id) REFERENCES mooc_categories (id);
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_product FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_product_images
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL   COMMENT '主键',
+    image_url  VARCHAR(255)          NOT NULL   COMMENT '图片地址',
+    product_id BIGINT                NULL       COMMENT '产品ID',
+    created_at datetime              NULL       COMMENT '创建时间',
+    updated_at datetime              NULL       COMMENT '更新时间',
+    CONSTRAINT pk_mooc_product_images PRIMARY KEY (id)
+) COMMENT '产品图片表';
+
+ALTER TABLE mooc_product_images
+    ADD CONSTRAINT FK_MOOC_PRODUCT_IMAGES_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_pages
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL   COMMENT '主键',
+    created_at datetime              NULL       COMMENT '创建时间',
+    updated_at datetime              NULL       COMMENT '更新时间',
+    platform   VARCHAR(255)          NOT NULL   COMMENT '平台',
+    page_type  VARCHAR(255)          NOT NULL   COMMENT '页面类型',
+    config     JSON                  NOT NULL   COMMENT '页面配置',
+    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
+) COMMENT '页面表';
+
+CREATE TABLE mooc_page_blocks
+(
+    id      BIGINT AUTO_INCREMENT NOT NULL      COMMENT '主键',
+    title   VARCHAR(255)          NOT NULL      COMMENT '标题',
+    type    VARCHAR(255)          NOT NULL      COMMENT '类型',
+    sort    INT                   NOT NULL      COMMENT '排序',
+    config  JSON                  NOT NULL      COMMENT '配置',
+    page_id BIGINT                NULL          COMMENT '页面ID',
+    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
+) COMMENT '页面块表';
+
+ALTER TABLE mooc_page_blocks
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
+
+CREATE TABLE mooc_page_block_data
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
+    sort          INT                   NOT NULL    COMMENT '排序',
+    content       JSON                  NOT NULL    COMMENT '内容',
+    page_block_id BIGINT                NULL        COMMENT '页面块ID',
+    CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
+) COMMENT '页面块数据表';
+
+ALTER TABLE mooc_page_block_data
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCK_DATA_ON_PAGE_BLOCK FOREIGN KEY (page_block_id) REFERENCES mooc_page_blocks (id);
+```
 
 ### 6.4.2 手动创建数据库表
 
@@ -749,7 +989,7 @@ ALTER TABLE mooc_pages
 
 ## 6.5 对象关系
 
-### 6.5.1 一对多
+### 6.5.1 一对多：布局/区块/数据
 
 在 Spring Data JPA 中，我们可以使用 `@ManyToOne`、`@OneToOne`、`@OneToMany`、`@ManyToMany` 注解来标注实体类之间的关联关系。
 
@@ -892,7 +1132,7 @@ public class Category extends Auditable {
 }
 ```
 
-### 6.5.2 多对多
+### 6.5.2 多对多：类目和商品
 
 `Category` 和 `Product` 是多对多的关系，一个分类可以有多个产品，一个产品可以属于多个分类。那么对于这种情况我们怎么处理呢？
 
@@ -905,7 +1145,7 @@ public class Category extends Auditable {
 @AllArgsConstructor
 @Entity
 @Table(name = "mooc_products")
-public class Product extends Auditable {
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -1147,6 +1387,67 @@ class BackendApplicationTests {
 }
 ```
 
+为了写入外键，我们需要在 `productImage` 中设置 `product`，为了保证数据一致，我们需要在 `product` 中添加 `productImage`。这段逻辑其实对于实体类是非常普遍的，因为我们可以添加一些辅助方法来简化这段逻辑。
+
+```java
+public class Product {
+    // ...
+    public void addImage(ProductImage image) {
+        images.add(image);
+        image.setProduct(this);
+    }
+
+    public void removeImage(ProductImage image) {
+        images.remove(image);
+        image.setProduct(null);
+    }
+}
+```
+
+这样的话，我们就可以将上面的代码简化为
+
+```java
+@SpringBootTest
+class BackendApplicationTests {
+    @Autowired
+    private EntityManager entityManager;
+
+    @Test
+    @Transactional
+    void testJpaEntities() {
+        Product product = Product.builder()
+                .sku("sku_001")
+                .name("iPhone 12")
+                .description("Apple iPhone 12")
+                .price(BigDecimal.valueOf(6999))
+                .build();
+        ProductImage productImage = ProductImage.builder()
+                .imageUrl("https://example.com/iphone12.jpg")
+                .build();
+        product.addImage(productImage);
+
+        entityManager.persist(product);
+        entityManager.persist(productImage);
+
+        entityManager.flush();
+
+        var foundProduct = entityManager.find(Product.class, product.getId());
+        assertEquals(product, foundProduct);
+    }
+
+}
+```
+
+这样做的好处是，我们可以将关系的维护逻辑封装到实体类中，这样我们在使用的时候就不需要关心维护逻辑，只需要调用相应的方法即可。
+
+### 6.5.5.1 作业：为实体类添加关系维护方法
+
+请按上面的方式为 `Category` 和 `Product` 添加关系维护方法。其中有两对关系
+
+1. `Category` 和 `Product` 之间的关系
+
+2. `Category` 和自身之间的关系
+
 ### 6.5.6 集合类型的选择
 
 在构建实体关系的时候，我们经常会遇到一对多的关系，比如一个商品可以有多个商品图片，一个商品图片只能属于一个商品。在这种情况下，我们可以使用 `Set` 或者 `List` 来表示一对多的关系。
@@ -1263,3 +1564,325 @@ class BackendApplicationTests {
 1. 改造 `PageBlock` 中的 `data` 类型
 
 2. 让 `PageBlockData` 实现 `Comparable<PageBlockData>` 接口
+
+3. 测试验证顺序存储和读取
+
+## 6.6 审计字段
+
+在后端开发中，我们经常会遇到一些审计字段，比如创建时间、更新时间、创建人、更新人等。Spring Boot 为我们提供了 `@CreatedDate`、`@LastModifiedDate`、`@CreatedBy`、`@LastModifiedBy` 注解，我们可以使用这些注解来实现审计字段。一旦使用这些注解，我们就不需要在代码中手动设置这些字段了，Spring Boot 会自动帮我们设置。也就是几乎不需要写代码就可以实现这些字段的更新。
+
+在本课程中我们只使用 `@CreatedDate` 和 `@LastModifiedDate`，其他的注解我们不使用。因为 `@CreatedBy` 和 `@LastModifiedBy` 需要我们实现 `AuditorAware` 接口，这个接口的作用是获取当前用户，但是我们的课程中没有用户系统，所以我们不使用这两个注解。
+
+启用审计字段的步骤如下：
+
+1. 在 `Application` 类上添加 `@EnableJpaAuditing` 注解
+
+2. 在实体类中添加 `@EntityListeners(AuditingEntityListener.class)` 注解
+
+3. 在实体类中添加 `@CreatedDate` 和 `@LastModifiedDate` 注解
+
+由于我们在每个需要的实体类都要添加 `@CreatedDate` 和 `@LastModifiedDate` 注解，所以我们可以创建一个基类，然后让所有的实体类都继承这个基类。
+
+```java
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public abstract class Auditable {
+
+    @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
+    private LocalDateTime updatedAt;
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+}
+```
+
+然后我们让 `PageLayout`、`Product`、`Category` 以及 `ProductImage` 继承这个基类。
+
+```java
+public class PageLayout extends Auditable {
+    // ...
+}
+
+public class Product extends Auditable {
+    // ...
+}
+
+public class Category extends Auditable {
+    // ...
+}
+
+public class ProductImage extends Auditable {
+    // ...
+}
+```
+
+`PageBlock` 和 `PageBlockData` 不需要审计字段的原因是，这两个实体类是通过 `PageLayout` 来维护的，所以我们只需要在 `PageLayout` 中添加审计字段即可。
+
+## 6.7 综合实战：给 APP 首页构建 API
+
+由于之前我们已经构建了 `PageLayoutRepository`，所以我们可以直接使用这个仓储来构建 API。按 Java 的习惯模式，我们在 `Service` 层中定义一个 `PageQueryService` 类，然后在这个类中定义一个 `findPublished` 方法，这个方法用来查询已发布的页面布局。
+
+```java
+@RequiredArgsConstructor
+@Service
+public class PageQueryService {
+    private final EntityManager entityManager;
+
+    @Transactional(readOnly = true)
+    public Optional<PageLayout> findPublished(Platform platform, PageType pageType) {
+        var now = LocalDateTime.now();
+        var query = entityManager.createQuery(
+                """
+                select pl from PageLayout pl
+                where pl.platform = :platform
+                and pl.pageType = :pageType
+                and pl.startTime <= :now
+                and pl.endTime >= :now
+                order by pl.startTime desc
+                """,
+                PageLayout.class
+        );
+        query.setParameter("platform", platform);
+        query.setParameter("pageType", pageType);
+        query.setParameter("now", now);
+        var stream = query.getResultStream();
+        return stream.findFirst();
+    }
+}
+```
+
+上面代码中，我们使用 `EntityManager` 来构建查询语句，然后使用 `getResultStream` 方法来获取查询结果的流，最后使用 `findFirst` 方法来获取第一个元素。查询语句中的 `:platform`、`:pageType` 和 `:now` 是占位符，我们可以使用 `setParameter` 方法来设置这些占位符的值。
+
+然后我们需要在 `PageController` 中定义一个 `findPublished` 方法，这个方法用来接收请求，然后调用 `PageQueryService` 的 `findPublished` 方法来查询数据，最后将查询到的数据返回给客户端。
+
+```java
+package com.mooc.backend.rest.app;
+
+import com.mooc.backend.dtos.PageDTO;
+import com.mooc.backend.enumerations.Errors;
+import com.mooc.backend.enumerations.PageType;
+import com.mooc.backend.enumerations.Platform;
+import com.mooc.backend.error.CustomException;
+import com.mooc.backend.services.PageQueryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+@Tag(name = "页面", description = "获取页面信息")
+@RequiredArgsConstructor
+@RestController
+@RequestMapping(value = "/api/v1/app/pages")
+public class PageController {
+
+    final PageQueryService pageQueryService;
+
+    @Operation(summary = "根据 pageType 获取页面信息")
+    @GetMapping("/published/{pageType}")
+    public PageDTO findPublished(
+            @Parameter(description = "页面类型", name = "pageType") @PathVariable PageType pageType,
+            @Parameter(description = "平台类型", name = "platform") @RequestParam(defaultValue = "App") Platform platform) {
+        return pageQueryService.findPublished(platform, pageType)
+                .map(PageDTO::fromEntity)
+                .orElseThrow(() -> new CustomException("Page not found", "PageController#findPublished",
+                        Errors.DataNotFoundException.code()));
+    }
+}
+```
+
+这里我们使用了 `@GetMapping("/published/{pageType}")` 注解来标记这个方法是一个 `GET` 请求，请求的路径是 `/published/{pageType}`，其中 `{pageType}` 是一个路径参数，这个参数会被传递到 `findPublished` 方法中。另外我们使用了 `@RequestParam(defaultValue = "App")` 注解来标记 `platform` 参数是一个查询参数，如果客户端没有传递这个参数，那么就使用默认值 `App`。
+
+值得指出的的是，我们没有直接返回 `PageLayout` 实体，而是返回了 `PageDTO`，这是因为我们不希望直接将实体返回给客户端，而是希望将实体转换为 `DTO`，然后再返回给客户端。这是因为有很多情况下，我们不希望暴露所有的属性，而是只暴露部分属性，这样可以提高安全性，同时也会减少数据的传输量，提高性能。
+
+这个 `PageDTO` 的定义如下：
+
+```java
+package com.mooc.backend.dtos;
+
+import com.mooc.backend.entities.PageBlock;
+import com.mooc.backend.entities.PageLayout;
+import com.mooc.backend.entities.blocks.PageConfig;
+import com.mooc.backend.enumerations.PageStatus;
+import com.mooc.backend.enumerations.PageType;
+import com.mooc.backend.enumerations.Platform;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+@Getter
+@Builder
+public class PageDTO implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -1;
+    private Long id;
+    private String title;
+    private Platform platform;
+    private PageType pageType;
+    private PageConfig config;
+    @Builder.Default
+    private SortedSet<PageBlock> blocks = new TreeSet<>();
+    /**
+     * 页面启用时间，只有在启用时间之后，且处于已发布状态下才会显示给用户
+     */
+    private LocalDateTime startTime;
+
+    /**
+     * 页面失效时间，只有在失效时间之前，且处于已发布状态下才会显示给用户
+     */
+    private LocalDateTime endTime;
+
+    private PageStatus status;
+
+    public static PageDTO fromEntity(PageLayout page) {
+        return PageDTO.builder()
+                .id(page.getId())
+                .title(page.getTitle())
+                .platform(page.getPlatform())
+                .pageType(page.getPageType())
+                .config(page.getConfig())
+                .blocks(page.getPageBlocks())
+                .startTime(page.getStartTime())
+                .endTime(page.getEndTime())
+                .status(page.getStatus())
+                .build();
+    }
+
+    public PageLayout toEntity() {
+        return PageLayout.builder()
+                .title(getTitle())
+                .platform(getPlatform())
+                .pageType(getPageType())
+                .config(getConfig())
+                .pageBlocks(getBlocks())
+                .build();
+    }
+}
+```
+
+对比 `PageLayout` 实体，我们可以看到 `PageDTO` 中的属性没有审计字段，这是因为 App 角度不需要知道这些字段。另外我们还定义了一个 `fromEntity` 方法，这个方法用来将 `PageLayout` 实体转换为 `PageDTO`，这样就可以将实体转换为 `DTO`，然后再返回给客户端。另外我们还定义了一个 `toEntity` 方法，这个方法用来将 `PageDTO` 转换为 `PageLayout` 实体，这样就可以将 `DTO` 转换为实体，然后再保存到数据库中。这两个方法在构建 DTO 的时候是非常常见的，后面我们还会经常用到。
+
+### 6.7.1 作业：完成 `CategoryDTO` 和 `ProductDTO` 的定义
+
+在上面的例子中，我们已经完成了 `PageDTO` 的定义，现在我们需要完成 `CategoryDTO` 和 `ProductDTO` 的定义，这两个 DTO 的定义和 `PageDTO` 的定义非常类似，你可以参考 `PageDTO` 的定义来完成这两个 DTO 的定义。
+
+提示：
+
+1. 对于 `CategoryDTO` 我们不希望出现 `parent` 属性，因为这个属性会导致循环引用，所以我们需要将这个属性去掉。我们可以添加一个 `parentId` 属性，这个属性用来保存父分类的 ID。
+2. `CategoryDTO` 的 `children` ，我们可能需要使用递归来完成，因为这个属性是一个树形结构，我们需要对这个集合的每个元素进行处理，然后再将处理后的结果添加到这个集合中。
+3. `ProductDTO` 的 `images` 属性是一个字符串的集合，所以需要从 `ProductImage` 集合中获取到所有的图片的 URL，然后再将这些 URL 添加到 `images` 集合中。
+
+### 6.7.2 作业：完成 `ProductQueryService` 和 `ProductController`
+
+我们需要完成瀑布流商品的查询，这个查询需要分页。
+
+- `ProductQueryService` 需要返回一个 `Slice<Product>`，这个类型是 Spring Data JPA 中的一个分页类型，这个类型中包含了分页的信息，以及当前页的数据。后面我们会详细讲解。对于分页的查询，在 Spring Data JPA 一般会需要传入一个 `Pageable` 对象，这个对象中包含了分页的信息，比如当前页码，每页的数据量等。在 Spring Data JPA 中，我们可以使用 `PageRequest.of(page, size)` 来创建一个 `Pageable` 对象，其中 `page` 是页码，`size` 是每页的数据量。在 `ProductQueryService` 中，我们需要使用 `setFirstResult` 和 `setMaxResults` 方法来设置分页的信息，这两个方法的参数分别是 `pageable.getOffset()` 和 `pageable.getPageSize()`。
+
+- `ProductQueryService` 需要的查询语句如下：
+
+  ```sql
+  select p from Product p left join p.categories c where c.id = :id
+  ```
+
+- `ProductController` 中的 `getProductsByCategory` 方法需要使用 `ProductQueryService` 来查询数据，然后再将查询到的数据转换为 `ProductDTO`，最后再返回给客户端。
+
+- `ProductController` 的 API 路径为 `/by-category/{id}/page`，其中 `{id}` 是分类的 ID，除了 `{id}` 之外，还需要传入 `page` 和 `size` 参数，这两个参数分别是页码和每页的数据量，如果方法的参数中有 `Pageable pageable`，那么 Spring MVC 会自动将 `page` 和 `size` 参数转换为 `Pageable` 对象，然后再传入到方法中。
+
+- 如果我们直接返回 `Slice` 对象，那么 Spring MVC 会自动将 `Slice` 对象转换为 JSON，这个 JSON 非常复杂，这个结构类似于下面的样子：
+
+  ```json
+  {
+    "first": true,
+    "last": true,
+    "size": 0,
+    "content": [
+      {
+        "id": 0,
+        "sku": "string",
+        "name": "string",
+        "description": "string",
+        "originalPrice": 0,
+        "price": 0,
+        "categories": [
+          {
+            "id": 0,
+            "name": "string",
+            "code": "string",
+            "parentId": 0,
+            "children": ["string"],
+            "dataType": "category"
+          }
+        ],
+        "images": ["string"]
+      }
+    ],
+    "number": 0,
+    "sort": {
+      "empty": true,
+      "unsorted": true,
+      "sorted": true
+    },
+    "pageable": {
+      "offset": 0,
+      "sort": {
+        "empty": true,
+        "unsorted": true,
+        "sorted": true
+      },
+      "paged": true,
+      "unpaged": true,
+      "pageNumber": 0,
+      "pageSize": 0
+    },
+    "numberOfElements": 0,
+    "empty": true
+  }
+  ```
+
+- 但这个结构显然过于臃肿，我们需要构建一个自己的 JSON 结构，这个结构类似于下面的样子，大家可以自己探索一下应该如何构建，可以参考 `SliceWrapper.java` ：
+
+  ```json
+  {
+    "data": [
+      {
+        "id": 0,
+        "sku": "string",
+        "name": "string",
+        "description": "string",
+        "originalPrice": 0,
+        "price": 0,
+        "categories": [
+          {
+            "id": 0,
+            "name": "string",
+            "code": "string",
+            "parentId": 0,
+            "children": ["string"],
+            "dataType": "category"
+          }
+        ],
+        "images": ["string"]
+      }
+    ],
+    "page": 0,
+    "size": 0,
+    "hasNext": true
+  }
+  ```
+
+## 6.8 改造 APP 首页使用 API

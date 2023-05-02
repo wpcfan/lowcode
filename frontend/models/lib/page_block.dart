@@ -1,16 +1,10 @@
-import 'dart:ui';
-
-import 'package:common/common.dart';
 import 'package:equatable/equatable.dart';
 
+import 'block_config.dart';
 import 'category.dart';
 import 'enumerations.dart';
+import 'image_data.dart';
 import 'product.dart';
-
-part 'page_block_config.dart';
-part 'page_config.dart';
-part 'page_image_data.dart';
-part 'page_link.dart';
 
 class PageBlock<T> extends Equatable {
   const PageBlock({

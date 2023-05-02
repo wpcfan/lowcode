@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
@@ -38,7 +37,7 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
 
   /// 错误处理
   void _handleError(Emitter<CanvasState> emit, dynamic error) {
-    final message = error is DioError ? error.message : error.toString();
+    final message = error is CustomException ? error.message : error.toString();
     emit(state.copyWith(
       error: message,
       saving: false,

@@ -1,8 +1,8 @@
 name: repositories
 description: 数据仓库模块，我们对数据的抽象存放在这个模块。
 version: 0.0.1
-homepage: https://imooc.com
 publish_to: "none"
+homepage: https://imooc.com
 
 environment:
   sdk: ">=2.19.4 <3.0.0"
@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^5.1.1
+
   models:
     path: ../models
   networking:

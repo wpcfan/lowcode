@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:repositories/repositories.dart';
 
-import 'home.dart';
+import 'blocs/blocs.dart';
+import 'home_view.dart';
 
 class HomeViewWithProvider extends StatelessWidget {
   const HomeViewWithProvider({

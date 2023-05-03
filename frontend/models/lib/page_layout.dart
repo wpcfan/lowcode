@@ -1,5 +1,11 @@
 import 'package:equatable/equatable.dart';
-import 'package:models/models.dart';
+
+import 'category.dart';
+import 'enumerations.dart';
+import 'image_data.dart';
+import 'page_block.dart';
+import 'page_config.dart';
+import 'product.dart';
 
 class PageLayout extends Equatable {
   final int? id;

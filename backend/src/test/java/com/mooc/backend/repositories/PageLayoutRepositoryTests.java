@@ -1,6 +1,6 @@
 package com.mooc.backend.repositories;
 
-import com.mooc.backend.dtos.ProductDataDTO;
+import com.mooc.backend.entities.blocks.ProductDataDTO;
 import com.mooc.backend.entities.PageBlock;
 import com.mooc.backend.entities.PageBlockData;
 import com.mooc.backend.entities.PageLayout;

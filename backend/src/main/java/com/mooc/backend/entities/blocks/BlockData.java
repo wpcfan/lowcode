@@ -2,7 +2,6 @@ package com.mooc.backend.entities.blocks;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.dtos.CategoryDTO;
-import com.mooc.backend.dtos.ProductDataDTO;
 import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.json.BlockDataDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;

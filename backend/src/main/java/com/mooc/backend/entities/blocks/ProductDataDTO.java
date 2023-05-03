@@ -1,9 +1,10 @@
-package com.mooc.backend.dtos;
+package com.mooc.backend.entities.blocks;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.mooc.backend.dtos.CategoryDTO;
+import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
-import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.enumerations.BlockDataType;
 import com.mooc.backend.json.MathUtils;
 
@@ -25,7 +26,7 @@ public record ProductDataDTO(
     @Serial
     private static final long serialVersionUID = -1;
 
-    public static ProductDataDTO fromEntity(com.mooc.backend.entities.Product product) {
+    public static ProductDataDTO fromEntity(Product product) {
         return new ProductDataDTO(
                 product.getId(),
                 product.getSku(),

@@ -2130,7 +2130,7 @@ factory PageLayout.fromJson(
 
 主要的原因是在页面一级，我们也会有内边距等设置，这其实在 flutter 中等于要求外面会套一层 `SliverPadding`，所以你接受的还是一个 `sliver`，而不是一个列表。但请注意不同平台不一定是这样的，如果使用不同的语言框架在 Web/iOS/Android 上，我们可能会有不同的实现。
 
-在 `app/lib/main.dart` 中，我们在 `MyApp` 中添加如下方法。
+在 `home/lib/home.dart` 中，我们在 `HomeView` 中添加如下方法。
 
 ```dart
 Widget _buildSliver(

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mooc.backend.dtos.CategoryDTO;
-import com.mooc.backend.dtos.ProductDataDTO;
+import com.mooc.backend.entities.blocks.ProductDataDTO;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.entities.blocks.ImageDTO;
 

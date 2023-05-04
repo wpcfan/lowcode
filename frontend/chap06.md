@@ -27,7 +27,7 @@
     - [6.2.6 实体对象之间的关系](#626-实体对象之间的关系)
   - [6.3 构建实体类](#63-构建实体类)
     - [6.3.1 JPA Buddy 插件](#631-jpa-buddy-插件)
-    - [6.3.2 作业：完成区块数据，产品和类别等实体类](#632-作业完成区块数据产品和类别等实体类)
+    - [6.3.2 作业：完成产品和类别等实体类](#632-作业完成产品和类别等实体类)
   - [6.4 生成数据库表](#64-生成数据库表)
     - [6.4.1 自动创建数据库表](#641-自动创建数据库表)
       - [6.4.1.1 Spring Data Jpa 自动建表](#6411-spring-data-jpa-自动建表)
@@ -49,6 +49,9 @@
   - [6.7 综合实战：给 APP 首页构建 API](#67-综合实战给-app-首页构建-api)
     - [6.7.1 作业：完成 `CategoryDTO` 和 `ProductDTO` 的定义](#671-作业完成-categorydto-和-productdto-的定义)
     - [6.7.2 作业：完成 `ProductQueryService` 和 `ProductController`](#672-作业完成-productqueryservice-和-productcontroller)
+  - [6.8 改造 APP 首页使用 API](#68-改造-app-首页使用-api)
+    - [6.8.1 网络包改造](#681-网络包改造)
+    - [6.8.2 Repository 层改造](#682-repository-层改造)
 
 <!-- /code_chunk_output -->
 
@@ -123,10 +126,10 @@ runtimeOnly 'com.mysql:mysql-connector-j'
 
 ### 6.2.6 实体对象之间的关系
 
-上面说的 `PageLayout` ， `PageBlock` 和 `BlockData` 三个实体对象之间都是一对多的关系
+上面说的 `PageLayout` ， `PageBlock` 和 `PageBlockData` 三个实体对象之间都是一对多的关系
 
 1. 一个页面布局可以由多个页面区块组成，所以 `PageLayout` 和 `PageBlock` 之间是一对多的关系
-2. 一个页面区块可以有多个数据项，所以 `PageBlock` 和 `BlockData` 之间是一对多的关系
+2. 一个页面区块可以有多个数据项，所以 `PageBlock` 和 `PageBlockData` 之间是一对多的关系
 3. 一个商品可以有多个图片，所以 `Product` 和 `ProductImage` 之间是一对多的关系
 4. 一个分类可以有多个商品，所以 `Category` 和 `Product` ，一个商品也可以属于多个分类，所以 `Product` 和 `Category` 之间是多对多的关系
 5. 一个分类可以有多个子分类，所以 `Category` 和 `Category` 之间是一对多的关系
@@ -576,9 +579,273 @@ public class PageBlock {
 
 但是由于 `config` 字段我们希望以 `JSON` 的形式保存到数据库中，所以我们需要使用 `@Type` 注解来指定 `JsonType` 类型，这个类型来自于 `hypersistence` 这个包。
 
-### 6.3.2 作业：完成区块数据，产品和类别等实体类
+接下来我们看一下区块数据，这个相对复杂一些，因为区块数据是不固定的，我们需要根据不同的区块类型来保存不同的数据，比如 `Banner` 区块， `ImageRow` 区块， `ProductRow` 区块， `Waterfall` 区块等等，这些区块的数据都是不一样的，我们需要根据不同的区块类型来保存不同的数据。
 
-请使用 `JPA Designer` 完成 `PageBlockData`， `Product`， `Category` 等实体类的设计，类之间的关系暂时不需要考虑，表名前缀都是 `mooc_`。暂时不需要考虑 `Auditable` 接口，这个是审计接口，我们后面会讲到。
+所以我们对于 `PageBlockData` 的 `content` 使用的是 `JSON` 类型，这样就可以保存不同的数据了，代码如下：
+
+```java
+@Getter
+@Setter
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "mooc_page_block_data")
+public class PageBlockData {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Integer sort;
+
+    @Type(JsonType.class)
+    @Column(nullable = false, columnDefinition = "json")
+    private BlockData content;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "page_block_id")
+    private PageBlock pageBlock;
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        PageBlockData other = (PageBlockData) obj;
+        if (id == null) {
+            return other.id == null;
+        } else return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        return result;
+    }
+}
+```
+
+但如果只是定义 `JSON` 又会过于宽泛，所以我们定义了 `BlockData` 这个接口。后面会把图片类型数据，商品类型数据以及类目类型数据都实现这个接口。
+
+```java
+public interface BlockData extends Serializable {
+    BlockDataType getDataType();
+}
+```
+
+上面的 `BlockDataType` 是一个枚举类型，用来标识不同的区块类型，代码如下：
+
+```java
+public enum BlockDataType {
+    Category("category"),
+    Product("product"),
+    Image("image");
+
+    private final String value;
+
+    BlockDataType(String value) {
+        this.value = value;
+    }
+
+    public static BlockDataType fromValue(String value) {
+        for (BlockDataType blockDataType : BlockDataType.values()) {
+            if (blockDataType.value.equals(value)) {
+                return blockDataType;
+            }
+        }
+        throw new IllegalArgumentException("Invalid BlockDataType value: " + value);
+    }
+
+    @JsonValue
+    public String getValue() {
+        return value;
+    }
+}
+```
+
+然后我们来分别定义以下几个数据的类型
+
+1. 图片类数据，我们使用了 `record` 来定义，代码如下：
+
+   ```java
+   public record ImageDTO(
+       @Schema(description = "图片地址", example = "http://localhost:8080/api/images/100/100/image1") @NotNull String image,
+       @Schema(description = "图片地址", example = "image1") @NotNull String title,
+       @NotNull Link link
+   ) implements BlockData {
+       @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+       @Override
+       public BlockDataType getDataType() {
+           return BlockDataType.Image;
+       }
+
+       @Override
+       public boolean equals(Object o) {
+           if (this == o) return true;
+           if (o == null || getClass() != o.getClass()) return false;
+
+           ImageDTO imageDTO = (ImageDTO) o;
+
+           if (!Objects.equals(image, imageDTO.image)) return false;
+           if (!Objects.equals(title, imageDTO.title)) return false;
+           return Objects.equals(link, imageDTO.link);
+       }
+
+       @Override
+       public int hashCode() {
+           int result = image != null ? image.hashCode() : 0;
+           result = 31 * result + (title != null ? title.hashCode() : 0);
+           result = 31 * result + (link != null ? link.hashCode() : 0);
+           return result;
+       }
+   }
+   ```
+
+2. 类似的商品类数据代码如下
+
+   ```java
+   public record ProductDataDTO(
+       Long id,
+       String sku,
+       String name,
+       String description,
+       String originalPrice,
+       String price,
+       Set<CategoryDTO> categories,
+       Set<String> images
+   ) implements BlockData {
+       @Serial
+       private static final long serialVersionUID = -1;
+
+       public static ProductDataDTO fromEntity(Product product) {
+           return new ProductDataDTO(
+                   product.getId(),
+                   product.getSku(),
+                   product.getName(),
+                   product.getDescription(),
+                   MathUtils.formatPrice(product.getOriginalPrice()),
+                   MathUtils.formatPrice(product.getPrice()),
+                   product.getCategories().stream().map(CategoryDTO::fromEntity).collect(Collectors.toSet()),
+                   product.getImages().stream().map(ProductImage::getImageUrl).collect(Collectors.toSet())
+           );
+       }
+
+       @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+       @Override
+       public BlockDataType getDataType() {
+           return BlockDataType.Product;
+       }
+
+       @Override
+       public boolean equals(Object obj) {
+           if (this == obj)
+               return true;
+           if (obj == null)
+               return false;
+           if (getClass() != obj.getClass())
+               return false;
+           ProductDataDTO other = (ProductDataDTO) obj;
+           if (id == null) {
+               return other.id == null;
+           } else return id.equals(other.id);
+       }
+
+       @Override
+       public int hashCode() {
+           final int prime = 31;
+           int result = 1;
+           result = prime * result + ((id == null) ? 0 : id.hashCode());
+           return result;
+       }
+   }
+   ```
+
+3. 类目类型的数据使用传统的 `class` 定义，大家可以体会一下区别
+
+   ```java
+   @Getter
+   @Builder
+   @NoArgsConstructor
+   @AllArgsConstructor
+   public class CategoryDTO implements BlockData, Comparable<CategoryDTO> {
+
+       @Serial
+       private static final long serialVersionUID = -1;
+       private Long id;
+       private String name;
+       private String code;
+       private Long parentId;
+
+       @Builder.Default
+       private SortedSet<CategoryDTO> children = new TreeSet<>();
+
+       public static CategoryDTO fromEntity(Category category) {
+           return CategoryDTO.builder()
+                   .id(category.getId())
+                   .name(category.getName())
+                   .code(category.getCode())
+                   .parentId(category.getParent() != null ? category.getParent().getId() : null)
+                   .children(category.getChildren().stream()
+                           .map(CategoryDTO::fromEntity)
+                           .collect(TreeSet::new, Set::add, Set::addAll))
+                   .build();
+       }
+
+       public Category toEntity() {
+           var category = Category.builder()
+                   .name(getName())
+                   .code(getCode())
+                   .build();
+           Optional.ofNullable(getChildren()).orElse(new TreeSet<>()).forEach(child -> category.addChild(child.toEntity()));
+           return category;
+       }
+
+       @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+       @Override
+       public BlockDataType getDataType() {
+           return BlockDataType.Category;
+       }
+
+       @Override
+       public int compareTo(CategoryDTO o) {
+           return this.getName().compareTo(o.getName());
+       }
+
+       @Override
+       public boolean equals(Object obj) {
+           if (this == obj)
+               return true;
+           if (obj == null)
+               return false;
+           if (getClass() != obj.getClass())
+               return false;
+           CategoryDTO other = (CategoryDTO) obj;
+           if (id == null) {
+               return other.id == null;
+           } else return id.equals(other.id);
+       }
+
+       @Override
+       public int hashCode() {
+           final int prime = 31;
+           int result = 1;
+           result = prime * result + ((id == null) ? 0 : id.hashCode());
+           return result;
+       }
+   }
+   ```
+
+### 6.3.2 作业：完成产品和类别等实体类
+
+请使用 `JPA Designer` 完成 `Product`， `Category` 等实体类的设计，类之间的关系暂时不需要考虑，表名前缀都是 `mooc_`。暂时不需要考虑 `Auditable` 接口，这个是审计接口，我们后面会讲到。
 
 其中类的设计请参考下图
 
@@ -1886,3 +2153,327 @@ public class PageDTO implements Serializable {
   ```
 
 ## 6.8 改造 APP 首页使用 API
+
+### 6.8.1 网络包改造
+
+我们需要对网络包进行改造，这样才能够使用新的 API。首先对于 App 的 API，我们在后端定义的路径前缀是 `api/v1/app` 。针对这些 App 可以使用的 API，我们有必要单独创建一个 Dio 实例，这样做的好处有几个
+
+1. 可以为这些 API 单独添加缓存拦截器，这样可以避免重复请求
+2. 可以统一管理这些 API 的请求头，比如 Content-Type 和 Accept
+3. 可以统一 API 请求路径的前缀
+4. 为以后 App 的 API 请求的优化和个性化做好准备
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+
+import 'cache_options.dart';
+import 'custom_exception_interceptor.dart';
+
+/// 自定义的 Dio 实例，用于访问 APP 接口
+/// 该实例会自动添加日志拦截器, 缓存拦截器和错误拦截器
+/// 该实例会自动添加 Content-Type 和 Accept 头
+/// 该实例会自动将后台返回的 Problem 对象转换为 DioError
+///
+/// DioMixin 是一个 Mixin，它会自动实现 Dio 的所有方法
+/// Mixin 的好处是可以在不改变原有类的情况下，为类添加新的功能
+/// 具体的实现原理可以参考：https://dart.dev/guides/language/language-tour#mixins
+class AppClient with DioMixin implements Dio {
+  static final AppClient _instance = AppClient._();
+  factory AppClient() => _instance;
+
+  AppClient._() {
+    options = BaseOptions(
+      baseUrl: 'http://localhost:8080/api/v1/app',
+      headers: Map.from({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      }),
+    );
+    httpClientAdapter = HttpClientAdapter();
+    interceptors.add(PrettyDioLogger());
+    interceptors.add(DioCacheInterceptor(options: cacheOptions));
+    interceptors.add(CustomExceptionInterceptor());
+  }
+}
+```
+
+上面代码中，我们使用了一个 `CacheOptions` 对象，用于配置缓存拦截器，这个拦截器是第三方库 `dio_cache_interceptor` 提供的，我们需要在 `pubspec.yaml` 文件中添加依赖：
+
+```yaml
+dependencies:
+  dio_cache_interceptor: ^1.0.0
+```
+
+这个缓存配置对象定义在 `cache_options.dart` 文件中，代码如下：
+
+```dart
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+
+/// 全局缓存配置
+final cacheOptions = CacheOptions(
+  // 必选参数，默认缓存存储器
+  store: MemCacheStore(),
+
+  /// 所有下面的参数都是可选的
+
+  /// 缓存策略，默认为 CachePolicy.request
+  /// - CachePolicy.request: 如果缓存可用并且未过期，则使用缓存，否则从服务器获取响应并缓存
+  /// - CachePolicy.forceCache: 当 Server 没有缓存的响应头时，强制使用缓存，也就是缓存每次成功的 GET 请求
+  /// - CachePolicy.refresh: 不论缓存是否可用，都从服务器获取响应并根据响应头缓存
+  /// - CachePolicy.refreshForceCache: 无论 Server 是否有缓存响应头，都从服务器获取响应并缓存
+  /// - CachePolicy.noCache: 不使用缓存，每次都从服务器获取响应并根据响应头缓存
+  policy: CachePolicy.forceCache,
+
+  /// 例外状态码，当请求失败时，如果状态码在此列表中，则不使用缓存
+  hitCacheOnErrorExcept: [401, 403],
+
+  /// 覆盖 HTTP 响应头中的 max-age 字段，用于指定缓存的有效期
+  /// 默认为 null，表示使用 HTTP 响应头中的 max-age 字段
+  maxStale: const Duration(minutes: 10),
+
+  /// 缓存优先级，默认为 CachePriority.normal
+  priority: CachePriority.normal,
+
+  /// 加密器，默认为 null，表示不加密
+  cipher: null,
+
+  /// 缓存键生成器，默认为 CacheOptions.defaultCacheKeyBuilder
+  keyBuilder: CacheOptions.defaultCacheKeyBuilder,
+
+  /// 是否允许缓存 Post 请求，默认为 false
+  /// 当设置为 true 时，建议改写 keyBuilder，以避免缓存多个不同的 POST 请求
+  allowPostMethod: false,
+);
+```
+
+由于服务端已经按 RFC 7807 规范实现了 Problem 对象，所以我们需要将 Problem 对象转换为 DioError 对象，这样就可以在 Dio 的错误回调中直接获取到 Problem 对象了。这里我们使用了一个自定义的拦截器 `CustomExceptionInterceptor` 来实现这个功能，代码如下：
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:models/models.dart';
+
+import 'problem.dart';
+
+class CustomExceptionInterceptor extends Interceptor {
+  @override
+  void onError(DioError err, ErrorInterceptorHandler handler) {
+    if (err.response != null) {
+      final problem = Problem.fromJson(err.response?.data);
+      throw CustomException(problem.title ?? err.message ?? '未知错误');
+      // Add more status codes and custom exceptions as needed
+    }
+    super.onError(err, handler);
+  }
+}
+```
+
+这个 `Problem` 的对象定义在 `models` 包中，我们可以直接使用。这个对象的定义如下：
+
+```dart
+class Problem {
+  final String? title;
+  final String? detail;
+  final String? instance;
+  final int? status;
+  final String? type;
+  final int? code;
+  final String? ua;
+  final String? locale;
+
+  Problem({
+    this.title,
+    this.detail,
+    this.instance,
+    this.status,
+    this.type,
+    this.code,
+    this.ua,
+    this.locale,
+  });
+
+  factory Problem.fromJson(Map<String, dynamic> json) {
+    return Problem(
+      title: json['title'],
+      detail: json['detail'],
+      instance: json['instance'],
+      status: json['status'],
+      type: json['type'],
+      code: json['code'],
+      ua: json['ua'],
+      locale: json['locale'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'detail': detail,
+      'instance': instance,
+      'status': status,
+      'type': type,
+      'code': code,
+      'ua': ua,
+      'locale': locale,
+    };
+  }
+
+  @override
+  String toString() {
+    return 'Problem{title: $title, detail: $detail, instance: $instance, status: $status, type: $type, code: $code, ua: $ua, locale: $locale}';
+  }
+
+  Problem copyWith({
+    String? title,
+    String? detail,
+    String? instance,
+    int? status,
+    String? type,
+    int? code,
+    String? ua,
+    String? locale,
+  }) {
+    return Problem(
+      title: title ?? this.title,
+      detail: detail ?? this.detail,
+      instance: instance ?? this.instance,
+      status: status ?? this.status,
+      type: type ?? this.type,
+      code: code ?? this.code,
+      ua: ua ?? this.ua,
+      locale: locale ?? this.locale,
+    );
+  }
+}
+```
+
+### 6.8.2 Repository 层改造
+
+我们在这一层需要添加一个 `PageRepository` 类，用于获取页面布局数据。这个类的定义如下：
+
+````dart
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:flutter/foundation.dart';
+import 'package:models/models.dart';
+import 'package:networking/networking.dart';
+
+/// 页面布局仓库
+class PageRepository {
+  final String baseUrl;
+  final Dio client;
+  final bool enableCache;
+  final bool refreshCache;
+
+  /// 构造函数
+  /// [client] Dio实例
+  /// [baseUrl] 接口基础地址
+  /// [enableCache] 是否启用缓存
+  /// 注意下面的写法，是为了允许在调用时，只传入部分参数，而不是全部参数
+  /// 例如：
+  /// ```dart
+  /// PageRepository(
+  ///   baseUrl: '/pages',
+  ///   enableCache: true,
+  /// )
+  /// ```
+  /// 这样就可以省略掉client参数
+  /// 但是，如果你传入了client参数，那么就会覆盖掉默认值
+  /// 例如：
+  /// ```dart
+  /// PageRepository(
+  ///   client: Dio(),
+  ///   baseUrl: '/pages',
+  ///   enableCache: true,
+  /// )
+  /// ```
+  /// 构造函数的写法，在 `:` 后面，是初始化列表
+  /// 初始化列表的写法，是为了在构造函数执行之前，先执行初始化列表中的代码
+  /// 这样就可以在构造函数中，直接使用初始化列表中的变量，写法上更加简洁。
+  ///
+  PageRepository({
+    Dio? client,
+    this.baseUrl = '/pages',
+    this.enableCache = true,
+    this.refreshCache = false,
+  }) : client = client ?? AppClient();
+
+  Future<PageLayout> getByPageType(PageType pageType) async {
+    debugPrint('PageRepository.getByPageType($pageType)');
+
+    final url = '$baseUrl/published/${pageType.value}';
+
+    final response = await client.get(
+      url,
+      options: enableCache
+          ? refreshCache
+              ? cacheOptions
+                  .copyWith(policy: CachePolicy.refreshForceCache)
+                  .toOptions()
+              : null
+          : cacheOptions.copyWith(policy: CachePolicy.noCache).toOptions(),
+    );
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageRepository.getByPageType($pageType) - success');
+
+    return result;
+  }
+}
+````
+
+上面代码中，我们使用 `AppClient` 作为 `Dio` 的实例，使用 `get` 方法获取数据。而且配置了缓存策略。对于 App 来说，我们需要缓存页面布局数据，因为页面布局数据不会经常变化。
+
+除了页面布局，我们还需要给瀑布流页面访问 API 定义一个 `ProductRepository` 类，这个类的定义如下：
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:flutter/foundation.dart';
+import 'package:models/models.dart';
+import 'package:networking/networking.dart';
+
+class ProductRepository {
+  final String baseUrl;
+  final Dio client;
+  final bool enableCache;
+  final bool refreshCache;
+
+  ProductRepository({
+    Dio? client,
+    this.baseUrl = '/products',
+    this.enableCache = true,
+    this.refreshCache = false,
+  }) : client = client ?? AppClient();
+
+  Future<SliceWrapper<Product>> getByCategory(
+      {required int categoryId, int page = 0}) async {
+    debugPrint('ProductRepository.getByCategory($categoryId, $page)');
+    final url = '$baseUrl/by-category/$categoryId/page?page=$page';
+
+    final response = await client.get(
+      url,
+      options: enableCache
+          ? refreshCache
+              ? cacheOptions
+                  .copyWith(policy: CachePolicy.refreshForceCache)
+                  .toOptions()
+              : null
+          : cacheOptions.copyWith(policy: CachePolicy.noCache).toOptions(),
+    );
+
+    final result = SliceWrapper<Product>.fromJson(
+        response.data, (json) => Product.fromJson(json));
+
+    debugPrint('ProductRepository.getByCategory($categoryId, $page) - success');
+
+    return result;
+  }
+}
+```
+
+### 6.8.3 ViewModel 层改造

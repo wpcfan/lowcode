@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:models/models.dart';
 
-import 'problem.dart';
-
 class CustomExceptionInterceptor extends Interceptor {
   @override
   void onError(DioError err, ErrorInterceptorHandler handler) {

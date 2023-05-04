@@ -52,6 +52,8 @@
   - [6.8 改造 APP 首页使用 API](#68-改造-app-首页使用-api)
     - [6.8.1 网络包改造](#681-网络包改造)
     - [6.8.2 Repository 层改造](#682-repository-层改造)
+    - [6.8.3 BLoC 层改造](#683-bloc-层改造)
+    - [6.8.4 UI 层改造](#684-ui-层改造)
 
 <!-- /code_chunk_output -->
 
@@ -2476,4 +2478,623 @@ class ProductRepository {
 }
 ```
 
-### 6.8.3 ViewModel 层改造
+### 6.8.3 BLoC 层改造
+
+这里我们仍然使用 `flutter_bloc` 来管理状态，首先我们来定义 `HomeEvent` 类，用来管理 App 的事件，这个类的定义如下：
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+
+abstract class HomeEvent extends Equatable {
+  final PageType pageType;
+
+  const HomeEvent(this.pageType);
+
+  @override
+  List<Object> get props => [pageType];
+}
+
+/// 首页数据加载
+class HomeEventFetch extends HomeEvent {
+  const HomeEventFetch(PageType pageType) : super(pageType);
+}
+
+/// 上拉加载更多
+class HomeEventLoadMore extends HomeEvent {
+  const HomeEventLoadMore() : super(PageType.home);
+}
+
+/// 切换底部导航栏
+class HomeEventSwitchBottomNavigation extends HomeEvent {
+  final int index;
+
+  const HomeEventSwitchBottomNavigation(this.index) : super(PageType.home);
+}
+
+/// 打开抽屉
+class HomeEventOpenDrawer extends HomeEvent {
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  const HomeEventOpenDrawer(this.scaffoldKey) : super(PageType.home);
+}
+
+/// 关闭抽屉
+class HomeEventCloseDrawer extends HomeEvent {
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  const HomeEventCloseDrawer(this.scaffoldKey) : super(PageType.home);
+}
+```
+
+上面代码中，我们定义了 `HomeEventFetch`、`HomeEventLoadMore`、`HomeEventSwitchBottomNavigation`、`HomeEventOpenDrawer` 和 `HomeEventCloseDrawer` 五个事件，这些事件分别用于加载首页数据、上拉加载更多、切换底部导航栏、打开抽屉和关闭抽屉。
+
+首先定义事件有利于我们梳理清楚 App 的逻辑:
+
+- 首页数据加载事件，当用户打开 App 的时候，会触发这个事件，这个事件会加载首页的数据。首页的数据包括页面布局数据和瀑布流商品数据。由于除了瀑布流之外的区块，数据都是直接封装在页面布局结构中的，所以我们需要在状态中有 `PageLayout` 。
+
+- 获取到页面布局后，由于瀑布流数据是依赖瀑布流区块中定义的类目，然后根据类目再去查找对应的商品，而上拉加载更多也会需要往已有的商品集合中继续加入新加载的商品，所以我们需要在状态中有 `List<Product>` 。
+
+- 考虑到上拉加载更多这个事件，我们会请求指定类目下商品列表的 API，我们需要维护 `categoryId`、 `page` 和 `hasReachedMax` 属性，用于请求下一页以及是否已经到达最后一页。
+
+- 加载更多时，需要一个 `loadingMore` 属性，用于标记是否正在加载更多，这个可以用来控制界面上的进度控件。
+
+- 类似的，整个页面数据加载的时候，我们也需要一个状态，这个状态我们用一个枚举 `FetchStatus` 来表示，这个枚举的定义如下：
+
+```dart
+enum FetchStatus {
+  initial,
+  loading,
+  populated,
+  error,
+}
+```
+
+- 当然，在考虑到请求是可能失败的，所以我们还需要一个 `error` 属性，用于保存错误信息。
+
+- 此外切换底部导航栏，我们需要维护一个 `selectedIndex` 属性，用于标记当前选中的导航栏的索引。
+
+- 打开抽屉和关闭抽屉，我们需要维护一个 `drawerOpen` 属性，用于标记抽屉是否打开。
+
+根据这些事件，我们可以定义 `HomeState` 类，这个类的定义如下：
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:models/models.dart';
+
+class HomeState extends Equatable {
+  final PageLayout? layout;
+  final FetchStatus status;
+  final List<Product> waterfallList;
+  final int page;
+  final bool hasReachedMax;
+  final bool loadingMore;
+  final int? categoryId;
+  final int selectedIndex;
+  final bool drawerOpen;
+  final String error;
+
+  const HomeState({
+    this.layout,
+    required this.status,
+    this.waterfallList = const [],
+    this.page = 0,
+    this.hasReachedMax = true,
+    this.loadingMore = false,
+    this.categoryId,
+    this.selectedIndex = 0,
+    this.drawerOpen = false,
+    this.error = '',
+  });
+
+  HomeState copyWith({
+    PageLayout? layout,
+    FetchStatus? status,
+    List<Product>? waterfallList,
+    int? page,
+    bool? hasReachedMax,
+    bool? loadingMore,
+    int? categoryId,
+    int? selectedIndex,
+    bool? drawerOpen,
+    String? error,
+  }) =>
+      HomeState(
+        layout: layout ?? this.layout,
+        status: status ?? this.status,
+        waterfallList: waterfallList ?? this.waterfallList,
+        page: page ?? this.page,
+        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+        loadingMore: loadingMore ?? this.loadingMore,
+        categoryId: categoryId ?? this.categoryId,
+        selectedIndex: selectedIndex ?? this.selectedIndex,
+        drawerOpen: drawerOpen ?? this.drawerOpen,
+        error: error ?? this.error,
+      );
+
+  @override
+  String toString() =>
+      'HomeState{layout: $layout, status: $status, waterfallList: $waterfallList, page: $page, hasReachedMax: $hasReachedMax, loadingMore: $loadingMore, categoryId: $categoryId, selectedIndex: $selectedIndex, drawerOpen: $drawerOpen, error: $error}';
+
+  @override
+  List<Object?> get props => [
+        layout,
+        status,
+        waterfallList,
+        page,
+        hasReachedMax,
+        loadingMore,
+        categoryId,
+        selectedIndex,
+        drawerOpen,
+        error,
+      ];
+
+  factory HomeState.populated(
+    PageLayout layout, {
+    List<Product> waterfallList = const [],
+    bool hasReachedMax = true,
+    int page = 0,
+    int? categoryId,
+  }) =>
+      HomeState(
+        layout: layout,
+        waterfallList: waterfallList,
+        status: FetchStatus.populated,
+        hasReachedMax: hasReachedMax,
+        page: page,
+        categoryId: categoryId,
+      );
+
+  bool get isInitial => status == FetchStatus.initial;
+
+  bool get isLoading => status == FetchStatus.loading;
+
+  bool get isPopulated => status == FetchStatus.populated;
+
+  bool get isError => status == FetchStatus.error;
+
+  bool get isEnd => hasReachedMax;
+
+  bool get isLoadingMore => loadingMore;
+}
+```
+
+有了状态和事件，我们就可以定义 `HomeBloc` 类了，这个类的定义如下：
+
+```dart
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+import 'home_event.dart';
+import 'home_state.dart';
+
+/// HomeBloc
+/// 主页的业务逻辑
+class HomeBloc extends Bloc<HomeEvent, HomeState> {
+  final PageRepository pageRepo;
+  final ProductRepository productRepo;
+  HomeBloc({required this.pageRepo, required this.productRepo})
+      : super(const HomeState(status: FetchStatus.initial)) {
+    /// 首页内容加载
+    on<HomeEventFetch>(_onFetchHome);
+
+    /// 瀑布流加载更多
+    on<HomeEventLoadMore>(_onLoadMore);
+
+    /// 切换底部导航
+    on<HomeEventSwitchBottomNavigation>(_onSwitchBottomNavigation);
+
+    /// 打开抽屉
+    on<HomeEventOpenDrawer>(_onOpenDrawer);
+
+    /// 关闭抽屉
+    on<HomeEventCloseDrawer>(_onCloseDrawer);
+  }
+
+  /// 错误处理
+  void _handleError(Emitter<HomeState> emit, dynamic error) {
+    final message = error is CustomException ? error.message : error.toString();
+    emit(state.copyWith(
+      loadingMore: false,
+      error: message,
+      status: FetchStatus.error,
+    ));
+  }
+
+  void _onOpenDrawer(HomeEvent event, Emitter<HomeState> emit) {
+    if (event is HomeEventOpenDrawer) {
+      event.scaffoldKey.currentState?.openEndDrawer();
+    }
+    emit(state.copyWith(drawerOpen: true));
+  }
+
+  void _onCloseDrawer(HomeEvent event, Emitter<HomeState> emit) {
+    if (event is HomeEventCloseDrawer) {
+      event.scaffoldKey.currentState?.closeEndDrawer();
+    }
+    emit(state.copyWith(drawerOpen: false));
+  }
+
+  void _onSwitchBottomNavigation(
+      HomeEventSwitchBottomNavigation event, Emitter<HomeState> emit) {
+    emit(state.copyWith(selectedIndex: event.index));
+  }
+
+  void _onFetchHome(HomeEvent event, Emitter<HomeState> emit) async {
+    emit(state.copyWith(status: FetchStatus.loading));
+    try {
+      /// 获取首页布局
+      final layout = await pageRepo.getByPageType(event.pageType);
+
+      /// 如果没有布局，返回错误
+      if (layout.blocks.isEmpty) {
+        emit(state.copyWith(status: FetchStatus.error));
+        return;
+      }
+
+      final waterall = await _loadInitialWaterfallData(layout);
+
+      emit(state.copyWith(
+        status: FetchStatus.populated,
+        layout: layout,
+        hasReachedMax: true,
+        page: 0,
+        categoryId: waterall.data.isNotEmpty ? waterall.data.first.id : null,
+        waterfallList: waterall.data,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  Future<SliceWrapper<Product>> _loadInitialWaterfallData(
+      PageLayout layout) async {
+    /// 如果有瀑布流布局，获取瀑布流数据
+    if (layout.blocks
+        .where((element) => element.type == PageBlockType.waterfall)
+        .isNotEmpty) {
+      /// 获取第一个瀑布流布局
+      final waterfallBlock = layout.blocks
+          .firstWhere((element) => element.type == PageBlockType.waterfall);
+
+      /// 如果瀑布流布局有内容，获取瀑布流数据
+      if (waterfallBlock.data.isNotEmpty) {
+        /// 获取瀑布流数据的分类ID
+        final categoryId = waterfallBlock.data.first.content.id;
+        if (categoryId != null) {
+          /// 按分类获取瀑布流中的产品数据
+          final waterfall =
+              await productRepo.getByCategory(categoryId: categoryId);
+          return waterfall;
+        }
+      }
+    }
+    return const SliceWrapper<Product>(
+        data: [], hasNext: false, page: 0, size: 10);
+  }
+
+  void _onLoadMore(HomeEvent event, Emitter<HomeState> emit) async {
+    if (state.hasReachedMax) return;
+    emit(state.copyWith(loadingMore: true));
+    try {
+      final waterfall = await productRepo.getByCategory(
+          categoryId: state.categoryId!, page: state.page + 1);
+      emit(state.copyWith(
+        waterfallList: [...state.waterfallList, ...waterfall.data],
+        hasReachedMax: !waterfall.hasNext,
+        page: waterfall.page,
+        loadingMore: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+}
+```
+
+上面代码中，我们定义了 `HomeBloc` 类，这个类继承自 `Bloc<HomeEvent, HomeState>`，这个类的泛型参数分别是事件和状态。这个类的构造函数中，我们定义了事件的处理逻辑，这些逻辑都是通过 `on` 方法来定义的，这个方法的第一个参数是事件的类型，第二个参数是事件处理的逻辑。这些逻辑都是通过 `emit` 方法来触发状态的变化，这个方法的参数是新的状态。
+
+- 首页数据加载事件，我们首先需要将状态设置为 `FetchStatus.loading`，然后再获取页面布局数据，如果页面布局数据为空，那么我们需要将状态设置为 `FetchStatus.error`，否则我们需要获取瀑布流数据，然后将状态设置为 `FetchStatus.populated`，同时将瀑布流数据设置到状态中。
+
+- 获取瀑布流数据的时候，我们需要获取页面布局中的第一个瀑布流布局，然后再获取这个布局中的第一个类目，然后再根据这个类目获取瀑布流数据。获取到瀑布流数据之后，我们需要将瀑布流数据设置到状态中。
+
+- 上拉加载更多事件，我们首先需要判断是否已经到达最后一页，如果已经到达最后一页，那么我们就不需要再加载了，否则我们需要将状态设置为 `loadingMore`，然后再获取下一页的瀑布流数据，获取到数据之后，我们需要将新的数据追加到原有的数据之后，然后再将状态设置为 `loadingMore`。
+
+- 切换底部导航栏事件，我们只需要将状态中的 `selectedIndex` 设置为新的索引即可。
+
+- 打开抽屉事件，我们需要将状态中的 `drawerOpen` 设置为 `true`，然后再打开抽屉。
+
+- 关闭抽屉事件，我们需要将状态中的 `drawerOpen` 设置为 `false`，然后再关闭抽屉。
+
+### 6.8.4 UI 层改造
+
+我们这个 App 首页包括几个部分：
+
+- AppBar - 顶部的导航栏
+  1. 左侧的抽屉按钮
+  2. 中间的搜索框
+  3. 右侧的抽屉按钮
+- 中间的内容区域，也就是页面区块部分
+- 底部的导航栏 - 包括首页、分类和我的
+- 左侧弹出的抽屉
+- 右侧弹出的抽屉
+- 点商品之后弹出的商品详情，实际开发中应该是导航到详情页，但这个和我们的目的无关了，所以我们就直接在当前页面弹出商品详情了
+
+除了中间部分外，其他与课程关系不是很大，课程中我们就不讲解了，大家可以自己实现一下。
+
+我们先来看一下中间部分，这个部分的代码如下：
+
+```dart
+/// 首页的内容
+class SliverBodyWidget extends StatelessWidget {
+  const SliverBodyWidget({
+    super.key,
+    this.errorImage,
+    this.onTap,
+    this.addToCart,
+    this.onTapProduct,
+  });
+  final String? errorImage;
+  final void Function(MyLink?)? onTap;
+  final void Function(Product)? addToCart;
+  final void Function(Product)? onTapProduct;
+
+  @override
+  Widget build(BuildContext context) {
+    /// 使用 BlocBuilder 来监听 HomeBloc 的状态
+    /// 当 HomeBloc 的状态发生变化时，BlocBuilder 会重新构建 Widget
+    return BlocBuilder<HomeBloc, HomeState>(
+      builder: (context, state) {
+        /// 如果状态是错误状态，那么显示错误信息
+        if (state.isError) {
+          return SliverToBoxAdapter(
+            child: const Text('Error').center(),
+          );
+        }
+
+        /// 如果状态是初始状态，那么显示骨架屏
+        if (state.isInitial) {
+          return SliverToBoxAdapter(child: SkeletonListView());
+        }
+
+        /// 屏幕的宽度
+        final screenWidth = MediaQuery.of(context).size.width;
+
+        /// 最终的比例
+        final ratio =
+            screenWidth / (state.layout?.config.baselineScreenWidth ?? 375.0);
+        final blocks = state.layout?.blocks ?? [];
+        final products = state.waterfallList;
+        final horizontalPadding =
+            (state.layout?.config.horizontalPadding ?? 0) * ratio;
+        final verticalPadding =
+            (state.layout?.config.verticalPadding ?? 0) * ratio;
+
+        /// MultiSliver 是一个可以包含多个 Sliver 的 Widget
+        /// 允许一个方法返回多个 Sliver，这个是 `sliver_tools` 包提供的
+        return SliverPadding(
+          padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding, vertical: verticalPadding),
+          sliver: MultiSliver(
+              children: blocks.map((block) {
+            final config = block.config.withRatio(ratio);
+            switch (block.type) {
+              case PageBlockType.banner:
+                final it = block as PageBlock<ImageData>;
+
+                /// SliverToBoxAdapter 可以将一个 Widget 转换成 Sliver
+                return SliverToBoxAdapter(
+                  child: BannerWidget(
+                    items: it.data.map((di) => di.content).toList(),
+                    config: config,
+                    errorImage: errorImage,
+                    onTap: onTap,
+                  ),
+                );
+              case PageBlockType.imageRow:
+                final it = block as PageBlock<ImageData>;
+                return SliverToBoxAdapter(
+                  child: ImageRowWidget(
+                    items: it.data.map((di) => di.content).toList(),
+                    config: config,
+                    errorImage: errorImage,
+                    onTap: onTap,
+                  ),
+                );
+              case PageBlockType.productRow:
+                final it = block as PageBlock<Product>;
+                return SliverToBoxAdapter(
+                  child: ProductRowWidget(
+                    items: it.data.map((di) => di.content).toList(),
+                    config: config,
+                    errorImage: errorImage,
+                    onTap: onTapProduct,
+                    addToCart: addToCart,
+                  ),
+                );
+              case PageBlockType.waterfall:
+                final it = block as PageBlock<Category>;
+
+                /// WaterfallWidget 是一个瀑布流的 Widget
+                /// 它本身就是 Sliver，所以不需要再包装一层 SliverToBoxAdapter
+                return WaterfallWidget(
+                  products: products,
+                  config: config,
+                  errorImage: errorImage,
+                  onTap: onTapProduct,
+                  addToCart: addToCart,
+                );
+              default:
+                return SliverToBoxAdapter(
+                  child: Container(),
+                );
+            }
+          }).toList()),
+        );
+      },
+    );
+  }
+}
+```
+
+上面代码中，我们使用了 `BlocBuilder` 来监听 `HomeBloc` 的状态，当状态发生变化时，`BlocBuilder` 会重新构建 Widget。这个 Widget 的代码比较长，我们来一点一点分析：
+
+- 首先，我们需要判断状态是否是错误状态，如果是错误状态，那么我们就显示错误信息。
+
+- 如果状态是初始状态，那么我们就显示骨架屏。
+
+- 如果状态是加载状态，那么我们就显示加载中的 Widget。
+
+- 如果状态是加载完成状态，那么我们就显示页面布局中的内容。
+
+- 页面布局中的内容，我们需要根据页面布局中的区块类型来显示不同的 Widget，这里我们使用了 `switch` 语句来判断区块类型，然后再显示对应的 Widget。
+
+由于整个页面是可滚动的，所以要在外面封装到 `CustomScrollView` 中，这个 Widget 的代码如下：
+
+```dart
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    const decoration = BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.blue,
+          Colors.green,
+        ],
+      ),
+    );
+    final key = GlobalKey<ScaffoldState>();
+    const errorImage = 'assets/images/error_150_150.png';
+    final bloc = context.read<HomeBloc>();
+
+    return Scaffold(
+      key: key,
+      body: MyCustomScrollView(
+        loadMoreWidget: const LoadMoreWidget(),
+        decoration: decoration,
+        sliverAppBar: MySliverAppBar(
+          decoration: decoration,
+          onTap: () => bloc.add(HomeEventOpenDrawer(key)),
+        ),
+        sliver: SliverBodyWidget(
+          errorImage: errorImage,
+          onTap: (link) => _onTapImage(link, context),
+          onTapProduct: (product) => _onTapProduct(product, context),
+          addToCart: (product) => _addToCart(product, context),
+        ),
+        onRefresh: () => _refresh(bloc),
+        onLoadMore: () => _loadMore(bloc),
+      ),
+      bottomNavigationBar: MyBottomBar(
+          onTap: (index) => bloc.add(HomeEventSwitchBottomNavigation(index))),
+      drawer: const LeftDrawer(),
+      endDrawer: const RightDrawer(),
+    );
+  }
+
+  Future<void> _refresh(HomeBloc bloc) async {
+    bloc.add(const HomeEventFetch(PageType.home));
+    await bloc.stream
+        .firstWhere((element) => element.isPopulated || element.isError);
+    // 加载速度太快，容易看不到加载动画
+    await Future.delayed(const Duration(seconds: 2));
+  }
+
+  Future<void> _loadMore(HomeBloc bloc) async {
+    bloc.add(const HomeEventLoadMore());
+    await bloc.stream
+        .firstWhere((element) => element.isPopulated || element.isError);
+  }
+
+  void _addToCart(Product product, BuildContext context) {
+    debugPrint('Add to cart: ${product.name}');
+  }
+
+  void _onTapProduct(Product product, BuildContext context) {
+    debugPrint('Tap product: ${product.name}');
+    showDialog(
+        context: context,
+        builder: (context) => ProductDialog(
+              product: product,
+              errorImage: '',
+            ));
+  }
+
+  void _onTapImage(MyLink? link, BuildContext context) {
+    if (link == null) {
+      return;
+    }
+    switch (link.type) {
+      case LinkType.route:
+        Navigator.of(context).pushNamed(link.value);
+        break;
+      case LinkType.url:
+        launchUrl(
+          Uri.parse(link.value),
+        );
+        break;
+    }
+  }
+}
+```
+
+上面代码中，我们使用了 `MyCustomScrollView` 来包裹 `SliverBodyWidget` 。并且在 `MyCustomScrollView` 中，我们还定义了 `sliverAppBar`、`sliver`、`onRefresh` 和 `onLoadMore` 四个属性，这些属性分别用于定义顶部导航栏、内容区域、下拉刷新和上拉加载更多的逻辑。此外，对于商品的点击和加购按钮的点击，我们也定义了对应的回调函数。
+
+这里由于不同 `app` 的逻辑不太一样，有的需要在 app 层次上全局 `provide` ，有的需要在包层次上 `provide` ，所以为了不同的实现方式，我们也提供了一个在包层次上 `provide` 的代码：
+
+```dart
+class HomeViewWithProvider extends StatelessWidget {
+  const HomeViewWithProvider({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    /// 使用 MultiRepositoryProvider 来管理多个 RepositoryProvider
+    /// 使用 MultiBlocProvider 来管理多个 BlocProvider
+    /// 这样做的好处是，我们可以在这里统一管理多个 RepositoryProvider 和 BlocProvider
+    /// 而不需要在每个页面中都添加一个 RepositoryProvider 和 BlocProvider
+    /// 如果我们需要添加一个新的 RepositoryProvider 或 BlocProvider
+    /// 那么我们只需要在这里添加一个 RepositoryProvider 或 BlocProvider 即可
+    /// 而不需要修改每个页面的代码
+    return MultiRepositoryProvider(
+      providers: [
+        /// RepositoryProvider 用于管理 Repository，其实不光是 Repository，任何对象都可以通过 RepositoryProvider 来管理
+        /// 它提供的是一种依赖注入的方式，可以在任何地方通过 context.read<T>() 来获取 RepositoryProvider 中的对象
+
+        RepositoryProvider<PageRepository>(
+            create: (context) => PageRepository()),
+        RepositoryProvider<ProductRepository>(
+            create: (context) => ProductRepository()),
+      ],
+
+      /// 使用 MultiBlocProvider 来管理多个 BlocProvider
+      child: MultiBlocProvider(
+        providers: [
+          /// BlocProvider 用于管理 Bloc
+          /// 在构造函数后面的 `..` 是级联操作符，可以用于连续调用多个方法
+          /// 意思就是构造后立刻调用 add 方法，构造 HomeBloc 后立刻调用 HomeEventFetch 事件
+          BlocProvider<HomeBloc>(
+            create: (context) => HomeBloc(
+              pageRepo: context.read<PageRepository>(),
+              productRepo: context.read<ProductRepository>(),
+            )..add(const HomeEventFetch(PageType.home)),
+          ),
+        ],
+
+        /// 需要注意的是，避免在这里使用 BlocBuilder 或 BlocListener
+        /// 因为这里的 BlocProvider 还没有构造完成，所以这里的 BlocBuilder 和 BlocListener 会报错
+        /// 如果需要使用 BlocBuilder 或 BlocListener，那么需要在子 Widget 中使用
+        child: const HomeView(),
+      ),
+    );
+  }
+}
+```

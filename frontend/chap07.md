@@ -1,21 +1,25 @@
-# 数据库
+# Spring Data JPA Repository
+
+在上一章，我们使用 `EntityManager` 来访问和操作数据库。在这一章，我们将使用 `Repository` 来看一下如何更加简单地访问和操作数据库。
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
 
 <!-- code_chunk_output -->
 
-- [数据库](#数据库)
+- [Spring Data JPA Repository](#spring-data-jpa-repository)
   - [7.1 Repository](#71-repository)
     - [7.1.1 Spring Data JPA 的命名式查询](#711-spring-data-jpa-的命名式查询)
     - [7.1.2 Spring Data JPA 测试命名式查询](#712-spring-data-jpa-测试命名式查询)
     - [7.1.3 返回结果类型的选择](#713-返回结果类型的选择)
+      - [7.1.3.1 投影查询](#7131-投影查询)
     - [7.1.4 使用 @Query 注解进行查询](#714-使用-query-注解进行查询)
-      - [关联查询](#关联查询)
-      - [作业：类目的关联查询](#作业类目的关联查询)
+      - [7.1.4.1 关联查询](#7141-关联查询)
+      - [7.1.4.2 作业：类目的关联查询](#7142-作业类目的关联查询)
     - [7.1.5 Example 查询](#715-example-查询)
     - [7.1.6 Specification 查询](#716-specification-查询)
     - [7.1.7 测试 Specification](#717-测试-specification)
     - [7.1.8 Spring Data JPA 的分页支持](#718-spring-data-jpa-的分页支持)
+  - [7.2 使用 Flyway 管理数据库版本](#72-使用-flyway-管理数据库版本)
 
 <!-- /code_chunk_output -->
 
@@ -265,6 +269,65 @@ public class ProductRepositoryTests {
 
 在这个测试用例中，我们使用 `try-with-resources` 语句来创建一个 `Stream` 对象，然后在 `try` 代码块中使用这个 `Stream` 对象来查询数据，最后在 `finally` 代码块中关闭这个 `Stream` 对象。和 `List` 或者 `Set` 不同的是，`Stream` 对象并不会一次性的将所有的数据都加载到内存中，而是在使用的时候才会加载。
 
+#### 7.1.3.1 投影查询
+
+有些时候我们可能只需要查询一部分数据，而不是所有的数据，这个时候我们可以使用投影查询来实现这个需求。投影查询可以用来查询实体类的部分属性，也可以用来查询实体类的部分属性和关联实体类的部分属性。
+
+比如说我们只想查询 `PageLayout` 中的 `id` 和 `title` 属性，我们可以在 `JPA Structure` 面板中右键点击 `DTOs and Projections` ，选择 `New` -> `Spring Data Projection` ，然后在弹出的对话框中输入 `PageLayoutInfo` ，Package 输入 `com.mooc.backend.projections`，勾选 `id` 和 `title` 字段， 然后点击 `OK` 按钮，就可以创建一个 `PageLayoutInfo` 投影类，如图 1 所示。
+
+![图 1](http://ngassets.twigcodes.com/2cb1805179e56ccad9ca86a8ea5f6d4d25a8f24ec8bbb9f2522f05a072887413.png)
+
+其实这个投影就是一个接口:
+
+```java
+public interface PageLayoutInfo {
+    Long getId();
+    String getTitle();
+}
+```
+
+然后在 `PageLayoutRepository` 中定义如下方法：
+
+```java
+@Query("select p.id as id, p.title as title from PageLayout p where p.id = ?1")
+Optional<PageLayoutInfo> findProjectionById(Long id);
+```
+
+这个方法的目的是为了查询指定 ID 的页面布局的 `id` 和 `title` 属性。然后我们在 `PageLayoutRepositoryTests` 中添加如下测试用例：
+
+```java
+@Test
+void testFindProjectionById() {
+    var now = LocalDateTime.now();
+    var pageConfig = PageConfig.builder()
+            .baselineScreenWidth(375.0)
+            .horizontalPadding(16.0)
+            .build();
+
+    var page1 = PageLayout.builder()
+            .pageType(PageType.About)
+            .platform(Platform.App)
+            .status(PageStatus.Published)
+            .config(pageConfig)
+            .title("Test Page Projection")
+            .startTime(now.minusDays(1))
+            .endTime(now.plusDays(1))
+            .build();
+
+    entityManager.persist(page1);
+    entityManager.flush();
+
+    var page = pageLayoutRepository.findProjectionById(page1.getId());
+    assertTrue(page.isPresent());
+    assertEquals(page1.getId(), page.get().getId());
+    assertEquals(page1.getTitle(), page.get().getTitle());
+}
+```
+
+这样我们就可以通过投影查询来查询指定 ID 的页面布局的 `id` 和 `title` ，而不需要完整的查询出页面布局的所有属性。
+
+所以其实需要查询哪些属性，就可以在投影类中定义哪些属性，然后在查询方法中使用 `as` 关键字来指定查询的属性和投影类中的属性的映射关系。
+
 ### 7.1.4 使用 @Query 注解进行查询
 
 除了使用方法名来定义查询方法之外，我们还可以使用 `@Query` 注解来定义查询方法。`@Query` 注解可以用来定义查询语句，也可以用来定义更新语句。这种方式可以用来定义复杂的查询语句，或者是一些特殊的查询语句，比如使用原生的 SQL 语句来查询数据。
@@ -354,7 +417,7 @@ and p.pageType = ?3
 int countPublishedTimeConflict(LocalDateTime time, Platform platform, PageType pageType);
 ```
 
-#### 关联查询
+#### 7.1.4.1 关联查询
 
 如果遇到需要关联查询的情况，比如我们需要查询指定商品类目下的所有商品，那么我们可以使用 `@Query` 注解来定义查询语句，比如：
 
@@ -382,7 +445,7 @@ List<Product> findByCategoryIdWithCategory(Long categoryId);
 
 这个例子中我们使用 `left join fetch` 来将商品类目也一并查询出来，这样的话我们就可以在查询结果中直接使用商品类目了，而不需要再去查询商品类目了。也就是说 `Product` 类中的 `categories` 属性已经被填充了，我们可以直接使用了。
 
-#### 作业：类目的关联查询
+#### 7.1.4.2 作业：类目的关联查询
 
 需求：
 
@@ -861,3 +924,253 @@ Page<Product> findByName(@Param("name") String name, Pageable pageable);
 
 Page<Product> findAll(Specification<Product> spec, Pageable pageable);
 ```
+
+## 7.2 使用 Flyway 管理数据库版本
+
+Flyway 是一个开源的数据库版本管理工具，它可以帮助我们管理数据库的版本，可以帮助我们在不同的环境中，自动创建数据库表，自动更新数据库表结构。
+
+SpringBoot 对 Flyway 提供了开箱即用的支持，我们可以在 `build.gradle` 中添加 Flyway 的依赖。
+
+```groovy
+implementation 'org.flywaydb:flyway-core'
+implementation 'org.flywaydb:flyway-mysql'
+```
+
+然后在 `application.properties` 文件中添加 Flyway 的配置，当然还是先禁用，我们仅在开发模式下启用：
+
+```properties
+# 数据初始化设置
+spring.sql.init.mode=never
+spring.flyway.enabled=false
+```
+
+然后在 `application-dev.properties` 文件中启用 Flyway：
+
+```properties
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration/h2
+spring.flyway.baseline-on-migrate=true
+```
+
+在 `application-prod.properties` 文件中启用 Flyway：
+
+```properties
+# 数据初始化设置
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration/mysql
+spring.flyway.baseline-on-migrate=true
+```
+
+在上面的配置中，我们使用了 `spring.flyway.enabled` 属性来启用 Flyway，然后使用了 `spring.flyway.locations` 属性来指定 Flyway 的脚本路径，这个路径是 `resources/db/migration`。
+`spring.flyway.baseline-on-migrate` 属性来指定在对一个非空数据库执行迁移时，是否应该执行基线。这个属性对于初次部署到生产数据库时非常有用，因为生产库往往都是需要特殊权限预先建立的，而且往往是非空的，这时候我们就可以使用这个属性来指定 Flyway 在对一个非空数据库执行迁移时，是否应该执行基线。
+
+在 `resources/db/migration` 目录下，我们创建两个子目录 `h2` 和 `mysql` ，这意味着我们需要支持两种数据库，一种是 H2，一种是 MySQL。
+
+我们可以创建一个初始化脚本，比如 `V1.0__schema.sql`，这个脚本可以通过 JpaBuddy 来导出，`H2` 版本的内容如下：
+
+```sql
+CREATE TABLE mooc_categories
+(
+    id        BIGINT AUTO_INCREMENT NOT NULL,
+    code      VARCHAR(255)          NOT NULL,
+    name      VARCHAR(255)          NOT NULL,
+    parent_id BIGINT,
+    created_at datetime             NULL,
+    updated_at datetime             NULL,
+    CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT FK_MOOC_CATEGORIES_ON_PARENT FOREIGN KEY (parent_id) REFERENCES mooc_categories (id);
+
+CREATE TABLE mooc_product_categories
+(
+    category_id BIGINT NOT NULL,
+    product_id  BIGINT NOT NULL,
+    CONSTRAINT pk_mooc_product_categories PRIMARY KEY (category_id, product_id)
+);
+
+CREATE TABLE mooc_products
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    name        VARCHAR(100)          NOT NULL,
+    description VARCHAR(255)          NOT NULL,
+    price       DECIMAL(10,2)         NOT NULL,
+    created_at  datetime              NULL,
+    updated_at  datetime              NULL,
+    CONSTRAINT pk_mooc_products PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_category FOREIGN KEY (category_id) REFERENCES mooc_categories (id);
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_product FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_product_images
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    image_url  VARCHAR(255)          NOT NULL,
+    product_id BIGINT                NULL,
+    created_at datetime              NULL,
+    updated_at datetime              NULL,
+    CONSTRAINT pk_mooc_product_images PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_product_images
+    ADD CONSTRAINT FK_MOOC_PRODUCT_IMAGES_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_pages
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at datetime              NULL,
+    updated_at datetime              NULL,
+    platform   VARCHAR(255)          NOT NULL,
+    page_type  VARCHAR(255)          NOT NULL,
+    config     JSON                  NOT NULL,
+    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
+);
+
+CREATE TABLE mooc_page_blocks
+(
+    id      BIGINT AUTO_INCREMENT NOT NULL,
+    title   VARCHAR(255)          NOT NULL,
+    type    VARCHAR(255)          NOT NULL,
+    sort    INT                   NOT NULL,
+    config  JSON                  NOT NULL,
+    page_id BIGINT                NULL,
+    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_page_blocks
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
+
+CREATE TABLE mooc_page_block_data
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL,
+    sort          INT                   NOT NULL,
+    content       JSON                  NOT NULL,
+    page_block_id BIGINT                NULL,
+    CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
+);
+
+ALTER TABLE mooc_page_block_data
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCK_DATA_ON_PAGE_BLOCK FOREIGN KEY (page_block_id) REFERENCES mooc_page_blocks (id);
+```
+
+MySQL 版本的内容如下：
+
+```sql
+CREATE TABLE mooc_categories
+(
+    id        BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
+    code      VARCHAR(255)          NOT NULL    COMMENT '分类编码',
+    name      VARCHAR(255)          NOT NULL    COMMENT '分类名称',
+    parent_id BIGINT                            COMMENT '父级分类',
+    created_at datetime             NULL        COMMENT '创建时间',
+    updated_at datetime             NULL        COMMENT '更新时间',
+    CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
+) COMMENT '分类表';
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
+
+ALTER TABLE mooc_categories
+    ADD CONSTRAINT FK_MOOC_CATEGORIES_ON_PARENT FOREIGN KEY (parent_id) REFERENCES mooc_categories (id);
+
+CREATE TABLE mooc_product_categories
+(
+    category_id BIGINT NOT NULL     COMMENT '分类ID',
+    product_id  BIGINT NOT NULL     COMMENT '产品ID',
+    CONSTRAINT pk_mooc_product_categories PRIMARY KEY (category_id, product_id)
+) COMMENT '产品分类关联表';
+
+CREATE TABLE mooc_products
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
+    name          VARCHAR(100)          NOT NULL    COMMENT '产品名称',
+    `description` VARCHAR(255)          NOT NULL    COMMENT '产品描述',
+    price         DECIMAL(10,2)         NOT NULL    COMMENT '产品价格',
+    created_at    datetime              NULL        COMMENT '创建时间',
+    updated_at    datetime              NULL        COMMENT '更新时间',
+    CONSTRAINT pk_mooc_products PRIMARY KEY (id)
+) COMMENT '产品表';
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_category FOREIGN KEY (category_id) REFERENCES mooc_categories (id);
+
+ALTER TABLE mooc_product_categories
+    ADD CONSTRAINT fk_mooprocat_on_product FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_product_images
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL   COMMENT '主键',
+    image_url  VARCHAR(255)          NOT NULL   COMMENT '图片地址',
+    product_id BIGINT                NULL       COMMENT '产品ID',
+    created_at datetime              NULL       COMMENT '创建时间',
+    updated_at datetime              NULL       COMMENT '更新时间',
+    CONSTRAINT pk_mooc_product_images PRIMARY KEY (id)
+) COMMENT '产品图片表';
+
+ALTER TABLE mooc_product_images
+    ADD CONSTRAINT FK_MOOC_PRODUCT_IMAGES_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES mooc_products (id);
+
+CREATE TABLE mooc_pages
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL   COMMENT '主键',
+    created_at datetime              NULL       COMMENT '创建时间',
+    updated_at datetime              NULL       COMMENT '更新时间',
+    platform   VARCHAR(255)          NOT NULL   COMMENT '平台',
+    page_type  VARCHAR(255)          NOT NULL   COMMENT '页面类型',
+    config     JSON                  NOT NULL   COMMENT '页面配置',
+    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
+) COMMENT '页面表';
+
+CREATE TABLE mooc_page_blocks
+(
+    id      BIGINT AUTO_INCREMENT NOT NULL      COMMENT '主键',
+    title   VARCHAR(255)          NOT NULL      COMMENT '标题',
+    type    VARCHAR(255)          NOT NULL      COMMENT '类型',
+    sort    INT                   NOT NULL      COMMENT '排序',
+    config  JSON                  NOT NULL      COMMENT '配置',
+    page_id BIGINT                NULL          COMMENT '页面ID',
+    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
+) COMMENT '页面块表';
+
+ALTER TABLE mooc_page_blocks
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
+
+CREATE TABLE mooc_page_block_data
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
+    sort          INT                   NOT NULL    COMMENT '排序',
+    content       JSON                  NOT NULL    COMMENT '内容',
+    page_block_id BIGINT                NULL        COMMENT '页面块ID',
+    CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
+) COMMENT '页面块数据表';
+
+ALTER TABLE mooc_page_block_data
+    ADD CONSTRAINT FK_MOOC_PAGE_BLOCK_DATA_ON_PAGE_BLOCK FOREIGN KEY (page_block_id) REFERENCES mooc_page_blocks (id);
+```
+
+flyway 的版本管理是通过表 `flyway_schema_history` 来实现的，表结构如下：
+
+| 字段名         | 类型          | 说明     |
+| -------------- | ------------- | -------- |
+| installed_rank | INT           | 版本号   |
+| version        | VARCHAR(50)   | 版本号   |
+| description    | VARCHAR(200)  | 版本描述 |
+| type           | VARCHAR(20)   | 类型     |
+| script         | VARCHAR(1000) | 脚本名称 |
+| checksum       | INT           | 校验和   |
+| installed_by   | VARCHAR(100)  | 安装人   |
+| installed_on   | TIMESTAMP     | 安装时间 |
+| execution_time | INT           | 执行时间 |
+| success        | TINYINT       | 是否成功 |
+
+我们每次改动数据库，无论是表结构，还是初始化数据，都需要在 flyway 中进行记录，这样才能保证数据库的版本管理。记录的方式是每次创建一个新的 sql 文件，文件名的命名规则是 `V{版本号}__{描述}.sql`，例如 `V1.0.0__init.sql`，然后在文件中编写 sql 语句，flyway 会自动执行 sql 语句，并记录到 `flyway_schema_history` 表中。
+
+flyway 会自动按版本号顺序执行 sql 文件，如果某个版本的 sql 文件已经执行过了，flyway 会跳过该文件，不会再次执行。

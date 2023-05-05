@@ -1,12 +1,9 @@
 package com.mooc.backend.dtos;
 
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
 import com.mooc.backend.json.BigDecimalSerializer;
-import com.mooc.backend.projections.ProductImageInfo;
-import com.mooc.backend.projections.ProductInfo;
 import lombok.Builder;
 import lombok.Value;
 import lombok.With;
@@ -39,23 +36,6 @@ public class ProductDTO implements Serializable {
     BigDecimal price;
     Set<CategoryDTO> categories;
     Set<String> images;
-
-    public static ProductDTO fromProjection(ProductInfo product) {
-        return ProductDTO.builder()
-                .id(product.getId())
-                .sku(product.getSku())
-                .name(product.getName())
-                .description(product.getDescription())
-                .originalPrice(product.getOriginalPrice())
-                .price(product.getPrice())
-                .categories(product.getCategories().stream()
-                        .map(CategoryDTO::fromProjection)
-                        .collect(Collectors.toSet()))
-                .images(product.getImages().stream()
-                        .map(ProductImageInfo::getImageUrl)
-                        .collect(Collectors.toSet()))
-                .build();
-    }
 
     public static ProductDTO fromEntity(Product product) {
         return ProductDTO.builder()

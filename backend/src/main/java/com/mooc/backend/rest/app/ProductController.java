@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @Tag(name = "商品查询", description = "根据条件查询商品")
 @RestController
 @RequestMapping(value = "/api/v1/app/products")
@@ -31,19 +29,11 @@ public class ProductController {
      * @param id 商品 ID
      * @return 商品列表
      */
-    @GetMapping("/by-category/{id}")
-    public List<ProductDTO> findAllByCategory(@PathVariable Long id) {
-        return productService.findPageableByCategory(id)
-                .stream()
-                .map(ProductDTO::fromEntity)
-                .toList();
-    }
-
     @GetMapping("/by-category/{id}/page")
     public SliceWrapper<ProductDTO> findPageableByCategoriesId(
             @PathVariable(value = "id") Long id,
             @PageableDefault(page = 0, size = 20, sort = "id", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable) {
-        var result = productService.findPageableByCategoriesId(id, pageable).map(ProductDTO::fromProjection);
+        var result = productService.findPageableByCategoriesId(id, pageable).map(ProductDTO::fromEntity);
 
         return new SliceWrapper<>(result.getNumber(), result.getSize(), result.hasNext(), result.getContent());
     }

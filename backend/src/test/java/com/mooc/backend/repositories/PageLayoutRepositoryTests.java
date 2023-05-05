@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -400,5 +401,32 @@ public class PageLayoutRepositoryTests {
 
         pages = pageLayoutRepository.findAll(spec);
         assertEquals(3, pages.size());
+    }
+
+    @Test
+    void testFindProjectionById() {
+        var now = LocalDateTime.now();
+        var pageConfig = PageConfig.builder()
+                .baselineScreenWidth(375.0)
+                .horizontalPadding(16.0)
+                .build();
+
+        var page1 = PageLayout.builder()
+                .pageType(PageType.About)
+                .platform(Platform.App)
+                .status(PageStatus.Published)
+                .config(pageConfig)
+                .title("Test Page Projection")
+                .startTime(now.minusDays(1))
+                .endTime(now.plusDays(1))
+                .build();
+
+        entityManager.persist(page1);
+        entityManager.flush();
+
+        var page = pageLayoutRepository.findProjectionById(page1.getId());
+        assertTrue(page.isPresent());
+        assertEquals(page1.getId(), page.get().getId());
+        assertEquals(page1.getTitle(), page.get().getTitle());
     }
 }

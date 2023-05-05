@@ -1,7 +1,6 @@
 package com.mooc.backend.services;
 
 import com.mooc.backend.entities.Product;
-import com.mooc.backend.projections.ProductInfo;
 import com.mooc.backend.repositories.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
@@ -21,10 +20,10 @@ public class ProductQueryService {
     private final ProductRepository productRepository;
 
     public List<Product> findPageableByCategory(Long id) {
-        return productRepository.findByCategoriesId(id);
+        return productRepository.findPageableByCategoriesId(id);
     }
 
-    public Slice<ProductInfo> findPageableByCategoriesId(Long id, Pageable pageable) {
+    public Slice<Product> findPageableByCategoriesId(Long id, Pageable pageable) {
         return productRepository.findPageableByCategoriesId(id, pageable);
     }
 

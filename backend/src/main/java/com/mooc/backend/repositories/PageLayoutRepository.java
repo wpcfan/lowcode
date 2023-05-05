@@ -14,7 +14,7 @@ public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, J
     @EntityGraph(attributePaths = {"pageBlocks", "pageBlocks.data"})
     Optional<PageLayout> findById(Long id);
 
-    @Query("select p from PageLayout p left join fetch p.pageBlocks pb left join fetch pb.data where p.id = ?1")
+    @Query("select p.id as id, p.title as title from PageLayout p where p.id = ?1")
     Optional<PageLayoutInfo> findProjectionById(Long id);
 
     /**
@@ -69,7 +69,7 @@ public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, J
      * @param currentTime 当前时间
      * @return 修改的记录数
      */
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
     update PageLayout p
     set p.status = com.mooc.backend.enumerations.PageStatus.Archived

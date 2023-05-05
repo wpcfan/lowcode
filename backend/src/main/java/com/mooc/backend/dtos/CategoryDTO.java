@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.mooc.backend.entities.Category;
 import com.mooc.backend.entities.blocks.BlockData;
 import com.mooc.backend.enumerations.BlockDataType;
-import com.mooc.backend.projections.CategoryInfo;
 import lombok.*;
 
 import java.io.Serial;
@@ -27,18 +26,6 @@ public class CategoryDTO implements BlockData, Comparable<CategoryDTO> {
 
     @Builder.Default
     private SortedSet<CategoryDTO> children = new TreeSet<>();
-
-    public static CategoryDTO fromProjection(CategoryInfo category) {
-        return CategoryDTO.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .code(category.getCode())
-                .parentId(category.getParent() != null ? category.getParent().getId() : null)
-                .children(category.getChildren().stream()
-                        .map(CategoryDTO::fromProjection)
-                        .collect(TreeSet::new, Set::add, Set::addAll))
-                .build();
-    }
 
     public static CategoryDTO fromEntity(Category category) {
         return CategoryDTO.builder()

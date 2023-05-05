@@ -124,7 +124,7 @@ public class ProductAdminController {
     public SliceWrapper<ProductDTO> findPageableByCategoriesId(
             @PathVariable(value = "id") Long id,
             @PageableDefault(page = 0, size = 20, sort = "id", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable) {
-        var result = productQueryService.findPageableByCategoriesId(id, pageable).map(ProductDTO::fromProjection);
+        var result = productQueryService.findPageableByCategoriesId(id, pageable).map(ProductDTO::fromEntity);
 
         return new SliceWrapper<>(result.getNumber(), result.getSize(), result.hasNext(), result.getContent());
     }

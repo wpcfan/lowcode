@@ -37,13 +37,13 @@ public class CategoryAdminController {
         if (categoryRepresentation == CategoryRepresentation.WITH_CHILDREN) {
             return categoryQueryService.findAll()
                     .stream()
-                    .map(CategoryDTO::fromProjection)
+                    .map(CategoryDTO::fromEntity)
                     .toList();
         } else if (categoryRepresentation == CategoryRepresentation.ROOT_ONLY) {
             return categoryQueryService.findAll()
                     .stream()
                     .filter(category -> category.getParent() == null)
-                    .map(CategoryDTO::fromProjection)
+                    .map(CategoryDTO::fromEntity)
                     .toList();
         }
         return categoryQueryService.findAllDTOs()

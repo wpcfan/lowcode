@@ -2,7 +2,6 @@ package com.mooc.backend.dtos;
 
 import com.mooc.backend.entities.Product;
 import com.mooc.backend.entities.ProductImage;
-import com.mooc.backend.projections.ProductImageInfo;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -12,7 +11,7 @@ import java.util.stream.Collectors;
 
 
 public record ProductAdminDTO(Long id, String sku, String name, String description, BigDecimal originalPrice, BigDecimal price, Set<CategoryDTO> categories,
-                              Set<ProductImageInfo> images) implements Serializable {
+                              Set<ProductImage> images) implements Serializable {
     @Serial
     private static final long serialVersionUID = -1;
 
@@ -27,19 +26,7 @@ public record ProductAdminDTO(Long id, String sku, String name, String descripti
                 product.getCategories().stream()
                         .map(CategoryDTO::fromEntity)
                         .collect(Collectors.toSet()),
-                product.getImages().stream()
-                        .map(i -> new ProductImageInfo() {
-                            @Override
-                            public Long getId() {
-                                return i.getId();
-                            }
-
-                            @Override
-                            public String getImageUrl() {
-                                return i.getImageUrl();
-                            }
-                        })
-                        .collect(Collectors.toSet())
+                product.getImages()
         );
     }
 

@@ -1,7 +1,6 @@
 package com.mooc.backend.rest.app;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,6 +37,9 @@ public class ProductControllerTests {
 
         @MockBean
         private ProductQueryService productQueryService;
+
+        @Autowired
+        private PageProperties pageProperties;
 
         @Test
         public void testFindAllByCategory() throws Exception {
@@ -56,26 +62,36 @@ public class ProductControllerTests {
                 product2.setPrice(BigDecimal.valueOf(200000));
                 product2.setCategories(Set.of(category));
 
-                Mockito.when(productQueryService.findPageableByCategory(1L))
-                                .thenReturn(List.of(product1, product2));
+                var pageRequest = PageRequest.of(
+                        pageProperties.getDefaultPageNumber(),
+                        pageProperties.getDefaultPageSize(),
+                        Sort.by(
+                                pageProperties.getDefaultSortDirection(),
+                                pageProperties.getDefaultSortField()
+                        ));
+                var result = new SliceImpl<>(List.of(product1, product2), pageRequest, false);
 
-                mockMvc.perform(get("/api/v1/app/products/by-category/{id}", 1).accept("application/json"))
+                Mockito.when(productQueryService.findPageableByCategoriesId(Mockito.eq(1L), Mockito.any(Pageable.class)))
+                                .thenReturn(result);
+
+                mockMvc.perform(get("/api/v1/app/products/by-category/{id}/page", 1).accept("application/json"))
                                 .andExpect(status().isOk())
-                                .andExpect(jsonPath("$", hasSize(2)))
-                                .andExpect(jsonPath("$[0].id", is(1)))
-                                .andExpect(jsonPath("$[0].name", is("Product 1")))
-                                .andExpect(jsonPath("$[0].description", is("Description 1")))
-                                .andExpect(jsonPath("$[0].price", is("¥100,000.00")))
-                                .andExpect(jsonPath("$[0].categories", hasSize(1)))
-                                .andExpect(jsonPath("$[0].categories[0].code", is("cat_one")))
-                                .andExpect(jsonPath("$[0].categories[0].name", is("Category 1")))
-                                .andExpect(jsonPath("$[1].id", is(2)))
-                                .andExpect(jsonPath("$[1].name", is("Product 2")))
-                                .andExpect(jsonPath("$[1].description", is("Description 2")))
-                                .andExpect(jsonPath("$[1].price", is("¥200,000.00")))
-                                .andExpect(jsonPath("$[1].categories", hasSize(1)))
-                                .andExpect(jsonPath("$[1].categories[0].code", is("cat_one")))
-                                .andExpect(jsonPath("$[1].categories[0].name", is("Category 1")));
+                                .andExpect(jsonPath("$.size", is(pageRequest.getPageSize())))
+                                .andExpect(jsonPath("$.page", is(pageRequest.getPageNumber())))
+                                .andExpect(jsonPath("$.data[0].id", is(1)))
+                                .andExpect(jsonPath("$.data[0].name", is("Product 1")))
+                                .andExpect(jsonPath("$.data[0].description", is("Description 1")))
+                                .andExpect(jsonPath("$.data[0].price", is("¥100,000.00")))
+                                .andExpect(jsonPath("$.data[0].categories", hasSize(1)))
+                                .andExpect(jsonPath("$.data[0].categories[0].code", is("cat_one")))
+                                .andExpect(jsonPath("$.data[0].categories[0].name", is("Category 1")))
+                                .andExpect(jsonPath("$.data[1].id", is(2)))
+                                .andExpect(jsonPath("$.data[1].name", is("Product 2")))
+                                .andExpect(jsonPath("$.data[1].description", is("Description 2")))
+                                .andExpect(jsonPath("$.data[1].price", is("¥200,000.00")))
+                                .andExpect(jsonPath("$.data[1].categories", hasSize(1)))
+                                .andExpect(jsonPath("$.data[1].categories[0].code", is("cat_one")))
+                                .andExpect(jsonPath("$.data[1].categories[0].name", is("Category 1")));
         }
 
 

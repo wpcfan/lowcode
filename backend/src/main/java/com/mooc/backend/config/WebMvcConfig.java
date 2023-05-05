@@ -38,11 +38,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public PageableHandlerMethodArgumentResolver pageableResolver() {
         PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
         resolver.setFallbackPageable(PageRequest.of(
-                pageProperties.defaultPageNumber,
-                pageProperties.defaultPageSize,
+                pageProperties.getDefaultPageNumber(),
+                pageProperties.getDefaultPageSize(),
                 Sort.by(
-                        pageProperties.defaultSortDirection,
-                        pageProperties.defaultSortField
+                        pageProperties.getDefaultSortDirection(),
+                        pageProperties.getDefaultSortField()
                 )));
         return resolver;
     }

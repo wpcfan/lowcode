@@ -1,7 +1,6 @@
 package com.mooc.backend.repositories;
 
 import com.mooc.backend.entities.Product;
-import com.mooc.backend.projections.ProductInfo;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -21,14 +20,14 @@ public interface ProductRepository extends JpaRepository<Product, Long>, CustomP
      * @return 指定类目下的所有商品
      */
     @EntityGraph(attributePaths = {"categories", "images"})
-    List<Product> findByCategoriesId(Long id);
+    List<Product> findPageableByCategoriesId(Long id);
 
     List<Product> findByNameLikeOrderByIdDesc(String name);
 
     Stream<Product> streamByNameLikeIgnoreCaseAndCategoriesCode(String name, String code);
 
     @EntityGraph(attributePaths = {"categories", "images"})
-    Slice<ProductInfo> findPageableByCategoriesId(Long id, Pageable pageable);
+    Slice<Product> findPageableByCategoriesId(Long id, Pageable pageable);
 
     Stream<Product> findByIdIn(Collection<Long> id);
 }

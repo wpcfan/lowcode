@@ -87,7 +87,7 @@ public class ProductRepositoryTests {
         entityManager.persist(product2);
         entityManager.flush();
 
-        var products = productRepository.findByCategoriesId(category.getId());
+        var products = productRepository.findPageableByCategoriesId(category.getId());
 
         assertEquals(1, products.size());
         assertEquals("Test Product", products.get(0).getName());

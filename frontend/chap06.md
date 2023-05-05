@@ -28,10 +28,9 @@
   - [6.3 构建实体类](#63-构建实体类)
     - [6.3.1 JPA Buddy 插件](#631-jpa-buddy-插件)
     - [6.3.2 作业：完成产品和类别等实体类](#632-作业完成产品和类别等实体类)
-  - [6.4 生成数据库表](#64-生成数据库表)
+  - [6.4 生成数据库表和数据初始化](#64-生成数据库表和数据初始化)
     - [6.4.1 自动创建数据库表](#641-自动创建数据库表)
       - [6.4.1.1 Spring Data Jpa 自动建表](#6411-spring-data-jpa-自动建表)
-      - [6.4.1.2 使用 Flyway 管理数据库版本](#6412-使用-flyway-管理数据库版本)
     - [6.4.2 手动创建数据库表](#642-手动创建数据库表)
       - [6.4.2.1 使用 Docker 启动 MySQL 数据库](#6421-使用-docker-启动-mysql-数据库)
       - [6.4.2.2 使用 JPA Buddy 插件生成数据库表](#6422-使用-jpa-buddy-插件生成数据库表)
@@ -47,13 +46,15 @@
     - [6.5.8 作业：改造 PageBlockData](#658-作业改造-pageblockdata)
   - [6.6 审计字段](#66-审计字段)
   - [6.7 综合实战：给 APP 首页构建 API](#67-综合实战给-app-首页构建-api)
-    - [6.7.1 作业：完成 `CategoryDTO` 和 `ProductDTO` 的定义](#671-作业完成-categorydto-和-productdto-的定义)
-    - [6.7.2 作业：完成 `ProductQueryService` 和 `ProductController`](#672-作业完成-productqueryservice-和-productcontroller)
+    - [6.7.1 序列化和反序列化中的类型转换](#671-序列化和反序列化中的类型转换)
+    - [6.7.2 作业：完成 `CategoryDTO` 的定义](#672-作业完成-categorydto-的定义)
+    - [6.7.3 作业：完成 `ProductQueryService` 和 `ProductController`](#673-作业完成-productqueryservice-和-productcontroller)
   - [6.8 改造 APP 首页使用 API](#68-改造-app-首页使用-api)
     - [6.8.1 网络包改造](#681-网络包改造)
     - [6.8.2 Repository 层改造](#682-repository-层改造)
     - [6.8.3 BLoC 层改造](#683-bloc-层改造)
     - [6.8.4 UI 层改造](#684-ui-层改造)
+    - [6.8.5 初始化数据](#685-初始化数据)
 
 <!-- /code_chunk_output -->
 
@@ -853,7 +854,7 @@ public enum BlockDataType {
 
 ![图 8](http://ngassets.twigcodes.com/60a25fb7b91ce1e58feac721545640ee342815d3ea6a4a1f707ed0b865b28864.png)
 
-## 6.4 生成数据库表
+## 6.4 生成数据库表和数据初始化
 
 ### 6.4.1 自动创建数据库表
 
@@ -918,237 +919,6 @@ spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 点击 `Connect` 按钮，可以看到数据库中已经有了 `mooc_page_layout`，`mooc_page_block`，`mooc_page_block_data` 等表。
 
 ![图 18](http://ngassets.twigcodes.com/d1368f60966cf95e4389c1fd7695af3c84ea42f64478ceb132a6d22c1ef57439.png)
-
-#### 6.4.1.2 使用 Flyway 管理数据库版本
-
-Flyway 是一个开源的数据库版本管理工具，它可以帮助我们管理数据库的版本，可以帮助我们在不同的环境中，自动创建数据库表，自动更新数据库表结构。
-
-SpringBoot 对 Flyway 提供了开箱即用的支持，我们可以在 `build.gradle` 中添加 Flyway 的依赖。
-
-```groovy
-implementation 'org.flywaydb:flyway-core'
-implementation 'org.flywaydb:flyway-mysql'
-```
-
-然后在 `application.properties` 文件中添加 Flyway 的配置，当然还是先禁用，我们仅在开发模式下启用：
-
-```properties
-# 数据初始化设置
-spring.sql.init.mode=never
-spring.flyway.enabled=false
-```
-
-然后在 `application-dev.properties` 文件中启用 Flyway：
-
-```properties
-spring.flyway.enabled=true
-spring.flyway.locations=classpath:db/migration/h2
-spring.flyway.baseline-on-migrate=true
-```
-
-在 `application-prod.properties` 文件中启用 Flyway：
-
-```properties
-# 数据初始化设置
-spring.flyway.enabled=true
-spring.flyway.locations=classpath:db/migration/mysql
-spring.flyway.baseline-on-migrate=true
-```
-
-在上面的配置中，我们使用了 `spring.flyway.enabled` 属性来启用 Flyway，然后使用了 `spring.flyway.locations` 属性来指定 Flyway 的脚本路径，这个路径是 `resources/db/migration`。
-`spring.flyway.baseline-on-migrate` 属性来指定在对一个非空数据库执行迁移时，是否应该执行基线。这个属性对于初次部署到生产数据库时非常有用，因为生产库往往都是需要特殊权限预先建立的，而且往往是非空的，这时候我们就可以使用这个属性来指定 Flyway 在对一个非空数据库执行迁移时，是否应该执行基线。
-
-在 `resources/db/migration` 目录下，我们创建两个子目录 `h2` 和 `mysql` ，这意味着我们需要支持两种数据库，一种是 H2，一种是 MySQL。
-
-我们可以创建一个初始化脚本，比如 `V1.0__schema.sql`，这个脚本可以通过 JpaBuddy 来导出，`H2` 版本的内容如下：
-
-```sql
-CREATE TABLE mooc_categories
-(
-    id        BIGINT AUTO_INCREMENT NOT NULL,
-    code      VARCHAR(255)          NOT NULL,
-    name      VARCHAR(255)          NOT NULL,
-    parent_id BIGINT,
-    created_at datetime             NULL,
-    updated_at datetime             NULL,
-    CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
-);
-
-ALTER TABLE mooc_categories
-    ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
-
-ALTER TABLE mooc_categories
-    ADD CONSTRAINT FK_MOOC_CATEGORIES_ON_PARENT FOREIGN KEY (parent_id) REFERENCES mooc_categories (id);
-
-CREATE TABLE mooc_product_categories
-(
-    category_id BIGINT NOT NULL,
-    product_id  BIGINT NOT NULL,
-    CONSTRAINT pk_mooc_product_categories PRIMARY KEY (category_id, product_id)
-);
-
-CREATE TABLE mooc_products
-(
-    id          BIGINT AUTO_INCREMENT NOT NULL,
-    name        VARCHAR(100)          NOT NULL,
-    description VARCHAR(255)          NOT NULL,
-    price       DECIMAL(10,2)         NOT NULL,
-    created_at  datetime              NULL,
-    updated_at  datetime              NULL,
-    CONSTRAINT pk_mooc_products PRIMARY KEY (id)
-);
-
-ALTER TABLE mooc_product_categories
-    ADD CONSTRAINT fk_mooprocat_on_category FOREIGN KEY (category_id) REFERENCES mooc_categories (id);
-
-ALTER TABLE mooc_product_categories
-    ADD CONSTRAINT fk_mooprocat_on_product FOREIGN KEY (product_id) REFERENCES mooc_products (id);
-
-CREATE TABLE mooc_product_images
-(
-    id         BIGINT AUTO_INCREMENT NOT NULL,
-    image_url  VARCHAR(255)          NOT NULL,
-    product_id BIGINT                NULL,
-    created_at datetime              NULL,
-    updated_at datetime              NULL,
-    CONSTRAINT pk_mooc_product_images PRIMARY KEY (id)
-);
-
-ALTER TABLE mooc_product_images
-    ADD CONSTRAINT FK_MOOC_PRODUCT_IMAGES_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES mooc_products (id);
-
-CREATE TABLE mooc_pages
-(
-    id         BIGINT AUTO_INCREMENT NOT NULL,
-    created_at datetime              NULL,
-    updated_at datetime              NULL,
-    platform   VARCHAR(255)          NOT NULL,
-    page_type  VARCHAR(255)          NOT NULL,
-    config     JSON                  NOT NULL,
-    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
-);
-
-CREATE TABLE mooc_page_blocks
-(
-    id      BIGINT AUTO_INCREMENT NOT NULL,
-    title   VARCHAR(255)          NOT NULL,
-    type    VARCHAR(255)          NOT NULL,
-    sort    INT                   NOT NULL,
-    config  JSON                  NOT NULL,
-    page_id BIGINT                NULL,
-    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
-);
-
-ALTER TABLE mooc_page_blocks
-    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
-
-CREATE TABLE mooc_page_block_data
-(
-    id            BIGINT AUTO_INCREMENT NOT NULL,
-    sort          INT                   NOT NULL,
-    content       JSON                  NOT NULL,
-    page_block_id BIGINT                NULL,
-    CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
-);
-
-ALTER TABLE mooc_page_block_data
-    ADD CONSTRAINT FK_MOOC_PAGE_BLOCK_DATA_ON_PAGE_BLOCK FOREIGN KEY (page_block_id) REFERENCES mooc_page_blocks (id);
-```
-
-MySQL 版本的内容如下：
-
-```sql
-CREATE TABLE mooc_categories
-(
-    id        BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
-    code      VARCHAR(255)          NOT NULL    COMMENT '分类编码',
-    name      VARCHAR(255)          NOT NULL    COMMENT '分类名称',
-    parent_id BIGINT                            COMMENT '父级分类',
-    created_at datetime             NULL        COMMENT '创建时间',
-    updated_at datetime             NULL        COMMENT '更新时间',
-    CONSTRAINT pk_mooc_categories PRIMARY KEY (id)
-) COMMENT '分类表';
-
-ALTER TABLE mooc_categories
-    ADD CONSTRAINT uc_mooc_categories_code UNIQUE (code);
-
-ALTER TABLE mooc_categories
-    ADD CONSTRAINT FK_MOOC_CATEGORIES_ON_PARENT FOREIGN KEY (parent_id) REFERENCES mooc_categories (id);
-
-CREATE TABLE mooc_product_categories
-(
-    category_id BIGINT NOT NULL     COMMENT '分类ID',
-    product_id  BIGINT NOT NULL     COMMENT '产品ID',
-    CONSTRAINT pk_mooc_product_categories PRIMARY KEY (category_id, product_id)
-) COMMENT '产品分类关联表';
-
-CREATE TABLE mooc_products
-(
-    id            BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
-    name          VARCHAR(100)          NOT NULL    COMMENT '产品名称',
-    `description` VARCHAR(255)          NOT NULL    COMMENT '产品描述',
-    price         DECIMAL(10,2)         NOT NULL    COMMENT '产品价格',
-    created_at    datetime              NULL        COMMENT '创建时间',
-    updated_at    datetime              NULL        COMMENT '更新时间',
-    CONSTRAINT pk_mooc_products PRIMARY KEY (id)
-) COMMENT '产品表';
-
-ALTER TABLE mooc_product_categories
-    ADD CONSTRAINT fk_mooprocat_on_category FOREIGN KEY (category_id) REFERENCES mooc_categories (id);
-
-ALTER TABLE mooc_product_categories
-    ADD CONSTRAINT fk_mooprocat_on_product FOREIGN KEY (product_id) REFERENCES mooc_products (id);
-
-CREATE TABLE mooc_product_images
-(
-    id         BIGINT AUTO_INCREMENT NOT NULL   COMMENT '主键',
-    image_url  VARCHAR(255)          NOT NULL   COMMENT '图片地址',
-    product_id BIGINT                NULL       COMMENT '产品ID',
-    created_at datetime              NULL       COMMENT '创建时间',
-    updated_at datetime              NULL       COMMENT '更新时间',
-    CONSTRAINT pk_mooc_product_images PRIMARY KEY (id)
-) COMMENT '产品图片表';
-
-ALTER TABLE mooc_product_images
-    ADD CONSTRAINT FK_MOOC_PRODUCT_IMAGES_ON_PRODUCT FOREIGN KEY (product_id) REFERENCES mooc_products (id);
-
-CREATE TABLE mooc_pages
-(
-    id         BIGINT AUTO_INCREMENT NOT NULL   COMMENT '主键',
-    created_at datetime              NULL       COMMENT '创建时间',
-    updated_at datetime              NULL       COMMENT '更新时间',
-    platform   VARCHAR(255)          NOT NULL   COMMENT '平台',
-    page_type  VARCHAR(255)          NOT NULL   COMMENT '页面类型',
-    config     JSON                  NOT NULL   COMMENT '页面配置',
-    CONSTRAINT pk_mooc_pages PRIMARY KEY (id)
-) COMMENT '页面表';
-
-CREATE TABLE mooc_page_blocks
-(
-    id      BIGINT AUTO_INCREMENT NOT NULL      COMMENT '主键',
-    title   VARCHAR(255)          NOT NULL      COMMENT '标题',
-    type    VARCHAR(255)          NOT NULL      COMMENT '类型',
-    sort    INT                   NOT NULL      COMMENT '排序',
-    config  JSON                  NOT NULL      COMMENT '配置',
-    page_id BIGINT                NULL          COMMENT '页面ID',
-    CONSTRAINT pk_mooc_page_blocks PRIMARY KEY (id)
-) COMMENT '页面块表';
-
-ALTER TABLE mooc_page_blocks
-    ADD CONSTRAINT FK_MOOC_PAGE_BLOCKS_ON_PAGE FOREIGN KEY (page_id) REFERENCES mooc_pages (id);
-
-CREATE TABLE mooc_page_block_data
-(
-    id            BIGINT AUTO_INCREMENT NOT NULL    COMMENT '主键',
-    sort          INT                   NOT NULL    COMMENT '排序',
-    content       JSON                  NOT NULL    COMMENT '内容',
-    page_block_id BIGINT                NULL        COMMENT '页面块ID',
-    CONSTRAINT pk_mooc_page_block_data PRIMARY KEY (id)
-) COMMENT '页面块数据表';
-
-ALTER TABLE mooc_page_block_data
-    ADD CONSTRAINT FK_MOOC_PAGE_BLOCK_DATA_ON_PAGE_BLOCK FOREIGN KEY (page_block_id) REFERENCES mooc_page_blocks (id);
-```
 
 ### 6.4.2 手动创建数据库表
 
@@ -2046,17 +1816,114 @@ public class PageDTO implements Serializable {
 
 对比 `PageLayout` 实体，我们可以看到 `PageDTO` 中的属性没有审计字段，这是因为 App 角度不需要知道这些字段。另外我们还定义了一个 `fromEntity` 方法，这个方法用来将 `PageLayout` 实体转换为 `PageDTO`，这样就可以将实体转换为 `DTO`，然后再返回给客户端。另外我们还定义了一个 `toEntity` 方法，这个方法用来将 `PageDTO` 转换为 `PageLayout` 实体，这样就可以将 `DTO` 转换为实体，然后再保存到数据库中。这两个方法在构建 DTO 的时候是非常常见的，后面我们还会经常用到。
 
-### 6.7.1 作业：完成 `CategoryDTO` 和 `ProductDTO` 的定义
+### 6.7.1 序列化和反序列化中的类型转换
 
-在上面的例子中，我们已经完成了 `PageDTO` 的定义，现在我们需要完成 `CategoryDTO` 和 `ProductDTO` 的定义，这两个 DTO 的定义和 `PageDTO` 的定义非常类似，你可以参考 `PageDTO` 的定义来完成这两个 DTO 的定义。
+有些时候，我们虽然在存储的时候使用某种类型，但在输出到客户端的时候，我们希望使用另一种类型，这个时候我们就需要使用类型转换器。比如 `Product` 中的 `price` 和 `orignialPrice` 是 `BigDecimal` 类型，但是在输出到客户端的时候，我们希望使用 `String` 类型，这个时候我们就需要使用类型转换器。
+
+```java
+/**
+ * 用于将 BigDecimal 类型的价格格式化为人民币
+ * 例如：123.456 -> ￥123.46
+ * 在类中的对应字段，使用 @JsonSerialize(using = BigDecimalSerializer.class) 注解
+ */
+public class BigDecimalSerializer extends JsonSerializer<BigDecimal> {
+
+    @Override
+    public void serialize(BigDecimal value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+        gen.writeString(MathUtils.formatPrice(value));
+    }
+}
+```
+
+然后我们在 `ProductDTO` 中使用 `@JsonSerialize(using = BigDecimalSerializer.class)` 注解来标记 `price` 和 `originalPrice` 字段，这样就可以在输出到客户端的时候，将 `BigDecimal` 类型的价格格式化为人民币。
+
+```java
+package com.mooc.backend.dtos;
+
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.mooc.backend.entities.Product;
+import com.mooc.backend.entities.ProductImage;
+import com.mooc.backend.json.BigDecimalSerializer;
+import lombok.Builder;
+import lombok.Value;
+import lombok.With;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * 产品数据传输对象
+ * 使用 @With 注解，可以在不修改原对象的情况下，创建一个新的对象
+ * 使用 @Value 注解，可以自动创建一个不可变的对象
+ * 使用 @Builder 注解，可以自动创建一个 Builder 对象
+ */
+@With
+@Value
+@Builder
+public class ProductDTO implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -1;
+    Long id;
+    String sku;
+    String name;
+    String description;
+    @JsonSerialize(using = BigDecimalSerializer.class)
+    BigDecimal originalPrice;
+    @JsonSerialize(using = BigDecimalSerializer.class)
+    BigDecimal price;
+    Set<CategoryDTO> categories;
+    Set<String> images;
+
+    public static ProductDTO fromEntity(Product product) {
+        return ProductDTO.builder()
+                .id(product.getId())
+                .sku(product.getSku())
+                .name(product.getName())
+                .description(product.getDescription())
+                .originalPrice(product.getOriginalPrice())
+                .price(product.getPrice())
+                .categories(product.getCategories().stream()
+                        .map(CategoryDTO::fromEntity)
+                        .collect(Collectors.toSet()))
+                .images(product.getImages().stream()
+                        .map(ProductImage::getImageUrl)
+                        .collect(Collectors.toSet()))
+                .build();
+    }
+
+    public Product toEntity() {
+        var product = Product.builder()
+                .sku(getSku())
+                .name(getName())
+                .description(getDescription())
+                .originalPrice(getOriginalPrice())
+                .price(getPrice())
+                .build();
+        getImages().forEach(image -> {
+            var productImage = new ProductImage();
+            productImage.setImageUrl(image);
+            product.addImage(productImage);
+        });
+        getCategories().forEach(category -> product.addCategory(category.toEntity()));
+        return product;
+    }
+}
+```
+
+### 6.7.2 作业：完成 `CategoryDTO` 的定义
+
+在上面的例子中，我们已经完成了 `PageDTO` 和 `ProductDTO` 的定义，现在我们需要完成 `CategoryDTO` 的定义，你可以参考 `PageDTO` 的定义来完成。
 
 提示：
 
 1. 对于 `CategoryDTO` 我们不希望出现 `parent` 属性，因为这个属性会导致循环引用，所以我们需要将这个属性去掉。我们可以添加一个 `parentId` 属性，这个属性用来保存父分类的 ID。
 2. `CategoryDTO` 的 `children` ，我们可能需要使用递归来完成，因为这个属性是一个树形结构，我们需要对这个集合的每个元素进行处理，然后再将处理后的结果添加到这个集合中。
-3. `ProductDTO` 的 `images` 属性是一个字符串的集合，所以需要从 `ProductImage` 集合中获取到所有的图片的 URL，然后再将这些 URL 添加到 `images` 集合中。
 
-### 6.7.2 作业：完成 `ProductQueryService` 和 `ProductController`
+### 6.7.3 作业：完成 `ProductQueryService` 和 `ProductController`
 
 我们需要完成瀑布流商品的查询，这个查询需要分页。
 
@@ -3098,3 +2965,32 @@ class HomeViewWithProvider extends StatelessWidget {
   }
 }
 ```
+
+### 6.8.5 初始化数据
+
+由于要进行测试，我们需要初始化一些数据，比如说初始化一些区块数据和商品数据。
+
+Hibernate 提供了自动建表的能力，但初始化数据的能力是没有的，所以我们需要使用 Spring Boot 的初始化数据的能力来初始化数据。
+
+但值得注意的是，如果使用这种方式，我们需要禁用 Hibernate 的自动建表能力，而采用使用脚本建表的方式。我们在 `application.properties` 中添加
+
+```properties
+spring.sql.init.mode=never
+```
+
+在 `application-dev.properties` 中禁用 Hibernate 的自动建表能力，并启用 SQL 脚本初始化数据的能力。
+
+```properties
+spring.jpa.hibernate.ddl-auto=none
+# 数据初始化设置
+## 第一种方式：使用SQL脚本初始化，这种方式需要禁用自动生成DDL语句
+## 也就是 spring.jpa.hibernate.ddl-auto=none
+## spring.sql.init.mode=always 表示每次启动都会执行SQL脚本
+## spring.sql.init.mode=embedded 表示只有内存数据库才会执行SQL脚本
+## spring.sql.init.mode=never 表示不会执行SQL脚本
+spring.sql.init.mode=embedded
+## 数据库方言设置，这里使用 H2 数据库
+spring.sql.init.platform=h2
+```
+
+默认情况下，在 `src/main/resources` 目录下的 `schema.sql` 和 `data.sql` 文件会被执行，其中 `schema.sql` 用于建表，`data.sql` 用于初始化数据。

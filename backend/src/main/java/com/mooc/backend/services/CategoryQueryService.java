@@ -2,7 +2,6 @@ package com.mooc.backend.services;
 
 import com.mooc.backend.dtos.CategoryRecord;
 import com.mooc.backend.entities.Category;
-import com.mooc.backend.projections.CategoryInfo;
 import com.mooc.backend.repositories.CategoryRepository;
 import com.mooc.backend.specifications.CategorySpecs;
 import org.springframework.stereotype.Service;
@@ -18,12 +17,12 @@ public class CategoryQueryService {
     }
 
     /**
-     * 使用投影
+     * 获得类目列表
      *
      * @return 带子类目的列表
      */
-    public List<CategoryInfo> findAll() {
-        return categoryRepository.findAll(CategoryInfo.class);
+    public List<Category> findAll() {
+        return categoryRepository.findAll(Category.class);
     }
 
     /**

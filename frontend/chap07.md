@@ -22,8 +22,10 @@
   - [7.2 使用 Flyway 管理数据库版本](#72-使用-flyway-管理数据库版本)
   - [7.3 构建运营管理后台的页面布局列表](#73-构建运营管理后台的页面布局列表)
     - [7.3.1 作业：实现一个选择过滤组件和日期范围过滤组件](#731-作业实现一个选择过滤组件和日期范围过滤组件)
+    - [Repository 层](#repository-层)
     - [实现页面列表的 BLoC](#实现页面列表的-bloc)
       - [7.3.2 作业：实现页面列表的 BLoC](#732-作业实现页面列表的-bloc)
+    - [搭建运营管理后台的页面列表](#搭建运营管理后台的页面列表)
 
 <!-- /code_chunk_output -->
 
@@ -1639,6 +1641,94 @@ class TextFilterWidget extends StatelessWidget {
 
 实现一个选择过滤组件和日期范围过滤组件，这两个组件的代码和 `TextFilterWidget` 类似，只是输入的类型不同，选择过滤组件的输入类型是枚举类型，日期范围过滤组件的输入类型是日期范围类型。
 
+### Repository 层
+
+我们在 `repositories` 包中需要给管理后台一个自己的 `PageAdminRepository` ，代码如下：
+
+```dart
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:models/models.dart';
+import 'package:networking/networking.dart';
+
+class PageAdminRepository {
+  final String baseUrl;
+  final Dio client;
+
+  PageAdminRepository({
+    Dio? client,
+    this.baseUrl = '/pages',
+  }) : client = client ?? AdminClient();
+
+  /// 按条件查询页面
+  /// [query] 查询条件
+  Future<PageWrapper<PageLayout>> search(PageQuery query) async {
+    debugPrint('PageAdminRepository.search($query)');
+
+    final url = _buildUrl(query);
+    debugPrint('PageAdminRepository.search($query) - url: $url');
+
+    final response = await client.get(url, options: cacheOptions.toOptions());
+
+    final result = PageWrapper.fromJson(
+      response.data,
+      (json) => PageLayout.fromJson(json),
+    );
+
+    debugPrint('PageAdminRepository.search($query) - success');
+
+    return result;
+  }
+
+  String _buildUrl(PageQuery query) {
+    final params = <String, String>{};
+
+    if (query.title != null && query.title!.isNotEmpty) {
+      params['title'] = query.title!;
+    }
+
+    if (query.platform != null) {
+      params['platform'] = query.platform!.value;
+    }
+
+    if (query.pageType != null) {
+      params['pageType'] = query.pageType!.value;
+    }
+
+    if (query.status != null) {
+      params['status'] = query.status!.value;
+    }
+
+    if (query.startDateFrom != null) {
+      params['startDateFrom'] = query.startDateFrom!;
+    }
+
+    if (query.startDateTo != null) {
+      params['startDateTo'] = query.startDateTo!;
+    }
+
+    if (query.endDateFrom != null) {
+      params['endDateFrom'] = query.endDateFrom!;
+    }
+
+    if (query.endDateTo != null) {
+      params['endDateTo'] = query.endDateTo!;
+    }
+
+    params['page'] = query.page.toString();
+
+    final url = Uri.parse(baseUrl).replace(queryParameters: params);
+
+    return url.toString();
+  }
+}
+```
+
+上面代码中，我们定义了一个 `PageAdminRepository` 类，这个类中包含了一个 `search` 方法，这个方法用于按条件查询页面，这个方法的参数是一个 `PageQuery` 对象，这个对象中包含了查询条件，这个方法的返回值是一个 `Future<PageWrapper<PageLayout>>` 对象，这个对象中包含了查询结果。
+
 ### 实现页面列表的 BLoC
 
 如果我们暂时只考虑条件筛选的事件，那么这些事件定义如下：
@@ -1705,3 +1795,99 @@ class PageEventEndDateChanged extends PageEvent {
 - 请根据事件思考页面列表的状态，然后实现页面列表的状态。
 
 - 根据事件和状态，实现页面列表的 BLoC。
+
+### 搭建运营管理后台的页面列表
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+import 'blocs/blocs.dart';
+import 'widgets/widgets.dart';
+
+class PageTableView extends StatelessWidget {
+  const PageTableView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<PageAdminRepository>(
+          create: (context) => PageAdminRepository(),
+        ),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider<PageBloc>(
+            create: (context) => PageBloc(
+              context.read<PageAdminRepository>(),
+            )..add(PageEventClearAll()),
+          ),
+        ],
+        child: BlocConsumer<PageBloc, PageState>(
+          listenWhen: (previous, current) =>
+              previous.loading != current.loading,
+          listener: (context, state) {
+            if (state.loading) {
+              return;
+            }
+            if (state.error.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.error),
+                ),
+              );
+              context.read<PageBloc>().add(PageEventClearError());
+            }
+          },
+          builder: (context, state) {
+            final bloc = context.read<PageBloc>();
+            switch (state.status) {
+              case FetchStatus.initial:
+                return const Text('initial').center();
+              case FetchStatus.loading:
+                return const CircularProgressIndicator().center();
+              default:
+                return _buildPageTable(state, bloc, context);
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  PageTableWidget _buildPageTable(
+      PageState state, PageBloc bloc, BuildContext context) {
+    return PageTableWidget(
+      query: state.query,
+      items: state.items,
+      page: state.page,
+      pageSize: state.pageSize,
+      total: state.total,
+      onPageChanged: (int? value) => bloc.add(PageEventPageChanged(value)),
+      onTitleChanged: (String? value) => bloc.add(PageEventTitleChanged(value)),
+      onPlatformChanged: (Platform? value) =>
+          bloc.add(PageEventPlatformChanged(value)),
+      onStatusChanged: (PageStatus? value) =>
+          bloc.add(PageEventPageStatusChanged(value)),
+      onPageTypeChanged: (PageType? value) =>
+          bloc.add(PageEventPageTypeChanged(value)),
+      onStartDateChanged: (DateTimeRange? value) =>
+          bloc.add(PageEventStartDateChanged(value?.start, value?.end)),
+      onEndDateChanged: (DateTimeRange? value) =>
+          bloc.add(PageEventEndDateChanged(value?.start, value?.end)),
+      onClearAll: () => debugPrint('onClearAll'),
+      onAdd: () => debugPrint('onAdd'),
+      onUpdate: (PageLayout layout) => debugPrint('onUpdate: $layout'),
+      onDelete: (int id) => debugPrint('onDelete: $id'),
+      onPublish: (int id) => debugPrint('onPublish: $id'),
+      onDraft: (int id) => debugPrint('onDraft: $id'),
+      onSelect: (int id) => debugPrint('onSelect: $id'),
+    );
+  }
+}
+```

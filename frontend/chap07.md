@@ -16,10 +16,14 @@
       - [7.1.4.1 关联查询](#7141-关联查询)
       - [7.1.4.2 作业：类目的关联查询](#7142-作业类目的关联查询)
     - [7.1.5 Example 查询](#715-example-查询)
-    - [7.1.6 Specification 查询](#716-specification-查询)
+    - [7.1.6 Specification 查询 - 构建页面布局的动态查询](#716-specification-查询---构建页面布局的动态查询)
     - [7.1.7 测试 Specification](#717-测试-specification)
     - [7.1.8 Spring Data JPA 的分页支持](#718-spring-data-jpa-的分页支持)
   - [7.2 使用 Flyway 管理数据库版本](#72-使用-flyway-管理数据库版本)
+  - [7.3 构建运营管理后台的页面布局列表](#73-构建运营管理后台的页面布局列表)
+    - [7.3.1 作业：实现一个选择过滤组件和日期范围过滤组件](#731-作业实现一个选择过滤组件和日期范围过滤组件)
+    - [实现页面列表的 BLoC](#实现页面列表的-bloc)
+      - [7.3.2 作业：实现页面列表的 BLoC](#732-作业实现页面列表的-bloc)
 
 <!-- /code_chunk_output -->
 
@@ -512,7 +516,7 @@ public void testQueryByExample() throws Exception {
 
 适用于 `Example` 查询的场景是查询条件比较简单的场景，如果查询条件比较复杂，那么就不适合使用 `Example` 查询了。 `Example` 也有一些限制，比如不能使用 `OR` 条件，不能使用 `LIKE` 条件，不能嵌套查询等等。
 
-### 7.1.6 Specification 查询
+### 7.1.6 Specification 查询 - 构建页面布局的动态查询
 
 `Specification` 查询是 Spring Data JPA 提供的一种基于 Criteria API 的查询方式。它允许你根据一组条件来执行查询，而无需编写复杂的查询语句。 `Specification` 查询通过创建一个 `Specification` 对象来描述查询条件，然后将其传递给 Repository 的查询方法中。
 
@@ -1174,3 +1178,530 @@ flyway 的版本管理是通过表 `flyway_schema_history` 来实现的，表结
 我们每次改动数据库，无论是表结构，还是初始化数据，都需要在 flyway 中进行记录，这样才能保证数据库的版本管理。记录的方式是每次创建一个新的 sql 文件，文件名的命名规则是 `V{版本号}__{描述}.sql`，例如 `V1.0.0__init.sql`，然后在文件中编写 sql 语句，flyway 会自动执行 sql 语句，并记录到 `flyway_schema_history` 表中。
 
 flyway 会自动按版本号顺序执行 sql 文件，如果某个版本的 sql 文件已经执行过了，flyway 会跳过该文件，不会再次执行。
+
+当然如果我们采用 flyway 管理数据，那么之前的 `schema.sql` 和 `data.sql` 文件就不需要了，可以删除了。
+
+## 7.3 构建运营管理后台的页面布局列表
+
+运营管理后台的页面布局列表，是一个页面，页面中包含了一个表格，表格中展示了所有的页面布局，每一行是一个页面布局，每一列是页面布局的属性。
+
+这个页面我们封装成一个独立的包 `pages` ，然后在 `admin` 引入这个包，这样就可以复用了。
+
+这个页面本身也比较复杂，因为这个表格是一个比较复杂的表格，表格中的表头是可以进行对应字段筛选的组件，用于构建查询条件。而每一行数据的尾部，是一个操作按钮组，用于对数据进行修改，删除，上线，下线等操作。
+
+对于这种类型的表格，我们可以封装一下形成一个较为通用的组件：
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+
+class CustomPaginatedTable extends StatelessWidget {
+  const CustomPaginatedTable({
+    super.key,
+    required this.rowPerPage,
+    required this.dataColumns,
+    this.header,
+    required this.showActions,
+    required this.actions,
+    required this.sortColumnIndex,
+    required this.sortColumnAsc,
+    this.onPageChanged,
+    required this.dataTableSource,
+  });
+  final int rowPerPage;
+  final List<DataColumn> dataColumns;
+  final Widget? header;
+  final bool showActions;
+  final List<Widget> actions;
+  final int sortColumnIndex;
+  final bool sortColumnAsc;
+  final void Function(int?)? onPageChanged;
+  final DataTableSource dataTableSource;
+
+  @override
+  Widget build(BuildContext context) {
+    final themeData = Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+        cardColor: Theme.of(context).cardColor,
+        textTheme: Typography.whiteCupertino);
+    final table = PaginatedDataTable(
+      header: header,
+      rowsPerPage: rowPerPage,
+      showFirstLastButtons: true,
+      onRowsPerPageChanged: onPageChanged,
+      actions: actions,
+      sortColumnIndex: sortColumnIndex,
+      sortAscending: sortColumnAsc,
+      columns: dataColumns,
+      source: dataTableSource,
+    );
+    return Theme(
+      data: themeData,
+      child: table,
+    ).scrollable();
+  }
+}
+```
+
+上面代码中，我们封装了一个 `CustomPaginatedTable` 组件，这个组件接收了很多参数，这些参数都是用于构建表格的，其中 `dataTableSource` 是一个抽象类，用于构建表格的数据源，我们需要自己实现这个类，然后传递给 `CustomPaginatedTable` 组件。
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+
+class PageTableDataSource extends DataTableSource {
+  PageTableDataSource({
+    required this.items,
+    required this.onUpdate,
+    required this.onDelete,
+    required this.onPublish,
+    required this.onDraft,
+    required this.onSelect,
+  });
+
+  final List<PageLayout> items;
+  final void Function(int) onUpdate;
+  final void Function(int) onDelete;
+  final void Function(int) onPublish;
+  final void Function(int) onDraft;
+  final void Function(int) onSelect;
+
+  @override
+  DataRow getRow(int index) {
+    final item = items[index];
+    final statusIcon = item.status == PageStatus.published
+        ? const Icon(Icons.published_with_changes, color: Colors.green)
+        : item.status == PageStatus.draft
+            ? const Icon(Icons.drafts, color: Colors.yellow)
+            : const Icon(Icons.archive, color: Colors.grey);
+    final config = item.config;
+
+    return DataRow.byIndex(
+      index: index,
+      cells: _buildCells(item, index, statusIcon, config),
+    );
+  }
+
+  List<DataCell> _buildCells(
+      PageLayout item, int index, Icon statusIcon, PageConfig config) {
+    return [
+      DataCell(Text(
+        item.title,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        style: const TextStyle(decoration: TextDecoration.underline),
+      ).inkWell(onTap: () => onSelect.call(index))),
+      DataCell(Text(item.platform.value)),
+      DataCell([statusIcon, Text(item.status.value)].toRow()),
+      DataCell(Text(item.pageType.value)),
+      DataCell(Text(item.startTime?.formatted ?? '')),
+      DataCell(Text(item.endTime?.formatted ?? '')),
+      DataCell(Tooltip(
+        message: '''
+水平内边距: ${config.horizontalPadding ?? 0}
+垂直内边距: ${config.verticalPadding ?? 0}
+基准屏幕宽度: ${config.baselineScreenWidth ?? ''}''',
+        child: const Icon(Icons.code),
+      )),
+      DataCell(
+        [
+          if (item.isDraft)
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => onUpdate(index),
+              tooltip: '编辑',
+            ),
+          if (item.isDraft)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: () => onDelete(index),
+              tooltip: '删除',
+            ),
+          if (item.isDraft)
+            IconButton(
+              onPressed: () => onPublish(index),
+              icon: const Icon(Icons.publish),
+              tooltip: '发布',
+            ),
+          if (item.isPublished)
+            IconButton(
+              onPressed: () => onDraft(index),
+              icon: const Icon(Icons.drafts),
+              tooltip: '下架',
+            ),
+        ].toRow(),
+      )
+    ];
+  }
+
+  @override
+  bool get isRowCountApproximate => false;
+
+  @override
+  int get rowCount => items.length;
+
+  @override
+  int get selectedRowCount => 0;
+}
+```
+
+这个自定义的数据源类中，我们实现了 `DataRow getRow(int index)` 方法，这个方法用于构建表格中的每一行数据，我们可以在这个方法中构建每一行数据的每一列，这里我们使用了 `DataCell` 组件，这个组件用于构建表格中的每一列数据。
+
+然后我们需要一个 `PageTableWidget` 组件来使用 `CustomPaginatedTable` 组件，这个组件接收了很多参数，这些参数都是用于构建表格的，其中 `dataTableSource` 是一个抽象类，用于构建表格的数据源，我们需要自己实现这个类，然后传递给 `CustomPaginatedTable` 组件。
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+import '../filters/filters.dart';
+import 'custom_paginated_table.dart';
+import 'page_table_data_source.dart';
+
+class PageTableWidget extends StatelessWidget {
+  const PageTableWidget({
+    super.key,
+    required this.items,
+    required this.page,
+    required this.pageSize,
+    required this.total,
+    this.onPageChanged,
+    required this.onTitleChanged,
+    required this.onPlatformChanged,
+    required this.onStatusChanged,
+    required this.onPageTypeChanged,
+    required this.onStartDateChanged,
+    required this.onEndDateChanged,
+    required this.onClearAll,
+    required this.onAdd,
+    required this.onUpdate,
+    required this.onDelete,
+    required this.onPublish,
+    required this.onDraft,
+    required this.onSelect,
+    required this.query,
+  });
+
+  final List<PageLayout> items;
+  final int page;
+  final int pageSize;
+  final int total;
+  final void Function(int?)? onPageChanged;
+  final void Function(String?) onTitleChanged;
+  final void Function(Platform?) onPlatformChanged;
+  final void Function(PageStatus?) onStatusChanged;
+  final void Function(PageType?) onPageTypeChanged;
+  final void Function(DateTimeRange?) onStartDateChanged;
+  final void Function(DateTimeRange?) onEndDateChanged;
+  final void Function() onClearAll;
+  final void Function() onAdd;
+  final void Function(PageLayout layout) onUpdate;
+  final void Function(int) onDelete;
+  final void Function(int) onPublish;
+  final void Function(int) onDraft;
+  final void Function(int) onSelect;
+  final PageQuery query;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = TextFilterWidget(
+      label: '标题',
+      onFilter: onTitleChanged,
+      popupTitle: '页面标题',
+      popupHintText: '请输入页面标题包含的内容',
+      value: query.title,
+    );
+
+    final platform = SelectionFilterWidget(
+      label: '平台',
+      onFilter: onPlatformChanged,
+      items: [
+        SelectionItem(value: Platform.app, label: Platform.app.value),
+        SelectionItem(value: Platform.web, label: Platform.web.value),
+      ],
+      value: query.platform,
+    );
+
+    final pageType = SelectionFilterWidget(
+      label: '页面类型',
+      onFilter: onPageTypeChanged,
+      items: [
+        SelectionItem(value: PageType.home, label: PageType.home.value),
+        SelectionItem(value: PageType.category, label: PageType.category.value),
+        SelectionItem(value: PageType.about, label: PageType.about.value),
+      ],
+      value: query.pageType,
+    );
+
+    final status = SelectionFilterWidget(
+      label: '状态',
+      onFilter: onStatusChanged,
+      items: [
+        SelectionItem(value: PageStatus.draft, label: PageStatus.draft.value),
+        SelectionItem(
+            value: PageStatus.published, label: PageStatus.published.value),
+        SelectionItem(
+            value: PageStatus.archived, label: PageStatus.archived.value),
+      ],
+      value: query.status,
+    );
+
+    final startDate = DateRangeFilterWidget(
+        label: '开始日期',
+        helpText: '选择开始日期的范围',
+        onFilter: onStartDateChanged,
+        value: query.startDateFrom != null && query.startDateTo != null
+            ? DateTimeRange(
+                start: DateTime.parse(query.startDateFrom!),
+                end: DateTime.parse(query.startDateTo!),
+              )
+            : null);
+
+    final endDate = DateRangeFilterWidget(
+        label: '结束日期',
+        helpText: '选择结束日期的范围',
+        onFilter: onEndDateChanged,
+        value: query.endDateFrom != null && query.endDateTo != null
+            ? DateTimeRange(
+                start: DateTime.parse(query.endDateFrom!),
+                end: DateTime.parse(query.endDateTo!),
+              )
+            : null);
+
+    const pageConfig = Text('页面配置');
+
+    const actionHeader = Text('操作');
+
+    final dataColumns = [
+      title,
+      platform,
+      status,
+      pageType,
+      startDate,
+      endDate,
+      pageConfig,
+      actionHeader,
+    ].map((e) => DataColumn(label: e)).toList();
+
+    return CustomPaginatedTable(
+      rowPerPage: pageSize,
+      dataColumns: dataColumns,
+      showActions: true,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add),
+          onPressed: onAdd,
+        ),
+        IconButton(
+          icon: const Icon(Icons.filter_list_off_outlined),
+          onPressed: onClearAll,
+        ),
+      ],
+      header: const Text('Page Search Result'),
+      sortColumnIndex: 0,
+      sortColumnAsc: true,
+      onPageChanged: onPageChanged,
+      dataTableSource: PageTableDataSource(
+          items: items,
+          onUpdate: (index) => onUpdate(items[index]),
+          onDelete: (index) {
+            if (items[index].id != null) {
+              onDelete.call(items[index].id!);
+            }
+          },
+          onPublish: (index) {
+            if (items[index].id != null) {
+              onPublish.call(items[index].id!);
+            }
+          },
+          onDraft: (index) {
+            if (items[index].id != null) {
+              onDraft.call(items[index].id!);
+            }
+          },
+          onSelect: (index) {
+            if (items[index].id != null) {
+              onSelect.call(items[index].id!);
+            }
+          }),
+    );
+  }
+}
+```
+
+`CustomPaginatedTable` 中每列都有一个可以过滤的字段，变化后会作为筛选条件的一部分，这个部分是通过设置 `dataColumns` 参数来实现的，这个参数是一个 `List<DataColumn>` 类型的参数，我们可以通过这个参数来构建表格的每一列，这里我们使用了 `DataColumn` 组件，这个组件用于构建表格中的每一列。
+
+这种条件过滤组件分为几种
+
+- `TextFilterWidget` 文本过滤组件，用于过滤文本类型的字段
+
+- `SelectionFilterWidget` 选择过滤组件，用于过滤选择类型的字段，比如枚举类型
+
+- `DateRangeFilterWidget` 日期范围过滤组件，用于过滤日期范围类型的字段
+
+其中 `TextFilterWidget` 的代码如下：
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+
+/// 一个带有过滤功能的文本控件，点击后会弹出一个对话框，输入关键字后点击确定，会调用 [onFilter] 方法
+class TextFilterWidget extends StatelessWidget {
+  const TextFilterWidget({
+    super.key,
+    required this.label,
+    required this.onFilter,
+    required this.popupTitle,
+    required this.popupHintText,
+    this.iconData = Icons.filter_alt,
+    this.altIconData = Icons.filter_alt_off,
+    this.clearIconData = Icons.clear,
+    this.cancelText = '清除',
+    this.confirmText = '确定',
+    this.value,
+  });
+
+  final String label;
+  final IconData iconData;
+  final IconData altIconData;
+  final IconData clearIconData;
+  final String popupTitle;
+  final String popupHintText;
+  final String cancelText;
+  final String confirmText;
+  final String? value;
+  final void Function(String?) onFilter;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = TextEditingController(text: value);
+    final icon = PopupMenuButton(
+        itemBuilder: (context) {
+          return [
+            PopupMenuItem(
+              child: Text(label),
+            ),
+            PopupMenuItem(
+              child: TextFormField(
+                controller: controller,
+                decoration: InputDecoration(
+                  hintText: popupHintText,
+                  border: InputBorder.none,
+                ),
+                onFieldSubmitted: (value) {
+                  onFilter(value);
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+            PopupMenuItem(
+                child: [
+              TextButton(
+                onPressed: () {
+                  controller.text = '';
+                  onFilter(controller.text);
+                  Navigator.of(context).pop();
+                },
+                child: Text(cancelText),
+              ),
+              TextButton(
+                onPressed: () {
+                  onFilter(controller.text);
+                  Navigator.of(context).pop();
+                },
+                child: Text(confirmText),
+              ),
+            ].toRow()),
+          ];
+        },
+        child: Icon(value == null || value!.isEmpty
+            ? Icons.filter_alt
+            : Icons.filter_alt_off));
+    final clear = IconButton(
+      icon: Icon(clearIconData),
+      onPressed: () {
+        controller.text = '';
+        onFilter(controller.text);
+      },
+    );
+    final arr = value == null || value!.isEmpty
+        ? [Text(label), icon]
+        : [Text(label), icon, clear];
+    return arr.toRow();
+  }
+}
+```
+
+上面的代码中，我们使用了 `PopupMenuButton` 组件，这个组件用于构建一个弹出菜单，这个菜单中包含了一个 `TextFormField` 组件，这个组件用于输入过滤的关键字，输入完成后点击确定按钮，会调用 `onFilter` 方法，这个方法会将输入的关键字作为参数传递进去。
+
+### 7.3.1 作业：实现一个选择过滤组件和日期范围过滤组件
+
+实现一个选择过滤组件和日期范围过滤组件，这两个组件的代码和 `TextFilterWidget` 类似，只是输入的类型不同，选择过滤组件的输入类型是枚举类型，日期范围过滤组件的输入类型是日期范围类型。
+
+### 实现页面列表的 BLoC
+
+如果我们暂时只考虑条件筛选的事件，那么这些事件定义如下：
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:models/models.dart';
+
+abstract class PageEvent extends Equatable {}
+
+class PageEventTitleChanged extends PageEvent {
+  PageEventTitleChanged(this.title) : super();
+  final String? title;
+
+  @override
+  List<Object?> get props => [title];
+}
+
+class PageEventPlatformChanged extends PageEvent {
+  PageEventPlatformChanged(this.platform) : super();
+  final Platform? platform;
+
+  @override
+  List<Object?> get props => [platform];
+}
+
+class PageEventPageTypeChanged extends PageEvent {
+  PageEventPageTypeChanged(this.pageType) : super();
+  final PageType? pageType;
+
+  @override
+  List<Object?> get props => [pageType];
+}
+
+class PageEventPageStatusChanged extends PageEvent {
+  PageEventPageStatusChanged(this.pageStatus) : super();
+  final PageStatus? pageStatus;
+
+  @override
+  List<Object?> get props => [pageStatus];
+}
+
+class PageEventStartDateChanged extends PageEvent {
+  PageEventStartDateChanged(this.startDateFrom, this.startDateTo) : super();
+  final DateTime? startDateFrom;
+  final DateTime? startDateTo;
+
+  @override
+  List<Object?> get props => [startDateFrom, startDateTo];
+}
+
+class PageEventEndDateChanged extends PageEvent {
+  PageEventEndDateChanged(this.endDateFrom, this.endDateTo) : super();
+  final DateTime? endDateFrom;
+  final DateTime? endDateTo;
+
+  @override
+  List<Object?> get props => [endDateFrom, endDateTo];
+}
+```
+
+#### 7.3.2 作业：实现页面列表的 BLoC
+
+- 请根据事件思考页面列表的状态，然后实现页面列表的状态。
+
+- 根据事件和状态，实现页面列表的 BLoC。

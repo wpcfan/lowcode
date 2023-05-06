@@ -43,7 +43,7 @@ class PageTableDataSource extends DataTableSource {
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
         style: const TextStyle(decoration: TextDecoration.underline),
-      ).ripple().inkWell(onTap: () => onSelect.call(index))),
+      ).inkWell(onTap: () => onSelect.call(index))),
       DataCell(Text(item.platform.value)),
       DataCell([statusIcon, Text(item.status.value)].toRow()),
       DataCell(Text(item.pageType.value)),

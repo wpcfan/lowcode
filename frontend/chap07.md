@@ -27,6 +27,7 @@
       - [7.3.3.1 作业：实现页面列表的 BLoC](#7331-作业实现页面列表的-bloc)
     - [7.3.4 搭建运营管理后台的页面列表](#734-搭建运营管理后台的页面列表)
     - [7.3.5 非查询类接口](#735-非查询类接口)
+      - [7.3.5.1 Service 单元测试](#7351-service-单元测试)
 
 <!-- /code_chunk_output -->
 
@@ -423,6 +424,14 @@ and p.pageType = ?3
 """)
 int countPublishedTimeConflict(LocalDateTime time, Platform platform, PageType pageType);
 ```
+
+当然对于这个需求也可以使用命名规则查询，比如
+
+```java
+int countByStartTimeIsNotNullAndEndTimeIsNotNullAndStartTimeLessThanAndEndTimeGreaterThanAndPlatformAndPageTypeAndStatus(LocalDateTime time, LocalDateTime time, Platform platform, PageType pageType, PageStatus status);
+```
+
+很明显的，这种复杂查询如果使用命名规则查询的方式的话就会变得过长而且不容易看懂了，所以对于复杂查询还是使用 JPQL 方式或者我们后面会介绍的 Specification 方式会好很多。
 
 #### 7.1.4.1 关联查询
 
@@ -1898,3 +1907,255 @@ class PageTableView extends StatelessWidget {
 ### 7.3.5 非查询类接口
 
 除了查询类接口，我们还需要实现非查询类接口，这些接口包括：添加页面、更新页面、删除页面、发布页面、下架页面。
+
+由于 `JpaRepository` 本身对于 CRUD 操作已经有内置支持了，一般的修改操作，我们是不需要自己写代码的。我们在这里直接在 Service 层调用 `JpaRepository` 的方法即可。
+
+要注意的一点是在 Java 中，一个比较好的实践是接口要简单，职责单一，所以我们在这里不要把所有的接口都放在一个接口中，而是根据职责的不同，将接口分成多个接口，这样可以更好的遵循接口隔离原则。
+
+首先看创建页面的接口，代码如下：
+
+```java
+package com.mooc.backend.services;
+
+import org.springframework.stereotype.Service;
+
+import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
+import com.mooc.backend.entities.PageLayout;
+import com.mooc.backend.repositories.PageLayoutRepository;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+
+@Transactional
+@RequiredArgsConstructor
+@Service
+public class PageCreateService {
+
+    private final PageLayoutRepository pageLayoutRepository;
+
+    public PageLayout createPage(CreateOrUpdatePageDTO page) {
+        return pageLayoutRepository.save(page.toEntity());
+    }
+}
+```
+
+上面的代码中，我们使用了 `@Transactional` 注解，这个注解的作用是告诉 Spring，这个方法是一个事务，如果方法执行成功，那么事务就会提交，如果方法执行失败，那么事务就会回滚。非查询类接口，一般都需要使用事务，因为我们需要保证数据的一致性。
+
+在 `createPage` 方法中，我们调用了 `pageLayoutRepository` 的 `save` 方法，这个方法是 `JpaRepository` 提供的方法，用于保存数据，如果数据不存在，那么就是新增，如果数据已经存在，那么就是更新。这个方法的参数我们创建了一个 `CreateOrUpdatePageDTO` 对象，这个对象是用于接收前端传递过来的数据的，我们在这里使用了 `toEntity` 方法，将 DTO 对象转换成了实体对象。这个 `CreateOrUpdatePageDTO` 对象的代码如下：
+
+```java
+public record CreateOrUpdatePageDTO(
+        @Schema(description = "布局标题", example = "首页布局") @NotBlank @Size(min = 2, max = 100) String title,
+        @Schema(description = "平台", example = "App") @NotNull Platform platform,
+        @Schema(description = "页面类型", example = "home") @NotNull PageType pageType,
+        @NotNull @Valid PageConfig config) {
+
+    public PageLayout toEntity() {
+        return PageLayout.builder()
+                .title(title)
+                .platform(platform)
+                .pageType(pageType)
+                .config(config)
+                .build();
+    }
+}
+```
+
+因为前端很多情况下上传的数据不一定需要和后端的实体保持完全一致的格式，而且我们也不希望前端直接操作实体，所以我们一般都会创建一个 DTO 对象，用于接收前端传递过来的数据，然后再将 DTO 对象转换成实体对象，这样可以更好的控制数据的格式。
+
+类似的，我们再写一个 `PageUpdateService`，这个更新的服务比创建要复杂一些，因为我们要处理多种情况：
+
+1. 由于我们从 UI 操作上来说会给运营人员有几个可以更新页面布局的地方：
+
+- 更新页面本身的信息，包括标题，类型，目标平台和页面配置信息等。
+- 发布页面（上架），此时仅仅需要更改页面状态和生效时间段
+- 撤销发布（下架），这种情况下，需要改变页面状态为 `PageStatus.Draft` 还有将生效时间段设置为 `null`
+
+2. 我们当然可以只提供一个方法，前端根据不同情况设置不同的值即可。但是这样的话，等于前端不管什么情况都要传递回一个完整的页面布局结构。这会导致前端需要维护这些信息，而且需要保证正确，这个显然是有问题的。作为 API，我们首先要保证后端要有校验数据的能力，而且要给前端尽可能简单的接口，只传递必要信息。所以我们可以将上面几个操作分别提供校验以及更新的方法。
+
+```java
+@Slf4j
+@Transactional
+@RequiredArgsConstructor
+@Service
+public class PageUpdateService {
+    private final PageQueryService pageQueryService;
+    private final PageLayoutRepository pageLayoutRepository;
+
+    public PageLayout updatePage(Long id, CreateOrUpdatePageDTO page) {
+        var pageEntity = pageQueryService.findById(id);
+        if (pageEntity.getStatus() == PageStatus.Published) {
+            throw new CustomException("已发布的页面不允许修改", "PageUpdateService#updatePage", Errors.ConstraintViolationException.code());
+        }
+        pageEntity.setTitle(page.title());
+        pageEntity.setConfig(page.config());
+        pageEntity.setPageType(page.pageType());
+        pageEntity.setPlatform(page.platform());
+        return pageEntity;
+    }
+
+    public PageLayout publishPage(Long id, PublishPageDTO page) {
+        var pageEntity = pageQueryService.findById(id);
+        // 设置为当天的零点
+        var startTime = page.startTime().with(LocalTime.MIN);
+        // 设置为当天的23:59:59.999999999
+        var endTime = page.endTime().with(LocalTime.MAX);
+        if (pageLayoutRepository.countPublishedTimeConflict(startTime, pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
+            throw new CustomException("开始时间和已有数据冲突", "PageUpdateService#publishPage", Errors.ConstraintViolationException.code());
+        }
+        if (pageLayoutRepository.countPublishedTimeConflict(endTime, pageEntity.getPlatform(), pageEntity.getPageType()) > 0) {
+            throw new CustomException("结束时间和已有数据冲突", "PageUpdateService#publishPage", Errors.ConstraintViolationException.code());
+        }
+        pageEntity.setStatus(PageStatus.Published);
+        pageEntity.setStartTime(startTime);
+        pageEntity.setEndTime(endTime);
+        return pageLayoutRepository.save(pageEntity);
+    }
+
+    public PageLayout draftPage(Long id) {
+        var pageEntity = pageQueryService.findById(id);
+        pageEntity.setStatus(PageStatus.Draft);
+        pageEntity.setStartTime(null);
+        pageEntity.setEndTime(null);
+        return pageLayoutRepository.save(pageEntity);
+    }
+}
+```
+
+上面的代码中,
+
+之后在 Controller 层，我们就可以直接调用 `PageCreateService` 的 `createPage` 方法，为了简单起见，我们还是利用 `PageAdminController`，代码如下：
+
+```java
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/admin/pages")
+public class PageAdminController {
+
+    private final PageCreateService pageCreateService;
+    private final PageQueryService pageQueryService;
+
+    @Operation(summary = "添加页面")
+    @PostMapping()
+    public PageDTO createPage(@Valid @RequestBody CreateOrUpdatePageDTO page) {
+        if (pageQueryService.existsByTitle(page.title()))
+            throw new CustomException("页面标题已存在", "PageAdminController#createPage",
+                    Errors.DataAlreadyExistsException.code());
+        return PageDTO.fromEntity(pageCreateService.createPage(page));
+    }
+
+    // ...
+}
+```
+
+#### 7.3.5.1 Service 单元测试
+
+`@ExtendWith` 是 JUnit 5 中的一个注解，用于扩展测试运行器（Test Runner）。它可以用来加载自定义的扩展（Extension），从而增强测试运行器的功能。
+
+`@ExtendWith(SpringExtension.class)` 是 JUnit 5 中用于加载 Spring 扩展的注解。它的作用主要有以下几个方面：
+自动加载 Spring 上下文：使用 `@ExtendWith(SpringExtension.class)` 注解可以自动加载 Spring 上下文，从而可以在测试中使用 Spring 的依赖注入、事务管理、AOP 等功能。在测试方法执行前，SpringExtension 会自动创建一个 Spring 上下文，并将其注入到测试类中。
+简化测试配置：使用 `@ExtendWith(SpringExtension.class)` 注解可以简化测试配置，避免手动创建 Spring 上下文和配置测试环境的繁琐过程。SpringExtension 会自动加载 Spring 配置文件，并创建相应的 Bean。
+支持测试运行器扩展：使用 `@ExtendWith(SpringExtension.class)` 注解可以支持测试运行器扩展，从而可以自定义测试运行器的行为。例如，可以使用 @MockBean 注解来模拟 Bean，或者使用 @Transactional 注解来管理事务。
+总的来说，`@ExtendWith(SpringExtension.class)` 注解是 JUnit 5 中用于加载 Spring 扩展的注解。它可以自动加载 Spring 上下文，简化测试配置，支持测试运行器扩展，从而可以更加方便地进行集成测试。
+
+```java
+package com.mooc.backend.services;
+
+import com.mooc.backend.dtos.CreateOrUpdatePageDTO;
+import com.mooc.backend.entities.PageLayout;
+import com.mooc.backend.entities.blocks.PageConfig;
+import com.mooc.backend.enumerations.PageType;
+import com.mooc.backend.enumerations.Platform;
+import com.mooc.backend.repositories.PageLayoutRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@ExtendWith(SpringExtension.class)
+public class PageCreateServiceTests {
+    @MockBean
+    private PageLayoutRepository pageLayoutRepository;
+    @Test
+    void testCreatePage() {
+        var pageCreateService = new PageCreateService(pageLayoutRepository);
+        var page = new CreateOrUpdatePageDTO("Page 1", Platform.App, PageType.Home, PageConfig.builder().build());
+
+        Mockito.when(pageLayoutRepository.save(Mockito.any(PageLayout.class))).thenReturn(PageLayout.builder().id(1L).build());
+        var result = pageCreateService.createPage(page);
+        assertEquals(1L, result.getId());
+    }
+}
+```
+
+`@MockBean` 注解，用于模拟 Bean。它的作用主要有以下几个方面：
+
+1. 模拟依赖：使用 `@MockBean` 注解可以模拟依赖，从而避免测试过程中对真实依赖的依赖。例如，如果这个服务依赖于一个 `PageLayoutRepository` ，我们可以使用 `@MockBean` 注解来模拟，从而避免测试过程中对真实数据库的依赖。
+
+2. 简化测试配置：使用 `@MockBean` 注解可以简化测试配置，避免手动创建模拟对象的繁琐过程。Spring Boot Test 会自动创建模拟对象，并将其注入到测试类中。
+
+3. 支持测试运行器扩展：使用 `@MockBean` 注解可以支持测试运行器扩展，从而自定义测试运行器的行为。例如，可以使用 `@MockBean` 注解来模拟 Bean，或者使用 `@Transactional` 注解来管理事务。
+
+我们的 `PageCreateService` 有一个依赖 `PageLayoutRepository`，我们通过 `@MockBean` 注解可以方便的将其注入到这个测试中，我们并没有 `new` 这个依赖。我们在测试用例中模拟了 `PageLayoutRepository` 的 `save` 方法，这样就可以隔离依赖，单独测试 `PageCreateService` 。当然这个例子由于 `PageCreateService` 的 `createPage` 方法是单纯的调用 `PageLayoutRepository` 的 `save` 方法，所以其实真实意义并不大。一般来说，如果 Service 层有业务逻辑的话，我们可以很方便的用这种方法测试不同数据返回的情况下，业务逻辑是否正确。
+
+```java
+package com.mooc.backend.services;
+
+import com.mooc.backend.dtos.PublishPageDTO;
+import com.mooc.backend.entities.PageLayout;
+import com.mooc.backend.enumerations.PageStatus;
+import com.mooc.backend.enumerations.PageType;
+import com.mooc.backend.enumerations.Platform;
+import com.mooc.backend.error.CustomException;
+import com.mooc.backend.repositories.PageBlockDataRepository;
+import com.mooc.backend.repositories.PageBlockRepository;
+import com.mooc.backend.repositories.PageLayoutRepository;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+
+@ExtendWith(SpringExtension.class)
+public class PageUpdateServiceTests {
+    @MockBean
+    private PageLayoutRepository pageLayoutRepository;
+
+    @MockBean
+    private PageBlockRepository pageBlockRepository;
+
+    @MockBean
+    private PageBlockDataRepository pageBlockDataRepository;
+
+    @MockBean
+    private PageQueryService pageQueryService;
+
+    @Test
+    void testPublishPage() {
+        var pageUpdateService = new PageUpdateService(pageQueryService, pageLayoutRepository, pageBlockRepository, pageBlockDataRepository);
+        var now = LocalDateTime.now();
+        var startTime = now.minusDays(1).with(LocalTime.MIN);
+        var endTime = now.plusDays(1).with(LocalTime.MAX);
+        var page = new PublishPageDTO(startTime, endTime);
+        var entity = PageLayout.builder()
+                .id(1L)
+                .title("title")
+                .status(PageStatus.Published)
+                .pageType(PageType.Home)
+                .platform(Platform.App)
+                .build();
+        Mockito.when(pageQueryService.findById(any(Long.class))).thenReturn(entity);
+        Mockito.when(pageLayoutRepository.countPublishedTimeConflict(startTime, Platform.App, PageType.Home)).thenReturn(1);
+        assertThrows(CustomException.class, () -> pageUpdateService.publishPage(1L, page));
+    }
+}
+```

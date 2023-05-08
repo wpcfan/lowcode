@@ -1614,7 +1614,7 @@ class BackendApplicationTests {
 
 启用审计字段的步骤如下：
 
-1. 在 `Application` 类上添加 `@EnableJpaAuditing` 注解
+1. 在 `AuditConfig` 类上添加 `@EnableJpaAuditing` 注解和 `@Configuration` 注解
 
 2. 在实体类中添加 `@EntityListeners(AuditingEntityListener.class)` 注解
 

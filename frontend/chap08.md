@@ -32,6 +32,8 @@
     - [8.2.6 测试添加区块的 API](#826-测试添加区块的-api)
     - [8.2.7 作业：测试插入区块的 API](#827-作业测试插入区块的-api)
     - [8.2.8 Flutter 实现拖拽](#828-flutter-实现拖拽)
+    - [实现左侧面板](#实现左侧面板)
+    - [实现中间画布](#实现中间画布)
 
 <!-- /code_chunk_output -->
 
@@ -606,6 +608,8 @@ class MyApp extends StatelessWidget {
 
 大家可以体会一下上面这个例子，然后再去实现我们的画布。整体大框架其实是很类似的，但由于我们的这个页面要复杂，所以我们单独封装左中右三个区域的 Widget。
 
+### 实现左侧面板
+
 其中左侧的面板的代码如下：
 
 ```dart
@@ -623,13 +627,13 @@ class LeftPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return widgets
-        .mapWithIndex((e, i) => _buildDraggableWidget(e, i))
+        .map((e) => _buildDraggableWidget(e))
         .toList()
         .toColumn()
         .scrollable();
   }
 
-  Widget _buildDraggableWidget(WidgetData data, int index) {
+  Widget _buildDraggableWidget(WidgetData data) {
     final listTile = ListTile(
       leading: Icon(
         data.icon,
@@ -655,6 +659,47 @@ class LeftPane extends StatelessWidget {
   }
 }
 ```
+
+左侧面板的代码比较简单，就是将每个组件都包装成一个 `Draggable` ，然后在拖拽时，我们使用了一个 `Card` 来展现，这样就可以实现拖拽时的效果了。要说明的一点是，我们引入了 `WidgetData` 这个类，这个类是我们自己定义的，用来描述每个组件的数据，代码如下：
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+
+class WidgetData extends Equatable {
+  const WidgetData(
+      {required this.icon,
+      required this.label,
+      this.sort,
+      this.type = PageBlockType.banner});
+
+  final IconData icon;
+  final String label;
+  final PageBlockType type;
+  final int? sort;
+
+  @override
+  String toString() {
+    return 'WidgetData{icon: $icon, label: $label, index: $sort}';
+  }
+
+  @override
+  List<Object?> get props => [icon, label, sort];
+
+  WidgetData copyWith({IconData? icon, String? label, int? sort}) {
+    return WidgetData(
+      icon: icon ?? this.icon,
+      label: label ?? this.label,
+      sort: sort ?? this.sort,
+    );
+  }
+}
+```
+
+定义这个类的目的是为了在拖拽时，我们可以将这个数据传递给接收者，这样接收者就可以知道拖拽的是哪个组件了。
+
+### 实现中间画布
 
 中间的画布的代码如下：
 
@@ -1004,6 +1049,10 @@ class CenterPane extends StatelessWidget {
   }
 }
 ```
+
+上面的代码中，我们通过`Draggable`和`DragTarget`实现了拖拽功能，通过`Draggable`我们可以拖拽出一个`feedback`，通过`DragTarget`我们可以接收一个`Draggable`传递过来的数据。这个组件比较复杂的原因是每个 `Draggable` 同时也是一个 `DragTarget`，这样可以实现拖拽排序的功能。
+
+另外需要注意的是，我们这个画布上重用了`BannerWidget`、`ImageRowWidget`、`ProductRowWidget`、`WaterfallWidget`这几个组件，这些组件都是通过`PageBlock`的`type`属性来区分的，这样可以实现不同类型的组件在画布上的拖拽和排序。而且为了可视化的效果，我们需要给这些没有数据的组件一些默认的数据，这样才能在画布上看到效果。
 
 右侧面板的代码如下：
 

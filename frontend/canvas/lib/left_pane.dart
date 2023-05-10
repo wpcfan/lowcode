@@ -12,13 +12,13 @@ class LeftPane extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return widgets
-        .mapWithIndex((e, i) => _buildDraggableWidget(e, i))
+        .map((e) => _buildDraggableWidget(e))
         .toList()
         .toColumn()
         .scrollable();
   }
 
-  Widget _buildDraggableWidget(WidgetData data, int index) {
+  Widget _buildDraggableWidget(WidgetData data) {
     final listTile = ListTile(
       leading: Icon(
         data.icon,

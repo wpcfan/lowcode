@@ -7,7 +7,6 @@ class CanvasState extends Equatable {
   final bool saving;
   final String error;
   final FetchStatus status;
-  final int moveOverIndex;
   final PageBlock? selectedBlock;
 
   const CanvasState({
@@ -16,20 +15,12 @@ class CanvasState extends Equatable {
     this.error = '',
     this.waterfallList = const [],
     this.status = FetchStatus.initial,
-    this.moveOverIndex = -1,
     this.selectedBlock,
   });
 
   @override
-  List<Object?> get props => [
-        layout,
-        saving,
-        error,
-        waterfallList,
-        status,
-        moveOverIndex,
-        selectedBlock
-      ];
+  List<Object?> get props =>
+      [layout, saving, error, waterfallList, status, selectedBlock];
 
   CanvasState clearSelectedBlock() {
     return CanvasState(
@@ -38,7 +29,6 @@ class CanvasState extends Equatable {
       error: error,
       waterfallList: waterfallList,
       status: status,
-      moveOverIndex: moveOverIndex,
       selectedBlock: null,
     );
   }
@@ -58,7 +48,6 @@ class CanvasState extends Equatable {
       error: error ?? this.error,
       waterfallList: waterfallList ?? this.waterfallList,
       status: status ?? this.status,
-      moveOverIndex: moveOverIndex ?? this.moveOverIndex,
       selectedBlock: selectedBlock ?? this.selectedBlock,
     );
   }

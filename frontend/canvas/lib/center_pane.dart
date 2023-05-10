@@ -1,55 +1,41 @@
 import 'package:common/common.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:models/models.dart';
 import 'package:page_block_widgets/page_block_widgets.dart';
 
-import 'blocs/blocs.dart';
 import 'models/models.dart';
 
 /// 中间画布
-class CenterPane extends StatefulWidget {
-  const CenterPane({super.key, this.onTap, required this.state});
+class CenterPane extends StatelessWidget {
+  const CenterPane(
+      {super.key,
+      this.onTap,
+      required this.blocks,
+      required this.products,
+      required this.defaultBlockConfig,
+      required this.pageConfig,
+      this.onBlockAdded,
+      this.onBlockInserted,
+      this.onBlockMoved,
+      this.onBlockSelected});
   final void Function()? onTap;
-  final CanvasState state;
-
-  @override
-  State<CenterPane> createState() => _CenterPaneState();
-}
-
-class _CenterPaneState extends State<CenterPane> {
-  int moveOverIndex = -1;
-  final _paneWidth = 400.0;
+  final List<PageBlock<dynamic>> blocks;
+  final List<Product> products;
+  final BlockConfig defaultBlockConfig;
+  final PageConfig pageConfig;
+  final void Function(PageBlock<dynamic> block)? onBlockAdded;
+  final void Function(PageBlock<dynamic> block)? onBlockInserted;
+  final void Function(PageBlock<dynamic> block, int targetSort)? onBlockMoved;
+  final void Function(PageBlock<dynamic> block)? onBlockSelected;
 
   @override
   Widget build(BuildContext context) {
-    return _buildCanvas(widget.state);
-  }
-
-  Widget _buildCanvas(CanvasState state) {
-    final paneWidth = state.layout?.config.baselineScreenWidth ?? _paneWidth;
-    final blocks = state.layout?.blocks ?? [];
-    final products = state.waterfallList;
-    final bloc = context.read<CanvasBloc>();
-    final pageId = state.layout?.id;
-    final defaultBlockConfig = BlockConfig(
-      horizontalPadding: 12,
-      verticalPadding: 12,
-      horizontalSpacing: 6,
-      verticalSpacing: 6,
-      blockWidth: paneWidth - 24,
-      blockHeight: 140,
-      backgroundColor: Colors.white,
-      borderColor: Colors.transparent,
-      borderWidth: 0,
-    );
     // 整体作为左侧拖拽目标
     final dragTarget = DragTarget(
       builder: (context, candidateData, rejectedData) {
         return ListView.builder(
           itemBuilder: (BuildContext context, int index) {
-            return _buildListItem(blocks, index, products, paneWidth, bloc,
-                defaultBlockConfig, pageId);
+            return _buildListItem(index);
           },
           itemCount: blocks.length,
         );
@@ -67,43 +53,25 @@ class _CenterPaneState extends State<CenterPane> {
         return false;
       },
       onAccept: (WidgetData data) {
-        _addBlock(data, bloc, blocks.length + 1, defaultBlockConfig, pageId!);
+        _addBlock(data, blocks.length + 1);
       },
     );
     return dragTarget
-        .gestures(onTap: widget.onTap)
+        .gestures(onTap: onTap)
         .padding(
-          horizontal: state.layout?.config.horizontalPadding ?? 0.0,
-          vertical: state.layout?.config.verticalPadding ?? 0.0,
+          horizontal: pageConfig.horizontalPadding ?? 0.0,
+          vertical: pageConfig.verticalPadding ?? 0.0,
         )
         .backgroundColor(Colors.grey)
-        .constrained(width: paneWidth);
+        .constrained(width: pageConfig.baselineScreenWidth ?? 375.0);
   }
 
-  DragTarget<Object> _buildListItem(
-      List<PageBlock<dynamic>> blocks,
-      int index,
-      List<Product> products,
-      double paneWidth,
-      CanvasBloc bloc,
-      BlockConfig defaultBlockConfig,
-      int? pageId) {
+  DragTarget<Object> _buildListItem(int index) {
     return DragTarget(
       builder: (context, candidateData, rejectedData) {
         final item = blocks[index];
-        final ratio = paneWidth / (item.config.blockWidth ?? 375.0);
         return _buildDraggableWidget(
-            item, products, index, paneWidth, bloc, ratio);
-      },
-      onMove: (details) {
-        setState(() {
-          moveOverIndex = index;
-        });
-      },
-      onLeave: (data) {
-        setState(() {
-          moveOverIndex = -1;
-        });
+            item, index, pageConfig.baselineScreenWidth ?? 375.0);
       },
       onWillAccept: (data) {
         /// 如果是从侧边栏拖拽过来的，那么index为null
@@ -114,12 +82,9 @@ class _CenterPaneState extends State<CenterPane> {
           }
           return true;
         }
-        if (data is PageBlock) {
-          if (data.type == PageBlockType.waterfall) {
-            /// 已经有瀑布流不能拖拽
-            return false;
-          }
 
+        /// 已经有瀑布流不能拖拽
+        if (data is PageBlock && data.type != PageBlockType.waterfall) {
           /// 如果是从画布中拖拽过来的，需要判断拖拽的和放置的不是同一个
           final int dragIndex = blocks.indexWhere((it) => it.sort == data.sort);
           final int dropIndex =
@@ -138,35 +103,21 @@ class _CenterPaneState extends State<CenterPane> {
           /// 处理从侧边栏拖拽过来的
           /// 如果是从侧边栏拖拽过来的，在放置的位置下方插入
           if (data.sort == null) {
-            setState(() {
-              moveOverIndex = -1;
-            });
-            return _insertBlock(
-                data, bloc, dropIndex + 1, defaultBlockConfig, pageId!);
+            return _insertBlock(data, dropIndex + 1);
           }
         }
         if (data is PageBlock) {
           /// 处理从画布中拖拽过来的
-
-          bloc.add(CanvasEventMoveBlock(
-            pageId!,
-            data.id!,
-            blocks[dropIndex].sort,
-          ));
-          setState(() {
-            moveOverIndex = -1;
-          });
+          onBlockMoved?.call(data, blocks[dropIndex].sort);
         }
       },
     );
   }
 
-  void _insertBlock(WidgetData data, CanvasBloc bloc, int dropIndex,
-      BlockConfig defaultBlockConfig, int pageId) {
+  void _insertBlock(WidgetData data, int dropIndex) {
     switch (data.type) {
       case PageBlockType.banner:
-        return bloc.add(CanvasEventInsertBlock(
-          pageId,
+        return onBlockInserted?.call(
           PageBlock<ImageData>(
             type: PageBlockType.banner,
             title: 'Banner $dropIndex ',
@@ -174,10 +125,9 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-        ));
+        );
       case PageBlockType.waterfall:
-        return bloc.add(CanvasEventInsertBlock(
-          pageId,
+        return onBlockInserted?.call(
           PageBlock<Category>(
             type: PageBlockType.waterfall,
             title: 'Waterfall $dropIndex ',
@@ -185,10 +135,9 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig,
             data: const [],
           ),
-        ));
+        );
       case PageBlockType.imageRow:
-        return bloc.add(CanvasEventInsertBlock(
-          pageId,
+        return onBlockInserted?.call(
           PageBlock<ImageData>(
             type: PageBlockType.imageRow,
             title: 'ImageRow $dropIndex',
@@ -196,29 +145,26 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-        ));
+        );
       case PageBlockType.productRow:
-        return bloc.add(CanvasEventInsertBlock(
-          pageId,
+        return onBlockInserted?.call(
           PageBlock<Product>(
             type: PageBlockType.productRow,
             title: 'ProductRow $dropIndex ',
             sort: dropIndex,
-            config: defaultBlockConfig.copyWith(blockHeight: 110),
+            config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-        ));
+        );
       default:
         return;
     }
   }
 
-  void _addBlock(WidgetData data, CanvasBloc bloc, int dropIndex,
-      BlockConfig defaultBlockConfig, int pageId) {
+  void _addBlock(WidgetData data, int dropIndex) {
     switch (data.type) {
       case PageBlockType.banner:
-        return bloc.add(CanvasEventAddBlock(
-          pageId,
+        return onBlockAdded?.call(
           PageBlock<ImageData>(
             type: PageBlockType.banner,
             title: 'Banner $dropIndex ',
@@ -226,10 +172,9 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-        ));
+        );
       case PageBlockType.waterfall:
-        return bloc.add(CanvasEventAddBlock(
-          pageId,
+        return onBlockAdded?.call(
           PageBlock<Category>(
             type: PageBlockType.waterfall,
             title: 'Waterfall $dropIndex',
@@ -237,10 +182,9 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig,
             data: const [],
           ),
-        ));
+        );
       case PageBlockType.imageRow:
-        return bloc.add(CanvasEventAddBlock(
-          pageId,
+        return onBlockAdded?.call(
           PageBlock<ImageData>(
             type: PageBlockType.imageRow,
             title: 'ImageRow $dropIndex',
@@ -248,10 +192,9 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-        ));
+        );
       case PageBlockType.productRow:
-        return bloc.add(CanvasEventAddBlock(
-          pageId,
+        return onBlockAdded?.call(
           PageBlock<Product>(
             type: PageBlockType.productRow,
             title: 'ProductRow $dropIndex',
@@ -259,15 +202,14 @@ class _CenterPaneState extends State<CenterPane> {
             config: defaultBlockConfig.copyWith(blockHeight: 100),
             data: const [],
           ),
-        ));
+        );
       default:
         return;
     }
   }
 
-  Widget _buildDraggableWidget(PageBlock block, List<Product> products,
-      int index, double itemWidth, CanvasBloc bloc, double ratio) {
-    final config = block.config.withRatio(ratio);
+  Widget _buildDraggableWidget(PageBlock block, int index, double itemWidth) {
+    final config = block.config;
     page({required Widget child}) => Draggable(
           data: block,
           feedback: SizedBox(
@@ -277,13 +219,13 @@ class _CenterPaneState extends State<CenterPane> {
           child: SizedBox(
             width: itemWidth,
             child: Container(
-              color: moveOverIndex == index ? Colors.red[200] : Colors.black45,
+              color: Colors.black45,
               child: child,
             ),
           ),
         );
 
-    Widget widget;
+    Widget child;
     switch (block.type) {
       case PageBlockType.banner:
         final it = block as PageBlock<ImageData>;
@@ -298,12 +240,9 @@ class _CenterPaneState extends State<CenterPane> {
                 const ImageData(
                     image: 'http://localhost:8080/api/v1/image/400/100/Third')
               ];
-
-        /// SliverToBoxAdapter 可以将一个 Widget 转换成 Sliver
-        widget = BannerWidget(
+        child = BannerWidget(
           items: items,
           config: config,
-          onTap: (_) => bloc.add(CanvasEventSelectBlock(block)),
         );
         break;
       case PageBlockType.imageRow:
@@ -319,10 +258,9 @@ class _CenterPaneState extends State<CenterPane> {
                 ImageData(
                     image: 'http://localhost:8080/api/v1/image/100/80/Third')
               ];
-        widget = ImageRowWidget(
+        child = ImageRowWidget(
           items: items,
           config: config,
-          onTap: (_) => bloc.add(CanvasEventSelectBlock(block)),
         );
         break;
       case PageBlockType.productRow:
@@ -341,10 +279,9 @@ class _CenterPaneState extends State<CenterPane> {
                   price: '¥100.23',
                 )
               ];
-        widget = ProductRowWidget(
+        child = ProductRowWidget(
           items: items,
           config: config,
-          onTap: (_) => bloc.add(CanvasEventSelectBlock(block)),
         );
         break;
       case PageBlockType.waterfall:
@@ -390,17 +327,18 @@ class _CenterPaneState extends State<CenterPane> {
                 ),
               ];
 
-        widget = WaterfallWidget(
+        child = WaterfallWidget(
           products: items,
           config: config,
           isPreview: true,
-          onTap: (_) => bloc.add(CanvasEventSelectBlock(block)),
         );
         break;
       default:
         return Container();
     }
 
-    return page(child: widget);
+    return page(child: IgnorePointer(child: child)).gestures(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onBlockSelected?.call(block));
   }
 }

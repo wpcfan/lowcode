@@ -36,14 +36,14 @@ class PageBloc extends Bloc<PageEvent, PageState> {
     try {
       final layout =
           await adminRepo.publish(event.id, event.startTime, event.endTime);
-      final index = state.items.indexWhere((element) => element.id == event.id);
       emit(state.copyWith(
         loading: false,
-        items: [
-          ...state.items.sublist(0, index),
-          layout,
-          ...state.items.sublist(index + 1)
-        ],
+        items: state.items.map((e) {
+          if (e.id == event.id) {
+            return layout;
+          }
+          return e;
+        }).toList(),
         error: '',
       ));
     } catch (e) {
@@ -55,14 +55,14 @@ class PageBloc extends Bloc<PageEvent, PageState> {
     emit(state.copyWith(loading: true));
     try {
       final layout = await adminRepo.draft(event.id);
-      final index = state.items.indexWhere((element) => element.id == event.id);
       emit(state.copyWith(
         loading: false,
-        items: [
-          ...state.items.sublist(0, index),
-          layout,
-          ...state.items.sublist(index + 1)
-        ],
+        items: state.items.map((e) {
+          if (e.id == event.id) {
+            return layout;
+          }
+          return e;
+        }).toList(),
         error: '',
       ));
     } catch (e) {
@@ -82,13 +82,9 @@ class PageBloc extends Bloc<PageEvent, PageState> {
     emit(state.copyWith(loading: true));
     try {
       await adminRepo.delete(event.id);
-      final index = state.items.indexWhere((element) => element.id == event.id);
       emit(state.copyWith(
         loading: false,
-        items: [
-          ...state.items.sublist(0, index),
-          ...state.items.sublist(index + 1)
-        ],
+        items: state.items.where((element) => element.id != event.id).toList(),
         error: '',
       ));
     } catch (e) {
@@ -101,14 +97,14 @@ class PageBloc extends Bloc<PageEvent, PageState> {
     emit(state.copyWith(loading: true));
     try {
       final layout = await adminRepo.update(event.id, event.layout);
-      final index = state.items.indexWhere((element) => element.id == event.id);
       emit(state.copyWith(
         loading: false,
-        items: [
-          ...state.items.sublist(0, index),
-          layout,
-          ...state.items.sublist(index + 1)
-        ],
+        items: state.items.map((e) {
+          if (e.id == event.id) {
+            return layout;
+          }
+          return e;
+        }).toList(),
         error: '',
       ));
     } catch (e) {

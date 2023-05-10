@@ -24,8 +24,7 @@ public class PageQueryService {
     private final PageLayoutRepository pageLayoutRepository;
 
     public PageLayout findById(Long id) {
-        var page = pageLayoutRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", Errors.DataNotFoundException.code()));
-        return page;
+        return pageLayoutRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", Errors.DataNotFoundException.code()));
     }
 
 

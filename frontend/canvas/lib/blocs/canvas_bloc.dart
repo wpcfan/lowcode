@@ -37,7 +37,8 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
 
   /// 错误处理
   void _handleError(Emitter<CanvasState> emit, dynamic error) {
-    final message = error is CustomException ? error.message : error.toString();
+    final message =
+        error.error is CustomException ? error.error.message : error.toString();
     emit(state.copyWith(
       error: message,
       saving: false,

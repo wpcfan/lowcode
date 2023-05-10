@@ -117,7 +117,7 @@ public class PageAdminController {
     @PostMapping("/{id}/blocks")
     public PageDTO addBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdatePageBlockDTO block) {
+            @Valid @RequestBody CreateOrUpdatePageBlockDTO block) {
         checkPageStatus(id);
         return PageDTO.fromEntity(pageCreateService.addBlockToPage(id, block));
     }
@@ -126,7 +126,7 @@ public class PageAdminController {
     @PostMapping("/{id}/blocks/insert")
     public PageDTO insertBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
+            @Valid @RequestBody CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
         checkPageStatus(id);
         return PageDTO.fromEntity(pageCreateService.insertBlockToPage(id, insertPageBlockDTO));
     }

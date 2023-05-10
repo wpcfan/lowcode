@@ -30,7 +30,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   /// 错误处理
   void _handleError(Emitter<HomeState> emit, dynamic error) {
-    final message = error is CustomException ? error.message : error.toString();
+    final message =
+        error.error is CustomException ? error.error.message : error.toString();
     emit(state.copyWith(
       loadingMore: false,
       error: message,

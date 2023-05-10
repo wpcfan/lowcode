@@ -28,6 +28,10 @@
     - [7.3.4 搭建运营管理后台的页面列表](#734-搭建运营管理后台的页面列表)
     - [7.3.5 非查询类接口](#735-非查询类接口)
       - [7.3.5.1 Service 单元测试](#7351-service-单元测试)
+      - [7.3.5.2 作业：完成删除页面布局的逻辑并单元测试](#7352-作业完成删除页面布局的逻辑并单元测试)
+      - [7.3.5.3 完成运营管理后台的前端页面](#7353-完成运营管理后台的前端页面)
+        - [7.3.5.3.1 Flutter 中的 Dialog](#73531-flutter-中的-dialog)
+        - [7.3.5.3.2 BLoC 中如何更新内存中集合的数据](#73532-bloc-中如何更新内存中集合的数据)
 
 <!-- /code_chunk_output -->
 
@@ -2019,10 +2023,28 @@ public class PageUpdateService {
         pageEntity.setEndTime(null);
         return pageLayoutRepository.save(pageEntity);
     }
+
+    @Operation(summary = "发布页面")
+    @PatchMapping("/{id}/publish")
+    public PageDTO publishPage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Valid @RequestBody PublishPageDTO publishPageDTO) {
+        return PageDTO.fromEntity(pageUpdateService.publishPage(id, publishPageDTO));
+    }
+
+    @Operation(summary = "取消发布页面")
+    @PatchMapping("/{id}/draft")
+    public PageDTO draftPage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id) {
+        return PageDTO.fromEntity(pageUpdateService.draftPage(id));
+    }
 }
 ```
 
-上面的代码中,
+上面的代码中，我们在保存之前做了一些校验，比如：
+
+- 如果页面已经发布，那么就不允许修改
+- 如果发布时间段和已有的页面布局时间段冲突，那么就不允许发布
 
 之后在 Controller 层，我们就可以直接调用 `PageCreateService` 的 `createPage` 方法，为了简单起见，我们还是利用 `PageAdminController`，代码如下：
 
@@ -2042,6 +2064,15 @@ public class PageAdminController {
             throw new CustomException("页面标题已存在", "PageAdminController#createPage",
                     Errors.DataAlreadyExistsException.code());
         return PageDTO.fromEntity(pageCreateService.createPage(page));
+    }
+
+    @Operation(summary = "修改页面")
+    @PutMapping("/{id}")
+    public PageDTO updatePage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Valid @RequestBody CreateOrUpdatePageDTO page) {
+        checkPageStatus(id);
+        return PageDTO.fromEntity(pageUpdateService.updatePage(id, page));
     }
 
     // ...
@@ -2159,3 +2190,134 @@ public class PageUpdateServiceTests {
     }
 }
 ```
+
+上面的测试用例中，我们模拟了 `PageQueryService` 的 `findById` 方法，`PageLayoutRepository` 的 `countPublishedTimeConflict` 方法。这样我们就可以测试 `PageUpdateService` 的 `publishPage` 方法了。这个方法的逻辑是，首先根据 `id` 查询 `PageLayout`，然后判断 `startTime` 和 `endTime` 是否和已经发布的页面冲突，如果冲突则抛出异常。我们可以通过模拟 `PageLayoutRepository` 的 `countPublishedTimeConflict` 方法来测试这个逻辑。
+
+#### 7.3.5.2 作业：完成删除页面布局的逻辑并单元测试
+
+在 `PageDeleteService` 中完成删除页面布局的逻辑，并编写单元测试。
+
+#### 7.3.5.3 完成运营管理后台的前端页面
+
+利用已经有的接口，完成运营管理后台的前端页面。运营管理后台的前端页面需要完成以下功能：
+
+1. 页面列表：每一条信息的操作包括编辑、删除、发布、取消发布等操作。
+2. 页面编辑：编辑页面的基本信息，包括标题、平台、页面类型等。
+3. 页面创建：创建页面，需要填写页面的基本信息，包括标题、平台、页面类型等。
+
+提示：
+
+1. BLoC 中的事件可以参考以下定义
+
+```dart
+  class PageEventUpdate extends PageEvent {
+  PageEventUpdate(this.id, this.layout) : super();
+  final int id;
+  final PageLayout layout;
+
+  @override
+  List<Object> get props => [id, layout];
+}
+
+class PageEventCreate extends PageEvent {
+  PageEventCreate(this.layout) : super();
+
+  final PageLayout layout;
+
+  @override
+  List<Object> get props => [layout];
+}
+
+class PageEventDelete extends PageEvent {
+  PageEventDelete(this.id) : super();
+  final int id;
+
+  @override
+  List<Object> get props => [id];
+}
+
+class PageEventPublish extends PageEvent {
+  PageEventPublish(this.id, this.startTime, this.endTime) : super();
+  final int id;
+  final DateTime startTime;
+  final DateTime endTime;
+
+  @override
+  List<Object> get props => [id];
+}
+
+class PageEventDraft extends PageEvent {
+  PageEventDraft(this.id) : super();
+  final int id;
+
+  @override
+  List<Object> get props => [id];
+}
+```
+
+2. 创建和编辑可以使用 Dialog 完成，这个 Dialog 叫做 `CreateOrUpdatePageDialog` ，可以参考 `pages/lib/popups` 中的代码。
+
+##### 7.3.5.3.1 Flutter 中的 Dialog
+
+Flutter 中的 Dialog 有两种，一种是 `AlertDialog`，一种是 `SimpleDialog`。`AlertDialog` 是一个简单的对话框，只有一个标题和一个内容，一般用于提示。`SimpleDialog` 是一个复杂的对话框，可以有多个按钮，一般用于选择。我们可以通过 `showDialog` 方法来显示一个 Dialog。我们的作业使用 `AlertDialog` 即可。
+
+```dart
+showDialog(
+  context: context,
+  builder: (BuildContext context) {
+    return AlertDialog(
+      title: Text('提示'),
+      content: Text('确定要删除吗？'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('取消'),
+          onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+        ),
+        FlatButton(
+          child: Text('确定'),
+          onPressed: () {
+            // 执行删除操作
+            Navigator.of(context).pop(); // 关闭对话框
+          },
+        ),
+      ],
+    );
+  },
+);
+```
+
+##### 7.3.5.3.2 BLoC 中如何更新内存中集合的数据
+
+在 BLoC 中，我们经常会遇到要维护一个集合的数据，比如说我们要维护一个页面的列表，这个列表是一个 `List<PageLayout>` 类型的数据。
+
+- 如果新创建一个页面布局的话，一般会把这个元素添加到这个集合中，至于是添加到集合的头部还是尾部，这个取决于业务需求。下面是一个简单示例，把元素添加到集合的头部，这个用法和 `javascript` 很像。三个点代表把 `layouts` 中的元素展开。
+
+  ```dart
+  List<PageLayout> _addPageLayout(List<PageLayout> layouts, PageLayout layout) {
+    return [layout, ...layouts];
+  }
+  ```
+
+- 如果删除一个页面布局的话，一般会把这个元素从集合中删除。下面是一个简单示例，把元素从集合中删除。
+
+  ```dart
+  List<PageLayout> _deletePageLayout(List<PageLayout> layouts, int id) {
+    return layouts.where((layout) => layout.id != id).toList();
+  }
+  ```
+
+- 如果更新一个页面布局的话，相对会复杂一些，因为你需要找到这个元素在集合中的位置，然后把这个元素替换掉。下面是一个简单示例，把元素从集合中更新。
+
+  ```dart
+  // 如果服务器可以返回更新后的数据
+  List<PageLayout> _updatePageLayout(List<PageLayout> layouts, PageLayout updated) {
+    return layouts.map((item) {
+      if (item.id == updated.id) {
+        return updated;
+      }
+      return item;
+    }).toList();
+  }
+  // 如果服务器不可以返回更新后的数据
+
+  ```

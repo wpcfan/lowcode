@@ -1052,7 +1052,9 @@ class CenterPane extends StatelessWidget {
 
 上面的代码中，我们通过`Draggable`和`DragTarget`实现了拖拽功能，通过`Draggable`我们可以拖拽出一个`feedback`，通过`DragTarget`我们可以接收一个`Draggable`传递过来的数据。这个组件比较复杂的原因是每个 `Draggable` 同时也是一个 `DragTarget`，这样可以实现拖拽排序的功能。
 
-另外需要注意的是，我们这个画布上重用了`BannerWidget`、`ImageRowWidget`、`ProductRowWidget`、`WaterfallWidget`这几个组件，这些组件都是通过`PageBlock`的`type`属性来区分的，这样可以实现不同类型的组件在画布上的拖拽和排序。而且为了可视化的效果，我们需要给这些没有数据的组件一些默认的数据，这样才能在画布上看到效果。
+另外需要注意的是，我们这个画布上重用了`BannerWidget`、`ImageRowWidget`、`ProductRowWidget`、`WaterfallWidget`这几个组件，这些组件都是通过`PageBlock`的`type`属性来区分的，这样可以实现不同类型的组件在画布上的拖拽和排序。而且为了可视化的效果，我们需要给这些没有数据的组件一些默认的数据，这样才能在画布上看到效果。而且这里面我们利用了在第五章的实现的占位图 API。
+
+由于画布上的组件应该屏蔽组件本身的点击事件，所以我们在这里使用了`IgnorePointer`组件，这样就可以屏蔽掉组件本身的点击事件。然后我们在外层包裹了一个`GestureDetector`，这样就可以监听到组件的点击事件，然后通过`onBlockSelected`回调函数将组件的数据传递给父组件。
 
 右侧面板的代码如下：
 

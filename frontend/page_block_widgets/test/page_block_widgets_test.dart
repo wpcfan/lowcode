@@ -17,7 +17,7 @@ void main() {
             link: MyLink(value: 'https://example.com/2', type: LinkType.url)),
       ];
 
-      final BlockConfig config = BlockConfig(
+      const BlockConfig config = BlockConfig(
         borderWidth: 1,
         borderColor: Colors.red,
         backgroundColor: Colors.blue,
@@ -58,7 +58,7 @@ void main() {
             link: MyLink(value: 'https://example.com/2', type: LinkType.url)),
       ];
 
-      final BlockConfig config = BlockConfig(
+      const BlockConfig config = BlockConfig(
         borderWidth: 1,
         borderColor: Colors.red,
         backgroundColor: Colors.blue,
@@ -119,7 +119,7 @@ void main() {
         description: 'Description',
       );
 
-      final BlockConfig config = BlockConfig(
+      const BlockConfig config = BlockConfig(
         borderWidth: 1,
         borderColor: Colors.red,
         backgroundColor: Colors.blue,

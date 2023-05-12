@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 import 'package:repositories/repositories.dart';
 
-import 'blocs/blocs.dart';
 import 'widgets/widgets.dart';
 
 /// 右侧面板
-/// [state] 画布状态
+/// [selectedBlock] 选中的区块
+/// [layout] 页面布局
 /// [showBlockConfig] 是否显示块配置
 /// [onSavePageLayout] 保存页面布局回调
 /// [onSavePageBlock] 保存页面块回调
@@ -21,7 +21,6 @@ import 'widgets/widgets.dart';
 class RightPane extends StatelessWidget {
   const RightPane({
     super.key,
-    required this.state,
     required this.showBlockConfig,
     required this.productRepository,
     this.onSavePageLayout,
@@ -34,8 +33,11 @@ class RightPane extends StatelessWidget {
     required this.onProductRemoved,
     required this.onImageAdded,
     required this.onImageRemoved,
+    this.selectedBlock,
+    this.layout,
   });
-  final CanvasState state;
+  final PageBlock<dynamic>? selectedBlock;
+  final PageLayout? layout;
   final bool showBlockConfig;
   final ProductRepository productRepository;
   final void Function(PageBlock)? onSavePageBlock;
@@ -65,7 +67,7 @@ class RightPane extends StatelessWidget {
               body: TabBarView(
                 children: [
                   BlockConfigForm(
-                    block: state.selectedBlock!,
+                    block: selectedBlock!,
                     onSave: onSavePageBlock,
                     onDelete: onDeleteBlock,
                   ),
@@ -75,7 +77,7 @@ class RightPane extends StatelessWidget {
             ),
           )
         : PageConfigForm(
-            layout: state.layout!,
+            layout: layout!,
             onSave: onSavePageLayout,
           );
     return child.padding(horizontal: 12);
@@ -83,17 +85,17 @@ class RightPane extends StatelessWidget {
 
   BlockDataPane _buildBlockDataPane() {
     return BlockDataPane(
-      block: state.selectedBlock!,
+      block: selectedBlock!,
       productRepository: productRepository,
       onCategoryAdded: (category) {
         final data = BlockData<Category>(
-          sort: state.selectedBlock!.data.length,
+          sort: selectedBlock!.data.length,
           content: category,
         );
         onCategoryAdded(data);
       },
       onCategoryUpdated: (category) {
-        final matchedData = state.selectedBlock!.data.first;
+        final matchedData = selectedBlock!.data.first;
         final data = BlockData<Category>(
           id: matchedData.id,
           sort: matchedData.sort,
@@ -102,27 +104,27 @@ class RightPane extends StatelessWidget {
         onCategoryUpdated(data);
       },
       onCategoryRemoved: (category) {
-        final index = state.selectedBlock!.data
+        final index = selectedBlock!.data
             .indexWhere((element) => element.content.id == category.id);
         if (index == -1) return;
         onCategoryRemoved.call(index);
       },
       onProductAdded: (product) {
         final data = BlockData<Product>(
-          sort: state.selectedBlock!.data.length,
+          sort: selectedBlock!.data.length,
           content: product,
         );
         onProductAdded(data);
       },
       onProductRemoved: (product) {
-        final index = state.selectedBlock!.data
+        final index = selectedBlock!.data
             .indexWhere((element) => element.content.id == product.id);
         if (index == -1) return;
-        onProductRemoved(state.selectedBlock!.data[index].id!);
+        onProductRemoved(selectedBlock!.data[index].id!);
       },
       onImageAdded: (image) {
         final data = BlockData<ImageData>(
-          sort: state.selectedBlock!.data.length,
+          sort: selectedBlock!.data.length,
           content: image,
         );
         onImageAdded(data);

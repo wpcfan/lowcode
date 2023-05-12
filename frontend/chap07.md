@@ -32,6 +32,7 @@
       - [7.3.5.3 完成运营管理后台的前端页面](#7353-完成运营管理后台的前端页面)
         - [7.3.5.3.1 Flutter 中的 Dialog](#73531-flutter-中的-dialog)
         - [7.3.5.3.2 BLoC 中如何更新内存中集合的数据](#73532-bloc-中如何更新内存中集合的数据)
+        - [7.3.5.3.3 使用 go_router 设计页面路由](#73533-使用-go_router-设计页面路由)
 
 <!-- /code_chunk_output -->
 
@@ -2321,3 +2322,139 @@ showDialog(
   // 如果服务器不可以返回更新后的数据
 
   ```
+
+##### 7.3.5.3.3 使用 go_router 设计页面路由
+
+在 Flutter 中，我们可以使用 `Navigator` 来进行页面的跳转，但是这个 API 不够友好，我们可以使用 `go_router` 这个库来进行页面的跳转。`go_router` 的使用方法可以参考 [go_router](https://pub.dev/packages/go_router) 。
+
+`go_router` 是一个声明式的路由库，我们可以在 `main.dart` 中定义路由，然后在其他地方使用 `context.go('/xxx)` 来进行页面的跳转。下面是一个简单的示例：
+
+```dart
+// main.dart
+import 'package:go_router/go_router.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+// GoRouter configuration
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => HomeScreen(),
+    ),
+  ],
+);
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      routerConfig: _router,
+    );
+  }
+}
+```
+
+可以看到，路由的定义方式和 `vue` 等前端框架差不多，我们可以把所有路由放到一个数组中，然后在 `MyApp` 中使用 `routerConfig` 来配置路由。在 `GoRoute` 中的 `path` 就是路由的路径，`builder` 就是路由对应的页面的工厂函数。
+
+但需要指出的是 `GoRoute` 只能路由整个页面，如果是页面的某些部分在路由中是不变的，那么就需要使用 `ShellRoute`，`ShellRoute` 可以在路由中保留某些部分，这样可以避免在路由时，这些部分被重新构建。我们可以通过下面的代码来实现 `ShellRoute`：
+
+```dart
+// routes/routes.dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pages/pages.dart';
+
+import '../constants.dart';
+import '../widgets/widgets.dart';
+
+final scaffoldKey = GlobalKey<ScaffoldState>();
+final innerScaffoldKey = GlobalKey<ScaffoldState>();
+
+final routes = <RouteBase>[
+  GoRoute(
+    path: '/',
+    builder: (context, state) => const PageTableView(),
+  ),
+];
+
+final routerConfig = GoRouter(
+  initialLocation: '/',
+  routes: [
+    // 嵌套的路由使用 ShellRoute 包裹
+    // 我们这里只想让 body 部分刷新，
+    // 也就是切换路由时，只刷新 body 部分
+    ShellRoute(
+      builder: (context, state, child) => Scaffold(
+        key: scaffoldKey,
+        drawer: const SideMenu(),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Header(),
+          primary: true,
+          backgroundColor: bgColor,
+        ),
+        body: SafeArea(child: child),
+      ),
+      routes: routes,
+    ),
+  ],
+);
+```
+
+然后在 `main.dart` 中使用 `routerConfig` 来配置路由：
+
+```dart
+void main() {
+  /// 初始化 Bloc 的观察者，用于监听 Bloc 的生命周期
+  Bloc.observer = SimpleBlocObserver();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // 根组件
+  @override
+  Widget build(BuildContext context) {
+    /// 使用 MaterialApp.router 来初始化路由
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: '运营管理后台',
+
+      /// 使用 ThemeData.dark 来初始化一个深色主题
+      /// 使用 copyWith 来复制该主题，并修改部分属性
+      theme: ThemeData.dark(useMaterial3: false).copyWith(
+        scaffoldBackgroundColor: bgColor,
+        textTheme: Theme.of(context).textTheme.apply(bodyColor: Colors.white),
+        canvasColor: secondaryColor,
+        dataTableTheme: DataTableThemeData(
+          headingRowColor: MaterialStateProperty.all(secondaryColor),
+          dataRowColor: MaterialStateProperty.all(secondaryColor),
+          dividerThickness: 0,
+        ),
+      ),
+
+      /// 使用 GlobalMaterialLocalizations.delegate 来初始化 Material 组件的本地化
+      /// 使用 GlobalWidgetsLocalizations.delegate 来初始化 Widget 组件的本地化
+      /// 使用 GlobalCupertinoLocalizations.delegate 来初始化 Cupertino 组件的本地化
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      /// 使用 zh 来初始化中文本地化
+      supportedLocales: const [
+        Locale('zh'),
+      ],
+
+      /// 使用 routerConfig 来初始化路由
+      routerConfig: routerConfig,
+    );
+  }
+}
+```

@@ -163,7 +163,8 @@ class CanvasPage extends StatelessWidget {
           ProductRepository productRepository, BuildContext context) =>
       RightPane(
         showBlockConfig: state.selectedBlock != null,
-        state: state,
+        selectedBlock: state.selectedBlock,
+        layout: state.layout,
         productRepository: productRepository,
         onSavePageBlock: (pageBlock) => context.read<CanvasBloc>().add(
               CanvasEventUpdateBlock(

@@ -39,7 +39,6 @@ class CanvasState extends Equatable {
     String? error,
     List<Product>? waterfallList,
     FetchStatus? status,
-    int? moveOverIndex,
     PageBlock? selectedBlock,
   }) {
     return CanvasState(

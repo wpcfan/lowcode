@@ -32,8 +32,12 @@
     - [8.2.6 测试添加区块的 API](#826-测试添加区块的-api)
     - [8.2.7 作业：测试插入区块的 API](#827-作业测试插入区块的-api)
     - [8.2.8 Flutter 实现拖拽](#828-flutter-实现拖拽)
-    - [实现左侧面板](#实现左侧面板)
-    - [实现中间画布](#实现中间画布)
+    - [8.2.9 实现左侧面板](#829-实现左侧面板)
+    - [8.2.10 实现中间画布](#8210-实现中间画布)
+    - [8.2.11 右侧面板](#8211-右侧面板)
+    - [8.2.12 添加区块和插入区块的 Repository](#8212-添加区块和插入区块的-repository)
+    - [8.2.13 添加区块和插入区块的 Bloc](#8213-添加区块和插入区块的-bloc)
+    - [8.2.14 完成画布页面](#8214-完成画布页面)
 
 <!-- /code_chunk_output -->
 
@@ -608,7 +612,7 @@ class MyApp extends StatelessWidget {
 
 大家可以体会一下上面这个例子，然后再去实现我们的画布。整体大框架其实是很类似的，但由于我们的这个页面要复杂，所以我们单独封装左中右三个区域的 Widget。
 
-### 实现左侧面板
+### 8.2.9 实现左侧面板
 
 其中左侧的面板的代码如下：
 
@@ -699,7 +703,7 @@ class WidgetData extends Equatable {
 
 定义这个类的目的是为了在拖拽时，我们可以将这个数据传递给接收者，这样接收者就可以知道拖拽的是哪个组件了。
 
-### 实现中间画布
+### 8.2.10 实现中间画布
 
 中间的画布的代码如下：
 
@@ -1050,148 +1054,479 @@ class CenterPane extends StatelessWidget {
 }
 ```
 
-上面的代码中，我们通过`Draggable`和`DragTarget`实现了拖拽功能，通过`Draggable`我们可以拖拽出一个`feedback`，通过`DragTarget`我们可以接收一个`Draggable`传递过来的数据。这个组件比较复杂的原因是每个 `Draggable` 同时也是一个 `DragTarget`，这样可以实现拖拽排序的功能。
+上面的代码中，我们通过 `Draggable` 和 `DragTarget` 实现了拖拽功能，通过 `Draggable` 我们可以拖拽出一个 `feedback` ，通过 `DragTarget` 我们可以接收一个 `Draggable` 传递过来的数据。这个组件比较复杂的原因是每个 `Draggable` 同时也是一个 `DragTarget` ，这样可以实现拖拽排序的功能。
 
-另外需要注意的是，我们这个画布上重用了`BannerWidget`、`ImageRowWidget`、`ProductRowWidget`、`WaterfallWidget`这几个组件，这些组件都是通过`PageBlock`的`type`属性来区分的，这样可以实现不同类型的组件在画布上的拖拽和排序。而且为了可视化的效果，我们需要给这些没有数据的组件一些默认的数据，这样才能在画布上看到效果。而且这里面我们利用了在第五章的实现的占位图 API。
+另外需要注意的是，我们这个画布上重用了`BannerWidget`、`ImageRowWidget`、`ProductRowWidget`、`WaterfallWidget`这几个组件，这些组件都是通过 `PageBlock` 的`type`属性来区分的，这样可以实现不同类型的组件在画布上的拖拽和排序。而且为了可视化的效果，我们需要给这些没有数据的组件一些默认的数据，这样才能在画布上看到效果。而且这里面我们利用了在第五章的实现的占位图 API。
 
-由于画布上的组件应该屏蔽组件本身的点击事件，所以我们在这里使用了`IgnorePointer`组件，这样就可以屏蔽掉组件本身的点击事件。然后我们在外层包裹了一个`GestureDetector`，这样就可以监听到组件的点击事件，然后通过`onBlockSelected`回调函数将组件的数据传递给父组件。
+由于画布上的组件应该屏蔽组件本身的点击事件，所以我们在这里使用了 `IgnorePointer` 组件，这样就可以屏蔽掉组件本身的点击事件。然后我们在外层包裹了一个 `GestureDetector` ，这样就可以监听到组件的点击事件，然后通过 `onBlockSelected` 回调函数将组件的数据传递给父组件。
 
-右侧面板的代码如下：
+### 8.2.11 右侧面板
+
+由于右侧面板涉及的功能比较多，而且 API 部分仍未完成，所以我们给出一个简化版本，代码如下：
 
 ```dart
-import 'package:common/common.dart';
 import 'package:flutter/material.dart';
-import 'package:models/models.dart';
-import 'package:repositories/repositories.dart';
 
-import 'blocs/blocs.dart';
-import 'widgets/widgets.dart';
-
-/// 右侧面板
-/// [state] 画布状态
-/// [showBlockConfig] 是否显示块配置
-/// [onSavePageLayout] 保存页面布局回调
-/// [onSavePageBlock] 保存页面块回调
-/// [onDeleteBlock] 删除块回调
-/// [onCategoryAdded] 添加分类回调
-/// [onCategoryUpdated] 更新分类回调
-/// [onCategoryRemoved] 删除分类回调
-/// [onProductAdded] 添加商品回调
-/// [onProductRemoved] 删除商品回调
-///
 class RightPane extends StatelessWidget {
+
   const RightPane({
-    super.key,
-    required this.state,
-    required this.showBlockConfig,
-    required this.productRepository,
-    this.onSavePageLayout,
-    this.onSavePageBlock,
-    this.onDeleteBlock,
-    required this.onCategoryAdded,
-    required this.onCategoryUpdated,
-    required this.onCategoryRemoved,
-    required this.onProductAdded,
-    required this.onProductRemoved,
-    required this.onImageAdded,
-    required this.onImageRemoved,
-  });
-  final CanvasState state;
-  final bool showBlockConfig;
-  final ProductRepository productRepository;
-  final void Function(PageBlock)? onSavePageBlock;
-  final void Function(PageLayout)? onSavePageLayout;
-  final void Function(int)? onDeleteBlock;
-  final void Function(BlockData<Product>) onProductAdded;
-  final void Function(int) onProductRemoved;
-  final void Function(BlockData<Category>) onCategoryAdded;
-  final void Function(BlockData<Category>) onCategoryUpdated;
-  final void Function(int) onCategoryRemoved;
-  final void Function(BlockData<ImageData>) onImageAdded;
-  final void Function(int) onImageRemoved;
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final child = showBlockConfig
-        ? DefaultTabController(
-            initialIndex: 0,
-            length: 2,
-            child: Scaffold(
-              appBar: const TabBar(
-                tabs: [
-                  Tab(text: '配置'),
-                  Tab(text: '数据'),
-                ],
-              ),
-              body: TabBarView(
+    return Container(
+      width: 200,
+      color: Colors.grey,
+      child: DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            TabBar(
+              tabs: [
+                Tab(text: 'Properties'),
+                Tab(text: 'Data'),
+              ],
+            ),
+            Expanded(
+              child: TabBarView(
                 children: [
-                  BlockConfigForm(
-                    block: state.selectedBlock!,
-                    onSave: onSavePageBlock,
-                    onDelete: onDeleteBlock,
-                  ),
-                  _buildBlockDataPane(),
+                  Center(child: Text('Properties')),
+                  Center(child: Text('Data')),
                 ],
               ),
             ),
-          )
-        : PageConfigForm(
-            layout: state.layout!,
-            onSave: onSavePageLayout,
-          );
-    return child.padding(horizontal: 12);
-  }
-
-  BlockDataPane _buildBlockDataPane() {
-    return BlockDataPane(
-      block: state.selectedBlock!,
-      productRepository: productRepository,
-      onCategoryAdded: (category) {
-        final data = BlockData<Category>(
-          sort: state.selectedBlock!.data.length,
-          content: category,
-        );
-        onCategoryAdded(data);
-      },
-      onCategoryUpdated: (category) {
-        final matchedData = state.selectedBlock!.data.first;
-        final data = BlockData<Category>(
-          id: matchedData.id,
-          sort: matchedData.sort,
-          content: category,
-        );
-        onCategoryUpdated(data);
-      },
-      onCategoryRemoved: (category) {
-        final index = state.selectedBlock!.data
-            .indexWhere((element) => element.content.id == category.id);
-        if (index == -1) return;
-        onCategoryRemoved.call(index);
-      },
-      onProductAdded: (product) {
-        final data = BlockData<Product>(
-          sort: state.selectedBlock!.data.length,
-          content: product,
-        );
-        onProductAdded(data);
-      },
-      onProductRemoved: (product) {
-        final index = state.selectedBlock!.data
-            .indexWhere((element) => element.content.id == product.id);
-        if (index == -1) return;
-        onProductRemoved(state.selectedBlock!.data[index].id!);
-      },
-      onImageAdded: (image) {
-        final data = BlockData<ImageData>(
-          sort: state.selectedBlock!.data.length,
-          content: image,
-        );
-        onImageAdded(data);
-      },
-      onImageRemoved: (id) {
-        onImageRemoved(id);
-      },
+          ],
+        ),
+      ),
     );
   }
 }
 ```
+
+这里我们使用了 `TabBar` 和 `TabBarView` 来实现右侧面板的切换功能，这里我们只实现了两个 Tab，一个是 `Properties`，一个是 `Data`，这里的 `Properties` 是用来设置组件的属性的，`Data` 是用来设置组件的数据的。
+
+### 8.2.12 添加区块和插入区块的 Repository
+
+对于我们已经实现的 API，在客户端需要新建一个 `Repository` 来调用这些 API，这样可以将 API 的调用和业务逻辑分离开来，这样可以使得代码更加清晰。这里我们新建一个 `PageBlockRepository`，代码如下：
+
+```dart
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' hide Category;
+import 'package:models/models.dart';
+import 'package:networking/networking.dart';
+
+class PageBlockRepository {
+  final String baseUrl;
+  final Dio client;
+
+  PageBlockRepository({
+    Dio? client,
+    this.baseUrl = '/pages',
+  }) : client = client ?? AdminClient();
+
+  Future<PageLayout> createBlock(int pageId, PageBlock block) async {
+    debugPrint('PageAdminRepository.createBlock($pageId, $block)');
+
+    final url = '$baseUrl/$pageId/blocks';
+    final response = await client.post(url, data: block.toJson());
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageAdminRepository.createBlock($pageId, $block) - success');
+
+    return result;
+  }
+
+  Future<PageLayout> insertBlock(int pageId, PageBlock block) async {
+    debugPrint('PageAdminRepository.createBlock($pageId, $block)');
+
+    final url = '$baseUrl/$pageId/blocks/insert';
+    final response = await client.post(url, data: block.toJson());
+
+    final result = PageLayout.fromJson(response.data);
+
+    debugPrint('PageAdminRepository.createBlock($pageId, $block) - success');
+
+    return result;
+  }
+}
+```
+
+在 `repositories/repositories.dart` 中添加如下代码：
+
+```dart
+library repositories;
+
+export 'file_admin_repository.dart';
+export 'file_upload_repository.dart';
+export 'page_admin_repository.dart';
+export 'page_block_repository.dart';
+export 'page_repository.dart';
+```
+
+### 8.2.13 添加区块和插入区块的 Bloc
+
+接下来我们可以构建画布的事件，我们这一节需要构建三个：
+
+- `CanvasEventLoad`：加载画布
+- `CanvasEventAddBlock`：添加区块
+- `CanvasEventInsertBlock`：插入区块
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:models/models.dart';
+
+abstract class CanvasEvent extends Equatable {}
+
+/// 加载画布
+class CanvasEventLoad extends CanvasEvent {
+  CanvasEventLoad(this.id) : super();
+  final int id;
+
+  @override
+  List<Object?> get props => [id];
+}
+
+/// 添加页面区块
+class CanvasEventAddBlock extends CanvasEvent {
+  CanvasEventAddBlock(this.pageId, this.block) : super();
+  final PageBlock block;
+  final int pageId;
+
+  @override
+  List<Object?> get props => [pageId, block];
+}
+
+/// 插入页面区块
+class CanvasEventInsertBlock extends CanvasEvent {
+  CanvasEventInsertBlock(this.pageId, this.block) : super();
+  final PageBlock block;
+  final int pageId;
+
+  @override
+  List<Object?> get props => [pageId, block];
+}
+```
+
+然后我们可以构建画布的状态，由于在画布上我们需要构建一个层次结构和 App 首页几乎一样的效果，所以我们需要一个类似的状态结构：
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:models/models.dart';
+
+class CanvasState extends Equatable {
+  final PageLayout? layout;
+  final List<Product> waterfallList;
+  final String error;
+  final FetchStatus status;
+
+  const CanvasState({
+    this.layout,
+    this.error = '',
+    this.waterfallList = const [],
+    this.status = FetchStatus.initial,
+  });
+
+  @override
+  List<Object?> get props =>
+      [layout, error, waterfallList, status];
+
+  CanvasState copyWith({
+    PageLayout? layout,
+    String? error,
+    List<Product>? waterfallList,
+    FetchStatus? status,
+  }) {
+    return CanvasState(
+      layout: layout ?? this.layout,
+      error: error ?? this.error,
+      waterfallList: waterfallList ?? this.waterfallList,
+      status: status ?? this.status,
+    );
+  }
+}
+
+class CanvasInitial extends CanvasState {
+  const CanvasInitial() : super();
+}
+```
+
+然后我们可以构建画布的 Bloc，代码如下：
+
+```dart
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+import 'canvas_event.dart';
+import 'canvas_state.dart';
+
+class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
+  final PageAdminRepository adminRepo;
+  final PageBlockRepository blockRepo;
+  final ProductRepository productRepo;
+  CanvasBloc(
+      this.adminRepo, this.blockRepo, this.productRepo)
+      : super(const CanvasInitial()) {
+    on<CanvasEventLoad>(_onCanvasEventLoad);
+    on<CanvasEventAddBlock>(_onCanvasEventAddBlock);
+    on<CanvasEventInsertBlock>(_onCanvasEventInsertBlock);
+  }
+
+  /// 错误处理
+  void _handleError(Emitter<CanvasState> emit, dynamic error) {
+    final message =
+        error.error is CustomException ? error.error.message : error.toString();
+    emit(state.copyWith(
+      error: message,
+      saving: false,
+      status: FetchStatus.error,
+    ));
+  }
+
+  /// 加载瀑布流
+  Future<List<Product>> _loadWaterfallData(PageLayout layout) async {
+    try {
+      final waterfallBlock = layout.blocks
+          .firstWhere((element) => element.type == PageBlockType.waterfall);
+
+      if (waterfallBlock.data.isNotEmpty) {
+        final categoryId = waterfallBlock.data.first.content.id;
+        if (categoryId != null) {
+          final waterfall =
+              await productRepo.getByCategory(categoryId: categoryId);
+          return waterfall.data;
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return [];
+  }
+
+  /// 插入区块
+  void _onCanvasEventInsertBlock(
+      CanvasEventInsertBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final layout = await blockRepo.insertBlock(event.pageId, event.block);
+      emit(state.copyWith(
+        layout: layout,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 添加区块
+  void _onCanvasEventAddBlock(
+      CanvasEventAddBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final layout =
+          await blockRepo.createBlock(state.layout!.id!, event.block);
+
+      emit(state.copyWith(
+        layout: layout,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 加载页面
+  void _onCanvasEventLoad(
+      CanvasEventLoad event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(status: FetchStatus.loading));
+    try {
+      final layout = await adminRepo.get(event.id);
+      final waterfallList = await _loadWaterfallData(layout);
+
+      emit(state.copyWith(
+        status: FetchStatus.populated,
+        layout: layout,
+        waterfallList: waterfallList,
+        error: '',
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+}
+```
+
+上面的代码中，我们主要是实现了加载画布、添加区块和插入区块的逻辑，其中加载画布的逻辑和 App 首页的逻辑几乎一样，所以我们就不再赘述了。
+
+### 8.2.14 完成画布页面
+
+这个页面主要是把中间和右侧的页面组合起来，之所以不整合左侧是因为我们想做一个响应式布局，左侧在手机端显示的时候会以抽屉菜单的形式弹出。
+
+画布页面代码如下：
+
+```dart
+library canvas;
+
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:models/models.dart';
+import 'package:nested/nested.dart';
+import 'package:repositories/repositories.dart';
+
+import 'blocs/blocs.dart';
+import 'center_pane.dart';
+import 'right_pane.dart';
+
+export 'left_pane.dart';
+export 'models/widget_data.dart';
+
+/// 画布页面
+/// [id] 画布id
+/// [scaffoldKey] scaffold key
+class CanvasPage extends StatelessWidget {
+  const CanvasPage({
+    super.key,
+    required this.id,
+    required this.scaffoldKey,
+  });
+  final int id;
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiRepositoryProvider(
+      /// 仓库提供者
+      providers: _buildRepositoryProviders,
+      child: MultiBlocProvider(
+        /// bloc提供者
+        providers: _buildBlocProviders,
+        child: Builder(builder: (context) {
+          final productRepository = context.read<ProductRepository>();
+          return BlocConsumer<CanvasBloc, CanvasState>(
+            listener: (context, state) {
+              if (state.error.isNotEmpty) {
+                _handleErrors(context, state);
+              }
+            },
+            builder: (context, state) {
+              if (state.status == FetchStatus.initial) {
+                return const Text('initial').center();
+              }
+              if (state.status == FetchStatus.loading) {
+                return const CircularProgressIndicator().center();
+              }
+              final rightPane =
+                  _buildRightPane(context);
+              final centerPane = _buildCenterPane(state, context);
+              final body = _buildBody(context, centerPane, rightPane);
+
+              return Scaffold(
+                key: scaffoldKey,
+                body: body,
+                endDrawer: Drawer(child: rightPane),
+              );
+            },
+          );
+        }),
+      ),
+    );
+  }
+
+  /// 处理错误，显示snackbar
+  void _handleErrors(BuildContext context, CanvasState state) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(state.error,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+            )),
+      ),
+    );
+  }
+
+  /// 构建 BlocProviders 数组
+  List<SingleChildWidget> get _buildBlocProviders => [
+        BlocProvider<CanvasBloc>(
+          create: (context) => CanvasBloc(
+            context.read<PageAdminRepository>(),
+            context.read<PageBlockRepository>(),
+            context.read<PageBlockDataRepository>(),
+            context.read<ProductRepository>(),
+          )..add(CanvasEventLoad(id)),
+        ),
+      ];
+
+  /// 构建 RepositoryProviders 数组
+  List<SingleChildWidget> get _buildRepositoryProviders => [
+        RepositoryProvider<PageAdminRepository>(
+          create: (context) => PageAdminRepository(),
+        ),
+        RepositoryProvider<PageBlockRepository>(
+          create: (context) => PageBlockRepository(),
+        ),
+        RepositoryProvider<PageBlockDataRepository>(
+          create: (context) => PageBlockDataRepository(),
+        ),
+        RepositoryProvider<ProductRepository>(
+          create: (context) => ProductRepository(),
+        ),
+        RepositoryProvider<CategoryRepository>(
+          create: (context) => CategoryRepository(),
+        ),
+      ];
+
+  /// 构建主体，包含中间部分和右侧部分
+  Widget _buildBody(
+          BuildContext context, CenterPane centerPane, RightPane rightPane) =>
+      (Responsive.isDesktop(context)
+              ? [centerPane, const Spacer(), rightPane.expanded(flex: 4)]
+              : [centerPane])
+          .toRow(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+      );
+
+  /// 构建中间部分
+  CenterPane _buildCenterPane(CanvasState state, BuildContext context) =>
+      CenterPane(
+        blocks: state.layout?.blocks ?? [],
+        products: state.waterfallList,
+        defaultBlockConfig: BlockConfig(
+          horizontalPadding: 12,
+          verticalPadding: 12,
+          horizontalSpacing: 6,
+          verticalSpacing: 6,
+          blockWidth: (state.layout?.config.baselineScreenWidth ?? 375.0) - 24,
+          blockHeight: 140,
+          backgroundColor: Colors.white,
+          borderColor: Colors.transparent,
+          borderWidth: 0,
+        ),
+        pageConfig: state.layout?.config ??
+            const PageConfig(
+              horizontalPadding: 0.0,
+              verticalPadding: 0.0,
+              baselineScreenWidth: 375.0,
+            ),
+        onBlockAdded: (block) => context
+            .read<CanvasBloc>()
+            .add(CanvasEventAddBlock(state.layout!.id!, block)),
+        onBlockInserted: (block) => context
+            .read<CanvasBloc>()
+            .add(CanvasEventInsertBlock(state.layout!.id!, block)),
+      );
+
+  /// 构建右侧部分
+  RightPane _buildRightPane(BuildContext context) => RightPane();
+}
+```
+
+上面代码中，我们把 `providers` 数组通过函数的方式返回，这样可以让代码更加清晰，同时也可以避免 `build` 方法中的代码过长。我们使用了 `BlocConsumer` 来监听 `CanvasBloc` 的状态，当状态发生变化时，我们会根据状态来显示不同的页面。 `BlocConsumer` 相当于同时处理 `BlocListener` 和 `BlocBuilder`，这样可以让代码更加简洁。在 `listener` 中，我们会根据状态来显示错误信息，这里我们使用了 `ScaffoldMessenger` 来显示错误信息，这样可以避免在显示错误信息时，把页面的内容给覆盖掉。在 `builder` 中，我们会根据状态来显示不同的页面，如果状态是 `initial`，我们会显示 `Text`，如果状态是 `loading`，我们会显示 `CircularProgressIndicator`，如果状态是 `success`，我们会显示 `Scaffold`，这个 `Scaffold` 包含了 `body` 和 `endDrawer`，`body` 是中间部分，`endDrawer` 是右侧部分。在 `body` 中，我们会根据屏幕的大小来显示不同的内容，如果是桌面端，我们会显示中间部分和右侧部分，如果是移动端，我们只会显示中间部分。在 `endDrawer` 中，我们会显示右侧部分。

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'constants.dart';
-import 'routes/router_config.dart';
+import 'routes/routes.dart';
 
 class SimpleBlocObserver extends BlocObserver {
   @override

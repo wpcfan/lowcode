@@ -38,6 +38,12 @@
     - [8.2.12 添加区块和插入区块的 Repository](#8212-添加区块和插入区块的-repository)
     - [8.2.13 添加区块和插入区块的 Bloc](#8213-添加区块和插入区块的-bloc)
     - [8.2.14 完成画布页面](#8214-完成画布页面)
+    - [8.2.15 作业：实现区块的拖拽排序](#8215-作业实现区块的拖拽排序)
+  - [8.3 区块和数据的 CRUD 操作](#83-区块和数据的-crud-操作)
+    - [8.3.1 给区块添加数据的服务](#831-给区块添加数据的服务)
+    - [8.3.2 更新区块和数据的服务](#832-更新区块和数据的服务)
+    - [8.3.3 作业：实现删除区块和数据的服务](#833-作业实现删除区块和数据的服务)
+    - [8.3.4 区块和数据的 CRUD API](#834-区块和数据的-crud-api)
 
 <!-- /code_chunk_output -->
 
@@ -1530,3 +1536,304 @@ class CanvasPage extends StatelessWidget {
 ```
 
 上面代码中，我们把 `providers` 数组通过函数的方式返回，这样可以让代码更加清晰，同时也可以避免 `build` 方法中的代码过长。我们使用了 `BlocConsumer` 来监听 `CanvasBloc` 的状态，当状态发生变化时，我们会根据状态来显示不同的页面。 `BlocConsumer` 相当于同时处理 `BlocListener` 和 `BlocBuilder`，这样可以让代码更加简洁。在 `listener` 中，我们会根据状态来显示错误信息，这里我们使用了 `ScaffoldMessenger` 来显示错误信息，这样可以避免在显示错误信息时，把页面的内容给覆盖掉。在 `builder` 中，我们会根据状态来显示不同的页面，如果状态是 `initial`，我们会显示 `Text`，如果状态是 `loading`，我们会显示 `CircularProgressIndicator`，如果状态是 `success`，我们会显示 `Scaffold`，这个 `Scaffold` 包含了 `body` 和 `endDrawer`，`body` 是中间部分，`endDrawer` 是右侧部分。在 `body` 中，我们会根据屏幕的大小来显示不同的内容，如果是桌面端，我们会显示中间部分和右侧部分，如果是移动端，我们只会显示中间部分。在 `endDrawer` 中，我们会显示右侧部分。
+
+那么左侧部分怎么办呢？我们在桌面端和移动端是不同处理方式，桌面端是直接在页面左侧，而移动端则是在抽屉菜单中。为了兼顾移动端，我们需要新建一个 `SideMenu`
+
+```dart
+import 'package:canvas/canvas.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+
+import '../constants.dart';
+
+class SideMenu extends StatelessWidget {
+  const SideMenu({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Drawer(
+      backgroundColor: bgColor,
+      child:
+          // 左侧组件列表面板
+          LeftPane(widgets: [
+        WidgetData(
+          icon: Icons.photo_library,
+          label: '轮播图',
+          type: PageBlockType.banner,
+        ),
+        WidgetData(
+          icon: Icons.imagesearch_roller,
+          label: '图片行',
+          type: PageBlockType.imageRow,
+        ),
+        WidgetData(
+          icon: Icons.production_quantity_limits,
+          label: '产品行',
+          type: PageBlockType.productRow,
+        ),
+        WidgetData(
+          icon: Icons.category,
+          label: '瀑布流',
+          type: PageBlockType.waterfall,
+        ),
+      ]),
+    );
+  }
+}
+```
+
+然后就可以改造路由了，我们需要把 `PageTableView` 改造成 `ShellRoute`，这样就可以在路由中添加侧边栏了。根路由的组件中也添加 `drawer`，这样就可以在移动端显示侧边栏了。
+
+```dart
+import 'package:canvas/canvas.dart';
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pages/pages.dart';
+
+import '../constants.dart';
+import '../widgets/widgets.dart';
+
+final scaffoldKey = GlobalKey<ScaffoldState>();
+final innerScaffoldKey = GlobalKey<ScaffoldState>();
+
+final routes = <RouteBase>[
+  GoRoute(
+    path: '/',
+    builder: (context, state) => const PageTableView(),
+    routes: [
+      ShellRoute(
+        builder: (context, state, child) => [
+          // 只有桌面端才直接显示侧边栏
+          if (Responsive.isDesktop(context))
+            // 默认 flex = 1
+            // 它占据 1/6 屏幕
+            const SideMenu().expanded(),
+          // 它占据 5/6 屏幕
+          child.expanded(flex: 5),
+        ].toRow(crossAxisAlignment: CrossAxisAlignment.start),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) {
+              final id = int.parse(state.pathParameters['id']!);
+              return CanvasPage(
+                id: id,
+                scaffoldKey: innerScaffoldKey,
+              );
+            },
+          ),
+        ],
+      )
+    ],
+  ),
+];
+
+final routerConfig = GoRouter(
+  initialLocation: '/',
+  routes: [
+    // 嵌套的路由使用 ShellRoute 包裹
+    // 我们这里只想让 body 部分刷新，
+    // 也就是切换路由时，只刷新 body 部分
+    ShellRoute(
+      builder: (context, state, child) => Scaffold(
+        key: scaffoldKey,
+        drawer: const SideMenu(),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Header(),
+          primary: true,
+          backgroundColor: bgColor,
+        ),
+        body: SafeArea(child: child),
+      ),
+      routes: routes,
+    ),
+  ],
+);
+```
+
+### 8.2.15 作业：实现区块的拖拽排序
+
+已经添加到画布的区块，可以在垂直方向上进行拖拽排序，当拖拽到某个位置时，会把当前区块插入到这个位置，这个位置以及之下的原有区块会向下或向上移动。
+
+我们在前端已经实现了这个功能的基础支持，你需要在后端实现 API 和前端的 API 调用以及数据的更新。
+
+提示：
+
+1. 后端：在 `PageAdminController` 中添加一个路径为 `/{id}/blocks/{blockId}/move/{targetSort}` 的方法。其中 `id` 是页面的 ID，`blockId` 是区块的 ID，`targetSort` 是目标位置的排序值。
+
+2. 后端：在 `PageUpdateService` 中添加一个 `moveBlock` 方法处理排序的业务逻辑。需要注意处理两种情况：目标位置在当前位置之前和之后。
+
+- 可以使用 `PageLayout.getBlocks()` 方法获取当前页面的所有区块的集合。
+- 使用 `PageLayout.getBlocks().stream().filter()` 方法过滤出当前区块之前或之后的区块集合。
+- 使用 `forEach` 方法遍历这个集合，然后更新排序值。
+- 由于已经设置了 `CascadeType.ALL`，所以使用 `PageLayoutRepository.save()` 方法保存页面的时候，会自动保存区块的排序值。
+
+3. 前端：在 `PageBlockRepository` 中添加一个 `moveBlock` 方法调用我们的 API。
+
+4. 前端：添加一个 BLoC 事件 `CanvasEventMoveBlock` 然后在 `CanvasBloc` 中处理这个事件，更新对应的状态。
+
+5. 前端：在 `CanvasPage` 中调用 `CenterPane` 时传入处理 `onBlockMoved` 事件的方法。
+
+## 8.3 区块和数据的 CRUD 操作
+
+### 8.3.1 给区块添加数据的服务
+
+在 `PageCreateService` 中添加一个 `addDataToBlock` 方法，用于给区块添加数据。
+
+```java
+@Transactional
+@RequiredArgsConstructor
+@Service
+public class PageCreateService {
+
+    private final PageQueryService pageQueryService;
+    private final PageLayoutRepository pageLayoutRepository;
+    private final PageBlockRepository pageBlockRepository;
+    private final PageBlockDataRepository pageBlockDataRepository;
+    // ... 省略其他代码
+    /**
+     * 给区块添加数据
+     * @param blockId 区块ID
+     * @param data 数据
+     * @return 区块数据
+     */
+    public PageBlockData addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
+        return pageBlockRepository.findById(blockId)
+                .map(blockEntity -> {
+                    if (blockEntity.getType() == BlockType.Waterfall && blockEntity.getData().size() > 0) {
+                        throw new CustomException("瀑布流区块只能有一个数据", "PageCreateService#addDataToBlock", Errors.ConstraintViolationException.code());
+                    }
+                    if (blockEntity.getType() == BlockType.ProductRow && blockEntity.getData().size() >= 2) {
+                        throw new CustomException("产品行区块最多只能有2个数据", "PageCreateService#addDataToBlock", Errors.ConstraintViolationException.code());
+                    }
+                    var dataEntity = data.toEntity();
+                    dataEntity.setSort(blockEntity.getData().size() + 1);
+                    dataEntity.setPageBlock(blockEntity);
+                    return pageBlockDataRepository.save(dataEntity);
+                }).orElseThrow(() -> new CustomException("区块不存在", "PageCreateService#addDataToBlock", Errors.DataNotFoundException.code()));
+    }
+}
+```
+
+可以看到，我们在这个方法中，首先通过 `blockId` 获取到区块，然后判断区块的类型，如果是瀑布流区块，那么就判断区块中是否已经有数据了，如果有数据，就抛出异常。如果是产品行区块，那么就判断区块中的数据是否已经有两个了，如果有两个，就抛出异常。
+
+### 8.3.2 更新区块和数据的服务
+
+接下来我们实现更新区块和区块数据的功能。这一部分比较简单。我们在 `PageUpdateService` 中添加 `updateBlock` 和 `updateBlockData` 方法。
+
+```java
+@Slf4j
+@Transactional
+@RequiredArgsConstructor
+@Service
+public class PageUpdateService {
+    private final PageQueryService pageQueryService;
+    private final PageLayoutRepository pageLayoutRepository;
+    private final PageBlockRepository pageBlockRepository;
+    private final PageBlockDataRepository pageBlockDataRepository;
+    // ... 省略其他代码
+
+    /**
+     * 更新区块
+     * @param blockId 区块ID
+     * @param block 区块数据
+     * @return 区块
+     */
+    public PageBlock updateBlock(Long blockId, CreateOrUpdatePageBlockDTO block) {
+        return pageBlockRepository.findById(blockId)
+                .map(pageBlockEntity -> {
+                    pageBlockEntity.setConfig(block.config());
+                    pageBlockEntity.setSort(block.sort());
+                    pageBlockEntity.setTitle(block.title());
+                    pageBlockEntity.setType(block.type());
+                    return pageBlockRepository.save(pageBlockEntity);
+                }).orElseThrow(() -> new CustomException("未找到对应的区块", "PageUpdateService#updateBlock", Errors.DataNotFoundException.code()));
+    }
+
+    /**
+     * 更新区块数据
+     * @param dataId 数据ID
+     * @param data 数据
+     * @return 区块数据
+     */
+    public PageBlockData updateData(Long dataId, CreateOrUpdatePageBlockDataDTO data) {
+        return pageBlockDataRepository.findById(dataId)
+                .map(dataEntity -> {
+                    dataEntity.setSort(data.sort());
+                    dataEntity.setContent(data.content());
+                    return pageBlockDataRepository.save(dataEntity);
+                }).orElseThrow(() -> new CustomException("未找到对应的数据", "PageUpdateService#updateData", Errors.FileDeleteException.code()));
+    }
+}
+```
+
+上面两个方法中，我们都先进行了一次查询，这是因为我们需要判断是否存在对应的数据，如果不存在，就抛出异常。
+
+上面代码中的 `CreateOrUpdatePageBlockDTO` 和 `CreateOrUpdatePageBlockDataDTO` 是我们定义的两个 DTO 类。
+
+```java
+public record CreateOrUpdatePageBlockDTO(
+        @Schema(description = "区块标题", example = "直降促销活动区块") @NotBlank String title,
+        @Schema(description = "区块类型", example = "image_row") @NotNull BlockType type,
+        @Schema(description = "区块排序", example = "1") @NotNull @Positive Integer sort,
+        @NotNull @Valid BlockConfig config) {
+    public PageBlock toEntity() {
+        return PageBlock.builder()
+                .title(title)
+                .type(type)
+                .sort(sort)
+                .config(config)
+                .build();
+    }
+}
+```
+
+```java
+public record CreateOrUpdatePageBlockDataDTO(
+        @Schema(description = "数据排序", example = "1") @NotNull @Positive Integer sort,
+        @NotNull @Valid BlockData content) {
+    public PageBlockData toEntity() {
+        return PageBlockData.builder()
+                .sort(sort)
+                .content(content)
+                .build();
+    }
+}
+```
+
+### 8.3.3 作业：实现删除区块和数据的服务
+
+接下来，我们实现删除区块和数据的服务。这一部分的代码比较简单，我们在 `PageDeleteService` 中添加 `deleteBlock` 和 `deleteBlockData` 方法。
+
+删除有两种方式，你可以直接使用 `PageBlockDataRepository` 和 `PageBlockRepository` 中的 `deleteById` 方法，也可以使用 `PageLayout` 和 `PageBlock` 中的集合来删除并保存。
+
+第一种方式的优点是从后端角度看比较简单，但如果需要验证删除的数据是否存在，就需要先查询一次，然后再删除，这种情况下和第二种的区别就不大了。我们 git 中的代码使用的是第二种方式。但大家可以分别实现一下，体会一下两种方式的区别。
+
+### 8.3.4 区块和数据的 CRUD API
+
+```java
+@Slf4j
+@Tag(name = "页面管理", description = "添加、修改、删除、查询页面，发布页面，撤销发布页面，添加区块，删除区块，修改区块，添加区块数据，删除区块数据，修改区块数据")
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/admin/pages")
+public class PageAdminController {
+    private final PageCreateService pageCreateService;
+    private final PageUpdateService pageUpdateService;
+    private final PageQueryService pageQueryService;
+
+    @Operation(summary = "修改页面区块")
+    @PutMapping("/{id}/blocks/{blockId}")
+    public PageBlock updateBlock(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
+            @RequestBody CreateOrUpdatePageBlockDTO block) {
+        log.debug("update block: id = {}, blockId = {}, block = {}", id, blockId, block);
+        checkPageStatus(id);
+        return pageUpdateService.updateBlock(blockId, block);
+    }
+```

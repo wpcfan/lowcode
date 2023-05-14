@@ -2390,7 +2390,6 @@ final routerConfig = GoRouter(
     ShellRoute(
       builder: (context, state, child) => Scaffold(
         key: scaffoldKey,
-        drawer: const SideMenu(),
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: const Header(),

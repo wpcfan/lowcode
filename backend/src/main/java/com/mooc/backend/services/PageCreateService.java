@@ -28,10 +28,21 @@ public class PageCreateService {
     private final PageBlockRepository pageBlockRepository;
     private final PageBlockDataRepository pageBlockDataRepository;
 
+    /**
+     * 创建页面布局
+     * @param page 页面信息
+     * @return 页面布局
+     */
     public PageLayout createPage(CreateOrUpdatePageDTO page) {
         return pageLayoutRepository.save(page.toEntity());
     }
 
+    /**
+     * 添加区块：在页面末尾添加区块
+     * @param pageId 页面ID
+     * @param block 区块信息
+     * @return 页面布局
+     */
     public PageLayout addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
         var pageLayout = pageQueryService.findById(pageId);
         if (pageLayout.getStatus() != PageStatus.Draft) {
@@ -47,6 +58,12 @@ public class PageCreateService {
         return pageLayout;
     }
 
+    /**
+     * 插入区块：在指定位置插入区块
+     * @param id 页面ID
+     * @param insertPageBlockDTO 区块信息
+     * @return 页面布局
+     */
     public PageLayout insertBlockToPage(Long id, CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
         var pageLayout = pageQueryService.findById(id);
         if (pageLayout.getStatus() != PageStatus.Draft) {
@@ -66,6 +83,12 @@ public class PageCreateService {
         return pageLayoutRepository.save(pageLayout);
     }
 
+    /**
+     * 给区块添加数据
+     * @param blockId 区块ID
+     * @param data 数据
+     * @return 区块数据
+     */
     public PageBlockData addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
         return pageBlockRepository.findById(blockId)
                 .map(blockEntity -> {

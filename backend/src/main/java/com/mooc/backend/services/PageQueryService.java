@@ -17,17 +17,36 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+/**
+ * 页面查询服务
+ * @since 1.0
+ * @see PageLayoutRepository
+ * @see PageLayout
+ * @see PageFilter
+ * @see PageSpecs
+ * @see Page
+ */
 @RequiredArgsConstructor
 @Service
 public class PageQueryService {
 
     private final PageLayoutRepository pageLayoutRepository;
 
+    /**
+     * 根据 ID 查询页面布局
+     * @param id 页面 ID
+     * @return 页面布局
+     */
     public PageLayout findById(Long id) {
         return pageLayoutRepository.findById(id).orElseThrow(() -> new CustomException("页面不存在", "PageQueryService#findById", Errors.DataNotFoundException.code()));
     }
 
-
+    /**
+     * 动态查询页面布局
+     * @param filter  过滤条件
+     * @param pageable 分页条件
+     * @return 页面布局分页数据
+     */
     public Page<PageLayout> findSpec(PageFilter filter, Pageable pageable) {
         // 函数的 apply 方法，会执行函数的 body
         var specification = PageSpecs.pageSpec.apply(filter);

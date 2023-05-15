@@ -39,11 +39,21 @@
     - [8.2.13 添加区块和插入区块的 Bloc](#8213-添加区块和插入区块的-bloc)
     - [8.2.14 完成画布页面](#8214-完成画布页面)
     - [8.2.15 作业：实现区块的拖拽排序](#8215-作业实现区块的拖拽排序)
+      - [8.2.15.1 @Modifying 注解](#82151-modifying-注解)
+      - [8.2.15.2 自定义 Repository](#82152-自定义-repository)
   - [8.3 区块和数据的 CRUD 操作](#83-区块和数据的-crud-操作)
     - [8.3.1 给区块添加数据的服务](#831-给区块添加数据的服务)
     - [8.3.2 更新区块和数据的服务](#832-更新区块和数据的服务)
     - [8.3.3 作业：实现删除区块和数据的服务](#833-作业实现删除区块和数据的服务)
     - [8.3.4 区块和数据的 CRUD API](#834-区块和数据的-crud-api)
+  - [8.4 完成画布页面的前端](#84-完成画布页面的前端)
+    - [8.4.1 表单组件](#841-表单组件)
+      - [8.4.1.1 文本输入表单组件](#8411-文本输入表单组件)
+      - [8.4.1.2 颜色选择器表单组件](#8412-颜色选择器表单组件)
+    - [8.4.2 表单页面](#842-表单页面)
+      - [8.4.2.1 页面配置表单](#8421-页面配置表单)
+      - [8.4.2.2 作业：区块配置表单](#8422-作业区块配置表单)
+      - [8.4.2.3 图片区块数据表单](#8423-图片区块数据表单)
 
 <!-- /code_chunk_output -->
 
@@ -1678,6 +1688,135 @@ final routerConfig = GoRouter(
 
 5. 前端：在 `CanvasPage` 中调用 `CenterPane` 时传入处理 `onBlockMoved` 事件的方法。
 
+#### 8.2.15.1 @Modifying 注解
+
+在上面的作业中，我们需要更新指定页面下，指定排序值之后的所有块的排序值。我们在 git 中采用了实体类的操作方式，但是我们也可以使用 JPA 的 `@Modifying` 注解来实现。
+
+```java
+public interface PageBlockRepository extends JpaRepository<PageBlock, Long> {
+  /**
+     * 更新指定页面下，指定排序值之后的所有块的排序值
+     * 需要了解的知识点：
+     * <p><pre>@Modifying(flushAutomatically = true, clearAutomatically = false)</pre> 是一个注解
+     * 用于标记需要修改数据的方法。其中，flushAutomatically 和 clearAutomatically 是两个可选参数，
+     * 它们的作用如下：</p>
+     * <ul>
+     *     <li>
+     *          flushAutomatically: 当设置为 true 时，表示在执行修改操作<b>之前<b/>，会先将持久化上下文中的所有修改同步到数据库中。
+     *          这样可以确保修改操作的数据是最新的，但也会增加数据库的负担。
+     *          如果设置为 false，则不会自动同步，需要手动调用 flush() 方法。
+     *     </li>
+     *     <li>
+     *          clearAutomatically: 当设置为 true 时，表示在执行修改操作<b>之后</b>，会清空持久化上下文中的所有缓存对象。
+     *          如果设置为 false，则不会自动清空，需要手动调用 clear() 方法。
+     *     </li>
+     * </ul>
+     * @param id
+     * @param sort
+     * @return
+     */
+    @Modifying(flushAutomatically = true, clearAutomatically = false)
+    @Query("update PageBlock p set p.sort = p.sort + 1 where p.page.id = ?1 and p.sort >= ?2")
+    int updateSortByPageIdAndSortGreaterThanEqual(Long id, Integer sort);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = false)
+    @Query("update PageBlock p set p.sort = p.sort - 1 where p.page.id = ?1 and p.sort <= ?2")
+    int updateSortByPageIdAndSortLessThanEqual(Long pageId, Integer sort);
+}
+```
+
+上面的代码中，我们使用了 `@Modifying` 注解，它的作用是标记需要修改数据的方法。其中，`flushAutomatically` 和 `clearAutomatically` 是两个可选参数，它们的作用如下：
+
+- `flushAutomatically`: 当设置为 `true` 时，表示在执行修改操作**之前**，会先将持久化上下文中的所有修改同步到数据库中。这样可以确保修改操作的数据是最新的，但也会增加数据库的负担。如果设置为 `false`，则不会自动同步，需要手动调用 `flush()` 方法。
+
+- `clearAutomatically`: 当设置为 `true` 时，表示在执行修改操作**之后**，会清空持久化上下文中的所有缓存对象。如果设置为 `false`，则不会自动清空，需要手动调用 `clear()` 方法。
+
+`@Modifying` 注解有助于我们方便的实现较为复杂的批量更新操作。对比实体类的操作来说，它的优势在于有的时候可以生成更有效率的 SQL。
+
+#### 8.2.15.2 自定义 Repository
+
+有的时候，或者是历史原因，或者是其他原因，我们需要自定义 Repository 来实现一些特殊的功能。这种情况下，我们可以使用多接口继承的方式来实现。比如我们需要对于 `Product` 这个实体类建立一个自定义的 `CustomProductRepository`，它的代码如下：
+
+```java
+public interface CustomProductRepository {
+    List<ProductDTO> findProductDTOsByCategoriesId(Long id);
+}
+```
+
+然后我们让 `ProductRepository` 继承这个接口，这是一个小技巧，由于继承关系，`ProductRepository` 拥有 `findProductDTOsByCategoriesId` 这个方法的定义：
+
+```java
+public interface ProductRepository extends JpaRepository<Product, Long>, CustomProductRepository  {
+    // ... 省略其他代码
+}
+```
+
+接下来我们实现 `CustomProductRepository` 接口：
+
+```java
+public class CustomProductRepositoryImpl implements CustomProductRepository {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<ProductDTO> findProductDTOsByCategoriesId(Long id) {
+        return entityManager.createNativeQuery(
+                        """
+                                SELECT
+                                    p.id AS id,
+                                    p.name AS name,
+                                    p.description as description,
+                                    p.price AS price,
+                                    c.id AS c_id,
+                                    c.code AS c_code,
+                                    c.name AS c_name,
+                                    pi.image_url AS pi_image_url
+                                FROM
+                                    mooc_products p
+                                LEFT JOIN
+                                    mooc_product_categories pc
+                                ON
+                                    p.id = pc.product_id
+                                LEFT JOIN
+                                    mooc_categories c
+                                ON
+                                    pc.category_id = c.id
+                                LEFT JOIN
+                                    mooc_product_images pi
+                                ON
+                                    p.id = pi.product_id
+                                WHERE
+                                    c.id = :id
+                                """)
+                .setParameter("id", id)
+                .unwrap(Query.class)
+                .setTupleTransformer(((tuple, aliases) -> {
+                    Map<String, Integer> aliasToIndexMap = Arrays.stream(aliases)
+                            .collect(HashMap::new, (map, alias) -> map.put(alias.toLowerCase(Locale.ROOT), map.size()), Map::putAll);
+                    return ProductDTO.builder()
+                            .id((Long) tuple[aliasToIndexMap.get("id")])
+                            .name((String) tuple[aliasToIndexMap.get("name")])
+                            .description((String) tuple[aliasToIndexMap.get("description")])
+                            .price((BigDecimal) tuple[aliasToIndexMap.get("price")])
+                            .categories(Set.of(CategoryDTO.builder()
+                                    .id((Long) tuple[aliasToIndexMap.get("c_id")])
+                                    .code((String) tuple[aliasToIndexMap.get("c_code")])
+                                    .name((String) tuple[aliasToIndexMap.get("c_name")])
+                                    .build()))
+                            .images(aliasToIndexMap.containsKey("pi_image_url") && tuple.length > aliasToIndexMap.get("pi_image_url") + 1 ? Set.of((String) tuple[aliasToIndexMap.get("pi_image_url")]) : new HashSet<>())
+                            .build();
+                }))
+                .getResultList();
+    }
+}
+```
+
+在上面代码中，我们使用了 `@PersistenceContext` 注解来注入 `EntityManager` 对象，然后使用 `createNativeQuery` 方法来创建一个原生 SQL 查询，最后使用 `unwrap` 方法将 `Query` 对象转换为 `org.hibernate.query.Query` 对象，然后使用 `setTupleTransformer` 方法来设置结果集的转换器，最后使用 `getResultList` 方法来获取查询结果。
+
+在其他地方调用 `ProductRepository` 的时候，就可以直接调用 `findProductDTOsByCategoriesId` 方法来获取结果了。
+
 ## 8.3 区块和数据的 CRUD 操作
 
 ### 8.3.1 给区块添加数据的服务
@@ -1815,6 +1954,14 @@ public record CreateOrUpdatePageBlockDataDTO(
 
 ### 8.3.4 区块和数据的 CRUD API
 
+我们在 `PageAdminController` 中添加区块和数据的 CRUD API。其路径遵循 RESTful API 的规范。
+
+- 修改区块：`PUT /api/v1/admin/pages/{id}/blocks`
+- 删除区块：`DELETE /api/v1/admin/pages/{id}/blocks/{blockId}`
+- 添加区块数据：`POST /api/v1/admin/pages/{id}/blocks/{blockId}/data`
+- 修改区块数据：`PUT /api/v1/admin/pages/{id}/blocks/{blockId}/data`
+- 删除区块数据：`DELETE /api/v1/admin/pages/{id}/blocks/{blockId}/data/{dataId}`
+
 ```java
 @Slf4j
 @Tag(name = "页面管理", description = "添加、修改、删除、查询页面，发布页面，撤销发布页面，添加区块，删除区块，修改区块，添加区块数据，删除区块数据，修改区块数据")
@@ -1826,6 +1973,42 @@ public class PageAdminController {
     private final PageUpdateService pageUpdateService;
     private final PageQueryService pageQueryService;
 
+    // ... 省略其他代码
+
+    @Operation(summary = "添加页面区块数据")
+    @PostMapping("/{id}/blocks/{blockId}/data")
+    public PageBlockData addData(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
+            @RequestBody CreateOrUpdatePageBlockDataDTO data) {
+        log.debug("add data: id = {}, blockId = {}, data = {}", id, blockId, data);
+        checkPageStatus(id);
+        return pageCreateService.addDataToBlock(blockId, data);
+    }
+
+    @Operation(summary = "修改页面区块数据")
+    @PutMapping("/{id}/blocks/{blockId}/data/{dataId}")
+    public PageBlockData updateData(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
+            @Parameter(description = "页面区块数据 id", name = "dataId") @PathVariable Long dataId,
+            @RequestBody CreateOrUpdatePageBlockDataDTO data) {
+        log.debug("update data: id = {}, blockId = {}, dataId = {}, data = {}", id, blockId, dataId, data);
+        checkPageStatus(id);
+        return pageUpdateService.updateData(dataId, data);
+    }
+
+    @Operation(summary = "删除页面区块数据")
+    @DeleteMapping("/{id}/blocks/{blockId}/data/{dataId}")
+    public void deleteData(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Parameter(description = "页面区块 id", name = "blockId") @PathVariable Long blockId,
+            @Parameter(description = "页面区块数据 id", name = "dataId") @PathVariable Long dataId) {
+        log.debug("delete data: id = {}, blockId = {}, dataId = {}", id, blockId, dataId);
+        checkPageStatus(id);
+        pageDeleteService.deleteData(blockId, dataId);
+    }
+
     @Operation(summary = "修改页面区块")
     @PutMapping("/{id}/blocks/{blockId}")
     public PageBlock updateBlock(
@@ -1836,4 +2019,620 @@ public class PageAdminController {
         checkPageStatus(id);
         return pageUpdateService.updateBlock(blockId, block);
     }
+}
+```
+
+## 8.4 完成画布页面的前端
+
+我们在之前完成了从左侧组件列表拖放添加区块，以及在中间区域拖放区块更改顺序的功能。接下来要实现的有以下几个功能：
+
+- 点击区块，右侧显示区块的配置和数据的标签页，用于编辑区块信息和添加/修改/删除区块数据。由于区块的数据是不一样的，所以我们需要根据区块的类型来显示不同的表单。
+
+  1. 图片类型的区块。需要已表格形式显示图片的 URL 和跳转链接。点击添加按钮，可以弹出一个表单对话框，用于添加图片的 URL 和跳转链接。其中 URL 的文本框点击右侧图标可以弹出之前我们完成的图片选择器，用于选择图片。
+
+  2. 商品类型的区块。需要已表格形式显示商品的 SKU、图片、名称和价格。表格上方有一个搜索框，可以按商品的名称、描述、sku 或分类名称来查询，选中一个商品后，商品会添加到表格中。点击表格中的删除按钮，可以删除商品。
+
+  3. 瀑布流类型的区块。需要显示搜索框，可以按类目名称或代码进行查询，查询结果是一个类目树，左边是单选 radio，右边是类目的名称。
+
+- 点击页面区域：在区块之外，但在画布之上的其他区域点击，要显示页面的配置标签页，用于修改页面的信息。
+
+### 8.4.1 表单组件
+
+由于我们在这一节会有大量的表单，所以我们先把表单组件抽取出来，方便我们复用。
+
+#### 8.4.1.1 文本输入表单组件
+
+文本类型的表单组件比较简单，我们只需要传入一些参数，就可以生成一个文本输入框。我们可以通过 `TextFormField` 组件来实现，为了方便表单校验，我们在这里面采用了声明式的校验器数组作为输入参数，校验器数组中的每一个元素都是一个校验器，校验器是一个函数，接收一个字符串参数，返回一个字符串，如果返回的字符串为空，则表示校验通过，否则表示校验不通过，返回的字符串就是错误信息。
+
+```dart
+import 'package:flutter/material.dart';
+
+import '../validators/validators.dart';
+
+/// 文本输入表单组件
+/// [keyboardType] 键盘类型
+/// [initialValue] 初始值
+/// [label] 标签
+/// [hint] 提示
+/// [suffix] 后缀
+/// [validators] 校验器
+/// [onChanged] 值改变回调
+class MyTextFormField extends StatelessWidget {
+  final TextInputType? keyboardType;
+  final String? initialValue;
+  final String? label;
+  final String? hint;
+  final Widget? suffix;
+  final InputDecoration decoration;
+  final List<Validator> validators;
+  final void Function(String?)? onChanged;
+  MyTextFormField({
+    super.key,
+    this.keyboardType = TextInputType.text,
+    this.initialValue,
+    this.label,
+    this.hint,
+    this.suffix,
+    required this.validators,
+    this.onChanged,
+  }) : decoration = InputDecoration(
+          labelText: label,
+          hintText: hint,
+          suffix: suffix,
+        );
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      /// 需要注意，如果设置 initialValue，那么这个 widget 在切换的时候不会更新
+      /// 因为在 widget 树中，这个 widget 的位置没有变化，所以不会重新 build
+      /// 所以需要使用 controller 来控制
+      controller: TextEditingController(text: initialValue),
+      decoration: decoration,
+      keyboardType: keyboardType,
+      validator: (value) {
+        for (var validator in validators) {
+          var error = validator(value);
+          if (error != null) {
+            return error;
+          }
+        }
+        return null;
+      },
+      onSaved: onChanged,
+    );
+  }
+}
+```
+
+#### 8.4.1.2 颜色选择器表单组件
+
+这个组件主要方便运营人员选择颜色，并转换为 Hex 格式的字符串。我们使用了一个第三方组件 `flex_color_picker` 来实现颜色选择器，这个组件的使用方法可以参考官方文档：[https://pub.dev/packages/flex_color_picker](https://pub.dev/packages/flex_color_picker)。
+
+```dart
+import 'package:common/common.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
+import 'package:flutter/material.dart';
+
+/// 自定义表单字段，用于选择颜色
+/// Flutter 中的表单字段是一个抽象类，它的子类必须实现 [FormField] 类。
+/// 我们在这里实现了一个自定义的表单字段，用于选择颜色。
+/// 该表单字段的初始值是一个 [Color] 对象，它的值是用户选择的颜色。
+/// 该表单字段的验证器是一个 [FormFieldValidator<Color>] 函数，它的参数是用户选择的颜色。
+/// 该表单字段的保存器是一个 [FormFieldSetter<Color>] 函数，它的参数是用户选择的颜色。
+/// 该表单字段的构建器是一个 [FormFieldBuilder<Color>] 函数，它的参数是一个 [FormFieldState<Color>] 对象。
+class ColorPickerFormField extends FormField<Color> {
+  final String label;
+
+  /// Stateful widgets 的初始值变化时是不会重绘的，所以我们需要一个 [ValueNotifier] 来通知表单字段重绘。
+  /// 这里我们使用了一个 [ValueNotifier]，它的值是用户选择的颜色或初始值。
+  /// 值变化后，我们通过 [ValueListenableBuilder] 来重绘表单字段。
+  /// 只有在点击弹出框的确定按钮时，我们才会调用 [FormFieldState.didChange] 方法来更新表单字段的值。
+  final ValueNotifier<Color> colorNotifier;
+  ColorPickerFormField({
+    super.key,
+    required this.label,
+    required this.colorNotifier,
+    required FormFieldSetter<Color> onSaved,
+    required FormFieldValidator<Color> validator,
+  }) : super(
+          initialValue: colorNotifier.value,
+          onSaved: onSaved,
+          validator: validator,
+          builder: (FormFieldState<Color> state) {
+            return ValueListenableBuilder(
+              valueListenable: colorNotifier,
+              builder: (BuildContext context, Color value, Widget? child) {
+                final item = [
+                  Text(label),
+                  const SizedBox(width: 8),
+                  const SizedBox(
+                    width: 50,
+                    height: 50,
+                  ).decorated(
+                    color: value,
+                    border: Border.all(
+                      color: state.hasError ? Colors.red : Colors.grey,
+                      width: 1,
+                    ),
+                  ),
+                ].toRow().gestures(onTap: () async {
+                  Color? newColor = await showDialog<Color>(
+                    context: state.context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        content: ColorPicker(
+                          color: state.value!,
+                          enableOpacity: true,
+                          pickersEnabled: const {
+                            ColorPickerType.primary: true,
+                            ColorPickerType.accent: true,
+                            ColorPickerType.bw: true,
+                            ColorPickerType.custom: false,
+                            ColorPickerType.wheel: true,
+                          },
+                          pickerTypeLabels: const {
+                            ColorPickerType.primary: '主色',
+                            ColorPickerType.accent: '强调色',
+                            ColorPickerType.bw: '黑白',
+                            ColorPickerType.custom: '自定义',
+                            ColorPickerType.wheel: '色轮',
+                          },
+                          pickerTypeTextStyle:
+                              Theme.of(context).textTheme.titleSmall,
+                          width: 40,
+                          height: 40,
+                          borderRadius: 4,
+                          spacing: 5,
+                          runSpacing: 5,
+                          wheelDiameter: 155,
+                          heading: Text(
+                            '选择颜色',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          subheading: Text(
+                            '选择颜色的亮度',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          wheelSubheading: Text(
+                            '选择颜色的饱和度',
+                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                          showMaterialName: true,
+                          showColorName: true,
+                          showColorCode: true,
+                          copyPasteBehavior: const ColorPickerCopyPasteBehavior(
+                            editFieldCopyButton: true,
+                          ),
+                          onColorChanged: (Color color) {
+                            colorNotifier.value = color;
+                          },
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop<Color?>(null);
+                            },
+                            child: const Text('取消'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pop<Color?>(colorNotifier.value);
+                            },
+                            child: const Text('确定'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (newColor != null) {
+                    /// 调用 [FormFieldState.didChange] 方法来更新表单字段的值。
+                    state.didChange(newColor);
+                  } else {
+                    /// 如果用户没有选择颜色，我们就把表单字段的值重置为初始值。
+                    colorNotifier.value = state.value!;
+                  }
+                });
+                return item;
+              },
+            );
+          },
+        );
+}
+```
+
+### 8.4.2 表单页面
+
+#### 8.4.2.1 页面配置表单
+
+页面配置表单组件，用于配置页面的属性。比如页面标题、水平内边距、垂直内边距、基准屏幕宽度等。
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:forms/forms.dart';
+import 'package:models/models.dart';
+
+/// 页面配置表单组件
+/// [layout] 画布布局
+/// [onSave] 保存回调
+class PageConfigForm extends StatefulWidget {
+  const PageConfigForm({super.key, required this.layout, this.onSave});
+  final PageLayout layout;
+  final void Function(PageLayout)? onSave;
+  @override
+  State<PageConfigForm> createState() => _PageConfigFormState();
+}
+
+class _PageConfigFormState extends State<PageConfigForm> {
+  final _formKey = GlobalKey<FormState>();
+  late PageLayout? _formValue;
+
+  @override
+  Widget build(BuildContext context) {
+    /// 初始化表单值
+    _formValue = widget.layout;
+    final elements = [
+      const Text('页面属性'),
+      ..._createFormItems(),
+      const SizedBox(height: 16),
+      ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState?.validate() ?? false) {
+            _formKey.currentState?.save();
+            widget.onSave?.call(_formValue!);
+          }
+        },
+        child: const Text('保存'),
+      ),
+    ];
+    return Form(
+      key: _formKey,
+      child: elements.toColumn(mainAxisSize: MainAxisSize.min),
+    );
+  }
+
+  /// 创建表单项
+  List<Widget> _createFormItems() {
+    return [
+      MyTextFormField(
+        label: '标题',
+        hint: '请输入标题',
+        validators: [
+          Validators.required(label: '标题'),
+          Validators.maxLength(label: '标题', maxLength: 100),
+          Validators.minLength(label: '标题', minLength: 2),
+        ],
+        initialValue: _formValue?.title,
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(title: value);
+          });
+        },
+      ),
+      MyTextFormField(
+        label: '水平内边距',
+        hint: '请输入水平内边距',
+        validators: [
+          Validators.required(label: '水平内边距'),
+          Validators.isInteger(label: '水平内边距'),
+          Validators.min(label: '水平内边距', min: 0),
+          Validators.max(label: '水平内边距', max: 1000),
+        ],
+        initialValue: _formValue?.config.horizontalPadding.toString(),
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(
+                config: _formValue?.config
+                    .copyWith(horizontalPadding: double.parse(value ?? '0')));
+          });
+        },
+      ),
+      MyTextFormField(
+        label: '垂直内边距',
+        hint: '请输入垂直内边距',
+        validators: [
+          Validators.required(label: '垂直内边距'),
+          Validators.isInteger(label: '垂直内边距'),
+          Validators.min(label: '垂直内边距', min: 0),
+          Validators.max(label: '垂直内边距', max: 1000),
+        ],
+        initialValue: _formValue?.config.verticalPadding.toString(),
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(
+                config: _formValue?.config
+                    .copyWith(verticalPadding: double.parse(value ?? '0')));
+          });
+        },
+      ),
+      MyTextFormField(
+        label: '基准屏幕宽度',
+        hint: '请输入基准屏幕宽度',
+        validators: [
+          Validators.required(label: '基准屏幕宽度'),
+          Validators.isInteger(label: '基准屏幕宽度'),
+          Validators.min(label: '基准屏幕宽度', min: 0),
+          Validators.max(label: '基准屏幕宽度', max: 1000),
+        ],
+        initialValue: _formValue?.config.baselineScreenWidth.toString(),
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue?.copyWith(
+                config: _formValue?.config
+                    .copyWith(baselineScreenWidth: double.parse(value ?? '0')));
+          });
+        },
+      ),
+    ];
+  }
+}
+```
+
+上面代码中，我们使用了 `MyTextFormField` 组件，它是对 `TextFormField` 组件的封装，它的 `onChanged` 回调函数会在表单字段的值发生变化时被调用，我们在这个回调函数中更新表单值。这里你可以看到声明式的验证器的好处，我们只需要在 `validators` 属性中声明验证器，就可以实现表单字段的验证。
+
+#### 8.4.2.2 作业：区块配置表单
+
+类似的，你可以创建一个区块配置表单组件 `BlockConfigForm` ，用于配置区块的属性。比如区块标题、排序、水平内边距、垂直内边距、水平间距、垂直间距、块宽度、块高度、背景颜色、边框颜色和边框宽度等。
+
+#### 8.4.2.3 图片区块数据表单
+
+图片区块数据表单组件 `ImageDataForm` 用于配置图片区块的数据。图片区块的数据是一个 `List<BlockData<ImageData>>` 类型的数据，它是一个列表，列表中的每一项都是一个 `BlockData<ImageData>` 类型的数据，它包含了图片的数据和配置。图片的数据是一个 `ImageData` 类型的数据，它包含了图片的地址、链接类型和链接地址等。
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+
+import '../popups/popups.dart';
+
+/// 图片数据表单组件
+/// [data] 数据
+class ImageDataForm extends StatelessWidget {
+  const ImageDataForm({
+    super.key,
+    required this.data,
+    required this.onImageRemoved,
+    required this.onImageAdded,
+  });
+  final List<BlockData<ImageData>> data;
+  final void Function(int) onImageRemoved;
+  final void Function(ImageData) onImageAdded;
+
+  @override
+  Widget build(BuildContext context) {
+    /// 表格列头：图片、链接类型、链接地址、操作
+    const dataColumns = [
+      DataColumn(label: Text('图片')),
+      DataColumn(label: Text('链接类型')),
+      DataColumn(label: Text('链接地址')),
+      DataColumn(label: Text('操作')),
+    ];
+
+    /// 表格行：图片、链接类型、链接地址、删除按钮
+    final dataRows = data.map((e) => DataRow(cells: _buildCells(e))).toList();
+
+    /// 表头：添加图片按钮
+    final header = [
+      IconButton(
+        onPressed: () async {
+          await showDialog<CreateOrUpdateImageDataDialog>(
+            context: context,
+            builder: (context) => CreateOrUpdateImageDataDialog(
+              title: '添加图片',
+              onCreate: onImageAdded,
+            ),
+          );
+        },
+        icon: const Icon(Icons.add),
+        tooltip: '添加图片数据',
+      ),
+    ]
+        .toRow(mainAxisAlignment: MainAxisAlignment.end)
+        .backgroundColor(Colors.grey[600]!);
+
+    /// 表格
+    final table = DataTable(
+      columns: dataColumns,
+      rows: dataRows,
+    );
+
+    /// 最终组件
+    final widget = [
+      header,
+      table,
+    ].toColumn().scrollable();
+    return widget;
+  }
+
+  List<DataCell> _buildCells(BlockData<ImageData> blockData) {
+    final item = blockData.content;
+    return [
+      DataCell(Image.network(item.image)),
+      DataCell(Text(item.link?.type.value ?? '')),
+      DataCell(Text(item.link?.value ?? '')),
+      DataCell(
+        IconButton(
+          onPressed: () => onImageRemoved(blockData.id!),
+          icon: const Icon(Icons.delete),
+        ),
+      ),
+    ];
+  }
+}
+```
+
+表头中，我们使用了一个弹出对话框用来进行图片的添加，这个弹出对话框是一个 `CreateOrUpdateImageDataDialog` 组件，它用于创建或更新图片数据。这个组件的代码如下：
+
+```dart
+import 'package:common/common.dart';
+import 'package:files/files.dart';
+import 'package:flutter/material.dart';
+import 'package:forms/forms.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+/// 用于图片数据的对话框
+/// [onUpdate] 更新回调
+/// [onCreate] 创建回调
+/// [data] 数据
+/// [title] 标题
+class CreateOrUpdateImageDataDialog extends StatefulWidget {
+  const CreateOrUpdateImageDataDialog({
+    super.key,
+    this.onUpdate,
+    this.onCreate,
+    this.data,
+    required this.title,
+  });
+  final void Function(ImageData data)? onUpdate;
+  final void Function(ImageData data)? onCreate;
+  final ImageData? data;
+  final String title;
+
+  @override
+  State<CreateOrUpdateImageDataDialog> createState() =>
+      _CreateOrUpdateImageDataDialogState();
+}
+
+class _CreateOrUpdateImageDataDialogState
+    extends State<CreateOrUpdateImageDataDialog> {
+  /// 表单数据
+  late ImageData _formValue;
+
+  /// 表单key
+  final _formKey = GlobalKey<FormState>();
+
+  /// 选中的图片
+  String _selectedImage = '';
+
+  /// 初始化
+  @override
+  void initState() {
+    super.initState();
+    _formValue = widget.data ??
+        const ImageData(
+          image: '',
+          link: MyLink(type: LinkType.route, value: ''),
+        );
+  }
+
+  /// 销毁
+  @override
+  void dispose() {
+    _formKey.currentState?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cancelButton = TextButton(
+      onPressed: () => Navigator.of(context).pop(),
+      child: const Text('取消'),
+    );
+    final confirmButton = TextButton(
+      onPressed: () => _validateAndSave(context),
+      child: const Text('确定'),
+    );
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Form(
+        key: _formKey,
+        child: _createFormItems().toColumn(mainAxisSize: MainAxisSize.min),
+      ),
+      actions: [cancelButton, confirmButton],
+    );
+  }
+
+  /// 创建表单项
+  List<Widget> _createFormItems() {
+    return [
+      MyTextFormField(
+        label: '图片地址',
+        hint: '请输入图片地址',
+        suffix: IconButton(
+          icon: const Icon(Icons.image),
+          onPressed: _showImageExplorer,
+        ),
+        validators: [
+          Validators.required(label: '图片地址'),
+          Validators.maxLength(label: '图片地址', maxLength: 255),
+          Validators.minLength(label: '图片地址', minLength: 12),
+        ],
+        initialValue:
+            _selectedImage.isEmpty ? widget.data?.image : _selectedImage,
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue.copyWith(image: value ?? '');
+          });
+        },
+      ),
+      DropdownButtonFormField<LinkType>(
+        value: widget.data?.link?.type,
+        decoration: const InputDecoration(
+          labelText: '链接类型',
+        ),
+        items: const [
+          DropdownMenuItem(
+            value: LinkType.route,
+            child: Text('路由'),
+          ),
+          DropdownMenuItem(
+            value: LinkType.url,
+            child: Text('链接'),
+          ),
+        ],
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue.copyWith(
+                link: _formValue.link?.copyWith(type: value ?? LinkType.route));
+          });
+        },
+      ),
+      MyTextFormField(
+        label: '链接地址',
+        hint: '请输入链接地址',
+        validators: [
+          Validators.required(label: '链接地址'),
+          Validators.maxLength(label: '链接地址', maxLength: 255),
+          Validators.minLength(label: '链接地址', minLength: 12),
+        ],
+        initialValue: _formValue.link?.value,
+        onChanged: (value) {
+          setState(() {
+            _formValue = _formValue.copyWith(
+                link: _formValue.link?.copyWith(value: value ?? '') as MyLink);
+          });
+        },
+      ),
+    ];
+  }
+
+  void _validateAndSave(BuildContext context) {
+    if (_formKey.currentState?.validate() ?? false) {
+      _formKey.currentState?.save();
+      if (widget.onCreate != null && widget.data == null) {
+        widget.onCreate?.call(_formValue);
+      }
+      if (widget.onUpdate != null && widget.data != null) {
+        widget.onUpdate?.call(_formValue);
+      }
+    }
+    Navigator.of(context).pop();
+  }
+
+  void _showImageExplorer() async {
+    final FileDto? result = await showDialog<FileDto?>(
+      context: context,
+      builder: (context) => const ImageExplorer(),
+    );
+    if (result != null) {
+      setState(() {
+        _selectedImage = result.url;
+      });
+    }
+  }
+}
 ```

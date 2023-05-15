@@ -144,10 +144,10 @@ class _CreateOrUpdateImageDataDialogState
   void _validateAndSave(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
       _formKey.currentState?.save();
-      if (widget.onCreate != null) {
+      if (widget.onCreate != null && widget.data == null) {
         widget.onCreate?.call(_formValue);
       }
-      if (widget.onUpdate != null) {
+      if (widget.onUpdate != null && widget.data != null) {
         widget.onUpdate?.call(_formValue);
       }
     }

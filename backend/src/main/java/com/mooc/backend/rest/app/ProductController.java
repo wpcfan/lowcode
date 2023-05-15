@@ -1,17 +1,19 @@
 package com.mooc.backend.rest.app;
 
+import com.mooc.backend.dtos.PageWrapper;
 import com.mooc.backend.dtos.ProductDTO;
 import com.mooc.backend.dtos.SliceWrapper;
+import com.mooc.backend.entities.Category;
+import com.mooc.backend.entities.Product;
 import com.mooc.backend.services.ProductQueryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "商品查询", description = "根据条件查询商品")
 @RestController
@@ -21,6 +23,29 @@ public class ProductController {
 
     public ProductController(ProductQueryService productQueryService) {
         this.productService = productQueryService;
+    }
+
+    @GetMapping("/by-example")
+    public PageWrapper<ProductDTO> findPageableByExample(
+            @RequestParam(required = false) String keyword,
+            @ParameterObject Pageable pageable
+    ) {
+        Product productQuery = new Product();
+        productQuery.setName(keyword);
+        productQuery.setDescription(keyword);
+        productQuery.setSku(keyword);
+        Category category = new Category();
+        category.setName(keyword);
+        productQuery.addCategory(category);
+        ExampleMatcher matcher = ExampleMatcher.matchingAny()
+                .withIgnoreCase("name", "description", "sku", "category.name")
+                .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains())
+                .withMatcher("description", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains())
+                .withMatcher("sku", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains())
+                .withMatcher("category.name", ExampleMatcher.GenericPropertyMatchers.ignoreCase().contains());
+        Example<Product> example = Example.of(productQuery, matcher);
+        var result = productService.findPageableByExample(example, pageable).map(ProductDTO::fromEntity);
+        return new PageWrapper<>(pageable.getPageNumber(), pageable.getPageSize(), result.getTotalPages(), result.getTotalElements(), result.getContent());
     }
 
     /**

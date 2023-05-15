@@ -519,7 +519,7 @@ public void testQueryByExample() throws Exception {
     Product productQuery = new Product();
     productQuery.setName("Test");
 
-    ExampleMatcher matcher = ExampleMatcher.matching()
+    ExampleMatcher matcher = ExampleMatcher.matchingAny()
             .withIgnoreCase("name")
             .withMatcher("name", ExampleMatcher.GenericPropertyMatchers.startsWith());
 
@@ -532,6 +532,8 @@ public void testQueryByExample() throws Exception {
 ```
 
 适用于 `Example` 查询的场景是查询条件比较简单的场景，如果查询条件比较复杂，那么就不适合使用 `Example` 查询了。 `Example` 也有一些限制，比如不能使用 `OR` 条件，不能使用 `LIKE` 条件，不能嵌套查询等等。
+
+`ExampleMatcher` 是用来构造匹配器的，它有很多方法可以用来构造匹配器，比如 `withMatcher` 方法可以用来指定匹配器的匹配规则，`withIgnoreCase` 方法可以用来指定匹配器是否忽略大小写等等。 `matchingAny` 方法表示只要有一个匹配条件满足就可以了，还有一个 `matchingAll` 方法表示所有匹配条件都要满足。
 
 ### 7.1.6 Specification 查询 - 构建页面布局的动态查询
 

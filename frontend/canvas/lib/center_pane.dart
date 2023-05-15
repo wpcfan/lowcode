@@ -57,13 +57,13 @@ class CenterPane extends StatelessWidget {
       },
     );
     return dragTarget
-        .gestures(onTap: onTap)
         .padding(
           horizontal: pageConfig.horizontalPadding ?? 0.0,
           vertical: pageConfig.verticalPadding ?? 0.0,
         )
         .backgroundColor(Colors.grey)
-        .constrained(width: pageConfig.baselineScreenWidth ?? 375.0);
+        .constrained(width: pageConfig.baselineScreenWidth ?? 375.0)
+        .gestures(onTap: onTap);
   }
 
   DragTarget<Object> _buildListItem(int index) {

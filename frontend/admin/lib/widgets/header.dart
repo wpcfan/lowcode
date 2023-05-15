@@ -2,7 +2,7 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 
 import '../constants.dart';
-import '../routes/router_config.dart';
+import '../routes/routes.dart';
 import 'profile_card.dart';
 
 class Header extends StatelessWidget {

@@ -35,11 +35,16 @@ class AdminClient with DioMixin implements Dio {
     httpClientAdapter = HttpClientAdapter();
 
     /// 添加日志拦截器
-    interceptors.add(PrettyDioLogger());
+    interceptors.add(PrettyDioLogger(
+        requestHeader: true,
+        requestBody: true,
+        responseBody: true,
+        responseHeader: false,
+        error: true,
+        compact: true,
+        maxWidth: 90));
 
     /// 添加错误拦截器
-    /// InterceptorsWrapper 是一个拦截器包装器，它可以包装多个拦截器
-    /// 可以处理 onError, onRequest, onResponse 事件
     interceptors.add(CustomExceptionInterceptor());
   }
 }

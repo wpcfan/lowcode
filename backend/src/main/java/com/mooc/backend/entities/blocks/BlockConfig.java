@@ -27,26 +27,26 @@ public class BlockConfig implements Serializable {
     @Schema(description = "垂直内边距", example = "12.0")
     @NotNull
     @PositiveOrZero
-    @DecimalMax("100.00")
+    @DecimalMax("100.0")
     private Double verticalPadding;
     @Schema(description = "水平间距", example = "4.0")
     @NotNull
     @PositiveOrZero
-    @DecimalMax("100.00")
+    @DecimalMax("100.0")
     private Double horizontalSpacing;
     @Schema(description = "垂直间距", example = "4.0")
     @NotNull
     @PositiveOrZero
-    @DecimalMax("100.00")
+    @DecimalMax("100.0")
     private Double verticalSpacing;
     @Schema(description = "区块宽度", example = "376.0")
     @NotNull
-    @DecimalMin("300")
-    @DecimalMax("1200.00")
+    @DecimalMin("300.0")
+    @DecimalMax("1200.0")
     private Double blockWidth;
     @Schema(description = "区块高度", example = "94.0")
-    @DecimalMin("300")
-    @DecimalMax("1200.00")
+    @DecimalMin("50.0")
+    @DecimalMax("600.0")
     private Double blockHeight;
     @Schema(description = "区块背景颜色", example = "#ffffff")
     @Pattern(regexp = HEX_COLOR_PATTERN)

@@ -70,6 +70,12 @@ public class CategoryAdminService {
                 }).orElseThrow(() -> new CustomException("未找到该分类", "CategoryAdminService#addProductToCategory", 404));
     }
 
+    /**
+     * 从分类中移除产品
+     * @param id 分类ID
+     * @param productId 产品ID
+     * @return 分类
+     */
     public Category removeProductFromCategory(Long id, Long productId) {
         return categoryRepository.findById(id)
                 .map(c -> {
@@ -79,6 +85,11 @@ public class CategoryAdminService {
                 }).orElseThrow(() -> new CustomException("未找到该分类", "CategoryAdminService#removeProductFromCategory", 404));
     }
 
+    /**
+     * 删除分类的父分类
+     * @param id 分类ID
+     * @return 分类
+     */
     public Category removeCategoryParent(Long id) {
         return categoryRepository.findById(id)
                 .map(c -> {

@@ -28,30 +28,45 @@ public class PageCreateService {
     private final PageBlockRepository pageBlockRepository;
     private final PageBlockDataRepository pageBlockDataRepository;
 
+    /**
+     * 创建页面布局
+     * @param page 页面信息
+     * @return 页面布局
+     */
     public PageLayout createPage(CreateOrUpdatePageDTO page) {
         return pageLayoutRepository.save(page.toEntity());
     }
 
+    /**
+     * 添加区块：在页面末尾添加区块
+     * @param pageId 页面ID
+     * @param block 区块信息
+     * @return 页面布局
+     */
     public PageLayout addBlockToPage(Long pageId, CreateOrUpdatePageBlockDTO block) {
-        var pageEntity = pageQueryService.findById(pageId);
-        if (pageEntity.getStatus() != PageStatus.Draft) {
+        var pageLayout = pageQueryService.findById(pageId);
+        if (pageLayout.getStatus() != PageStatus.Draft) {
             throw new CustomException("只有草稿状态的页面才能添加区块", "PageCreateService#addBlockToPage", Errors.ConstraintViolationException.code());
         }
         if (block.type() == BlockType.Waterfall && pageBlockRepository.countByTypeAndPageId(BlockType.Waterfall, pageId) > 0L) {
             throw new CustomException("瀑布流区块只能有一个", "PageCreateService#addBlockToPage", Errors.ConstraintViolationException.code());
         }
-        if (block.type() == BlockType.Waterfall && pageBlockRepository.countByTypeAndPageIdAndSortGreaterThanEqual(BlockType.Waterfall, pageId, block.sort()) > 0) {
-            throw new CustomException("瀑布流区块必须在最后", "PageCreateService#addBlockToPage", Errors.ConstraintViolationException.code());
-        }
         var blockEntity = block.toEntity();
+        blockEntity.setSort(pageLayout.getPageBlocks().size());
+        pageLayout.addPageBlock(blockEntity);
         pageBlockRepository.save(blockEntity);
-        pageEntity.addPageBlock(blockEntity);
-        return pageLayoutRepository.save(pageEntity);
+        return pageLayout;
     }
 
+    /**
+     * 插入区块：在指定位置插入区块
+     * @param id 页面ID
+     * @param insertPageBlockDTO 区块信息
+     * @return 页面布局
+     */
     public PageLayout insertBlockToPage(Long id, CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
-        var pageEntity = pageQueryService.findById(id);
-        if (pageEntity.getStatus() != PageStatus.Draft) {
+        var pageLayout = pageQueryService.findById(id);
+        if (pageLayout.getStatus() != PageStatus.Draft) {
             throw new CustomException("只有草稿状态的页面才能插入区块", "PageCreateService#insertBlockToPage", Errors.ConstraintViolationException.code());
         }
         if (insertPageBlockDTO.type() == BlockType.Waterfall && pageBlockRepository.countByTypeAndPageId(BlockType.Waterfall, id) > 0L) {
@@ -60,14 +75,20 @@ public class PageCreateService {
         if (insertPageBlockDTO.type() == BlockType.Waterfall && pageBlockRepository.countByTypeAndPageIdAndSortGreaterThanEqual(BlockType.Waterfall, id, insertPageBlockDTO.sort()) > 0) {
             throw new CustomException("瀑布流区块必须在最后", "PageCreateService#insertBlockToPage", Errors.ConstraintViolationException.code());
         }
-        pageEntity.getPageBlocks().stream()
+        pageLayout.getPageBlocks().stream()
                 .filter(pageBlockEntity -> pageBlockEntity.getSort() >= insertPageBlockDTO.sort())
                 .forEach(pageBlockEntity -> pageBlockEntity.setSort(pageBlockEntity.getSort() + 1));
         var blockEntity = insertPageBlockDTO.toEntity();
-        pageEntity.addPageBlock(blockEntity);
-        return pageLayoutRepository.save(pageEntity);
+        pageLayout.addPageBlock(blockEntity);
+        return pageLayoutRepository.save(pageLayout);
     }
 
+    /**
+     * 给区块添加数据
+     * @param blockId 区块ID
+     * @param data 数据
+     * @return 区块数据
+     */
     public PageBlockData addDataToBlock(Long blockId, CreateOrUpdatePageBlockDataDTO data) {
         return pageBlockRepository.findById(blockId)
                 .map(blockEntity -> {

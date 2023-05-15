@@ -429,4 +429,65 @@ public class PageLayoutRepositoryTests {
         assertEquals(page1.getId(), page.get().getId());
         assertEquals(page1.getTitle(), page.get().getTitle());
     }
+
+    @Test
+    void testCascadeSave_shouldBeSuccess_whenAddBlockToPage() {
+        var now = LocalDateTime.now();
+        var pageConfig = PageConfig.builder()
+                .baselineScreenWidth(375.0)
+                .horizontalPadding(16.0)
+                .build();
+
+        var page = PageLayout.builder()
+                .pageType(PageType.About)
+                .platform(Platform.App)
+                .status(PageStatus.Published)
+                .config(pageConfig)
+                .title("Test Page Projection")
+                .startTime(now.minusDays(1))
+                .endTime(now.plusDays(1))
+                .build();
+
+        var block = PageBlock.builder()
+                .type(BlockType.Waterfall)
+                .title("Test Block")
+                .sort(1)
+                .config(BlockConfig.builder().build())
+                .build();
+
+        page.addPageBlock(block);
+        System.out.println("pagePersisted");
+        entityManager.persist(page);
+        entityManager.flush();
+
+        var pageInDb = pageLayoutRepository.findById(page.getId());
+        assertTrue(pageInDb.isPresent());
+        assertEquals(1, pageInDb.get().getPageBlocks().size());
+        assertEquals(block.getId(), pageInDb.get().getPageBlocks().stream().findFirst().get().getId());
+
+        var block1 = PageBlock.builder()
+                .type(BlockType.Banner)
+                .title("Test Block 1")
+                .sort(2)
+                .config(BlockConfig.builder().build())
+                .build();
+        page.addPageBlock(block1);
+
+        var block2 = PageBlock.builder()
+                .type(BlockType.Banner)
+                .title("Test Block 2")
+                .sort(3)
+                .config(BlockConfig.builder().build())
+                .build();
+        page.addPageBlock(block2);
+        System.out.println("pageMerged");
+        var pageMerged =entityManager.merge(page);
+
+        entityManager.flush();
+
+        var pageInDb2 = pageLayoutRepository.findById(page.getId());
+        assertTrue(pageInDb2.isPresent());
+        assertEquals(3, pageInDb2.get().getPageBlocks().size());
+        assertEquals(pageMerged.getPageBlocks(), pageInDb2.get().getPageBlocks());
+    }
 }

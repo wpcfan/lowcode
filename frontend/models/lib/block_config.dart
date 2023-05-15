@@ -12,7 +12,7 @@ class BlockConfig {
   final Color? borderColor;
   final double? borderWidth;
 
-  BlockConfig({
+  const BlockConfig({
     this.horizontalPadding,
     this.verticalPadding,
     this.horizontalSpacing,
@@ -49,10 +49,10 @@ class BlockConfig {
       'blockWidth': blockWidth,
       'blockHeight': blockHeight,
       'backgroundColor': backgroundColor != null
-          ? '#${backgroundColor!.value.toRadixString(16)}'
+          ? '#${backgroundColor!.value.toRadixString(16).padLeft(8, '0')}'
           : null,
       'borderColor': borderColor != null
-          ? '#${borderColor!.value.toRadixString(16)}'
+          ? '#${borderColor!.value.toRadixString(16).padLeft(8, '0')}'
           : null,
       'borderWidth': borderWidth,
     };

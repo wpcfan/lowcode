@@ -28,6 +28,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * 页面管理 API
+ * @since 1.0
+ * @see PageCreateService
+ * @see PageUpdateService
+ * @see PageDeleteService
+ * @see PageQueryService
+ */
 @Slf4j
 @Tag(name = "页面管理", description = "添加、修改、删除、查询页面，发布页面，撤销发布页面，添加区块，删除区块，修改区块，添加区块数据，删除区块数据，修改区块数据")
 @RequiredArgsConstructor
@@ -117,7 +125,7 @@ public class PageAdminController {
     @PostMapping("/{id}/blocks")
     public PageDTO addBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdatePageBlockDTO block) {
+            @Valid @RequestBody CreateOrUpdatePageBlockDTO block) {
         checkPageStatus(id);
         return PageDTO.fromEntity(pageCreateService.addBlockToPage(id, block));
     }
@@ -126,7 +134,7 @@ public class PageAdminController {
     @PostMapping("/{id}/blocks/insert")
     public PageDTO insertBlock(
             @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
-            @RequestBody CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
+            @Valid @RequestBody CreateOrUpdatePageBlockDTO insertPageBlockDTO) {
         checkPageStatus(id);
         return PageDTO.fromEntity(pageCreateService.insertBlockToPage(id, insertPageBlockDTO));
     }

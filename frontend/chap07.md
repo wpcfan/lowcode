@@ -28,6 +28,11 @@
     - [7.3.4 搭建运营管理后台的页面列表](#734-搭建运营管理后台的页面列表)
     - [7.3.5 非查询类接口](#735-非查询类接口)
       - [7.3.5.1 Service 单元测试](#7351-service-单元测试)
+      - [7.3.5.2 作业：完成删除页面布局的逻辑并单元测试](#7352-作业完成删除页面布局的逻辑并单元测试)
+      - [7.3.5.3 完成运营管理后台的前端页面](#7353-完成运营管理后台的前端页面)
+        - [7.3.5.3.1 Flutter 中的 Dialog](#73531-flutter-中的-dialog)
+        - [7.3.5.3.2 BLoC 中如何更新内存中集合的数据](#73532-bloc-中如何更新内存中集合的数据)
+        - [7.3.5.3.3 使用 go_router 设计页面路由](#73533-使用-go_router-设计页面路由)
 
 <!-- /code_chunk_output -->
 
@@ -2019,10 +2024,28 @@ public class PageUpdateService {
         pageEntity.setEndTime(null);
         return pageLayoutRepository.save(pageEntity);
     }
+
+    @Operation(summary = "发布页面")
+    @PatchMapping("/{id}/publish")
+    public PageDTO publishPage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Valid @RequestBody PublishPageDTO publishPageDTO) {
+        return PageDTO.fromEntity(pageUpdateService.publishPage(id, publishPageDTO));
+    }
+
+    @Operation(summary = "取消发布页面")
+    @PatchMapping("/{id}/draft")
+    public PageDTO draftPage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id) {
+        return PageDTO.fromEntity(pageUpdateService.draftPage(id));
+    }
 }
 ```
 
-上面的代码中,
+上面的代码中，我们在保存之前做了一些校验，比如：
+
+- 如果页面已经发布，那么就不允许修改
+- 如果发布时间段和已有的页面布局时间段冲突，那么就不允许发布
 
 之后在 Controller 层，我们就可以直接调用 `PageCreateService` 的 `createPage` 方法，为了简单起见，我们还是利用 `PageAdminController`，代码如下：
 
@@ -2042,6 +2065,15 @@ public class PageAdminController {
             throw new CustomException("页面标题已存在", "PageAdminController#createPage",
                     Errors.DataAlreadyExistsException.code());
         return PageDTO.fromEntity(pageCreateService.createPage(page));
+    }
+
+    @Operation(summary = "修改页面")
+    @PutMapping("/{id}")
+    public PageDTO updatePage(
+            @Parameter(description = "页面 id", name = "id") @PathVariable Long id,
+            @Valid @RequestBody CreateOrUpdatePageDTO page) {
+        checkPageStatus(id);
+        return PageDTO.fromEntity(pageUpdateService.updatePage(id, page));
     }
 
     // ...
@@ -2157,5 +2189,271 @@ public class PageUpdateServiceTests {
         Mockito.when(pageLayoutRepository.countPublishedTimeConflict(startTime, Platform.App, PageType.Home)).thenReturn(1);
         assertThrows(CustomException.class, () -> pageUpdateService.publishPage(1L, page));
     }
+}
+```
+
+上面的测试用例中，我们模拟了 `PageQueryService` 的 `findById` 方法，`PageLayoutRepository` 的 `countPublishedTimeConflict` 方法。这样我们就可以测试 `PageUpdateService` 的 `publishPage` 方法了。这个方法的逻辑是，首先根据 `id` 查询 `PageLayout`，然后判断 `startTime` 和 `endTime` 是否和已经发布的页面冲突，如果冲突则抛出异常。我们可以通过模拟 `PageLayoutRepository` 的 `countPublishedTimeConflict` 方法来测试这个逻辑。
+
+#### 7.3.5.2 作业：完成删除页面布局的逻辑并单元测试
+
+在 `PageDeleteService` 中完成删除页面布局的逻辑，并编写单元测试。
+
+#### 7.3.5.3 完成运营管理后台的前端页面
+
+利用已经有的接口，完成运营管理后台的前端页面。运营管理后台的前端页面需要完成以下功能：
+
+1. 页面列表：每一条信息的操作包括编辑、删除、发布、取消发布等操作。
+2. 页面编辑：编辑页面的基本信息，包括标题、平台、页面类型等。
+3. 页面创建：创建页面，需要填写页面的基本信息，包括标题、平台、页面类型等。
+
+提示：
+
+1. BLoC 中的事件可以参考以下定义
+
+```dart
+  class PageEventUpdate extends PageEvent {
+  PageEventUpdate(this.id, this.layout) : super();
+  final int id;
+  final PageLayout layout;
+
+  @override
+  List<Object> get props => [id, layout];
+}
+
+class PageEventCreate extends PageEvent {
+  PageEventCreate(this.layout) : super();
+
+  final PageLayout layout;
+
+  @override
+  List<Object> get props => [layout];
+}
+
+class PageEventDelete extends PageEvent {
+  PageEventDelete(this.id) : super();
+  final int id;
+
+  @override
+  List<Object> get props => [id];
+}
+
+class PageEventPublish extends PageEvent {
+  PageEventPublish(this.id, this.startTime, this.endTime) : super();
+  final int id;
+  final DateTime startTime;
+  final DateTime endTime;
+
+  @override
+  List<Object> get props => [id];
+}
+
+class PageEventDraft extends PageEvent {
+  PageEventDraft(this.id) : super();
+  final int id;
+
+  @override
+  List<Object> get props => [id];
+}
+```
+
+2. 创建和编辑可以使用 Dialog 完成，这个 Dialog 叫做 `CreateOrUpdatePageDialog` ，可以参考 `pages/lib/popups` 中的代码。
+
+##### 7.3.5.3.1 Flutter 中的 Dialog
+
+Flutter 中的 Dialog 有两种，一种是 `AlertDialog`，一种是 `SimpleDialog`。`AlertDialog` 是一个简单的对话框，只有一个标题和一个内容，一般用于提示。`SimpleDialog` 是一个复杂的对话框，可以有多个按钮，一般用于选择。我们可以通过 `showDialog` 方法来显示一个 Dialog。我们的作业使用 `AlertDialog` 即可。
+
+```dart
+showDialog(
+  context: context,
+  builder: (BuildContext context) {
+    return AlertDialog(
+      title: Text('提示'),
+      content: Text('确定要删除吗？'),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('取消'),
+          onPressed: () => Navigator.of(context).pop(), // 关闭对话框
+        ),
+        FlatButton(
+          child: Text('确定'),
+          onPressed: () {
+            // 执行删除操作
+            Navigator.of(context).pop(); // 关闭对话框
+          },
+        ),
+      ],
+    );
+  },
+);
+```
+
+##### 7.3.5.3.2 BLoC 中如何更新内存中集合的数据
+
+在 BLoC 中，我们经常会遇到要维护一个集合的数据，比如说我们要维护一个页面的列表，这个列表是一个 `List<PageLayout>` 类型的数据。
+
+- 如果新创建一个页面布局的话，一般会把这个元素添加到这个集合中，至于是添加到集合的头部还是尾部，这个取决于业务需求。下面是一个简单示例，把元素添加到集合的头部，这个用法和 `javascript` 很像。三个点代表把 `layouts` 中的元素展开。
+
+  ```dart
+  List<PageLayout> _addPageLayout(List<PageLayout> layouts, PageLayout layout) {
+    return [layout, ...layouts];
+  }
+  ```
+
+- 如果删除一个页面布局的话，一般会把这个元素从集合中删除。下面是一个简单示例，把元素从集合中删除。
+
+  ```dart
+  List<PageLayout> _deletePageLayout(List<PageLayout> layouts, int id) {
+    return layouts.where((layout) => layout.id != id).toList();
+  }
+  ```
+
+- 如果更新一个页面布局的话，相对会复杂一些，因为你需要找到这个元素在集合中的位置，然后把这个元素替换掉。下面是一个简单示例，把元素从集合中更新。
+
+  ```dart
+  // 如果服务器可以返回更新后的数据
+  List<PageLayout> _updatePageLayout(List<PageLayout> layouts, PageLayout updated) {
+    return layouts.map((item) {
+      if (item.id == updated.id) {
+        return updated;
+      }
+      return item;
+    }).toList();
+  }
+  // 如果服务器不可以返回更新后的数据
+
+  ```
+
+##### 7.3.5.3.3 使用 go_router 设计页面路由
+
+在 Flutter 中，我们可以使用 `Navigator` 来进行页面的跳转，但是这个 API 不够友好，我们可以使用 `go_router` 这个库来进行页面的跳转。`go_router` 的使用方法可以参考 [go_router](https://pub.dev/packages/go_router) 。
+
+`go_router` 是一个声明式的路由库，我们可以在 `main.dart` 中定义路由，然后在其他地方使用 `context.go('/xxx)` 来进行页面的跳转。下面是一个简单的示例：
+
+```dart
+// main.dart
+import 'package:go_router/go_router.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+// GoRouter configuration
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => HomeScreen(),
+    ),
+  ],
+);
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp.router(
+      routerConfig: _router,
+    );
+  }
+}
+```
+
+可以看到，路由的定义方式和 `vue` 等前端框架差不多，我们可以把所有路由放到一个数组中，然后在 `MyApp` 中使用 `routerConfig` 来配置路由。在 `GoRoute` 中的 `path` 就是路由的路径，`builder` 就是路由对应的页面的工厂函数。
+
+但需要指出的是 `GoRoute` 只能路由整个页面，如果是页面的某些部分在路由中是不变的，那么就需要使用 `ShellRoute`，`ShellRoute` 可以在路由中保留某些部分，这样可以避免在路由时，这些部分被重新构建。我们可以通过下面的代码来实现 `ShellRoute`：
+
+```dart
+// routes/routes.dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:pages/pages.dart';
+
+import '../constants.dart';
+import '../widgets/widgets.dart';
+
+final scaffoldKey = GlobalKey<ScaffoldState>();
+final innerScaffoldKey = GlobalKey<ScaffoldState>();
+
+final routes = <RouteBase>[
+  GoRoute(
+    path: '/',
+    builder: (context, state) => const PageTableView(),
+  ),
+];
+
+final routerConfig = GoRouter(
+  initialLocation: '/',
+  routes: [
+    // 嵌套的路由使用 ShellRoute 包裹
+    // 我们这里只想让 body 部分刷新，
+    // 也就是切换路由时，只刷新 body 部分
+    ShellRoute(
+      builder: (context, state, child) => Scaffold(
+        key: scaffoldKey,
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          title: const Header(),
+          primary: true,
+          backgroundColor: bgColor,
+        ),
+        body: SafeArea(child: child),
+      ),
+      routes: routes,
+    ),
+  ],
+);
+```
+
+然后在 `main.dart` 中使用 `routerConfig` 来配置路由：
+
+```dart
+void main() {
+  /// 初始化 Bloc 的观察者，用于监听 Bloc 的生命周期
+  Bloc.observer = SimpleBlocObserver();
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  // 根组件
+  @override
+  Widget build(BuildContext context) {
+    /// 使用 MaterialApp.router 来初始化路由
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: '运营管理后台',
+
+      /// 使用 ThemeData.dark 来初始化一个深色主题
+      /// 使用 copyWith 来复制该主题，并修改部分属性
+      theme: ThemeData.dark(useMaterial3: false).copyWith(
+        scaffoldBackgroundColor: bgColor,
+        textTheme: Theme.of(context).textTheme.apply(bodyColor: Colors.white),
+        canvasColor: secondaryColor,
+        dataTableTheme: DataTableThemeData(
+          headingRowColor: MaterialStateProperty.all(secondaryColor),
+          dataRowColor: MaterialStateProperty.all(secondaryColor),
+          dividerThickness: 0,
+        ),
+      ),
+
+      /// 使用 GlobalMaterialLocalizations.delegate 来初始化 Material 组件的本地化
+      /// 使用 GlobalWidgetsLocalizations.delegate 来初始化 Widget 组件的本地化
+      /// 使用 GlobalCupertinoLocalizations.delegate 来初始化 Cupertino 组件的本地化
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      /// 使用 zh 来初始化中文本地化
+      supportedLocales: const [
+        Locale('zh'),
+      ],
+
+      /// 使用 routerConfig 来初始化路由
+      routerConfig: routerConfig,
+    );
+  }
 }
 ```

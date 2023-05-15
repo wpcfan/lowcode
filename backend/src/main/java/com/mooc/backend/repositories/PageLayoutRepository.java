@@ -1,17 +1,18 @@
 package com.mooc.backend.repositories;
 
-import com.mooc.backend.entities.PageLayout;
-import com.mooc.backend.enumerations.PageType;
-import com.mooc.backend.enumerations.Platform;
-import com.mooc.backend.projections.PageLayoutInfo;
-import org.springframework.data.jpa.repository.*;
-
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import org.springframework.data.jpa.repository.*;
+
+import com.mooc.backend.entities.PageLayout;
+import com.mooc.backend.enumerations.PageType;
+import com.mooc.backend.enumerations.Platform;
+import com.mooc.backend.projections.PageLayoutInfo;
+
 public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, JpaSpecificationExecutor<PageLayout> {
-    @EntityGraph(attributePaths = {"pageBlocks", "pageBlocks.data"})
+    @EntityGraph(attributePaths = { "pageBlocks", "pageBlocks.data" })
     Optional<PageLayout> findById(Long id);
 
     @Query("select p.id as id, p.title as title from PageLayout p where p.id = ?1")
@@ -34,31 +35,32 @@ public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, J
      * @return 页面列表
      */
     @Query("""
-    select p from PageLayout p
-    where p.status = com.mooc.backend.enumerations.PageStatus.Published
-    and p.startTime is not null and p.endTime is not null
-    and p.startTime < ?1 and p.endTime > ?1
-    and p.platform = ?2
-    and p.pageType = ?3
-    """)
+            select p from PageLayout p
+            where p.status = com.mooc.backend.enumerations.PageStatus.Published
+            and p.startTime is not null and p.endTime is not null
+            and p.startTime < ?1 and p.endTime > ?1
+            and p.platform = ?2
+            and p.pageType = ?3
+            """)
     Stream<PageLayout> streamPublishedPage(LocalDateTime currentTime, Platform platform, PageType pageType);
 
     /**
      * 计算指定时间、平台、页面类型的页面数量
      * 用于判断是否存在时间冲突的页面布局
+     * 
      * @param time
      * @param platform
      * @param pageType
      * @return
      */
     @Query("""
-    select count(p) from PageLayout p
-    where p.status = com.mooc.backend.enumerations.PageStatus.Published
-    and p.startTime is not null and p.endTime is not null
-    and p.startTime < ?1 and p.endTime > ?1
-    and p.platform = ?2
-    and p.pageType = ?3
-    """)
+            select count(p) from PageLayout p
+            where p.status = com.mooc.backend.enumerations.PageStatus.Published
+            and p.startTime is not null and p.endTime is not null
+            and p.startTime < ?1 and p.endTime > ?1
+            and p.platform = ?2
+            and p.pageType = ?3
+            """)
     int countPublishedTimeConflict(LocalDateTime time, Platform platform, PageType pageType);
 
     /**
@@ -71,12 +73,12 @@ public interface PageLayoutRepository extends JpaRepository<PageLayout, Long>, J
      */
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("""
-    update PageLayout p
-    set p.status = com.mooc.backend.enumerations.PageStatus.Archived
-    where p.status = com.mooc.backend.enumerations.PageStatus.Published
-    and p.startTime is not null and p.endTime is not null
-    and p.endTime < ?1
-    """)
+            update PageLayout p
+            set p.status = com.mooc.backend.enumerations.PageStatus.Archived
+            where p.status = com.mooc.backend.enumerations.PageStatus.Published
+            and p.startTime is not null and p.endTime is not null
+            and p.endTime < ?1
+            """)
     int updatePageStatusToArchived(LocalDateTime currentTime);
 
     int countByTitle(String title);

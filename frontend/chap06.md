@@ -1379,6 +1379,46 @@ public class JpaEntityTest {
 
 需要介绍一下 `EntityManager`，它是 JPA 的核心接口，用于管理实体类和数据库之间的映射关系。我们可以通过 `EntityManager` 的 `persist` 方法来将实体类保存到数据库中，通过 `find` 方法来从数据库中查询实体类。`flush` 方法用于将实体类的变更同步到数据库中。
 
+这里要说明一下 `EntityManager` 的几个常用方法：
+
+- `persist` 方法用于将实体类保存到数据库中，如果实体类已经存在于数据库中，则会抛出异常。一般用于保存新的实体类。
+
+- `merge` 方法用于将实体类保存到数据库中，如果实体类已经存在于数据库中，则会更新数据库中的数据。 `merge` 方法会返回一个新的实体类，这个实体类和入参的实体类不是同一个实体类。所以需要使用返回值来进行后续操作。
+
+  ```java
+  // user 处于游离状态
+  User user = entityManager.find(User.class, 1L);
+  user.setName("New Name");
+  // mergedUser 是持久化状态
+  User mergedUser = entityManager.merge(user);
+  // 此时对于 mergedUser 的变更会同步到数据库中
+  mergedUser.setEmail("new.email@example.com");
+
+  entityManager.flush();
+  ```
+
+- `remove` 方法用于将实体类从数据库中删除。
+
+- `refresh` 方法用于将实体类的数据从数据库中重新加载。
+
+- `flush` 方法用于将实体类的变更同步到数据库中。
+
+- `find` 方法用于从数据库中查询实体类。查询出来的实体类处于游离状态，即实体类和数据库中的数据不再同步。除非调用 `merge` 方法，否则实体类的变更不会同步到数据库中。
+
+如果我们查看 `JpaRepository.save` 方法，就会发现它是通过 `EntityManager` 的 `persist` 和 `merge` 方法来实现的。对于一个新的实体类，`save` 方法会调用 `persist` 方法来将实体类保存到数据库中；对于一个已经存在于数据库中的实体类，`save` 方法会调用 `merge` 方法来更新数据库中的数据。
+
+```java
+@Transactional
+public <S extends T> S save(S entity) {
+    if (entityInformation.isNew(entity)) {
+        em.persist(entity);
+        return entity;
+    } else {
+        return em.merge(entity);
+    }
+}
+```
+
 我们分别将 `product` 和 `productImage` 保存到数据库中，然后通过 `find` 方法来查询 `product`，并验证查询结果是否正确。
 
 值得说明的是

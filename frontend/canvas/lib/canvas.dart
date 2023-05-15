@@ -126,8 +126,36 @@ class CanvasPage extends StatelessWidget {
   /// 构建中间部分
   CenterPane _buildCenterPane(CanvasState state, BuildContext context) =>
       CenterPane(
-        state: state,
+        blocks: state.layout?.blocks ?? [],
+        products: state.waterfallList,
+        defaultBlockConfig: BlockConfig(
+          horizontalPadding: 12,
+          verticalPadding: 12,
+          horizontalSpacing: 6,
+          verticalSpacing: 6,
+          blockWidth: (state.layout?.config.baselineScreenWidth ?? 375.0) - 24,
+          blockHeight: 140,
+          backgroundColor: Colors.white,
+          borderColor: Colors.transparent,
+          borderWidth: 0,
+        ),
+        pageConfig: state.layout?.config ??
+            const PageConfig(
+              horizontalPadding: 0.0,
+              verticalPadding: 0.0,
+              baselineScreenWidth: 375.0,
+            ),
         onTap: () => context.read<CanvasBloc>().add(CanvasEventSelectNoBlock()),
+        onBlockAdded: (block) => context
+            .read<CanvasBloc>()
+            .add(CanvasEventAddBlock(state.layout!.id!, block)),
+        onBlockInserted: (block) => context
+            .read<CanvasBloc>()
+            .add(CanvasEventInsertBlock(state.layout!.id!, block)),
+        onBlockSelected: (block) =>
+            context.read<CanvasBloc>().add(CanvasEventSelectBlock(block)),
+        onBlockMoved: (block, targetSort) => context.read<CanvasBloc>().add(
+            CanvasEventMoveBlock(state.layout!.id!, block.id!, targetSort)),
       );
 
   /// 构建右侧部分
@@ -135,7 +163,8 @@ class CanvasPage extends StatelessWidget {
           ProductRepository productRepository, BuildContext context) =>
       RightPane(
         showBlockConfig: state.selectedBlock != null,
-        state: state,
+        selectedBlock: state.selectedBlock,
+        layout: state.layout,
         productRepository: productRepository,
         onSavePageBlock: (pageBlock) => context.read<CanvasBloc>().add(
               CanvasEventUpdateBlock(

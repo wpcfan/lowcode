@@ -23,14 +23,30 @@ public class ProductQueryService {
         return productRepository.findPageableByCategoriesId(id);
     }
 
+    /**
+     * 根据 ID 查询产品
+     * @param id 产品 ID
+     * @param pageable 分页条件
+     * @return 产品的分页数据
+     */
     public Slice<Product> findPageableByCategoriesId(Long id, Pageable pageable) {
         return productRepository.findPageableByCategoriesId(id, pageable);
     }
 
+    /**
+     * 根据 Example 查询产品
+     * @param product 产品 Example
+     * @return 产品
+     */
     public Page<Product> findPageableByExample(Example<Product> product, Pageable pageable) {
         return productRepository.findAll(product, pageable);
     }
 
+    /**
+     * 根据一组 ID 查询产品集合
+     * @param ids ID 集合
+     * @return  产品集合
+     */
     @Transactional(readOnly = true)
     public Stream<Product> findByIds(Collection<Long> ids) {
         return productRepository.findByIdIn(ids);

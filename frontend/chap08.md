@@ -54,6 +54,11 @@
       - [8.4.2.1 页面配置表单](#8421-页面配置表单)
       - [8.4.2.2 作业：区块配置表单](#8422-作业区块配置表单)
       - [8.4.2.3 图片区块数据表单](#8423-图片区块数据表单)
+      - [8.4.2.4 商品区块数据表单](#8424-商品区块数据表单)
+      - [8.4.2.5 瀑布流区块数据表单](#8425-瀑布流区块数据表单)
+    - [8.4.3 实现右侧面板](#843-实现右侧面板)
+    - [8.3.6 实现区块和数据的 BLoC](#836-实现区块和数据的-bloc)
+    - [8.3.6 实现最终的画布](#836-实现最终的画布)
 
 <!-- /code_chunk_output -->
 
@@ -2632,6 +2637,1204 @@ class _CreateOrUpdateImageDataDialogState
       setState(() {
         _selectedImage = result.url;
       });
+    }
+  }
+}
+```
+
+#### 8.4.2.4 商品区块数据表单
+
+对于商品数据，我们需要一个表格展现给用户商品的必要属性：
+
+- 商品 SKU
+- 商品名称
+- 商品图片
+- 商品价格
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+
+/// 商品表格组件
+/// [products] 商品列表
+/// [onRemove] 删除回调
+class ProductTable extends StatelessWidget {
+  const ProductTable({
+    super.key,
+    required this.products,
+    this.onRemove,
+  });
+  final List<Product> products;
+  final void Function(Product)? onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    const columns = [
+      DataColumn(label: Text('商品SKU')),
+      DataColumn(label: Text('商品名称')),
+      DataColumn(label: Text('商品图片')),
+      DataColumn(label: Text('商品价格')),
+      DataColumn(label: Text('操作')),
+    ];
+    return DataTable(
+      columns: columns,
+      rows: products.map((e) => DataRow(cells: _buildCells(e))).toList(),
+    );
+  }
+
+  List<DataCell> _buildCells(Product e) {
+    return [
+      DataCell(Text(e.sku ?? '')),
+      DataCell(Text(e.name ?? '')),
+      DataCell(Image.network(
+        e.images.first,
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      )),
+      DataCell(Text(e.price.toString())),
+      DataCell(IconButton(
+        icon: const Icon(Icons.delete),
+        onPressed: () => onRemove?.call(e),
+      )),
+    ];
+  }
+}
+```
+
+商品的数据表单就是一个输入框和一个表格的组合，输入框用于输入关键字，同样是利用 Autocompelete 组件，表格用于展示选中的商品。
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+import 'product_table.dart';
+
+/// 商品数据表单组件
+/// [data] 数据
+/// [onAdd] 添加商品回调
+/// [onRemove] 删除商品回调
+class ProductDataForm extends StatefulWidget {
+  const ProductDataForm({
+    super.key,
+    this.onAdd,
+    this.onRemove,
+    required this.data,
+    required this.productRepository,
+  });
+  final void Function(Product)? onRemove;
+  final void Function(Product)? onAdd;
+  final List<BlockData<Product>> data;
+  final ProductRepository productRepository;
+
+  @override
+  State<ProductDataForm> createState() => _ProductDataFormState();
+}
+
+class _ProductDataFormState extends State<ProductDataForm> {
+  /// 选中的商品
+  final List<Product> _selectedProducts = [];
+
+  /// 匹配的商品
+  final List<Product> _matchedProducts = [];
+
+  @override
+  Widget build(BuildContext context) {
+    /// 初始化选中的商品
+    setState(() {
+      _selectedProducts.clear();
+      _selectedProducts.addAll(widget.data.map((e) => e.content));
+    });
+    return [
+      _buildAutocomplete(context),
+      const SizedBox(height: 16),
+      ProductTable(
+        products: _selectedProducts,
+        onRemove: widget.onRemove,
+      )
+    ].toColumn(mainAxisSize: MainAxisSize.min).scrollable();
+  }
+
+  Autocomplete<Product> _buildAutocomplete(BuildContext context) {
+    return Autocomplete<Product>(
+      optionsBuilder: (textValue) async {
+        /// 从服务器获取匹配的商品列表
+        final matchedProducts = await _searchProducts(textValue.text);
+        setState(() {
+          _matchedProducts.clear();
+          _matchedProducts.addAll(matchedProducts);
+        });
+        return _matchedProducts;
+      },
+      optionsViewBuilder: (context, onSelected, options) => Material(
+        child: ListView(
+          shrinkWrap: true,
+          children: options
+              .map((e) => ListTile(
+                    title: Text(e.name ?? ''),
+                    leading: Image.network(
+                      e.images.first,
+                      fit: BoxFit.cover,
+                      width: 40,
+                      height: 40,
+                    ),
+                    onTap: () {
+                      onSelected(e);
+                    },
+                  ))
+              .toList(),
+        ),
+      ),
+      onSelected: (option) {
+        if (_selectedProducts.length > 1) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('最多只能选择两个商品'),
+            ),
+          );
+          return;
+        }
+        setState(() {
+          if (!_selectedProducts
+              .where((element) => element.id == option.id)
+              .isNotEmpty) {
+            _selectedProducts.add(option);
+            widget.onAdd?.call(option);
+          } else {
+            _selectedProducts.removeWhere((element) => element.id == option.id);
+            widget.onRemove?.call(option);
+          }
+        });
+      },
+      displayStringForOption: (option) => option.sku ?? '',
+    );
+  }
+
+  /// 从服务器获取匹配的商品列表
+  /// [text] 搜索关键字
+  Future<List<Product>> _searchProducts(String text) async {
+    final res = await widget.productRepository.searchByKeyword(text);
+    return res;
+  }
+}
+```
+
+#### 8.4.2.5 瀑布流区块数据表单
+
+瀑布流区块需要指定一个类目作为数据，其代码如下：
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+/// 用于类目数据的表单
+/// [onCategoryAdded] 类目添加回调
+/// [onCategoryUpdated] 类目更新回调
+/// [onCategoryRemoved] 类目移除回调
+/// [data] 类目数据
+class CategoryDataForm extends StatelessWidget {
+  const CategoryDataForm({
+    super.key,
+    required this.onCategoryAdded,
+    required this.onCategoryUpdated,
+    required this.onCategoryRemoved,
+    required this.data,
+  });
+  final void Function(Category) onCategoryAdded;
+  final void Function(Category) onCategoryUpdated;
+  final void Function(Category) onCategoryRemoved;
+  final List<BlockData<Category>> data;
+
+  @override
+  Widget build(BuildContext context) {
+    /// 类目仓库
+    final categoryRepository = context.read<CategoryRepository>();
+
+    return FutureBuilder(
+      future: _getCategories(categoryRepository),
+      initialData: const [],
+      builder: (context, snapshot) {
+        /// 加载中
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const CircularProgressIndicator().center();
+        }
+
+        /// 错误
+        if (snapshot.hasError) {
+          return Text('错误: ${snapshot.error}');
+        }
+
+        /// 没有数据
+        if (snapshot.data == null || snapshot.data!.isEmpty) {
+          return const Text('没有数据').center();
+        }
+
+        /// 类目
+        final categories = snapshot.data as List<Category>;
+
+        final autoComplete = Autocomplete<Category>(
+          /// 构建选项
+          optionsBuilder: (text) {
+            return categories
+                .where((element) => element.name!
+                    .toLowerCase()
+                    .contains(text.text.toLowerCase()))
+                .toList();
+          },
+
+          /// 选中回调
+          onSelected: (option) {
+            if (data
+                .where((element) => element.content.id == option.id)
+                .isNotEmpty) {
+              onCategoryRemoved(option);
+            } else {
+              if (data.isEmpty) {
+                onCategoryAdded(option);
+                return;
+              }
+              onCategoryUpdated(option);
+            }
+          },
+
+          /// 选中值在输入框中的显示
+          displayStringForOption: (option) => option.name ?? '',
+        );
+        final tree = _buildCategoryTree(categories);
+        return [autoComplete, tree]
+            .toColumn(mainAxisSize: MainAxisSize.min)
+            .scrollable();
+      },
+    );
+  }
+
+  /// 获取类目
+  Future<List<Category>> _getCategories(
+      CategoryRepository categoryRepository) async {
+    final categories = await categoryRepository.getCategories();
+    return categories;
+  }
+
+  /// 构建类目树
+  Widget _buildCategoryTree(Iterable<Category> categories) {
+    return Material(
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemBuilder: (context, index) {
+          final category = categories.elementAt(index);
+          return _buildCategoryItem(category);
+        },
+        itemCount: categories.length,
+      ),
+    );
+  }
+
+  /// 构建类目项
+  Widget _buildCategoryItem(Category category) {
+    return [
+      /// 类目
+      RadioListTile(
+        title: Text(category.name ?? ''),
+        value: category,
+        selected: data.isEmpty ? false : data.first.content.id == category.id,
+        groupValue: data.isEmpty ? null : data.first.content,
+        onChanged: (value) {
+          if (value != null) {
+            if (data.isNotEmpty) {
+              onCategoryUpdated(value);
+              return;
+            }
+            onCategoryAdded(category);
+          } else {
+            onCategoryRemoved(category);
+          }
+        },
+      ),
+
+      /// 子类目
+      if (category.children != null && category.children!.isNotEmpty)
+        Padding(
+          padding: const EdgeInsets.only(left: 16),
+          child: _buildCategoryTree(category.children!),
+        ),
+    ].toColumn(mainAxisSize: MainAxisSize.min);
+  }
+}
+```
+
+上面代码中，我们使用了`Autocomplete`组件，该组件可以实现输入框的自动补全功能。由于类目是有父子关系的，所以我们使用了递归的方式构建了类目树。我们对子类目进行了缩进，以便于区分父子关系。
+
+### 8.4.3 实现右侧面板
+
+之前我们实现的右侧面板是一个空白的面板，现在我们需要根据不同的区块类型，实现不同的面板。利用我们之前完成的一系列组件，我们可以实现右侧的面板如下：
+
+```dart
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+import 'widgets/widgets.dart';
+
+/// 右侧面板
+/// [selectedBlock] 选中的区块
+/// [layout] 页面布局
+/// [showBlockConfig] 是否显示块配置
+/// [onSavePageLayout] 保存页面布局回调
+/// [onSavePageBlock] 保存页面块回调
+/// [onDeleteBlock] 删除块回调
+/// [onCategoryAdded] 添加分类回调
+/// [onCategoryUpdated] 更新分类回调
+/// [onCategoryRemoved] 删除分类回调
+/// [onProductAdded] 添加商品回调
+/// [onProductRemoved] 删除商品回调
+///
+class RightPane extends StatelessWidget {
+  const RightPane({
+    super.key,
+    required this.showBlockConfig,
+    required this.productRepository,
+    this.onSavePageLayout,
+    this.onSavePageBlock,
+    this.onDeleteBlock,
+    required this.onCategoryAdded,
+    required this.onCategoryUpdated,
+    required this.onCategoryRemoved,
+    required this.onProductAdded,
+    required this.onProductRemoved,
+    required this.onImageAdded,
+    required this.onImageRemoved,
+    this.selectedBlock,
+    this.layout,
+  });
+  final PageBlock<dynamic>? selectedBlock;
+  final PageLayout? layout;
+  final bool showBlockConfig;
+  final ProductRepository productRepository;
+  final void Function(PageBlock)? onSavePageBlock;
+  final void Function(PageLayout)? onSavePageLayout;
+  final void Function(int)? onDeleteBlock;
+  final void Function(BlockData<Product>) onProductAdded;
+  final void Function(int) onProductRemoved;
+  final void Function(BlockData<Category>) onCategoryAdded;
+  final void Function(BlockData<Category>) onCategoryUpdated;
+  final void Function(int) onCategoryRemoved;
+  final void Function(BlockData<ImageData>) onImageAdded;
+  final void Function(int) onImageRemoved;
+
+  @override
+  Widget build(BuildContext context) {
+    final child = showBlockConfig
+        ? DefaultTabController(
+            initialIndex: 0,
+            length: 2,
+            child: Scaffold(
+              appBar: const TabBar(
+                tabs: [
+                  Tab(text: '配置'),
+                  Tab(text: '数据'),
+                ],
+              ),
+              body: TabBarView(
+                children: [
+                  BlockConfigForm(
+                    block: selectedBlock!,
+                    onSave: onSavePageBlock,
+                    onDelete: onDeleteBlock,
+                  ),
+                  _buildBlockDataPane(),
+                ],
+              ),
+            ),
+          )
+        : PageConfigForm(
+            layout: layout!,
+            onSave: onSavePageLayout,
+          );
+    return child.padding(horizontal: 12);
+  }
+
+  BlockDataPane _buildBlockDataPane() {
+    return BlockDataPane(
+      block: selectedBlock!,
+      productRepository: productRepository,
+      onCategoryAdded: (category) {
+        final data = BlockData<Category>(
+          sort: selectedBlock!.data.length,
+          content: category,
+        );
+        onCategoryAdded(data);
+      },
+      onCategoryUpdated: (category) {
+        final matchedData = selectedBlock!.data.first;
+        final data = BlockData<Category>(
+          id: matchedData.id,
+          sort: matchedData.sort,
+          content: category,
+        );
+        onCategoryUpdated(data);
+      },
+      onCategoryRemoved: (category) {
+        final index = selectedBlock!.data
+            .indexWhere((element) => element.content.id == category.id);
+        if (index == -1) return;
+        onCategoryRemoved.call(index);
+      },
+      onProductAdded: (product) {
+        final data = BlockData<Product>(
+          sort: selectedBlock!.data.length,
+          content: product,
+        );
+        onProductAdded(data);
+      },
+      onProductRemoved: (product) {
+        final index = selectedBlock!.data
+            .indexWhere((element) => element.content.id == product.id);
+        if (index == -1) return;
+        onProductRemoved(selectedBlock!.data[index].id!);
+      },
+      onImageAdded: (image) {
+        final data = BlockData<ImageData>(
+          sort: selectedBlock!.data.length,
+          content: image,
+        );
+        onImageAdded(data);
+      },
+      onImageRemoved: (id) {
+        onImageRemoved(id);
+      },
+    );
+  }
+}
+```
+
+上面代码中，我们根据`showBlockConfig`属性，判断是否显示块配置面板。如果显示，则显示块配置面板，否则显示页面配置面板。块配置面板中，我们使用了`TabBar`和`TabBarView`组件，实现了块配置和块数据的切换。
+
+### 8.3.6 实现区块和数据的 BLoC
+
+添加以下事件：
+
+- `CanvasEventUpdate`：更新画布，也就是页面配置点击保存后的逻辑
+
+- `CanvasEventUpdateBlock`：更新页面区块，也就是块配置点击保存后的逻辑
+
+- `CanvasEventDeleteBlock`：删除页面区块，也就是块配置点击删除后的逻辑
+
+- `CanvasEventAddBlockData`：添加区块数据，也就是块数据点击添加后的逻辑
+
+- `CanvasEventUpdateBlockData`：更新区块数据，也就是块数据点击保存后的逻辑
+
+- `CanvasEventDeleteBlockData`：删除区块数据，也就是块数据点击删除后的逻辑
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:models/models.dart';
+
+abstract class CanvasEvent extends Equatable {}
+
+// ... 省略其他代码
+
+/// 更新画布
+class CanvasEventUpdate extends CanvasEvent {
+  CanvasEventUpdate(this.id, this.layout) : super();
+  final PageLayout layout;
+  final int id;
+
+  @override
+  List<Object?> get props => [id, layout];
+}
+
+/// 更新页面区块
+class CanvasEventUpdateBlock extends CanvasEvent {
+  CanvasEventUpdateBlock(this.pageId, this.blockId, this.block) : super();
+  final PageBlock block;
+  final int pageId;
+  final int blockId;
+
+  @override
+  List<Object?> get props => [pageId, blockId, block];
+}
+
+/// 删除页面区块
+class CanvasEventDeleteBlock extends CanvasEvent {
+  CanvasEventDeleteBlock(this.pageId, this.blockId) : super();
+  final int pageId;
+  final int blockId;
+
+  @override
+  List<Object?> get props => [pageId, blockId];
+}
+
+/// 选择页面区块
+class CanvasEventSelectBlock extends CanvasEvent {
+  CanvasEventSelectBlock(this.block) : super();
+  final PageBlock block;
+
+  @override
+  List<Object?> get props => [block];
+}
+
+/// 取消选择页面区块
+class CanvasEventSelectNoBlock extends CanvasEvent {
+  CanvasEventSelectNoBlock() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// 添加页面区块数据
+class CanvasEventAddBlockData extends CanvasEvent {
+  CanvasEventAddBlockData(this.data) : super();
+  final BlockData data;
+
+  @override
+  List<Object> get props => [data];
+}
+
+/// 删除页面区块数据
+class CanvasEventDeleteBlockData extends CanvasEvent {
+  CanvasEventDeleteBlockData(this.dataId) : super();
+  final int dataId;
+
+  @override
+  List<Object> get props => [dataId];
+}
+
+/// 更新页面区块数据
+class CanvasEventUpdateBlockData extends CanvasEvent {
+  CanvasEventUpdateBlockData(this.data) : super();
+  final BlockData data;
+
+  @override
+  List<Object> get props => [data];
+}
+
+class CanvasEventErrorCleared extends CanvasEvent {
+  CanvasEventErrorCleared() : super();
+
+  @override
+  List<Object?> get props => [];
+}
+```
+
+添加以下状态，由于选择区块的时候会显示该区块的配置和数据表单，所以我们需要一个 `selectedBlock` ，当选择一个区块的时候，这个状态会被写入，而当点击页面的时候，这个状态会被设置为 `null`。：
+
+```dart
+import 'package:equatable/equatable.dart';
+import 'package:models/models.dart';
+
+class CanvasState extends Equatable {
+  final PageLayout? layout;
+  final List<Product> waterfallList;
+  final bool saving;
+  final String error;
+  final FetchStatus status;
+  final PageBlock? selectedBlock;
+
+  const CanvasState({
+    this.layout,
+    this.saving = false,
+    this.error = '',
+    this.waterfallList = const [],
+    this.status = FetchStatus.initial,
+    this.selectedBlock,
+  });
+
+  @override
+  List<Object?> get props =>
+      [layout, saving, error, waterfallList, status, selectedBlock];
+
+  CanvasState clearSelectedBlock() {
+    return CanvasState(
+      layout: layout,
+      saving: saving,
+      error: error,
+      waterfallList: waterfallList,
+      status: status,
+      selectedBlock: null,
+    );
+  }
+
+  CanvasState copyWith({
+    PageLayout? layout,
+    bool? saving,
+    String? error,
+    List<Product>? waterfallList,
+    FetchStatus? status,
+    PageBlock? selectedBlock,
+  }) {
+    return CanvasState(
+      layout: layout ?? this.layout,
+      saving: saving ?? this.saving,
+      error: error ?? this.error,
+      waterfallList: waterfallList ?? this.waterfallList,
+      status: status ?? this.status,
+      selectedBlock: selectedBlock ?? this.selectedBlock,
+    );
+  }
+}
+
+class CanvasInitial extends CanvasState {
+  const CanvasInitial() : super();
+}
+```
+
+那么对应的 BLoC 代码如下：
+
+```dart
+import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:models/models.dart';
+import 'package:repositories/repositories.dart';
+
+import 'canvas_event.dart';
+import 'canvas_state.dart';
+
+class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
+  final PageAdminRepository adminRepo;
+  final PageBlockRepository blockRepo;
+  final PageBlockDataRepository blockDataRepo;
+  final ProductRepository productRepo;
+  CanvasBloc(
+      this.adminRepo, this.blockRepo, this.blockDataRepo, this.productRepo)
+      : super(const CanvasInitial()) {
+    on<CanvasEventLoad>(_onCanvasEventLoad);
+    on<CanvasEventUpdate>(_onCanvasEventUpdate);
+    on<CanvasEventAddBlock>(_onCanvasEventAddBlock);
+    on<CanvasEventUpdateBlock>(_onCanvasEventUpdateBlock);
+    on<CanvasEventInsertBlock>(_onCanvasEventInsertBlock);
+    on<CanvasEventMoveBlock>(_onCanvasEventMoveBlock);
+    on<CanvasEventDeleteBlock>(_onCanvasEventDeleteBlock);
+    on<CanvasEventSelectBlock>(_onCanvasEventSelectBlock);
+    on<CanvasEventSelectNoBlock>(_onCanvasEventSelectNoBlock);
+    on<CanvasEventAddBlockData>(_onCanvasEventAddBlockData);
+    on<CanvasEventDeleteBlockData>(_onCanvasEventDeleteBlockData);
+    on<CanvasEventUpdateBlockData>(_onCanvasEventUpdateBlockData);
+    on<CanvasEventErrorCleared>(_onCanvasEventErrorCleared);
+  }
+
+  /// 清除错误
+  void _onCanvasEventErrorCleared(
+      CanvasEventErrorCleared event, Emitter<CanvasState> emit) {
+    emit(state.copyWith(error: ''));
+  }
+
+  /// 错误处理
+  void _handleError(Emitter<CanvasState> emit, dynamic error) {
+    final message =
+        error.error is CustomException ? error.error.message : error.toString();
+    emit(state.copyWith(
+      error: message,
+      saving: false,
+      status: FetchStatus.error,
+    ));
+  }
+
+  /// 加载瀑布流
+  Future<List<Product>> _loadWaterfallData(PageLayout layout) async {
+    try {
+      final waterfallBlock = layout.blocks
+          .firstWhere((element) => element.type == PageBlockType.waterfall);
+
+      if (waterfallBlock.data.isNotEmpty) {
+        final categoryId = waterfallBlock.data.first.content.id;
+        if (categoryId != null) {
+          final waterfall =
+              await productRepo.getByCategory(categoryId: categoryId);
+          return waterfall.data;
+        }
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return [];
+  }
+
+  PageLayout? _buildNewLayoutWhenBlockChanges(PageBlock<dynamic> newBlock) {
+    final blocks = state.layout?.blocks ?? [];
+    final blockIndex =
+        blocks.indexWhere((element) => element.id == state.selectedBlock!.id!);
+
+    final newLayout = state.layout?.copyWith(blocks: [
+      ...blocks.sublist(0, blockIndex),
+      newBlock,
+      ...blocks.sublist(blockIndex + 1)
+    ]);
+    return newLayout;
+  }
+
+  /// 更新区块数据
+  void _onCanvasEventUpdateBlockData(
+      CanvasEventUpdateBlockData event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final data = await blockDataRepo.updateData(
+          state.layout!.id!, state.selectedBlock!.id!, event.data);
+      final dataList = state.selectedBlock!.data;
+      final dataIndex = dataList.indexWhere((element) => element.id == data.id);
+      if (dataIndex != -1) {
+        dataList[dataIndex] = data;
+      }
+      final newBlock = state.selectedBlock!.copyWith(data: dataList);
+      final newLayout = _buildNewLayoutWhenBlockChanges(newBlock);
+      final waterfallList = await _loadWaterfallData(state.layout!);
+      emit(state.copyWith(
+        layout: newLayout,
+        waterfallList: waterfallList,
+        selectedBlock: newBlock,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 删除区块数据
+  void _onCanvasEventDeleteBlockData(
+      CanvasEventDeleteBlockData event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      await blockDataRepo.deleteData(
+          state.layout!.id!, state.selectedBlock!.id!, event.dataId);
+      final dataList = state.selectedBlock!.data;
+      final dataIndex =
+          dataList.indexWhere((element) => element.id == event.dataId);
+      if (dataIndex != -1) {
+        dataList.removeAt(dataIndex);
+      }
+      final newBlock = state.selectedBlock!.copyWith(data: dataList);
+      final newLayout = _buildNewLayoutWhenBlockChanges(newBlock);
+      emit(state.copyWith(
+        layout: newLayout,
+        selectedBlock: newBlock,
+        error: '',
+        saving: false,
+      ));
+
+      /// 如果选中的区块是瀑布流，清空瀑布流数据
+      if (state.selectedBlock!.type == PageBlockType.waterfall) {
+        emit(state.copyWith(waterfallList: []));
+      }
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 添加区块数据
+  void _onCanvasEventAddBlockData(
+      CanvasEventAddBlockData event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final blockData = await blockDataRepo.addData(
+          state.layout!.id!, state.selectedBlock!.id!, event.data);
+      final dataList = state.selectedBlock!.data;
+      dataList.add(blockData);
+
+      final newBlock = state.selectedBlock!.copyWith(data: dataList);
+      final newLayout = _buildNewLayoutWhenBlockChanges(newBlock);
+      final waterfallList = await _loadWaterfallData(state.layout!);
+      emit(state.copyWith(
+        layout: newLayout,
+        waterfallList: waterfallList,
+        selectedBlock: newBlock,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 点击页面时，清除选中的区块
+  void _onCanvasEventSelectNoBlock(
+      CanvasEventSelectNoBlock event, Emitter<CanvasState> emit) {
+    emit(state.clearSelectedBlock());
+  }
+
+  /// 选中区块
+  void _onCanvasEventSelectBlock(
+      CanvasEventSelectBlock event, Emitter<CanvasState> emit) {
+    emit(state.copyWith(selectedBlock: event.block));
+  }
+
+  /// 插入区块
+  void _onCanvasEventInsertBlock(
+      CanvasEventInsertBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final layout = await blockRepo.insertBlock(event.pageId, event.block);
+      emit(state.copyWith(
+        layout: layout,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 更新区块
+  void _onCanvasEventUpdateBlock(
+      CanvasEventUpdateBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final block =
+          await blockRepo.updateBlock(event.pageId, event.blockId, event.block);
+      final blocks = state.layout?.blocks ?? [];
+      final index = blocks.indexWhere((element) => element.id == event.blockId);
+      if (index == -1) {
+        return;
+      }
+      emit(state.copyWith(
+        layout: state.layout?.copyWith(blocks: [
+          ...blocks.sublist(0, index),
+          block,
+          ...blocks.sublist(index + 1)
+        ]),
+        selectedBlock: block,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 移动区块
+  void _onCanvasEventMoveBlock(
+      CanvasEventMoveBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final layout =
+          await blockRepo.moveBlock(event.pageId, event.blockId, event.sort);
+      emit(state.copyWith(
+        layout: layout,
+        selectedBlock: event.blockId == state.selectedBlock?.id
+            ? state.selectedBlock?.copyWith(sort: event.sort)
+            : layout.blocks
+                .firstWhere((element) => element.id == event.blockId),
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 添加区块
+  void _onCanvasEventAddBlock(
+      CanvasEventAddBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final layout =
+          await blockRepo.createBlock(state.layout!.id!, event.block);
+
+      emit(state.copyWith(
+        layout: layout,
+        error: '',
+        saving: false,
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 删除区块
+  void _onCanvasEventDeleteBlock(
+      CanvasEventDeleteBlock event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      await blockRepo.deleteBlock(event.pageId, event.blockId);
+      final blocks = state.layout?.blocks ?? [];
+      final index = blocks.indexWhere((element) => element.id == event.blockId);
+      if (index == -1) {
+        return;
+      }
+      blocks.removeAt(index);
+      emit(CanvasState(
+        status: FetchStatus.populated,
+        layout: state.layout?.copyWith(blocks: blocks),
+        saving: false,
+        error: '',
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 加载页面
+  void _onCanvasEventLoad(
+      CanvasEventLoad event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(status: FetchStatus.loading));
+    try {
+      final layout = await adminRepo.get(event.id);
+      final waterfallList = await _loadWaterfallData(layout);
+
+      emit(state.copyWith(
+        status: FetchStatus.populated,
+        layout: layout,
+        waterfallList: waterfallList,
+        error: '',
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+
+  /// 保存页面
+  void _onCanvasEventUpdate(
+      CanvasEventUpdate event, Emitter<CanvasState> emit) async {
+    emit(state.copyWith(saving: true));
+    try {
+      final layout = await adminRepo.update(event.id, event.layout);
+      emit(state.copyWith(
+        saving: false,
+        layout: layout,
+        error: '',
+      ));
+    } catch (e) {
+      _handleError(emit, e);
+    }
+  }
+}
+```
+
+上面代码中，我们定义了一系列的事件，这些事件都是对应的操作，比如：加载页面、保存页面、插入区块、更新区块、移动区块、添加区块、删除区块等等。
+
+### 8.3.6 实现最终的画布
+
+```dart
+library canvas;
+
+import 'package:common/common.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:models/models.dart';
+import 'package:nested/nested.dart';
+import 'package:repositories/repositories.dart';
+
+import 'blocs/blocs.dart';
+import 'center_pane.dart';
+import 'right_pane.dart';
+
+export 'left_pane.dart';
+export 'models/widget_data.dart';
+
+/// 画布页面
+/// [id] 画布id
+/// [scaffoldKey] scaffold key
+class CanvasPage extends StatelessWidget {
+  const CanvasPage({
+    super.key,
+    required this.id,
+    required this.scaffoldKey,
+  });
+  final int id;
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiRepositoryProvider(
+      /// 仓库提供者
+      providers: _buildRepositoryProviders,
+      child: MultiBlocProvider(
+        /// bloc提供者
+        providers: _buildBlocProviders,
+        child: Builder(builder: (context) {
+          final productRepository = context.read<ProductRepository>();
+          return BlocConsumer<CanvasBloc, CanvasState>(
+            listener: (context, state) {
+              if (state.error.isNotEmpty) {
+                _handleErrors(context, state);
+              }
+            },
+            builder: (context, state) {
+              if (state.status == FetchStatus.initial) {
+                return const Text('initial').center();
+              }
+              if (state.status == FetchStatus.loading) {
+                return const CircularProgressIndicator().center();
+              }
+              final rightPane =
+                  _buildRightPane(state, productRepository, context);
+              final centerPane = _buildCenterPane(state, context);
+              final body = _buildBody(context, centerPane, rightPane);
+
+              return Scaffold(
+                key: scaffoldKey,
+                body: body,
+                endDrawer: Drawer(child: rightPane),
+              );
+            },
+          );
+        }),
+      ),
+    );
+  }
+
+  /// 处理错误，显示snackbar
+  void _handleErrors(BuildContext context, CanvasState state) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(state.error,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+            )),
+      ),
+    );
+    context.read<CanvasBloc>().add(CanvasEventErrorCleared());
+  }
+
+  /// 构建 BlocProviders 数组
+  List<SingleChildWidget> get _buildBlocProviders => [
+        BlocProvider<CanvasBloc>(
+          create: (context) => CanvasBloc(
+            context.read<PageAdminRepository>(),
+            context.read<PageBlockRepository>(),
+            context.read<PageBlockDataRepository>(),
+            context.read<ProductRepository>(),
+          )..add(CanvasEventLoad(id)),
+        ),
+      ];
+
+  /// 构建 RepositoryProviders 数组
+  List<SingleChildWidget> get _buildRepositoryProviders => [
+        RepositoryProvider<PageAdminRepository>(
+          create: (context) => PageAdminRepository(),
+        ),
+        RepositoryProvider<PageBlockRepository>(
+          create: (context) => PageBlockRepository(),
+        ),
+        RepositoryProvider<PageBlockDataRepository>(
+          create: (context) => PageBlockDataRepository(),
+        ),
+        RepositoryProvider<ProductRepository>(
+          create: (context) => ProductRepository(),
+        ),
+        RepositoryProvider<CategoryRepository>(
+          create: (context) => CategoryRepository(),
+        ),
+      ];
+
+  /// 构建主体，包含中间部分和右侧部分
+  Widget _buildBody(
+          BuildContext context, CenterPane centerPane, RightPane rightPane) =>
+      (Responsive.isDesktop(context)
+              ? [centerPane, const Spacer(), rightPane.expanded(flex: 4)]
+              : [centerPane])
+          .toRow(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+      );
+
+  /// 构建中间部分
+  CenterPane _buildCenterPane(CanvasState state, BuildContext context) =>
+      CenterPane(
+        blocks: state.layout?.blocks ?? [],
+        products: state.waterfallList,
+        defaultBlockConfig: BlockConfig(
+          horizontalPadding: 12,
+          verticalPadding: 12,
+          horizontalSpacing: 6,
+          verticalSpacing: 6,
+          blockWidth: (state.layout?.config.baselineScreenWidth ?? 375.0) - 24,
+          blockHeight: 140,
+          backgroundColor: Colors.white,
+          borderColor: Colors.transparent,
+          borderWidth: 0,
+        ),
+        pageConfig: state.layout?.config ??
+            const PageConfig(
+              horizontalPadding: 0.0,
+              verticalPadding: 0.0,
+              baselineScreenWidth: 375.0,
+            ),
+        onTap: () => context.read<CanvasBloc>().add(CanvasEventSelectNoBlock()),
+        onBlockAdded: (block) => context
+            .read<CanvasBloc>()
+            .add(CanvasEventAddBlock(state.layout!.id!, block)),
+        onBlockInserted: (block) => context
+            .read<CanvasBloc>()
+            .add(CanvasEventInsertBlock(state.layout!.id!, block)),
+        onBlockSelected: (block) =>
+            context.read<CanvasBloc>().add(CanvasEventSelectBlock(block)),
+        onBlockMoved: (block, targetSort) => context.read<CanvasBloc>().add(
+            CanvasEventMoveBlock(state.layout!.id!, block.id!, targetSort)),
+      );
+
+  /// 构建右侧部分
+  RightPane _buildRightPane(CanvasState state,
+          ProductRepository productRepository, BuildContext context) =>
+      RightPane(
+        showBlockConfig: state.selectedBlock != null,
+        selectedBlock: state.selectedBlock,
+        layout: state.layout,
+        productRepository: productRepository,
+        onSavePageBlock: (pageBlock) => context.read<CanvasBloc>().add(
+              CanvasEventUpdateBlock(
+                  state.layout!.id!, pageBlock.id!, pageBlock),
+            ),
+        onSavePageLayout: (pageLayout) => context.read<CanvasBloc>().add(
+              CanvasEventUpdate(state.layout!.id!, pageLayout),
+            ),
+        onDeleteBlock: (blockId) => _deleteBlock(context, state, blockId),
+        onCategoryAdded: (data) =>
+            context.read<CanvasBloc>().add(CanvasEventAddBlockData(data)),
+        onCategoryUpdated: (data) =>
+            context.read<CanvasBloc>().add(CanvasEventUpdateBlockData(data)),
+        onCategoryRemoved: (dataId) =>
+            context.read<CanvasBloc>().add(CanvasEventDeleteBlockData(dataId)),
+        onProductAdded: (data) =>
+            context.read<CanvasBloc>().add(CanvasEventAddBlockData(data)),
+        onProductRemoved: (dataId) =>
+            context.read<CanvasBloc>().add(CanvasEventDeleteBlockData(dataId)),
+        onImageAdded: (imageData) =>
+            context.read<CanvasBloc>().add(CanvasEventAddBlockData(
+                  imageData,
+                )),
+        onImageRemoved: (dataId) =>
+            context.read<CanvasBloc>().add(CanvasEventDeleteBlockData(dataId)),
+      );
+
+  /// 删除区块
+  Future<void> _deleteBlock(
+      BuildContext context, CanvasState state, int blockId) async {
+    final bloc = context.read<CanvasBloc>();
+    final result = await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('删除'),
+            content: const Text('确定要删除吗？'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: const Text('取消'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                },
+                child: const Text('确定'),
+              ),
+            ],
+          );
+        });
+    if (result) {
+      bloc.add(
+        CanvasEventDeleteBlock(state.layout!.id!, blockId),
+      );
     }
   }
 }

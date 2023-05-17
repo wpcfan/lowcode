@@ -16,7 +16,7 @@ services:
       - mysql:/var/lib/mysql
 
   adminer:
-    image: adminer
+    image: adminer:4
     container_name: adminer
     restart: always
     ports:
@@ -24,29 +24,6 @@ services:
     environment:
       ADMINER_DEFAULT_SERVER: mysql
 
-  redis:
-    image: redis:7
-    container_name: redis
-    restart: always
-    ports:
-      - "7001:6379"
-    volumes:
-      - redis:/data
-
-  redis-insight:
-    image: redislabs/redisinsight:latest
-    container_name: redis-insight
-    restart: always
-    depends_on:
-      - redis
-    ports:
-      - "8082:8001"
-    environment:
-      REDIS_INSIGHT_REDIS_HOSTS: redis-cluster:8083
-
-
 volumes:
     mysql:
-        driver: local
-    redis:
         driver: local

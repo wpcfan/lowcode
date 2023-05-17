@@ -3610,6 +3610,8 @@ class CanvasBloc extends Bloc<CanvasEvent, CanvasState> {
 
 ### 8.3.6 实现最终的画布
 
+最终的画布，和之前类似，我们需要在外层包裹 `MultiRepositoryProvider` 和 `MultiBlocProvider`，然后利用 `BlocConsumer` 来监听状态变化，然后根据状态来渲染不同的页面。
+
 ```dart
 library canvas;
 

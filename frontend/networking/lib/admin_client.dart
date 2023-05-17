@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:networking/custom_exception_interceptor.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
+import 'constants.dart';
+
 /// 自定义的 Dio 实例，用于访问后台管理接口
 /// 该实例会自动添加日志拦截器和错误拦截器
 /// 该实例会自动添加 Content-Type 和 Accept 头
@@ -22,7 +24,7 @@ class AdminClient with DioMixin implements Dio {
     /// 配置参数
     options = BaseOptions(
       /// 后台管理接口的基础 URL
-      baseUrl: 'http://localhost:8080/api/v1/admin',
+      baseUrl: '${Constants.lowcodeBaseUrl}/admin',
 
       /// 添加 Content-Type 和 Accept 头
       headers: Map.from({

@@ -3,6 +3,7 @@ import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 import 'cache_options.dart';
+import 'constants.dart';
 import 'custom_exception_interceptor.dart';
 
 /// 自定义的 Dio 实例，用于访问 APP 接口
@@ -19,7 +20,7 @@ class AppClient with DioMixin implements Dio {
 
   AppClient._() {
     options = BaseOptions(
-      baseUrl: 'http://localhost:8080/api/v1/app',
+      baseUrl: '${Constants.lowcodeBaseUrl}/app',
       headers: Map.from({
         'Content-Type': 'application/json',
         'Accept': 'application/json',

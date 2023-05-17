@@ -27,7 +27,6 @@ import java.util.TreeSet;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Cacheable
 @Entity
 @Table(name = "mooc_pages")
 public class PageLayout extends Auditable {

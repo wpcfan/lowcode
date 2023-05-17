@@ -1,0 +1,138 @@
+version: '3.7'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: low_code
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 1s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+
+  backend:
+    image: low_code_api
+    build:
+      context: backend
+      dockerfile: Dockerfile
+      tags:
+        - "low_code_api:1"
+        - "low_code_api:1.0"
+        - "low_code_api:1.0.0"
+        - "low_code_api:latest"
+    container_name: backend
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - MYSQL_HOST=mysql
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "-f",
+          "http://localhost:8080/actuator/health"
+        ]
+      interval: 1s
+      timeout: 3s
+      retries: 20
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "low_code_api"
+
+  frontend:
+    build:
+      context: ./frontend/admin
+      dockerfile: Dockerfile
+      tags:
+        - "low_code_admin:1"
+        - "low_code_admin:1.0"
+        - "low_code_admin:1.0.0"
+        - "low_code_admin:latest"
+    container_name: frontend
+    ports:
+      - 80:80
+    depends_on:
+      - backend
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost" ]
+      interval: 1s
+      timeout: 3s
+      retries: 20
+
+  adminer:
+    image: adminer:4
+    container_name: adminer
+    restart: always
+    ports:
+      - "8081:8080" # host:container
+    environment:
+      ADMINER_DEFAULT_SERVER: mysql
+    depends_on:
+      - mysql
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081" ]
+      interval: 1s
+      timeout: 3s
+      retries: 20
+
+  mongo:
+    image: mongo:5
+    container_name: mongo
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+    container_name: elasticsearch
+    environment:
+      - http.host=0.0.0.0
+      - transport.host=localhost
+      - network.host=0.0.0.0
+      - "ES_JAVA_OPTS=-Dlog4j2.formatMsgNoLookups=true -Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+  graylog:
+    image: graylog/graylog:5.0
+    container_name: graylog
+    environment:
+      - GRAYLOG_PASSWORD_SECRET=somepasswordpepper
+      - GRAYLOG_ROOT_PASSWORD_SHA2=8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:9000/
+    ports:
+      - "9000:9000"
+      - "12201:12201/udp"
+      - "1514:1514"
+      - "1514:1514/udp"
+    restart: always
+    depends_on:
+      - mongo
+      - elasticsearch
+
+volumes:
+  mysql_data:
+    driver: local

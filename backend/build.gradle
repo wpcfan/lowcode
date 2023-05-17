@@ -5,9 +5,9 @@ plugins {
 }
 
 group = 'com.mooc'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '20'
-targetCompatibility = '20'
+version = '1.0.0'
+sourceCompatibility = '17'
+targetCompatibility = '17'
 
 // 项目依赖版本号定义
 ext {
@@ -15,7 +15,7 @@ ext {
     springdocVersion = '2.1.+'
     hypersistenceVersion = '3.1.+'
     testcontainersVersion = '1.17.+'
-    redissonVersion = '3.20.+'
+    logbackGelfVersion = '4.0.+'
 }
 
 configurations {
@@ -34,11 +34,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation "io.hypersistence:hypersistence-utils-hibernate-60:${hypersistenceVersion}"
-    implementation "org.redisson:redisson-hibernate-6:${redissonVersion}"
-    implementation "org.redisson:redisson-spring-boot-starter:${redissonVersion}"
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
     implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
+    implementation "de.siegmar:logback-gelf:${logbackGelfVersion}"
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation 'org.flywaydb:flyway-core'

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
+import 'constants.dart';
 import 'custom_exception_interceptor.dart';
 
 /// 自定义的 Dio 实例，用于访问文件接口
@@ -13,7 +14,7 @@ class FileClient with DioMixin implements Dio {
 
   FileClient._() {
     options = BaseOptions(
-      baseUrl: 'http://localhost:8080/api/v1/admin',
+      baseUrl: '${Constants.lowcodeBaseUrl}/admin',
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
       headers: Map.from({

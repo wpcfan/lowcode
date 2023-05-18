@@ -689,7 +689,7 @@ services:
       - elasticsearch
 ```
 
-注意 `graylog` 会依赖 MongoDB 和 Elasticsearch，所以我们需要先启动这两个服务。
+注意 `graylog` 会依赖 MongoDB 和 Elasticsearch，所以我们需要先启动这两个服务。在 `graylog` 中我们还配置了一些环境变量，其中 `GRAYLOG_PASSWORD_SECRET` 是密码的盐，`GRAYLOG_ROOT_PASSWORD_SHA2` 是密码的哈希值，这里我们使用的是 `admin` 作为密码，你可以使用 <https://hash.online-convert.com/sha256-generator> 来生成密码的哈希值。`GRAYLOG_HTTP_EXTERNAL_URI` 是 `graylog` 的访问地址，这里我们使用的是 `http://localhost:9000/`。
 
 要让 `backend` 服务将日志发送到 `graylog`，我们需要在 `resources` 目录下创建一个 `logback-spring.xml` 文件，内容如下：
 

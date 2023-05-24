@@ -1,6 +1,6 @@
 ```dot
 digraph G {
-  rankdir=TD;
+  rankdir=LR;
   node [shape=box];
   canvas [label="canvas", style=filled, fillcolor="grey"];
   pages [label="pages", style=filled, fillcolor="grey"];
@@ -26,6 +26,8 @@ digraph G {
   pages -> forms;
   canvas -> forms;
   forms -> common;
+  models -> common;
+  networking -> models;
   pages -> repositories;
   canvas -> repositories;
   home -> repositories;
@@ -41,7 +43,7 @@ digraph G {
   }
 
   subgraph cluster_1 {
-    label = "混合模块";
+    label = "组件模块";
     color = "yellow";
     style = "filled";
     fillcolor = "lightyellow";

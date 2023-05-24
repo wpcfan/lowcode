@@ -18,16 +18,16 @@
       - [2.1.6.4 组件模块](#2164-组件模块)
       - [2.1.6.5 功能模块](#2165-功能模块)
     - [2.1.7 调试验证](#217-调试验证)
-  - [2.1.8 App 和 Admin 的脚手架](#218-app-和-admin-的脚手架)
-    - [2.1.8.1. App 的脚手架](#2181-app-的脚手架)
-      - [2.1.8.2. Admin 的脚手架](#2182-admin-的脚手架)
-  - [2.2 Spring Boot 环境搭建](#22-spring-boot-环境搭建)
-    - [2.2.1 创建 Spring Boot 项目](#221-创建-spring-boot-项目)
-    - [2.2.2 Gradle 介绍](#222-gradle-介绍)
-    - [2.2.3 Lombok 介绍](#223-lombok-介绍)
-    - [2.2.4 IDEA 插件安装](#224-idea-插件安装)
-  - [2.3 常见环境错误](#23-常见环境错误)
-    - [2.3.1 IDEA 中的错误](#231-idea-中的错误)
+  - [2.2 App 和 Admin 的脚手架](#22-app-和-admin-的脚手架)
+    - [2.2.1 App 的脚手架](#221-app-的脚手架)
+    - [2.2.2 Admin 的脚手架](#222-admin-的脚手架)
+  - [2.3 Spring Boot 环境搭建](#23-spring-boot-环境搭建)
+    - [2.3.1 创建 Spring Boot 项目](#231-创建-spring-boot-项目)
+    - [2.3.2 Gradle 介绍](#232-gradle-介绍)
+    - [2.3.3 Lombok 介绍](#233-lombok-介绍)
+    - [2.3.4 IDEA 插件安装](#234-idea-插件安装)
+  - [2.4 常见环境错误](#24-常见环境错误)
+    - [2.4.1 IDEA 中的错误](#241-idea-中的错误)
       - [Unsupported class file major version 64](#unsupported-class-file-major-version-64)
 
 <!-- /code_chunk_output -->
@@ -123,16 +123,19 @@
   - 打开终端，输入 `flutter doctor`，如果出现如下内容，说明安装成功
 
   ```bash
+  ❯ flutter doctor
   Doctor summary (to see all details, run flutter doctor -v):
-  [✓] Flutter (Channel stable, 3.7.8, on macOS 13.2.1 22D68 darwin-arm64, locale zh-Hans-CN)
+  [✓] Flutter (Channel stable, 3.10.1, on macOS 13.3.1 22E772610a darwin-arm64,
+      locale zh-Hans-CN)
   [✓] Android toolchain - develop for Android devices (Android SDK version 33.0.1)
-  [✓] Xcode - develop for iOS and macOS (Xcode 14.2)
+  [✓] Xcode - develop for iOS and macOS (Xcode 14.3)
   [✓] Chrome - develop for the web
-  [✓] Android Studio (version 2022.1)
-  [✓] IntelliJ IDEA Ultimate Edition (version 2022.3.3)
-  [✓] VS Code (version 1.76.2)
-  [✓] Connected device (3 available)
-  [✓] HTTP Host Availability
+  [✓] Android Studio (version 2022.2)
+  [✓] IntelliJ IDEA Ultimate Edition (version 2023.1.2)
+  [✓] VS Code (version 1.78.2)
+  [✓] VS Code (version 1.79.0-insider)
+  [✓] Connected device (2 available)
+  [✓] Network resources
 
   • No issues found!
   ```
@@ -822,11 +825,11 @@ flutter:
 
 这样我们就为 `admin` 和 `app` 两个项目分别配置了调试的参数，然后我们就可以在 VSCode 的调试面板中选择 `admin` 或者 `app` 来进行调试了，比如我们可以在 `app` 的 `main.dart` 中添加一个断点，然后点击调试面板中的 `启动调试` 按钮，这样就可以在调试面板中看到调试的信息了
 
-## 2.1.8 App 和 Admin 的脚手架
+## 2.2 App 和 Admin 的脚手架
 
 为了后面的学习更专注于业务本身，我们在这一节会把两个工程的脚手架搭建好，然后我们就可以在这个基础上进行业务的开发了。
 
-### 2.1.8.1. App 的脚手架
+### 2.2.1 App 的脚手架
 
 我们先来看看 `app` 工程的脚手架，我们在 `app` 工程的 `lib` 目录下找到 `main.dart` 文件，然后把 `main.dart` 改为如下的代码：
 
@@ -881,7 +884,7 @@ class MyApp extends StatelessWidget {
 
 这个 `main.dart` 文件就是 `app` 工程的入口文件，我们在这个文件中创建了一个 `MyApp` 组件，然后在 `main` 函数中调用了 `runApp` 函数，这个函数的作用就是运行 Flutter 应用，我们可以在这个函数中传入一个 `Widget`，这个 `Widget` 就是 Flutter 应用的根 `Widget`，也就是我们的应用都是从这里开始的。
 
-#### 2.1.8.2. Admin 的脚手架
+### 2.2.2 Admin 的脚手架
 
 我们再来看看 `admin` 工程的脚手架，我们在 `admin` 工程的 `lib` 目录下找到 `main.dart` 文件，然后把 `main.dart` 改为如下代码：
 
@@ -889,13 +892,13 @@ class MyApp extends StatelessWidget {
 
 ```
 
-## 2.2 Spring Boot 环境搭建
+## 2.3 Spring Boot 环境搭建
 
 - 下载 JDK 17： https://www.oracle.com/java/technologies/javase-downloads.html
 
 - 下载安装 IntelliJ IDEA： https://www.jetbrains.com/idea/download
 
-### 2.2.1 创建 Spring Boot 项目
+### 2.3.1 创建 Spring Boot 项目
 
 - 打开 IntelliJ IDEA，点击 `Create New Project` 按钮，选择 `Spring Initializr`。
 - 填写项目名称，语言选择 `Java`, 项目类型选择 `Gradle - Groovy`, 项目 JDK 选择 `JDK 17`，Java 版本选择 `17` , 组填写 `com.mooc`，工件填写 `backend`，点击 `Next` 按钮。
@@ -951,7 +954,7 @@ public class BackendApplication {
 
 只要有这个文件，我们就可以运行 Spring Boot 项目了，我们可以在 IDEA 中的 `BackendApplication` 类上面右键，然后选择 `Run BackendApplication`，这样就可以运行 Spring Boot 项目了。
 
-### 2.2.2 Gradle 介绍
+### 2.3.2 Gradle 介绍
 
 Gradle 是一个基于 Groovy 的构建工具，它是一个开源项目，由 Gradle 开发团队维护。Gradle 与 Maven 有着相似的功能，但是 Gradle 的构建速度更快，而且 Gradle 的构建脚本更加灵活，可以使用 Groovy 或者 Kotlin 编写。
 
@@ -969,18 +972,15 @@ plugins {
 }
 
 group = 'com.mooc'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 sourceCompatibility = '17'
 targetCompatibility = '17'
 
-// 项目依赖版本号定义
 ext {
     qiNiuVersion = '7.12.1'
     springdocVersion = '2.0.2'
     hypersistenceVersion = '3.1.1'
     testcontainersVersion = '1.17.6'
-    redissonVersion = '3.20.0'
-    springbootAdminVersion = '3.0.0'
 }
 
 configurations {
@@ -989,22 +989,16 @@ configurations {
     }
 }
 
-// 项目依赖仓库
 repositories {
     mavenCentral()
 }
 
-// 项目依赖
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation "io.hypersistence:hypersistence-utils-hibernate-60:${hypersistenceVersion}"
-    implementation "org.redisson:redisson-hibernate-6:${redissonVersion}"
-    implementation "org.redisson:redisson-spring-boot-starter:${redissonVersion}"
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
-    implementation "de.codecentric:spring-boot-admin-starter-server:${springbootAdminVersion}"
-    implementation "de.codecentric:spring-boot-admin-starter-client:${springbootAdminVersion}"
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'com.mysql:mysql-connector-j'
     implementation "com.qiniu:qiniu-java-sdk:${qiNiuVersion}"
@@ -1037,7 +1031,7 @@ tasks.named('test') {
 - `repositories`：项目的依赖仓库，一般我们都是使用 Maven 中央仓库。
 - `dependencies`：项目的依赖，这里 `implementation` 依赖会被打包到最终的 jar 包中，`runtimeOnly` 依赖只在运行时使用，不会打包到最终的 jar 包中，`compileOnly` 依赖只在编译时使用，不会打包到最终的 jar 包中，`annotationProcessor` 是注解的处理，比如 `lombok`，会根据注解生成代码，依赖只在编译时使用，不会打包到最终的 jar 包中，`testImplementation` 依赖只在测试时使用，不会打包到最终的 jar 包中。
 
-### 2.2.3 Lombok 介绍
+### 2.3.3 Lombok 介绍
 
 Lombok 是一个 Java 开源库，它可以帮助我们减少 Java 代码的冗余，它可以帮助我们自动生成一些常用的方法，比如 `getter` 和 `setter` 方法，`equals` 和 `hashCode` 方法，`toString` 方法等。
 
@@ -1128,15 +1122,15 @@ class User {
 
 对于 Java 开发者来说，Lombok 是一个非常好用的工具，它可以帮助我们减少代码的冗余，提高开发效率。
 
-### 2.2.4 IDEA 插件安装
+### 2.3.4 IDEA 插件安装
 
 JPABuddy：JPABuddy 是一个 IDEA 插件，它可以帮助我们生成 JPA 实体类。在 IDEA 的设置中点击 `Plugins`，然后搜索 `JPABuddy`，点击 `Install` 安装即可。
 
 ![图 3](http://ngassets.twigcodes.com/732fcc8366d5aa39e137505b062a78126c149a141c3de0664f186dcfbc902d60.png)
 
-## 2.3 常见环境错误
+## 2.4 常见环境错误
 
-### 2.3.1 IDEA 中的错误
+### 2.4.1 IDEA 中的错误
 
 #### Unsupported class file major version 64
 

@@ -66,7 +66,10 @@ class ImageDataForm extends StatelessWidget {
   List<DataCell> _buildCells(BlockData<ImageData> blockData) {
     final item = blockData.content;
     return [
-      DataCell(Image.network(item.image)),
+      DataCell(Image.network(
+        item.image,
+        height: 100,
+      )),
       DataCell(Text(item.link?.type.value ?? '')),
       DataCell(Text(item.link?.value ?? '')),
       DataCell(

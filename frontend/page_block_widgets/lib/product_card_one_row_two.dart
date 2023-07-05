@@ -49,7 +49,7 @@ class ProductCardOneRowTwoWidget extends StatelessWidget {
       softWrap: true,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
-    ).padding(bottom: verticalSpacing);
+    ).padding(vertical: verticalSpacing);
     // 商品描述
     final productDescription = Text(
       product.description ?? '',

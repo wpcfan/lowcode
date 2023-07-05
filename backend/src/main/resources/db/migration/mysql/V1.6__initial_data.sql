@@ -1,3 +1,4 @@
+set foreign_key_checks=0; # 关闭外键约束
 insert into mooc_categories (`code`, `name`, `parent_id`)
 values ('cat_b_m', 'Business & Management', null),
        ('cat_c_s', 'Computer Science', null),
@@ -90,3 +91,4 @@ values (1, 'https://www.edx.org/sites/default/files/course/image/promoted/busine
        (22, 'https://www.edx.org/sites/default/files/course/image/promoted/none-1.jpg'),
        (23, 'https://www.edx.org/sites/default/files/course/image/promoted/none-1.jpg'),
        (24, 'https://www.edx.org/sites/default/files/course/image/promoted/none-1.jpg');
+set foreign_key_checks = 1; # 启用外键约束

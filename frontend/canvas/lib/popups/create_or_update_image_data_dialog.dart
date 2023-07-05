@@ -128,7 +128,7 @@ class _CreateOrUpdateImageDataDialogState
         validators: [
           Validators.required(label: '链接地址'),
           Validators.maxLength(label: '链接地址', maxLength: 255),
-          Validators.minLength(label: '链接地址', minLength: 12),
+          Validators.minLength(label: '链接地址', minLength: 4),
         ],
         initialValue: _formValue.link?.value,
         onChanged: (value) {
@@ -142,8 +142,8 @@ class _CreateOrUpdateImageDataDialogState
   }
 
   void _validateAndSave(BuildContext context) {
+    _formKey.currentState?.save();
     if (_formKey.currentState?.validate() ?? false) {
-      _formKey.currentState?.save();
       if (widget.onCreate != null && widget.data == null) {
         widget.onCreate?.call(_formValue);
       }

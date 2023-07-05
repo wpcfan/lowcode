@@ -31,7 +31,14 @@ class ProductTable extends StatelessWidget {
   List<DataCell> _buildCells(Product e) {
     return [
       DataCell(Text(e.sku ?? '')),
-      DataCell(Text(e.name ?? '')),
+      DataCell(Tooltip(
+        message: e.name,
+        child: Text(
+          (e.name ?? '').substring(0, 10),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      )),
       DataCell(Image.network(
         e.images.first,
         width: 40,

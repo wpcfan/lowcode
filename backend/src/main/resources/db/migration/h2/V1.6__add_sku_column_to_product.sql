@@ -1,7 +1,0 @@
-alter table mooc_products add column sku varchar(255) null;
-update mooc_products set sku = 'sku_' || id;
-alter table mooc_products add constraint mooc_products_sku_uindex unique (sku);
-alter table mooc_products alter column `sku` varchar(255) not null;
-update MOOC_PAGE_BLOCK_DATA set content =  JSON '{"id":24,"sku":"sku_24","name":"None 24","description":"Learn how to use data to make better decisions","price":"¥240.22","categories":[{"id":12,"name":"None","code":"cat_n","parentId":null,"children":[],"dataType":"category"}],"images":["https://images.pexels.com/photos/7034219/pexels-photo-7034219.jpeg"],"dataType":"product"}' where id = 14;
-update MOOC_PAGE_BLOCK_DATA set content =  JSON '{"id":22,"sku":"sku_22","name":"None 22","description":"Learn how to use data to make better decisions","price":"¥220.0","categories":[{"id":12,"name":"None","code":"cat_n","parentId":null,"children":[],"dataType":"category"}],"images":["https://images.pexels.com/photos/6625403/pexels-photo-6625403.jpeg"],"dataType":"product"}' where id = 15;
-update MOOC_PAGE_BLOCK_DATA set content =  JSON '{"id":21,"sku":"sku_21","name":"None 21","description":"Learn how to use data to make better decisions","price":"¥210.0","categories":[{"id":12,"name":"None","code":"cat_n","parentId":null,"children":[],"dataType":"category"}],"images":["https://images.pexels.com/photos/5390114/pexels-photo-5390114.jpeg"],"dataType":"product"}' where id = 16;

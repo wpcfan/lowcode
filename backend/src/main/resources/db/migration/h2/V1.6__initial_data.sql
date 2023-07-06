@@ -16,6 +16,7 @@ INSERT INTO "PUBLIC"."MOOC_CATEGORIES" VALUES
 (14, 'cat_py', 'Python', 2, NULL, NULL),
 (15, 'cat_dart', 'Dart', 2, NULL, NULL),
 (16, 'cat_java_spring', 'Spring', 13, NULL, NULL);
+ALTER TABLE "PUBLIC"."MOOC_CATEGORIES" ALTER COLUMN ID RESTART WITH 17;
 INSERT INTO "PUBLIC"."MOOC_PRODUCT_CATEGORIES" VALUES
 (1, 1),
 (2, 2),
@@ -66,6 +67,7 @@ INSERT INTO "PUBLIC"."MOOC_PRODUCTS" VALUES
 (22, 'SpringHill Suites by Marriott Atlanta Buckhead', 'Learn how to use data to make better decisions', 220.00, NULL, NULL, 'sku_22', 230.00),
 (23, 'None 23', 'Learn how to use data to make better decisions', 230.00, NULL, NULL, 'sku_23', NULL),
 (24, 'The Westin Peachtree Plaza, Atlanta', 'Learn how to use data to make better decisions', 240.00, NULL, NULL, 'sku_24', NULL);
+ALTER TABLE "PUBLIC"."MOOC_PRODUCTS" ALTER COLUMN ID RESTART WITH 25;
 INSERT INTO "PUBLIC"."MOOC_PRODUCT_IMAGES" VALUES
 (1, 'https://img.pddpic.com/gaudit-image/2023-04-22/b49ab90e9863bea58e706679d1605b7a.jpeg', 1, NULL, NULL),
 (2, 'https://img.pddpic.com/gaudit-image/2023-03-17/9cd7fd37e2df711e82db673a3d4a5b73.jpeg', 2, NULL, NULL),
@@ -91,9 +93,11 @@ INSERT INTO "PUBLIC"."MOOC_PRODUCT_IMAGES" VALUES
 (22, 'https://ak-d.tripcdn.com/images/220813000000uj76yE162_R_640_440_R5_D.jpg_.webp', 22, NULL, NULL),
 (23, 'https://images.pexels.com/photos/12528815/pexels-photo-12528815.jpeg', 23, NULL, NULL),
 (24, 'https://ak-d.tripcdn.com/images/220j050000000iape685E_R_600_400_R5_D.jpg_.webp', 24, NULL, NULL);
+ALTER TABLE "PUBLIC"."MOOC_PRODUCT_IMAGES" ALTER COLUMN ID RESTART WITH 25;
 INSERT INTO "PUBLIC"."MOOC_PAGES" VALUES
 (1, TIMESTAMP '2023-02-19 20:03:50.345727', TIMESTAMP '2023-07-04 15:11:15.308011', 'App', 'Home', JSON '{"horizontalPadding":0.0,"verticalPadding":0.0,"baselineScreenWidth":400.0}', U&'\65c5\6e38\9996\9875\5e03\5c40', NULL, NULL, 'Draft'),
 (2, TIMESTAMP '2023-07-04 15:11:51.294033', TIMESTAMP '2023-07-04 20:30:09.52612', 'App', 'Home', JSON '{"horizontalPadding":8.0,"verticalPadding":4.0,"baselineScreenWidth":400.0}', U&'\670d\88c5\9996\9875\5e03\5c40', DATEADD('DAY', -1, CURRENT_TIMESTAMP()), DATEADD('DAY', 120, CURRENT_TIMESTAMP()), 'Published');
+ALTER TABLE "PUBLIC"."MOOC_PAGES" ALTER COLUMN ID RESTART WITH 3;
 INSERT INTO "PUBLIC"."MOOC_PAGE_BLOCKS" VALUES
 (1, U&'\8f6e\64ad\56fe\533a\5757', 'Banner', 1, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":220.0,"backgroundColor":"#00000000","borderColor":"#00000000","borderWidth":0.0}', 1),
 (2, U&'\4e00\884c\4e00\56fe\7247\533a\5757', 'ImageRow', 4, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":4.0,"verticalSpacing":4.0,"blockWidth":376.0,"blockHeight":120.0,"backgroundColor":"#00000000","borderColor":"#00000000","borderWidth":0.0}', 1),
@@ -107,6 +111,7 @@ INSERT INTO "PUBLIC"."MOOC_PAGE_BLOCKS" VALUES
 (12, 'ProductRow 3', 'ProductRow', 2, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":6.0,"verticalSpacing":6.0,"blockWidth":376.0,"blockHeight":336.0,"backgroundColor":"#ffffffff","borderColor":"#00000000","borderWidth":0.0}', 2),
 (13, 'ImageRow 4', 'ImageRow', 3, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":6.0,"verticalSpacing":6.0,"blockWidth":376.0,"blockHeight":200.0,"backgroundColor":"#ffffffff","borderColor":"#00000000","borderWidth":0.0}', 2),
 (14, 'ImageRow 5', 'ImageRow', 4, JSON '{"horizontalPadding":12.0,"verticalPadding":12.0,"horizontalSpacing":6.0,"verticalSpacing":6.0,"blockWidth":376.0,"blockHeight":200.0,"backgroundColor":"#ffffffff","borderColor":"#00000000","borderWidth":0.0}', 2);
+ALTER TABLE "PUBLIC"."MOOC_PAGE_BLOCKS" ALTER COLUMN ID RESTART WITH 15;
 INSERT INTO "PUBLIC"."MOOC_PAGE_BLOCK_DATA" VALUES
 (1, 1, JSON '{"image":"https://ak-d.tripcdn.com/images/0a10612000aq6nbiu0827.jpg","title":"image1","link":{"type":"url","value":"https://baidu.com"},"dataType":"image"}', 1),
 (2, 2, JSON '{"image":"https://ak-d.tripcdn.com/images/0a12j12000becq7g4ACD1.png","title":"image2","link":{"type":"url","value":"https://google.com"},"dataType":"image"}', 1),
@@ -130,4 +135,5 @@ INSERT INTO "PUBLIC"."MOOC_PAGE_BLOCK_DATA" VALUES
 (34, 1, JSON '{"image":"https://cdn.pinduoduo.com/upload/home/img/subject/boyshirt.jpg","title":null,"link":{"type":"url","value":"https://bing.com"},"dataType":"image"}', 13),
 (35, 1, JSON '{"image":"https://img.pddpic.com/gaudit-image/2023-03-03/4aa56691591d8709dc7bb79db150ad6f.jpeg","title":null,"link":{"type":"url","value":"https://baidu.com"},"dataType":"image"}', 14),
 (36, 2, JSON '{"image":"https://img.pddpic.com/gaudit-image/2023-05-31/2b22395407796522922e249b3a488c47.jpeg","title":null,"link":{"type":"url","value":"https://google.com"},"dataType":"image"}', 14);
+ALTER TABLE "PUBLIC"."MOOC_PAGE_BLOCK_DATA" ALTER COLUMN ID RESTART WITH 37;
 SET REFERENTIAL_INTEGRITY TRUE; // 开启外键约束

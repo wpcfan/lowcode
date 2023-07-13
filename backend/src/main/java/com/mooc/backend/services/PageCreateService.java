@@ -99,7 +99,8 @@ public class PageCreateService {
                         throw new CustomException("产品行区块最多只能有2个数据", "PageCreateService#addDataToBlock", Errors.ConstraintViolationException.code());
                     }
                     var dataEntity = data.toEntity();
-                    dataEntity.setSort(blockEntity.getData().size() + 1);
+                    var maxSort = blockEntity.getData().stream().mapToInt(PageBlockData::getSort).max().orElse(0);
+                    dataEntity.setSort(maxSort + 1);
                     dataEntity.setPageBlock(blockEntity);
                     return pageBlockDataRepository.save(dataEntity);
                 }).orElseThrow(() -> new CustomException("区块不存在", "PageCreateService#addDataToBlock", Errors.DataNotFoundException.code()));

@@ -2,6 +2,8 @@ import 'package:common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:models/models.dart';
 
+import 'image.dart';
+
 /// 图片行组件
 /// 用于展示一行图片
 /// 一行图片的数量可以是 1、2、3、或更多
@@ -69,12 +71,12 @@ class ImageRowWidget extends StatelessWidget {
         .constrained(width: blockWidth, height: blockHeight);
 
     /// 构建图片组件
-    Widget buildImageWidget(ImageData imageData) => Image.network(
-          imageData.image,
-          width: imageWidth,
-          height: imageHeight,
-          fit: BoxFit.cover,
-        ).gestures(onTap: () => onTap?.call(imageData.link));
+    Widget buildImageWidget(ImageData imageData) => ImageWidget(
+            imageUrl: imageData.image,
+            width: imageWidth,
+            height: imageHeight,
+            errorImage: errorImage)
+        .gestures(onTap: () => onTap?.call(imageData.link));
 
     /// 如果没有图片，那么直接返回一个占位符
     if (items.isEmpty) {

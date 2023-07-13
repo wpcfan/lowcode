@@ -123,8 +123,12 @@ class RightPane extends StatelessWidget {
         onProductRemoved(selectedBlock!.data[index].id!);
       },
       onImageAdded: (image) {
+        final imageDataList = selectedBlock!.data as List<BlockData<ImageData>>;
+        final maxSort = imageDataList.isEmpty
+            ? 0
+            : imageDataList.map((e) => e.sort).reduce((a, b) => a > b ? a : b);
         final data = BlockData<ImageData>(
-          sort: selectedBlock!.data.length,
+          sort: maxSort + 1,
           content: image,
         );
         onImageAdded(data);
